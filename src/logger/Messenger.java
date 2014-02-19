@@ -1,19 +1,15 @@
-//TODO: Check that it all makes sense :P
-
 package logger;
 
 import java.util.*;
 
 /**
+ * @author Tamino Hartmann
+ *
  * This class implements a thread safe timer for multiple objects and
- * standardized logging functions for the framework.
+ * standardized logging functions.
  */
 class Messenger {
 
-    /**
-     * Activate debug logging
-     */
-    private boolean DEBUG_LOGGING = false;
     /**
      * Variable that stores singleton instance.
      */
@@ -22,7 +18,6 @@ class Messenger {
      * The stack with which the TimerResult objects are managed.
      */
     private HashMap<Object, Stack<TimerResult>> timers;
-    private ArrayList<MessageInterface> listeners;
 
     /**
      * Method to return the singleton instance of Messenger.
@@ -41,31 +36,16 @@ class Messenger {
      */
     private Messenger() {
         this.timers = new HashMap<Object, Stack<TimerResult>>();
-        this.listeners = new ArrayList<MessageInterface>();
     }
 
     /**
-     * Method for logging a message to the Android log.
+     * Method for logging a message to the console.
      *
      * @param tag     The tag used when logging after the internal tag.
      * @param content The content of the message to log.
      */
     protected synchronized void log(final String tag, final String content) {
-        sendMessage("Messenger|" + tag + " :log: " + content);
         System.out.println("Messenger|" + tag + " | " + content);
-    }
-
-    /**
-     * Method for logging only debugging content. DEBUG_LOGGING is set in
-     * MainInterface.
-     *
-     * @param tag     The tag used after the internal tag.
-     * @param content The content of the message to log.
-     */
-    protected synchronized void debug(final String tag, final String content) {
-        sendMessage("Messenger|" + tag + " :debug: " + content);
-        if (DEBUG_LOGGING)
-            System.out.println("Messenger|" + tag + " | " + content);
     }
 
     /**
@@ -120,35 +100,5 @@ class Messenger {
         } else {
             return new TimerResult(-1, "OBJECT HAS NO STACK");
         }
-    }
-
-    /**
-     * Sends a string to all listeners.
-     *
-     * @param msg The complete message to send.
-     */
-    private void sendMessage(String msg) {
-        for (MessageInterface listener : listeners)
-            listener.notify(msg);
-    }
-
-    /**
-     * Method for registering a listener for log and debug messages.
-     *
-     * @param object The object to register.
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    public void registerListener(MessageInterface object) {
-        listeners.add(object);
-    }
-
-    /**
-     * Method for removing a listener for log and debug messages.
-     *
-     * @param object The object to remove.
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    public void removeListener(MessageInterface object) {
-        listeners.remove(object);
     }
 }

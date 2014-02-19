@@ -1,6 +1,8 @@
 package logger;
 
 /**
+ * @author Tamino Hartmann
+ *
  * Class representation for a timer object that contains the label and time
  * spent between push and pop.
  */
