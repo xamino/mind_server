@@ -594,27 +594,4 @@ public class DatabaseController {
 					"failed to create default institute. Please check config.");
 		}
 	}
-
-	/**
-	 * Funktion die, falls nicht vorhanden, die Standardwerte fuer Angebote erstellt.
-	 */
-	public void generateDefaultDefaults() {
-		ResultSet rs = select(new String[] { "*" },
-				new String[] { "Standardangebot" },null);
-		if (rs == null) {
-			log.write("DatabaseController",
-					"No connection: couldn't create default defaults.");
-			return;
-		}
-		try {
-			if (!rs.next()) {
-				insert("Standardangebot", new Object[] { 30	,new Date() ,new Date() ,7});
-				log.write("DatabaseController", "default defaults created.");
-			}
-
-		} catch (SQLException e) {
-			log.write("DatabaseController",
-					"failed to create default defaults. Please check config.");
-		}
-	}
 }
