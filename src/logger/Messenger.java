@@ -8,7 +8,7 @@ import java.util.*;
  * This class implements a thread safe timer for multiple objects and
  * standardized logging functions.
  */
-class Messenger {
+public class Messenger {
 
     /**
      * Variable that stores singleton instance.
@@ -44,8 +44,8 @@ class Messenger {
      * @param tag     The tag used when logging after the internal tag.
      * @param content The content of the message to log.
      */
-    protected synchronized void log(final String tag, final String content) {
-        System.out.println("Messenger|" + tag + " | " + content);
+    public synchronized void log(final String tag, final String content) {
+        System.out.println("Messenger|" + tag + "::" + content);
     }
 
     /**
@@ -54,7 +54,7 @@ class Messenger {
      * @param object Object reference to allow the correct stack to be used.
      * @param label  The label to remember for the timer.
      */
-    protected synchronized void pushTimer(Object object, final String label) {
+    public synchronized void pushTimer(Object object, final String label) {
         // Make sure that we don't keep too many objects:
         if (timers.size() > 32) {
             log("Messenger", "WARNING: Excessive amount of stacks required " +
@@ -89,7 +89,7 @@ class Messenger {
      * were done), an object with time "-1" and label "EMPTY STACK" are
      * returned.
      */
-    protected synchronized TimerResult popTimer(Object object) {
+    public synchronized TimerResult popTimer(Object object) {
         if (timers.containsKey(object)) {
             Stack<TimerResult> stack = timers.get(object);
             if (stack.isEmpty())

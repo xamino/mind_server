@@ -4,6 +4,9 @@
 
 package servlet;
 
+import com.google.gson.Gson;
+import logger.Messenger;
+
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -11,8 +14,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import database.DatabaseController;
 
 /**
  * Dieses Servlet ist fuer alle oeffentlich zugaengliche Daten zustaendig.
@@ -23,8 +24,23 @@ import database.DatabaseController;
 @WebServlet("/Servlet/*")
 public class Servlet extends HttpServlet {
 
+    /**
+     * JSON library.
+     */
+    private Gson gson;
+    /**
+     * Class for logging stuff.
+     */
+    private Messenger log;
+    /**
+     * TAG for logging.
+     */
+    private final String TAG = "Servlet";
+
 	public Servlet() {
 		super();
+        gson = new Gson();
+        log = Messenger.getInstance();
 	}
 
     /**
@@ -38,8 +54,13 @@ public class Servlet extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		String path = request.getPathInfo();
 		path = (path == null) ? "" : path;
-		// todo – switch on path string
-        response.getWriter().println("Hello there! This is the server speaking!");
+		switch (path) {
+            case "":
+                break;
+            default:
+                log.log(TAG, "Unknown path sent: "+path);
+                break;
+        }
 	}
 
     /**
@@ -48,7 +69,15 @@ public class Servlet extends HttpServlet {
      * @param response
      */
 	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) {
-        // todo
+			HttpServletResponse response) throws IOException {
+        String path = request.getPathInfo();
+        path = (path == null) ? "" : path;
+        switch (path) {
+            case "":
+                break;
+            default:
+                log.log(TAG, "Unknown path sent: "+path);
+                break;
+        }
 	}
 }
