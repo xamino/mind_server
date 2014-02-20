@@ -5,5 +5,8 @@ package logic;
  *
  * Auch genannt LoMo – wie slowmo, aber besser.
  */
-public class LocationModule {
+public class LocationModule implements Module {
+
+
+
 }
