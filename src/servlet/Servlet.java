@@ -39,6 +39,7 @@ public class Servlet extends HttpServlet {
 		String path = request.getPathInfo();
 		path = (path == null) ? "" : path;
 		// todo – switch on path string
+        response.getWriter().println("Hello there! This is the server speaking!");
 	}
 
     /**

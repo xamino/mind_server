@@ -1,3 +1,0 @@
-Place here any libraries that are required for the server!
-
-For example JDBC MySQL driver, GSON, etc.
