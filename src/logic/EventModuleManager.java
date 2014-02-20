@@ -14,24 +14,18 @@ public class EventModuleManager {
 
         createModules();
         initModules();
+
     }
 
     private void createModules() {
         moduleList.add(new LocationModule());
     }
 
+
     private void initModules() {
         for(Module m : moduleList ){
             m.init(this);
         }
-    }
-
-    public void addEventListener(){
-
-    }
-
-    public void removeEventListener(){
-
     }
 
 }
