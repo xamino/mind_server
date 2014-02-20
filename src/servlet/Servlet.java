@@ -55,6 +55,9 @@ public class Servlet extends HttpServlet {
      */
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response) throws ServletException, IOException {
+        // maintenance (must be called before any writes!):
+        response.setCharacterEncoding("UTF-8");
+        // ---
         String path = request.getPathInfo();
         path = (path == null) ? "" : path;
         // todo
@@ -83,6 +86,9 @@ public class Servlet extends HttpServlet {
      */
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws IOException {
+        // maintenance (must be called before any writes!):
+        response.setCharacterEncoding("UTF-8");
+        // ---
         String path = request.getPathInfo();
         path = (path == null) ? "" : path;
         // todo
