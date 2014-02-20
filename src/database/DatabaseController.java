@@ -8,10 +8,6 @@
 
 package database;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -30,11 +26,6 @@ public class DatabaseController {
 	 * Variable for storing the instance of the class.
 	 */
 	private static DatabaseController instance;
-
-	/**
-	 * Variable welche auf den Logger zeigt.
-	 */
-	private Log log;
 
 	/**
 	 * Verbingung zur Datenbank
@@ -366,98 +357,5 @@ public class DatabaseController {
 				ret += ", ";
 		}
 		return ret;
-	}
-
-	
-	/**
-	 *
-	 *Funktion liefert Daten von Bewerbungen, die vom Anbieter ausgewaehlt,
-	 *aber noch nicht abgeschlossen sind.
-	 *
-	 *@param institute
-	 *			Institut des Clerks
-	 *@return
-	 *			ein Vector vom Typ HilfsDatenClerk, der die fuer den Clerk noetigen Informationen
-	 *			einer Bewerbung enthaelt
-	 */
-	public Vector<HilfsDatenClerk> getChosenApplicationDataByInstitute(
-			int institute) {
-		// Sicherheitsüberprüfung:
-		if (con == null) {
-			log.write("DatabaseController", "No instance of CON detected!");
-			return null;
-		}
-		String sel = "SELECT Accounts.name, Angebote.Name, Accounts.benutzername, Angebote.AID "
-				+ "FROM Bewerbungen, Angebote, Accounts WHERE Bewerbungen.AID = Angebote.AID AND Bewerbungen.ausgewaehlt = 1 AND Angebote.Institut = "
-				+ institute
-				+ " AND Accounts.benutzername = Bewerbungen.benutzername";
-
-		ResultSet rs;
-		// Auskommentiert da nervig (Tamino)
-//		 System.out.println(sel);
-		try {
-			rs = st.executeQuery(sel);
-			Vector<HilfsDatenClerk> hdc = new Vector<HilfsDatenClerk>();
-			while (rs.next()) {
-				// System.out.println(rs.getString(1));
-				hdc.add(new HilfsDatenClerk(rs.getString(1), rs.getString(2),
-						rs.getString(3), rs.getInt(4)));
-//				System.out.println(rs.getString(1)+ rs.getString(2)+rs.getString(3)+ rs.getInt(4));
-			}
-			return hdc;
-		} catch (SQLException e) {
-			log.write("DatabaseController", "SELECT error! <" + sel + ">");
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	/**
-	 * Funktion, die falls kein Admin Account vorhanden, ist einen erstellt.
-	 */
-	public void generateAdminAccount() {
-		ResultSet rs = select(new String[] { "count(accounttyp)" },
-				new String[] { "Accounts" }, "accounttyp=0");
-		if (rs == null) {
-			log.write("DatabaseController",
-					"No connection: couldn't create admin account.");
-			return;
-		}
-		try {
-			rs.next();
-			if (rs.getInt(1) == 0) {
-				insert("Accounts", new Object[] { "admin",
-						"ISMvKXpXpadDiUoOSoAfww", 0,
-						"donotreply.hiwiboerse@googlemail.com",
-						"Admin Account", 0, null });
-				log.write("DatabaseController",
-						"Admin account \"admin\" with password \"admin\" created.");
-			}
-		} catch (SQLException e) {
-			log.write("DatabaseController",
-					"failed to create Admin Account. Please check config.");
-		}
-	}
-
-	/**
-	 * Funktion die, falls nicht vorhanden, das default Institut erstellt.
-	 */
-	public void generateDefaultInstitute() {
-		ResultSet rs = select(new String[] { "iid" },
-				new String[] { "Institute" }, "iid=0");
-		if (rs == null) {
-			log.write("DatabaseController",
-					"No connection: couldn't create default Institute.");
-			return;
-		}
-		try {
-			if (!rs.next()) {
-				insert("Institute", new Object[] { 0, "default" });
-				log.write("DatabaseController", "default institute created.");
-			}
-		} catch (SQLException e) {
-			log.write("DatabaseController",
-					"failed to create default institute. Please check config.");
-		}
 	}
 }
