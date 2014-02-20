@@ -32,6 +32,7 @@ public class Servlet extends HttpServlet {
      * Class for logging stuff.
      */
     private Messenger log;
+    private SanitationSecurity sanSec;
     /**
      * TAG for logging.
      */
@@ -41,6 +42,7 @@ public class Servlet extends HttpServlet {
 		super();
         gson = new Gson();
         log = Messenger.getInstance();
+        sanSec = SanitationSecurity.getInstance();
 	}
 
     /**
@@ -54,9 +56,9 @@ public class Servlet extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		String path = request.getPathInfo();
 		path = (path == null) ? "" : path;
+        // todo
+        sanSec.secure();
 		switch (path) {
-            case "":
-                break;
             default:
                 log.log(TAG, "Unknown path sent: "+path);
                 break;
@@ -72,9 +74,9 @@ public class Servlet extends HttpServlet {
 			HttpServletResponse response) throws IOException {
         String path = request.getPathInfo();
         path = (path == null) ? "" : path;
+        // todo
+        sanSec.secure();
         switch (path) {
-            case "":
-                break;
             default:
                 log.log(TAG, "Unknown path sent: "+path);
                 break;
