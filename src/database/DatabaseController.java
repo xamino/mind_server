@@ -1,10 +1,12 @@
 package database;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import io.Configuration;
+import logger.Messenger;
+
+import javax.servlet.ServletContext;
+import java.sql.*;
 import java.util.Date;
+import java.util.jar.Manifest;
 
 /**
  * @author Tamino Hartmann
@@ -14,6 +16,7 @@ public class DatabaseController {
      * Variable for storing the instance of the class.
      */
     private static DatabaseController instance;
+    private final Messenger log;
 
     /**
      * Verbingung zur Datenbank
@@ -46,8 +49,9 @@ public class DatabaseController {
      * @return Instance of DatabaseController.
      */
     public static DatabaseController getInstance() {
-        if (instance == null)
+        if (instance == null) {
             instance = new DatabaseController();
+        }
         return instance;
     }
 
@@ -56,24 +60,26 @@ public class DatabaseController {
      * instance. Use getInstance() to get a reference to an object of this type.
      */
     private DatabaseController() {
-        /*
+        log = Messenger.getInstance();
+        Configuration config = Configuration.getInstance();
+
         try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            Class.forName(config.getDbDriver()).newInstance();
             // getLoginInfo();
-            user = conf.getString("user");
-            password = conf.getString("password");
-            database = conf.getString("database");
-            port = Integer.toString(conf.getInt("port"));
+            user = config.getDbUser();
+            password = config.getDbPassword();
+            database = config.getDbName();
+            port = config.getDbPort();
 
             if (password != null) {
-                log.write("DatabaseController", "Try login: "
+                log.log("DatabaseController", "Try login: "
                         + "jdbc:mysql://localhost:" + port + "/" + database
                         + "?user=" + user + "&password=" + password);
                 con = DriverManager.getConnection("jdbc:mysql://localhost:"
                         + port + "/" + database + "?user=" + user
                         + "&password=" + password);
             } else {
-                log.write("DatabaseController", "Try login: "
+                log.log("DatabaseController", "Try login: "
                         + "jdbc:mysql://localhost:" + port + "/" + database
                         + "?user=" + user);
                 con = DriverManager.getConnection("jdbc:mysql://localhost:"
@@ -81,14 +87,14 @@ public class DatabaseController {
             }
             st = con.createStatement();
         } catch (Exception e) {
-            log.write(
+            log.log(
                     "DatabaseController",
                     "Error while connecting to database: please check if DB is running and if logindata is correct (~/.sopra/sopraconf)");
             // Commented out by Tamino (it was making me edgy... :D )
             // e.printStackTrace();
         }
-        */
     }
+
 
     /**
      * Methode welche ein SQL "update" Statement ausfuehrt.
