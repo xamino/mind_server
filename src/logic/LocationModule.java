@@ -8,5 +8,8 @@ package logic;
 public class LocationModule implements Module {
 
 
+    @Override
+    public void init(EventModuleManager eventModuleManager) {
 
+    }
 }
