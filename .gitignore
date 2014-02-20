@@ -4,6 +4,7 @@
 !*.java
 !.gitignore
 !*.html
+!*.jsp
 !*.js
 !*.png
 !*.jpg
