@@ -1,5 +1,5 @@
 *
-src
+src/database
 WebContent
 !*.java
 !.gitignore
