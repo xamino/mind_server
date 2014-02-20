@@ -20,10 +20,6 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.Vector;
 
-import logger.Log;
-import config.Configurator;
-import database.garbage.GarbageCollector;
-
 /**
  * Verbindung zur Datenbank mit allen Modifikationsbefehlen.
  * 

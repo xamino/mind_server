@@ -1,5 +1,6 @@
 *
 !WebContent
+!src/*
 !*.java
 !.gitignore
 !*.html
