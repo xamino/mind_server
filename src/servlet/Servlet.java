@@ -63,9 +63,6 @@ public class Servlet extends HttpServlet {
      */
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response) throws ServletException, IOException {
-        // maintenance (must be called before any writes!):
-        response.setCharacterEncoding("UTF-8");
-        // ---
         String path = request.getPathInfo();
         path = (path == null) ? "" : path;
         // todo
@@ -78,12 +75,7 @@ public class Servlet extends HttpServlet {
                 answer = new Error("404", "Unknown path: <" + path + ">");
                 break;
         }
-        // If this happens, send back a standard error message.
-        if (answer == null) {
-            answer = new Error("NULL PUSH", "Your PUSH did not return an object!");
-        }
-        response.getWriter().write(gson.toJson(answer, answer.getClass()));
-        response.setContentType("application/json");
+        prepareDeparture(response, answer);
     }
 
     /**
@@ -94,9 +86,6 @@ public class Servlet extends HttpServlet {
      */
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws IOException {
-        // maintenance (must be called before any writes!):
-        response.setCharacterEncoding("UTF-8");
-        // ---
         String path = request.getPathInfo();
         path = (path == null) ? "" : path;
         // todo
@@ -106,14 +95,29 @@ public class Servlet extends HttpServlet {
         switch (path) {
             default:
                 log.log(TAG, "Unknown path sent: " + path);
-                answer = new Error("404", "Unknown path: <" + path + ">");
+                answer = new Error("404", "Unknown path: " + path);
                 break;
         }
+        prepareDeparture(response, answer);
+    }
+
+    /**
+     * Creates JSON object out of answer and encapsulates it in the type object.
+     *
+     * @param response The response where the data will be written.
+     * @param answer   The object to attach.
+     * @throws IOException
+     */
+    private void prepareDeparture(HttpServletResponse response, Object answer) throws IOException {
+        // Must be done before write:
+        response.setCharacterEncoding("UTF-8");
         // If this happens, send back a standard error message.
         if (answer == null) {
-            answer = new Error("NULL GET", "Your GET did not return an object!");
+            answer = new Error("Empty GET", "GET did not return an object!");
         }
-        response.getWriter().write(gson.toJson(answer, answer.getClass()));
+        String returnJson = "{\"type\":\"" + answer.getClass().toString().split(" ")[1] + "\",\"object\":"
+                + gson.toJson(answer, answer.getClass()) + "}";
+        response.getWriter().write(returnJson);
         response.setContentType("application/json");
     }
 }
