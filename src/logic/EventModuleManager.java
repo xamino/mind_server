@@ -1,6 +1,8 @@
 package logic;
 
+import database.Data;
 import database.objects.User;
+import logic.modules.LocationModule;
 
 import java.util.ArrayList;
 
@@ -23,7 +25,6 @@ public class EventModuleManager {
         moduleList = new ArrayList<Module>();
 
         createModules();
-        initModules();
 
     }
 
@@ -31,13 +32,8 @@ public class EventModuleManager {
         moduleList.add(new LocationModule());
     }
 
-    private void initModules() {
-        for(Module m : moduleList ){
-            m.init(this);
-        }
-    }
 
-    public Object doWork() {
+    public Data doWork() {
         return new User("tamino");
     }
 }

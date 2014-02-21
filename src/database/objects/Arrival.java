@@ -3,7 +3,7 @@ package database.objects;
 /**
  * @author Tamino Hartmann
  */
-public class Request {
+public class Arrival {
     private String sessionHash;
 
     public String getSessionHash() {

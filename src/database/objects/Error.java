@@ -1,10 +1,12 @@
 package database.objects;
 
+import database.Data;
+
 /**
  * @author Tamino Hartmann
  * Standard error class used to send an error to connected clients.
  */
-public class Error {
+public class Error implements Data {
     private String name;
     private String description;
 

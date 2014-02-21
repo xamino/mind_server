@@ -5,9 +5,10 @@
 package servlet;
 
 import com.google.gson.Gson;
+import database.Data;
 import database.DatabaseController;
+import database.objects.Arrival;
 import database.objects.Error;
-import database.objects.Request;
 import io.Configuration;
 import logger.Messenger;
 import logic.EventModuleManager;
@@ -94,7 +95,7 @@ public class Servlet extends HttpServlet {
         // todo
         sanSec.secure();
         // Write whatever you want sent back to this object:
-        Object answer = null;
+        Data answer = null;
         switch (path) {
             case "/test":
                 answer = moduleManager.doWork();
@@ -128,7 +129,7 @@ public class Servlet extends HttpServlet {
     }
 
     // TODO
-    private Request getRequest(HttpServletRequest request) {
-        return new Request();
+    private Arrival getRequest(HttpServletRequest request) {
+        return new Arrival();
     }
 }

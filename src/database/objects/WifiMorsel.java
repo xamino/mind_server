@@ -1,10 +1,12 @@
 package database.objects;
 
+import database.Data;
+
 /**
  * @author Tamino Hartmann
  * Data object for a single wifi data morsel on a location.
  */
-public class WifiMorsel {
+public class WifiMorsel implements Data {
     /**
      * MAC-Address of the wifi access point.
      */

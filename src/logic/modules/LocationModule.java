@@ -5,11 +5,11 @@ import logic.EventModuleManager;
 import logic.Module;
 
 /**
- * Created by tamino on 2/19/14.
+ * @author Tamino Hartmann
  *
- * Ignore me! :D
+ * Auch genannt LoMo – wie slowmo, aber besser.
  */
-public class PlaceholderTestModule implements Module {
+public class LocationModule implements Module {
 
     @Override
     public Data run(String task, Data request) {

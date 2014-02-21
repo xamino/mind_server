@@ -1,12 +1,14 @@
 package database.objects;
 
+import database.Data;
+
 import java.util.ArrayList;
 
 /**
  * @author Tamino Hartmann
  *         Data object for a location. References multiple WifiMorsels that have been detected at this location.
  */
-public class Location {
+public class Location implements Data {
     private double coordinateX, coordinateY;
     private ArrayList wifiNetworks;
 
