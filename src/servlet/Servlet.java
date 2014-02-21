@@ -92,6 +92,9 @@ public class Servlet extends HttpServlet {
                     sanitation.destroySession(arrival.getSessionHash());
                     answer = new Message("Logged out!");
                     break;
+                case "datatest":
+                    answer = new Message("called datatest");
+                    break;
                 default:
                     log.log(TAG, "Unknown task sent: " + task);
                     answer = new Error("POST illegal TASK", "Unknown task: <" + task + ">");
@@ -151,7 +154,25 @@ public class Servlet extends HttpServlet {
                 break;
             out += value;
         } while (true);
-        Arrival arrival = gson.fromJson(out, Arrival.class);
+
+        // todo finish! :P @tamino
+        System.out.println("HERE: "+getJSONValue("task",out));
+
+        Arrival arrival = new Arrival("","","",generateDataObject("",""));
         return arrival;
+    }
+
+    private Data generateDataObject(String type, String jsonObject) {
+        return new Message("");
+    }
+
+    private String getJSONValue(String key, String object) {
+        int i = object.indexOf(key)+key.length();
+        if (object.charAt(i+3)=='"') {
+            return object.substring(i+3).split("\"")[1];
+        } else if (object.charAt(i+3)=='{') {
+            return object.substring(i+3).split("}")[1];
+        } else
+            return "";
     }
 }

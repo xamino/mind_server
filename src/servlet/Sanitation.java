@@ -44,8 +44,9 @@ public class Sanitation {
      * @return The reference to a created object.
      */
     public static Sanitation getInstance() {
-        if (INSTANCE == null)
+        if (INSTANCE == null) {
             INSTANCE = new Sanitation();
+        }
         return INSTANCE;
     }
 
@@ -63,7 +64,6 @@ public class Sanitation {
             long timeDelta = System.currentTimeMillis() - sessions.get(sessionHash);
             if (timeDelta > TIMEOUT) {
                 // this means the session has expired
-                System.out.println("Session expired!");
                 // remove, as expired:
                 this.destroySession(sessionHash);
                 return false;
