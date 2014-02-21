@@ -40,12 +40,12 @@ public class Configuration {
             try {
                 config.load(customConfig);
 
-                instance.dbURL = config.getProperty("DATABASE_URL");
-                instance.dbPort = config.getProperty("DATABASE_PORT");
-                instance.dbName = config.getProperty("DATABASE_NAME");
-                instance.dbDriver = config.getProperty("DATABASE_DRIVER");
-                instance.dbUser = config.getProperty("DATABASE_USER");
-                instance.dbPassword = config.getProperty("DATABASE_PASSWORD");
+                this.dbURL = config.getProperty("DATABASE_URL");
+                this.dbPort = config.getProperty("DATABASE_PORT");
+                this.dbName = config.getProperty("DATABASE_NAME");
+                this.dbDriver = config.getProperty("DATABASE_DRIVER");
+                this.dbUser = config.getProperty("DATABASE_USER");
+                this.dbPassword = config.getProperty("DATABASE_PASSWORD");
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -59,18 +59,18 @@ public class Configuration {
             config.load(context.getResourceAsStream(
                     "WEB-INF/stdconfig.properties"));
 
-            if (instance.dbURL == null)
-                instance.dbURL = config.getProperty("DATABASE_URL");
-            if (instance.dbPort == null)
-                instance.dbPort = config.getProperty("DATABASE_PORT");
-            if (instance.dbName == null)
-                instance.dbName = config.getProperty("DATABASE_NAME");
-            if (instance.dbDriver == null)
-                instance.dbDriver = config.getProperty("DATABASE_DRIVER");
-            if (instance.dbUser == null)
-                instance.dbUser = config.getProperty("DATABASE_USER");
-            if (instance.dbPassword == null)
-                instance.dbPassword = config.getProperty("DATABASE_PASSWORD");
+            if (this.dbURL == null)
+                this.dbURL = config.getProperty("DATABASE_URL");
+            if (this.dbPort == null)
+                this.dbPort = config.getProperty("DATABASE_PORT");
+            if (this.dbName == null)
+                this.dbName = config.getProperty("DATABASE_NAME");
+            if (this.dbDriver == null)
+                this.dbDriver = config.getProperty("DATABASE_DRIVER");
+            if (this.dbUser == null)
+                this.dbUser = config.getProperty("DATABASE_USER");
+            if (this.dbPassword == null)
+                this.dbPassword = config.getProperty("DATABASE_PASSWORD");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -90,26 +90,26 @@ public class Configuration {
     }
 
     public String getDbURL() {
-        return instance.dbURL;
+        return this.dbURL;
     }
 
     public String getDbDriver() {
-        return instance.dbDriver;
+        return this.dbDriver;
     }
 
     public String getDbUser() {
-        return instance.dbUser;
+        return this.dbUser;
     }
 
     public String getDbPassword() {
-        return instance.dbPassword;
+        return this.dbPassword;
     }
 
     public String getDbPort() {
-        return instance.dbPort;
+        return this.dbPort;
     }
 
     public String getDbName() {
-        return instance.dbName;
+        return this.dbName;
     }
 }
