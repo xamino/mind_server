@@ -1,5 +1,7 @@
 package database;
 
+import database.objects.Area;
+import database.objects.Location;
 import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
@@ -20,7 +22,7 @@ public class DatabaseController {
     private static DatabaseController instance;
     private final Messenger log;
     private final String CLASS = "DatabaseController";
-    private  String url;
+    private String url;
 
     /**
      * Verbingung zur Datenbank
@@ -85,7 +87,7 @@ public class DatabaseController {
                         + "&password=" + password);
             } else {
                 log.log(CLASS, "Try login: "
-                        + "jdbc:mysql://"+ url + ":" + port + "/" + database
+                        + "jdbc:mysql://" + url + ":" + port + "/" + database
                         + "?user=" + user);
                 con = DriverManager.getConnection("jdbc:mysql://" + url + ":"
                         + port + "/" + database + "?user=" + user);
@@ -96,7 +98,7 @@ public class DatabaseController {
                     CLASS,
                     "Error while connecting to database: please check if DB is running and if logindata is correct!");
             log.log(CLASS, "Try login: "
-                    + "jdbc:mysql://" + url  + ":" + port + "/" + database
+                    + "jdbc:mysql://" + url + ":" + port + "/" + database
                     + "?user=" + user + "&password=" + password);
 
             // Commented out by Tamino (it was making me edgy... :D )
@@ -108,15 +110,11 @@ public class DatabaseController {
     /**
      * Methode welche ein SQL "update" Statement ausfuehrt.
      *
-     * @param table
-     *            Name der Tabelle.
-     * @param columns
-     *            Name der Spalten welche aktualisiert werden sollen.
-     * @param values
-     *            Daten, welche in die entsprechenden Spalten gefuehlt werden
-     *            sollen.
-     * @param where
-     *            Bedingung fuer die Aktualisierung.
+     * @param table   Name der Tabelle.
+     * @param columns Name der Spalten welche aktualisiert werden sollen.
+     * @param values  Daten, welche in die entsprechenden Spalten gefuehlt werden
+     *                sollen.
+     * @param where   Bedingung fuer die Aktualisierung.
      * @return <code>True</code> wenn erfolgreich, sonst <code>false</code>.
      */
     synchronized public boolean update(Data data) {
@@ -129,19 +127,20 @@ public class DatabaseController {
         String[] columns;
         Object[] values;
         String where;
+        String update;
 
-     //   if(data instanceof User){
+        if (data instanceof User) {
             User user = (User) data;
             table = "user";
-            columns = new String[]{"name","password","email"};
-            values = new Object[]{user.getName(),user.getPwdHash(),user.getEmail()};
-            where = "email='"+user.getEmail()+"'";
+            columns = new String[]{"name", "password", "email"};
+            values = new Object[]{user.getName(), user.getPwdHash(), user.getEmail()};
+            where = "email='" + user.getEmail() + "'";
+
+            update = "UPDATE " + table + " SET "
+                    + commanator(columns, values) + " WHERE " + where;
+        } else return false;
 
 
-
-
-        String update = "UPDATE " + table + " SET "
-                + commanator(columns, values) + " WHERE " + where;
         try {
             st.executeUpdate(update);
             return true;
@@ -154,10 +153,8 @@ public class DatabaseController {
     /**
      * Methode welche ein SQL "delete" Statement ausfuehrt.
      *
-     * @param table
-     *            Tabelle aus der ein Eintrag bzw. mehrere Eintraege geloescht werden soll.
-     * @param where
-     *            'WHERE' Bedingung.
+     * @param table Tabelle aus der ein Eintrag bzw. mehrere Eintraege geloescht werden soll.
+     * @param where 'WHERE' Bedingung.
      * @return boolean Bei TRUE erfolgreich ausgefuehrt. Sonst FALSE.
      */
     synchronized public boolean delete(String table, String where) {
@@ -178,10 +175,8 @@ public class DatabaseController {
     /**
      * Methode welche ein SQL "insert" Statement ausfuehrt.
      *
-     * @param table
-     *            Name der Tabelle.
-     * @param values
-     *            Einzufuegende Werte.
+     * @param table  Name der Tabelle.
+     * @param values Einzufuegende Werte.
      * @return boolean Bei TRUE erfolgreich ausgefuehrt. Sonst FALSE.
      */
     synchronized public boolean insert(String table, Object[] values) {
@@ -206,10 +201,8 @@ public class DatabaseController {
      * Gibt die Anzahl der Zeilen einer Tabelle aus, die die "Where"- Bedingung
      * erfuellen
      *
-     * @param from
-     *            Tabellen, die in die Suche miteinbezogen werden sollen
-     * @param where
-     *            Zu erfuellende Bedingung
+     * @param from  Tabellen, die in die Suche miteinbezogen werden sollen
+     * @param where Zu erfuellende Bedingung
      * @return Anzahl der Zeilen
      */
     synchronized public int count(String[] from, String where) {
@@ -234,22 +227,21 @@ public class DatabaseController {
     /**
      * Methode welche ein SQL "select" Statement ausfuehrt.
      *
-     * @param select
-     *            Welche Werte ausgewaehlt werden sollen.
-     * @param from
-     *            Namen der Tabellen.
-     * @param where
-     *            Zusaetzliche Bedingung. Wird keine benoetigt, kann
-     *            <code>null</code> gesetzt werden.
+     * @param select Welche Werte ausgewaehlt werden sollen.
+     * @param from   Namen der Tabellen.
+     * @param where  Zusaetzliche Bedingung. Wird keine benoetigt, kann
+     *               <code>null</code> gesetzt werden.
      * @return Gibt ein <code>ResultSet</code> mit den Antworddaten zurueck.
      */
-    synchronized public ResultSet select(String[] select, String[] from,
-                                         String where) {
+    synchronized public ResultSet select(String[] select,
+                                    String[] from,
+                                    String where) {
         // Sicherheitsüberprüfung:
         if (con == null) {
 
             return null;
         }
+
         String sel = "SELECT " + commanator(select) + " FROM "
                 + commanator(from);
         if (where != null)
@@ -269,13 +261,10 @@ public class DatabaseController {
     /**
      * Methode welche ein SQL "insert on not null update" Statement ausfuehrt.
      *
-     * @param table
-     *            Name der Tabelle.
-     * @param columns
-     *            Namen der Spalten.
-     * @param values
-     *            Ensprechende Werte welche eingefuegt oder aktualiesiert werden
-     *            sollen.
+     * @param table   Name der Tabelle.
+     * @param columns Namen der Spalten.
+     * @param values  Ensprechende Werte welche eingefuegt oder aktualiesiert werden
+     *                sollen.
      * @return boolean Bei TRUE erfolgreich ausgefuehrt. Sonst FALSE.
      */
     synchronized public boolean insertOnNullElseUpdate(String table,
@@ -300,8 +289,7 @@ public class DatabaseController {
     /**
      * Hilfsmethode zum Konkatenieren von Strings mit Kommasetzung.
      *
-     * @param stringz
-     *            Zu konkatenierende Strings.
+     * @param stringz Zu konkatenierende Strings.
      * @return Konkatenierter String.
      */
     private String commanator(String[] stringz) {
@@ -318,8 +306,7 @@ public class DatabaseController {
      * Hilfsmethode zum Konkatenieren von Objekten mit Kommasetzung. Dabei
      * werden Strings mit einfachen Anfuehrungszeichen eingeklammert.
      *
-     * @param objects
-     *            Zu konkatenierende objekte.
+     * @param objects Zu konkatenierende objekte.
      * @return Konkatenierter String.
      */
     private String commanator(Object[] objects) {
@@ -345,10 +332,8 @@ public class DatabaseController {
      * statements. Ergibt in etwa einen String der Form
      * "name[0]=value[0], name...".
      *
-     * @param name
-     *            Namen der Spalten.
-     * @param value
-     *            Werte, welche die Spalten bekommen sollen.
+     * @param name  Namen der Spalten.
+     * @param value Werte, welche die Spalten bekommen sollen.
      * @return String mit zusammengesetzten Inhalt.
      */
     private String commanator(String[] name, Object[] value) {
