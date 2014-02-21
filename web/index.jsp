@@ -7,10 +7,14 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
-  <head>
+<head>
     <title>Hello World</title>
-  </head>
-  <body>
-    Blub! World! :-) !!!!
-  </body>
+    <script language="JavaScript" type="text/javascript" src="jquery-2.1.0.min.js"></script>
+    <script language="JavaScript" type="text/javascript" src="run.js"></script>
+</head>
+<body>
+Blub! World! :-) !!!!
+
+JS now enabled, open your console!
+</body>
 </html>

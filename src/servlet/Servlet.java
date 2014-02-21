@@ -18,6 +18,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
 
 /**
@@ -41,7 +42,7 @@ public class Servlet extends HttpServlet {
      * Class for logging stuff.
      */
     private Messenger log;
-    private SanitationSecurity sanSec;
+    private Sanitation sanitation;
     private EventModuleManager moduleManager;
 
     @Override
@@ -50,7 +51,7 @@ public class Servlet extends HttpServlet {
 
         gson = new Gson();
         log = Messenger.getInstance();
-        sanSec = SanitationSecurity.getInstance();
+        sanitation = Sanitation.getInstance();
         moduleManager = EventModuleManager.getInstance();
 
         Configuration.getInstance().init(getServletContext());
@@ -62,22 +63,36 @@ public class Servlet extends HttpServlet {
      *
      * @param request
      * @param response
-     * @throws ServletException
-     * @throws IOException
+     * @throws javax.servlet.ServletException
+     * @throws java.io.IOException
      */
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response) throws ServletException, IOException {
         String path = request.getPathInfo();
         path = (path == null) ? "" : path;
-        // todo
-        sanSec.secure();
+        // Get arrival object
+        Arrival arrival = getRequest(request);
         // Write whatever you want sent back to this object:
-        Object answer = null;
-        switch (path) {
-            default:
-                log.log(TAG, "Unknown path sent: " + path);
-                answer = new Error("404", "Unknown path: <" + path + ">");
-                break;
+        Data answer = null;
+        // Check if valid request:
+        if (arrival == null) {
+            answer = new Error("Illegal POST", "POST does not conform to API!");
+            // log.log(TAG, "Illegal format.");
+        } else if (!sanitation.secure(arrival.getSessionHash())) {
+            answer = new Error("POST Authentication FAIL", "You seem not to be logged in!");
+            // log.log(TAG, "Failed login.");
+        } else {
+            log.log(TAG, "Handling POST.");
+            switch (path) {
+                case "/login":
+                    // todo : only temporary, must be changed!
+                    sanitation.createSession();
+                    break;
+                default:
+                    log.log(TAG, "Unknown path sent: " + path);
+                    answer = new Error("404", "Unknown path: <" + path + ">");
+                    break;
+            }
         }
         prepareDeparture(response, answer);
     }
@@ -90,22 +105,15 @@ public class Servlet extends HttpServlet {
      */
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws IOException {
-        String path = request.getPathInfo();
-        path = (path == null) ? "" : path;
-        // todo
-        sanSec.secure();
-        // Write whatever you want sent back to this object:
-        Data answer = null;
-        switch (path) {
-            case "/test":
-                answer = moduleManager.doWork();
-                break;
-            default:
-                log.log(TAG, "Unknown path sent: " + path);
-                answer = new Error("404", "Unknown path: " + path);
-                break;
-        }
-        prepareDeparture(response, answer);
+
+    }
+
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
+
     }
 
     /**
@@ -129,7 +137,16 @@ public class Servlet extends HttpServlet {
     }
 
     // TODO
-    private Arrival getRequest(HttpServletRequest request) {
-        return new Arrival();
+    private Arrival getRequest(HttpServletRequest request) throws IOException {
+        BufferedReader reader = request.getReader();
+        String out = "";
+        do {
+            String value = reader.readLine();
+            if (value == null || value.isEmpty())
+                break;
+            out += value;
+        } while (true);
+        Arrival arrival = gson.fromJson(out, Arrival.class);
+        return arrival;
     }
 }
