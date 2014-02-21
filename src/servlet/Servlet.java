@@ -5,9 +5,12 @@
 package servlet;
 
 import com.google.gson.Gson;
+import database.DatabaseController;
 import database.objects.Error;
+import io.Configuration;
 import logger.Messenger;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -38,11 +41,16 @@ public class Servlet extends HttpServlet {
     private Messenger log;
     private SanitationSecurity sanSec;
 
-    public Servlet() {
-        super();
+    @Override
+    public void init() throws ServletException {
+        super.init();
+
         gson = new Gson();
         log = Messenger.getInstance();
         sanSec = SanitationSecurity.getInstance();
+
+        Configuration.getInstance().init(getServletContext());
+        DatabaseController.getInstance();
     }
 
     /**

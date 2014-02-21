@@ -17,6 +17,8 @@ public class DatabaseController {
      */
     private static DatabaseController instance;
     private final Messenger log;
+    private final String CLASS = "DatabaseController";
+    private  String url;
 
     /**
      * Verbingung zur Datenbank
@@ -66,30 +68,35 @@ public class DatabaseController {
         try {
             Class.forName(config.getDbDriver()).newInstance();
             // getLoginInfo();
+            url = config.getDbURL();
             user = config.getDbUser();
             password = config.getDbPassword();
             database = config.getDbName();
             port = config.getDbPort();
 
             if (password != null) {
-                log.log("DatabaseController", "Try login: "
-                        + "jdbc:mysql://localhost:" + port + "/" + database
+                log.log(CLASS, "Try login: "
+                        + "jdbc:mysql://" + url + ":" + port + "/" + database
                         + "?user=" + user + "&password=" + password);
-                con = DriverManager.getConnection("jdbc:mysql://localhost:"
+                con = DriverManager.getConnection("jdbc:mysql://" + url + ":"
                         + port + "/" + database + "?user=" + user
                         + "&password=" + password);
             } else {
-                log.log("DatabaseController", "Try login: "
-                        + "jdbc:mysql://localhost:" + port + "/" + database
+                log.log(CLASS, "Try login: "
+                        + "jdbc:mysql://"+ url + ":" + port + "/" + database
                         + "?user=" + user);
-                con = DriverManager.getConnection("jdbc:mysql://localhost:"
+                con = DriverManager.getConnection("jdbc:mysql://" + url + ":"
                         + port + "/" + database + "?user=" + user);
             }
             st = con.createStatement();
         } catch (Exception e) {
             log.log(
-                    "DatabaseController",
-                    "Error while connecting to database: please check if DB is running and if logindata is correct (~/.sopra/sopraconf)");
+                    CLASS,
+                    "Error while connecting to database: please check if DB is running and if logindata is correct!");
+            log.log(CLASS, "Try login: "
+                    + "jdbc:mysql://" + url  + ":" + port + "/" + database
+                    + "?user=" + user + "&password=" + password);
+
             // Commented out by Tamino (it was making me edgy... :D )
             // e.printStackTrace();
         }
