@@ -9,6 +9,7 @@ import database.Data;
 import database.DatabaseController;
 import database.objects.Arrival;
 import database.objects.Error;
+import database.objects.Message;
 import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
@@ -67,8 +68,6 @@ public class Servlet extends HttpServlet {
      */
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response) throws ServletException, IOException {
-        String path = request.getPathInfo();
-        path = (path == null) ? "" : path;
         // Get arrival object
         Arrival arrival = getRequest(request);
         // Write whatever you want sent back to this object:
@@ -77,19 +76,25 @@ public class Servlet extends HttpServlet {
         if (arrival == null) {
             answer = new Error("Illegal POST", "POST does not conform to API!");
             // log.log(TAG, "Illegal format.");
-        } else if (!sanitation.secure(arrival.getSessionHash())) {
-            answer = new Error("POST Authentication FAIL", "You seem not to be logged in!");
-            // log.log(TAG, "Failed login.");
+        } else if (!sanitation.checkSession(arrival.getSessionHash())) {
+            // login only available when logged out
+            if (arrival.getTask().equals("login")) {
+                answer = new Message(sanitation.createSession());
+            } else {
+                answer = new Error("POST Authentication FAIL", "You seem not to be logged in!");
+                // log.log(TAG, "Failed login.");
+            }
         } else {
             log.log(TAG, "Handling POST.");
-            switch (path) {
-                case "/login":
-                    // todo : only temporary, must be changed!
-                    sanitation.createSession();
+            String task = arrival.getTask();
+            switch (task) {
+                case "logout":
+                    sanitation.destroySession(arrival.getSessionHash());
+                    answer = new Message("Logged out!");
                     break;
                 default:
-                    log.log(TAG, "Unknown path sent: " + path);
-                    answer = new Error("404", "Unknown path: <" + path + ">");
+                    log.log(TAG, "Unknown task sent: " + task);
+                    answer = new Error("POST illegal TASK", "Unknown task: <" + task + ">");
                     break;
             }
         }
