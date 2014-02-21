@@ -10,9 +10,11 @@ import database.Data;
 public class User implements Data {
     private String name;
     private String pwdHash;
+    private String email;
 
-    public User(String name) {
+    public User(String name, String email) {
         this.name = name;
+        this.email = email;
     }
 
     public String getName() {
@@ -29,5 +31,9 @@ public class User implements Data {
 
     public void setPwdHash(String pwdHash) {
         this.pwdHash = pwdHash;
+    }
+
+    public String getEmail() {
+        return email;
     }
 }

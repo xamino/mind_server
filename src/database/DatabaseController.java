@@ -1,10 +1,12 @@
 package database;
 
+import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
 
 import javax.servlet.ServletContext;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.jar.Manifest;
 
@@ -117,12 +119,27 @@ public class DatabaseController {
      *            Bedingung fuer die Aktualisierung.
      * @return <code>True</code> wenn erfolgreich, sonst <code>false</code>.
      */
-    synchronized public boolean update(String table, String[] columns,
-                                       Object[] values, String where) {
+    synchronized public boolean update(Data data) {
         // Sicherheitsüberprüfung:
         if (con == null) {
             return false;
         }
+
+        String table;
+        String[] columns;
+        Object[] values;
+        String where;
+
+     //   if(data instanceof User){
+            User user = (User) data;
+            table = "user";
+            columns = new String[]{"name","password","email"};
+            values = new Object[]{user.getName(),user.getPwdHash(),user.getEmail()};
+            where = "email='"+user.getEmail()+"'";
+
+
+
+
         String update = "UPDATE " + table + " SET "
                 + commanator(columns, values) + " WHERE " + where;
         try {

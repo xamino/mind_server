@@ -3,6 +3,7 @@ package logic;
 import database.Data;
 import database.objects.User;
 import logic.modules.LocationModule;
+import logic.modules.UserModule;
 
 import java.util.ArrayList;
 
@@ -12,8 +13,8 @@ import java.util.ArrayList;
 public class EventModuleManager {
 
     private static EventModuleManager INSTANCE;
-
-    private ArrayList<Module> moduleList;
+    private final UserModule userModule;
+    private final LocationModule locationModule;
 
     public static EventModuleManager getInstance() {
         if (INSTANCE == null)
@@ -22,18 +23,14 @@ public class EventModuleManager {
     }
 
     private EventModuleManager(){
-        moduleList = new ArrayList<Module>();
 
-        createModules();
+        userModule = new UserModule();
+        locationModule = new LocationModule();
 
     }
 
-    private void createModules() {
-        moduleList.add(new LocationModule());
-    }
 
-
-    public Data doWork() {
-        return new User("tamino");
+    public Data handleTask(Data task) {
+        return userModule.run("updateUser", task);
     }
 }

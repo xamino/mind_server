@@ -10,6 +10,7 @@ import database.DatabaseController;
 import database.objects.Arrival;
 import database.objects.Error;
 import database.objects.Message;
+import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
 import logic.EventModuleManager;
@@ -49,14 +50,12 @@ public class Servlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
+        Configuration.getInstance().init(getServletContext()); // must be first!!!
 
         gson = new Gson();
         log = Messenger.getInstance();
         sanitation = Sanitation.getInstance();
         moduleManager = EventModuleManager.getInstance();
-
-        Configuration.getInstance().init(getServletContext());
-        DatabaseController.getInstance();
     }
 
     /**
@@ -113,7 +112,8 @@ public class Servlet extends HttpServlet {
      */
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws IOException {
-
+        User u = new User("Hans","hans@peter.de");
+        moduleManager.handleTask(u);
     }
 
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
