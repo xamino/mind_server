@@ -36,4 +36,13 @@ public class User implements Data {
     public String getEmail() {
         return email;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", pwdHash='" + pwdHash + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
 }

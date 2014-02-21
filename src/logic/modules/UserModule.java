@@ -41,8 +41,7 @@ public class UserModule implements Module {
     }
 
     private Data deleteUser(User user) {
-        //boolean op = database.delete(user);
-        boolean op = false;
+        boolean op = database.delete(user);
         if (op)
             return new Success("UserDeletionSuccess", "The user " + user.getName() + "was deleted successfully.");
         else
@@ -58,20 +57,18 @@ public class UserModule implements Module {
     }
 
     private Data readUser(User user) {
-        //Data data = database.select(user);
-        Data data = null;
+        Data data = database.read(user);
         if (data != null)
             return data;
         else
-            return new Error("UserDeletionFailure", "No idea why");
+            return new Error("UserReadFailure", "No idea why");
     }
 
     private Data createUser(User user) {
-        //boolean op = database.insert(user);
-        boolean op = false;
+        boolean op = database.create(user);
         if (op)
-            return new Success("UserDeletionSuccess", "The user " + user.getName() + "was deleted successfully.");
+            return new Success("UserCreationSuccess", "The user " + user.getName() + "was deleted successfully.");
         else
-            return new Error("UserDeletionFailure", "No idea why");
+            return new Error("UserCreationFailure", "No idea why");
     }
 }

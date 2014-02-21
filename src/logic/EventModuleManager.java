@@ -30,7 +30,7 @@ public class EventModuleManager {
     }
 
 
-    public Data handleTask(Data task) {
-        return userModule.run("updateUser", task);
+    public Data handleTask(String operation, Data task) {
+        return userModule.run(operation, task);
     }
 }

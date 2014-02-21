@@ -113,7 +113,9 @@ public class Servlet extends HttpServlet {
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws IOException {
         User u = new User("Hans","hans@peter.de");
-        moduleManager.handleTask(u);
+        //moduleManager.handleTask("createUser",u);
+        User user = (User)moduleManager.handleTask("readUser", new User("",""));
+        log.log("Servlet", user.toString());
     }
 
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
