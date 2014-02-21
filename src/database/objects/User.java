@@ -7,6 +7,7 @@ package database.objects;
  */
 public class User {
     private String name;
+    private String pwdHash;
 
     public User(String name) {
         this.name = name;
@@ -18,5 +19,13 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPwdHash() {
+        return pwdHash;
+    }
+
+    public void setPwdHash(String pwdHash) {
+        this.pwdHash = pwdHash;
     }
 }

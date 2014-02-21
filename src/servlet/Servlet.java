@@ -7,10 +7,11 @@ package servlet;
 import com.google.gson.Gson;
 import database.DatabaseController;
 import database.objects.Error;
+import database.objects.Request;
 import io.Configuration;
 import logger.Messenger;
+import logic.EventModuleManager;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -40,6 +41,7 @@ public class Servlet extends HttpServlet {
      */
     private Messenger log;
     private SanitationSecurity sanSec;
+    private EventModuleManager moduleManager;
 
     @Override
     public void init() throws ServletException {
@@ -48,6 +50,7 @@ public class Servlet extends HttpServlet {
         gson = new Gson();
         log = Messenger.getInstance();
         sanSec = SanitationSecurity.getInstance();
+        moduleManager = EventModuleManager.getInstance();
 
         Configuration.getInstance().init(getServletContext());
         DatabaseController.getInstance();
@@ -93,6 +96,9 @@ public class Servlet extends HttpServlet {
         // Write whatever you want sent back to this object:
         Object answer = null;
         switch (path) {
+            case "/test":
+                answer = moduleManager.doWork();
+                break;
             default:
                 log.log(TAG, "Unknown path sent: " + path);
                 answer = new Error("404", "Unknown path: " + path);
@@ -119,5 +125,10 @@ public class Servlet extends HttpServlet {
                 + gson.toJson(answer, answer.getClass()) + "}";
         response.getWriter().write(returnJson);
         response.setContentType("application/json");
+    }
+
+    // TODO
+    private Request getRequest(HttpServletRequest request) {
+        return new Request();
     }
 }
