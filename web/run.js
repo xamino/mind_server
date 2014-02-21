@@ -5,9 +5,6 @@ function send(type, data) {
         data: JSON.stringify(data),
         contentType: 'application/json; charset=utf-8',
         dataType: 'json',
-        async: false,
-        success: function(msg) {
-            alert("OK!");
-        }
+        async: false
     });
 }
