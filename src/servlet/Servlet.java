@@ -6,11 +6,8 @@ package servlet;
 
 import com.google.gson.Gson;
 import database.Data;
-import database.DatabaseController;
-import database.objects.Arrival;
+import database.objects.*;
 import database.objects.Error;
-import database.objects.Message;
-import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
 import logic.EventModuleManager;
@@ -69,31 +66,25 @@ public class Servlet extends HttpServlet {
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response) throws ServletException, IOException {
         // Get arrival object
+        // Watch out, arrival.getData() might be NULL!
         Arrival arrival = getRequest(request);
         // Write whatever you want sent back to this object:
         Data answer = null;
-        // Check if valid request:
-        if (arrival == null) {
-            answer = new Error("Illegal POST", "POST does not conform to API!");
-            // log.log(TAG, "Illegal format.");
-        } else if (!sanitation.checkSession(arrival.getSessionHash())) {
-            // login only available when logged out
-            if (arrival.getTask().equals("login")) {
-                answer = new Message(sanitation.createSession());
-            } else {
-                answer = new Error("POST Authentication FAIL", "You seem not to be logged in!");
-                // log.log(TAG, "Failed login.");
-            }
-        } else {
-            log.log(TAG, "Handling POST.");
+        // Check if valid:
+        answer = sanitation.checkArrival(arrival);
+        // If answer is still null, everything checks out (otherwise an error or message object would be in place
+        // already)
+        if (answer == null) {
+            // This means valid session and arrival!
             String task = arrival.getTask();
             switch (task) {
                 case "logout":
                     sanitation.destroySession(arrival.getSessionHash());
                     answer = new Message("Logged out!");
                     break;
-                case "datatest":
-                    answer = new Message("called datatest");
+                case "echo":
+                    // Simple echo test for checking if the server can parse the data
+                    answer = arrival.getObject();
                     break;
                 default:
                     log.log(TAG, "Unknown task sent: " + task);
@@ -112,9 +103,9 @@ public class Servlet extends HttpServlet {
      */
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws IOException {
-        User u = new User("Hans","hans@peter.de");
+        User u = new User("Hans", "hans@peter.de");
         //moduleManager.handleTask("createUser",u);
-        User user = (User)moduleManager.handleTask("readUser", new User("",""));
+        User user = (User) moduleManager.handleTask("readUser", new User("", ""));
         log.log("Servlet", user.toString());
     }
 
@@ -138,15 +129,22 @@ public class Servlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         // If this happens, send back a standard error message.
         if (answer == null) {
-            answer = new Error("Empty GET", "GET did not return an object!");
+            answer = new Error("Empty ANSWER", "Answer does not contain an object!");
         }
-        String returnJson = "{\"type\":\"" + answer.getClass().toString().split(" ")[1] + "\",\"object\":"
+        String returnJson = "{\"dataType\":\"" + answer.getClass().toString().split(" ")[1] + "\",\"object\":"
                 + gson.toJson(answer, answer.getClass()) + "}";
         response.getWriter().write(returnJson);
         response.setContentType("application/json");
     }
 
-    // TODO
+    /**
+     * Takes the HttpServletRequest and returns the correct arrival object filled with JSON goodies.
+     *
+     * @param request The request to read.
+     * @return The Arrival object filled with the data.
+     * @throws IOException
+     */
+    // TODO: will not work with recursive data objects – how do we implement that?
     private Arrival getRequest(HttpServletRequest request) throws IOException {
         BufferedReader reader = request.getReader();
         String out = "";
@@ -156,25 +154,69 @@ public class Servlet extends HttpServlet {
                 break;
             out += value;
         } while (true);
-
-        // todo finish! :P @tamino
-        System.out.println("HERE: "+getJSONValue("task",out));
-
-        Arrival arrival = new Arrival("","","",generateDataObject("",""));
-        return arrival;
+        // Better safe than sorry:
+        if (out.isEmpty())
+            return null;
+        // parse the object out:
+        String dataType = getJSONValue("dataType", out);
+        String dataString = getJSONValue("object", out);
+        // If a dataType is given, try parsing it:
+        Data object = null;
+        if (dataType != null && !dataType.isEmpty()) {
+            // Parse data
+            // TODO this might be doable with reflection API?
+            // TODO possibly use full object path, as is sent by server? "User" --> "database.objects.User"?
+            switch (dataType) {
+                case "Message":
+                    object = gson.fromJson(dataString, Message.class);
+                    break;
+                case "User":
+                    object = gson.fromJson(dataString, User.class);
+                    break;
+                case "Error":
+                    object = gson.fromJson(dataString, Error.class);
+                    break;
+                case "Success":
+                    object = gson.fromJson(dataString, Success.class);
+                    break;
+                default:
+                    log.log(TAG, "ERROR: Unknown data sent, can not be parsed into Arrival!");
+            }
+        }
+        return new Arrival(getJSONValue("sessionHash", out), getJSONValue("task", out), dataType, object);
     }
 
-    private Data generateDataObject(String type, String jsonObject) {
-        return new Message("");
-    }
-
-    private String getJSONValue(String key, String object) {
-        int i = object.indexOf(key)+key.length();
-        if (object.charAt(i+3)=='"') {
-            return object.substring(i+3).split("\"")[1];
-        } else if (object.charAt(i+3)=='{') {
-            return object.substring(i+3).split("}")[1];
-        } else
-            return "";
+    /**
+     * Given the JSON key, returns the corresponding value out of the given JSON object.
+     *
+     * @param key    The JSON key to get.
+     * @param object The string of the JSON object.
+     * @return The value associated with the key. If non is found, set to null.
+     */
+    private String getJSONValue(final String key, String object) {
+        int j = object.indexOf("\"" + key + "\"");
+        // This happens if the key isn't found
+        if (j == -1) {
+            log.log(TAG, "WARNING JSON key not found \"" + key + "\"");
+            return null;
+        }
+        int i = j + key.length() + 1;
+        String retValue = null;
+        if (object.charAt(i + 2) == '"') {
+            // Simple data with '
+            retValue = object.substring(i + 2).split("\"")[1];
+        } else if (object.charAt(i + 2) == '\'') {
+            // Simple data with "
+            retValue = object.substring(i + 2).split("'")[1];
+        } else if (object.charAt(i + 2) == '{') {
+            // Data with {} – note that the surrounding braces are kept!
+            retValue = object.substring(i + 2).split("}")[0] + "}";
+        } else {
+            log.log(TAG, "ERROR parsing ARRIVAL for key \"" + key + "\"");
+        }
+        // If the value is empty, we return null
+        if (retValue == null || retValue.isEmpty())
+            return null;
+        return retValue;
     }
 }

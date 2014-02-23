@@ -1,5 +1,10 @@
 package servlet;
 
+import database.Data;
+import database.objects.Arrival;
+import database.objects.Error;
+import database.objects.Message;
+
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.HashMap;
@@ -95,5 +100,28 @@ public class Sanitation {
         if (sessions.containsKey(sessionHash)) {
             sessions.remove(sessionHash);
         }
+    }
+
+    /**
+     * Method that checks whether an arrival is valid and not null, then handles login if applicable and checks the session.
+     *
+     * @param arrival The Arrival object to check.
+     * @return Either an Error or a Message if something is wrong; if everything checks out, then null.
+     */
+    public Data checkArrival(Arrival arrival) {
+        Data answer;
+        if (arrival == null || !arrival.isValid()) {
+            answer = new database.objects.Error("Illegal POST", "POST does not conform to API! Check that all keys are valid and the values set!");
+            return answer;
+        } else if (!checkSession(arrival.getSessionHash())) {
+            // login only available when logged out
+            if (arrival.getTask().equals("login")) {
+                answer = new Message(createSession());
+            } else {
+                answer = new Error("POST Authentication FAIL", "You seem not to be logged in!");
+            }
+            return answer;
+        }
+        return null;
     }
 }
