@@ -6,16 +6,14 @@ import database.Data;
  * @author Tamino Hartmann
  */
 //WARNING: This class is parsed from JSON by hand in Servlet! Remember to keep that up to date when changing methods here!
-public class Arrival {
+public class Arrival implements Data {
     private String sessionHash;
     private String task;
-    private String dataType;
     private Data object;
 
-    public Arrival(String sessionHash, String task, String dataType, Data object) {
+    public Arrival(String sessionHash, String task, Data object) {
         this.sessionHash = sessionHash;
         this.task = task;
-        this.dataType = dataType;
         this.object = object;
     }
 
@@ -35,7 +33,6 @@ public class Arrival {
         return "Arrival{" +
                 "sessionHash='" + sessionHash + '\'' +
                 ", task='" + task + '\'' +
-                ", dataType='" + dataType + '\'' +
                 ", object=" + object +
                 '}';
     }
@@ -55,14 +52,6 @@ public class Arrival {
 
     public void setTask(String task) {
         this.task = task;
-    }
-
-    public String getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
     }
 
     public Data getObject() {

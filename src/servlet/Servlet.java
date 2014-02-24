@@ -5,6 +5,7 @@
 package servlet;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import database.Data;
 import database.objects.*;
 import database.objects.Error;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Dieses Servlet ist fuer alle oeffentlich zugaengliche Daten zustaendig.
@@ -49,7 +51,22 @@ public class Servlet extends HttpServlet {
         super.init();
         Configuration.getInstance().init(getServletContext()); // must be first!!!
 
-        gson = new Gson();
+        //JSON stuff
+        // Base data type that we use for JSON data: ($type is the attribute name)
+        RuntimeTypeAdapterFactory<Data> factory = RuntimeTypeAdapterFactory.of(Data.class, "$type");
+        // Register all JSON-objects: (The strings are the types, must be unique!)
+        factory.registerSubtype(Location.class, "Location");
+        factory.registerSubtype(Message.class, "Message");
+        factory.registerSubtype(Error.class, "Error");
+        factory.registerSubtype(Success.class, "Success");
+        factory.registerSubtype(WifiMorsel.class, "WifiMorsel");
+        factory.registerSubtype(User.class, "User");
+        factory.registerSubtype(Arrival.class, "Arrival");
+        // Register adapter
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapterFactory(factory);
+        gson = builder.create();
+
         log = Messenger.getInstance();
         sanitation = Sanitation.getInstance();
         moduleManager = EventModuleManager.getInstance();
@@ -78,6 +95,13 @@ public class Servlet extends HttpServlet {
             // This means valid session and arrival!
             String task = arrival.getTask();
             switch (task) {
+                case "test":
+                    ArrayList<WifiMorsel> wifis = new ArrayList<>();
+                    wifis.add(new WifiMorsel("0:0","WIFIS",-86));
+                    wifis.add(new WifiMorsel("A3:34","EDUROAM",-03));
+                    Location loc = new Location(4.0, 2.0, wifis);
+                    answer = loc;
+                    break;
                 case "logout":
                     sanitation.destroySession(arrival.getSessionHash());
                     answer = new Message("Logged out!");
@@ -124,16 +148,15 @@ public class Servlet extends HttpServlet {
      * @param answer   The object to attach.
      * @throws IOException
      */
-    private void prepareDeparture(HttpServletResponse response, Object answer) throws IOException {
+    // TODO $type is still not being written... maybe do manually? But should be done, ??
+    private void prepareDeparture(HttpServletResponse response, Data answer) throws IOException {
         // Must be done before write:
         response.setCharacterEncoding("UTF-8");
         // If this happens, send back a standard error message.
         if (answer == null) {
-            answer = new Error("Empty ANSWER", "Answer does not contain an object!");
+            answer = new Error("Empty ANSWER", "Answer does not contain an object! Make sure your request is valid!");
         }
-        String returnJson = "{\"dataType\":\"" + answer.getClass().toString().split(" ")[1] + "\",\"object\":"
-                + gson.toJson(answer, answer.getClass()) + "}";
-        response.getWriter().write(returnJson);
+        response.getWriter().write(gson.toJson(answer, answer.getClass()));
         response.setContentType("application/json");
     }
 
@@ -144,7 +167,6 @@ public class Servlet extends HttpServlet {
      * @return The Arrival object filled with the data.
      * @throws IOException
      */
-    // TODO: will not work with recursive data objects – how do we implement that?
     private Arrival getRequest(HttpServletRequest request) throws IOException {
         BufferedReader reader = request.getReader();
         String out = "";
@@ -158,65 +180,6 @@ public class Servlet extends HttpServlet {
         if (out.isEmpty())
             return null;
         // parse the object out:
-        String dataType = getJSONValue("dataType", out);
-        String dataString = getJSONValue("object", out);
-        // If a dataType is given, try parsing it:
-        Data object = null;
-        if (dataType != null && !dataType.isEmpty()) {
-            // Parse data
-            // TODO this might be doable with reflection API?
-            // TODO possibly use full object path, as is sent by server? "User" --> "database.objects.User"?
-            switch (dataType) {
-                case "Message":
-                    object = gson.fromJson(dataString, Message.class);
-                    break;
-                case "User":
-                    object = gson.fromJson(dataString, User.class);
-                    break;
-                case "Error":
-                    object = gson.fromJson(dataString, Error.class);
-                    break;
-                case "Success":
-                    object = gson.fromJson(dataString, Success.class);
-                    break;
-                default:
-                    log.log(TAG, "ERROR: Unknown data sent, can not be parsed into Arrival!");
-            }
-        }
-        return new Arrival(getJSONValue("sessionHash", out), getJSONValue("task", out), dataType, object);
-    }
-
-    /**
-     * Given the JSON key, returns the corresponding value out of the given JSON object.
-     *
-     * @param key    The JSON key to get.
-     * @param object The string of the JSON object.
-     * @return The value associated with the key. If non is found, set to null.
-     */
-    private String getJSONValue(final String key, String object) {
-        int j = object.indexOf("\"" + key + "\"");
-        // This happens if the key isn't found
-        if (j == -1) {
-            log.log(TAG, "WARNING JSON key not found \"" + key + "\"");
-            return null;
-        }
-        int i = j + key.length() + 1;
-        String retValue = null;
-        if (object.charAt(i + 2) == '"') {
-            // Simple data with '
-            retValue = object.substring(i + 2).split("\"")[1];
-        } else if (object.charAt(i + 2) == '\'') {
-            // Simple data with "
-            retValue = object.substring(i + 2).split("'")[1];
-        } else if (object.charAt(i + 2) == '{') {
-            // Data with {} – note that the surrounding braces are kept!
-            retValue = object.substring(i + 2).split("}")[0] + "}";
-        } else {
-            log.log(TAG, "ERROR parsing ARRIVAL for key \"" + key + "\"");
-        }
-        // If the value is empty, we return null
-        if (retValue == null || retValue.isEmpty())
-            return null;
-        return retValue;
+        return gson.fromJson(out, Arrival.class);
     }
 }
