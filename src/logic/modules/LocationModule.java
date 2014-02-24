@@ -1,6 +1,7 @@
 package logic.modules;
 
 import database.Data;
+import database.objects.Task;
 import logic.EventModuleManager;
 import logic.Module;
 
@@ -12,7 +13,7 @@ import logic.Module;
 public class LocationModule implements Module {
 
     @Override
-    public Data run(String task, Data request) {
+    public Data run(Task task, Data request) {
         return null;
     }
 }
