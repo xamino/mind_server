@@ -12,6 +12,7 @@ import database.objects.Error;
 import io.Configuration;
 import logger.Messenger;
 import logic.EventModuleManager;
+import logic.modules.UserModule;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -128,9 +129,15 @@ public class Servlet extends HttpServlet {
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws IOException {
         User u = new User("Hans", "hans@peter.de");
-        //moduleManager.handleTask("createUser",u);
-        User user = (User) moduleManager.handleTask("readUser", new User("", ""));
-        log.log("Servlet", user.toString());
+        moduleManager.handleTask(Task.UserTask.CREATE_USER, u);
+
+        User b = (User) moduleManager.handleTask(Task.UserTask.READ_USER, u);
+
+        b.setName("Gustav");
+
+        moduleManager.handleTask(Task.UserTask.UPDATE_USER, b);
+
+        moduleManager.handleTask(Task.UserTask.DELETE_USER, b);
     }
 
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {

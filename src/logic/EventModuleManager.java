@@ -1,7 +1,8 @@
 package logic;
 
 import database.Data;
-import database.objects.User;
+import database.objects.*;
+import database.objects.Error;
 import logic.modules.LocationModule;
 import logic.modules.UserModule;
 
@@ -30,7 +31,11 @@ public class EventModuleManager {
     }
 
 
-    public Data handleTask(String operation, Data task) {
+    public Data handleTask(Task operation, Data task) {
+
+        if(operation instanceof Task.UserTask)
         return userModule.run(operation, task);
+        else
+            return new Error("ModuleNotFound",operation.toString());
     }
 }

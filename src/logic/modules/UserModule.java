@@ -18,22 +18,22 @@ public class UserModule implements Module {
     }
 
     @Override
-    public Data run(String task, Data request) {
-
+    public Data run(Task task, Data request) {
         if (!(request instanceof User)) {
             return new Error("WrongDataType", "The User Module requires a User Object.");
         }
 
         User user = (User) request;
 
-        switch (task) {
-            case "createUser":
+        Task.UserTask userTask = (Task.UserTask) task;
+        switch (userTask) {
+            case CREATE_USER:
                 return createUser(user);
-            case "readUser":
+            case READ_USER:
                 return readUser(user);
-            case "updateUser":
+            case UPDATE_USER:
                 return updateUser(user);
-            case "deleteUser":
+            case DELETE_USER:
                 return deleteUser(user);
         }
 
