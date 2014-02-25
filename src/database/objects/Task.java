@@ -6,7 +6,7 @@ package database.objects;
 public interface Task {
 
     public enum UserTask implements Task {
-        CREATE_USER, READ_USER, UPDATE_USER, DELETE_USER
+        CREATE_USER, READ_USER, UPDATE_USER, DELETE_USER, READ_USERS
     }
 }
 

@@ -30,4 +30,12 @@ public class Success implements Data {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    @Override
+    public String toString() {
+        return "Success{" +
+                "message='" + message + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

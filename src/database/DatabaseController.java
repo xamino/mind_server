@@ -7,6 +7,7 @@ import com.db4o.ext.Db4oDatabase;
 import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import database.objects.Area;
+import database.objects.DataList;
 import database.objects.Location;
 import database.objects.User;
 import io.Configuration;
@@ -98,25 +99,38 @@ public class DatabaseController {
     public Data read(final Data requestFilter) {
         ObjectContainer con = getConnection();
 
-        List result = null;
+        List queryResult = null;
 
         if (requestFilter instanceof User) {
             final User user = (User) requestFilter;
-            result = con.query(new Predicate<User>() {
+            queryResult = con.query(new Predicate<User>() {
                 @Override
                 public boolean match(User o) {
+                    // check on unique key, empty email returns all users
+                    if(user.getEmail().equals(""))
+                        return true;
                     return o.getEmail().equals(user.getEmail());
                 }
             });
         }
 
-        Data singleResult = (result == null || result.size() == 0) ? null : (Data) result.get(0);
+        Data result = null;
+        if(queryResult.size() == 1){
+            result = (Data) queryResult.get(0);
+        }
+        else if(queryResult.size() > 1) {
+            DataList list = new DataList();
+            for(Object o : queryResult){
+                list.add((Data)o);
+            }
+            result = list;
+        }
 
         //con.close();
 
-        log.log(CLASS, singleResult.toString() + " read from DB!");
+        log.log(CLASS, result.toString() + " read from DB!");
 
-        return singleResult;
+        return result;
     }
 
     public boolean create(Data data) {

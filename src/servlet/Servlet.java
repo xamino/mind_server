@@ -129,16 +129,27 @@ public class Servlet extends HttpServlet {
                          HttpServletResponse response) throws IOException {
         // Use only for DEBUGGING AND TESTS!
         // All production code should go in POST
-        User u = new User("Hans", "hans@peter.de");
-        moduleManager.handleTask(Task.UserTask.CREATE_USER, u);
+        User a = new User("Hans", "hans@peter.de");
+        moduleManager.handleTask(Task.UserTask.CREATE_USER, a);
 
-        User b = (User) moduleManager.handleTask(Task.UserTask.READ_USER, u);
+        User t = (User) moduleManager.handleTask(Task.UserTask.READ_USER, a);
 
-        b.setName("Gustav");
+        t.setName("Gustav");
 
-        moduleManager.handleTask(Task.UserTask.UPDATE_USER, b);
+        moduleManager.handleTask(Task.UserTask.UPDATE_USER, t);
 
+        User b = new User("Tom", "tom@jerry.de");
+        User c = new User("Jerry", "jerry@tom.de");
+        moduleManager.handleTask(Task.UserTask.CREATE_USER, b);
+        moduleManager.handleTask(Task.UserTask.CREATE_USER, c);
+
+
+       Data userList = moduleManager.handleTask(Task.UserTask.READ_USERS,null);
+       log.log("Servlet", userList.toString());
+
+        moduleManager.handleTask(Task.UserTask.DELETE_USER, a);
         moduleManager.handleTask(Task.UserTask.DELETE_USER, b);
+        moduleManager.handleTask(Task.UserTask.DELETE_USER, c);
     }
 
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
