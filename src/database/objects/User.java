@@ -45,4 +45,5 @@ public class User implements Data {
                 ", email='" + email + '\'' +
                 '}';
     }
+
 }

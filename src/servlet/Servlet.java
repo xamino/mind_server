@@ -4,8 +4,6 @@
 
 package servlet;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import database.Data;
 import database.objects.*;
 import database.objects.Error;
@@ -38,7 +36,7 @@ public class Servlet extends HttpServlet {
     /**
      * JSON library.
      */
-    private Gson gson;
+    private JsonConverter json;
     /**
      * Class for logging stuff.
      */
@@ -51,25 +49,10 @@ public class Servlet extends HttpServlet {
         super.init();
         Configuration.getInstance().init(getServletContext()); // must be first!!!
 
-        //JSON stuff
-        // Base data type that we use for JSON data: ($type is the attribute name)
-        RuntimeTypeAdapterFactory<Data> factory = RuntimeTypeAdapterFactory.of(Data.class, "$type");
-        // Register all JSON-objects: (The strings are the types, must be unique!)
-        factory.registerSubtype(Location.class, "Location");
-        factory.registerSubtype(Message.class, "Message");
-        factory.registerSubtype(Error.class, "Error");
-        factory.registerSubtype(Success.class, "Success");
-        factory.registerSubtype(WifiMorsel.class, "WifiMorsel");
-        factory.registerSubtype(User.class, "User");
-        factory.registerSubtype(Arrival.class, "Arrival");
-        // Register adapter
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(factory);
-        gson = builder.create();
-
         log = Messenger.getInstance();
         sanitation = Sanitation.getInstance();
         moduleManager = EventModuleManager.getInstance();
+        json = JsonConverter.getInstance();
     }
 
     /**
@@ -97,8 +80,8 @@ public class Servlet extends HttpServlet {
             switch (task) {
                 case "test":
                     ArrayList<WifiMorsel> wifis = new ArrayList<>();
-                    wifis.add(new WifiMorsel("0:0","WIFIS",-86));
-                    wifis.add(new WifiMorsel("A3:34","EDUROAM",-03));
+                    wifis.add(new WifiMorsel("0:0", "WIFIS", -86));
+                    wifis.add(new WifiMorsel("A3:34", "EDUROAM", -03));
                     Location loc = new Location(4.0, 2.0, wifis);
                     answer = loc;
                     break;
@@ -164,7 +147,7 @@ public class Servlet extends HttpServlet {
         if (answer == null) {
             answer = new Error("Empty ANSWER", "Answer does not contain an object! Make sure your request is valid!");
         }
-        response.getWriter().write(gson.toJson(answer, answer.getClass()));
+        response.getWriter().write(json.toJson(answer));
         response.setContentType("application/json");
     }
 
@@ -188,6 +171,11 @@ public class Servlet extends HttpServlet {
         if (out.isEmpty())
             return null;
         // parse the object out:
-        return gson.fromJson(out, Arrival.class);
+        Data data = json.fromJson(out);
+        if (data instanceof Arrival) {
+            return (Arrival) data;
+        } else {
+            return null;
+        }
     }
 }

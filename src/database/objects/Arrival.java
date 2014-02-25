@@ -61,5 +61,4 @@ public class Arrival implements Data {
     public void setObject(Data object) {
         this.object = object;
     }
-
 }

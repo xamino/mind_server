@@ -41,4 +41,5 @@ public class Location implements Data {
     public void setWifiNetworks(ArrayList<WifiMorsel> wifiNetworks) {
         this.wifiNetworks = wifiNetworks;
     }
+
 }
