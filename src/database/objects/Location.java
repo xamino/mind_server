@@ -10,10 +10,12 @@ import java.util.ArrayList;
  */
 public class Location implements Data {
     private double coordinateX, coordinateY;
-    private ArrayList wifiNetworks;
+    private ArrayList<WifiMorsel> wifiNetworks;
 
-    public Location() {
-
+    public Location(double coordinateX, double coordinateY, ArrayList<WifiMorsel> wifiNetworks) {
+        this.coordinateX = coordinateX;
+        this.coordinateY = coordinateY;
+        this.wifiNetworks = wifiNetworks;
     }
 
     public double getCoordinateX() {
@@ -32,11 +34,11 @@ public class Location implements Data {
         this.coordinateY = coordinateY;
     }
 
-    public ArrayList getWifiNetworks() {
+    public ArrayList<WifiMorsel> getWifiNetworks() {
         return wifiNetworks;
     }
 
-    public void setWifiNetworks(ArrayList wifiNetworks) {
+    public void setWifiNetworks(ArrayList<WifiMorsel> wifiNetworks) {
         this.wifiNetworks = wifiNetworks;
     }
 }
