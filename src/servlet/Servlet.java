@@ -75,26 +75,31 @@ public class Servlet extends HttpServlet {
         // already)
         if (answer == null) {
             // This means valid session and arrival!
-            String task = arrival.getTask();
+            String taskString = arrival.getTask();
+            Task.Server task = Task.Server.safeValueOf(taskString);
             switch (task) {
-                case "test":
+                case TEST:
                     DataList wifis = new DataList();
                     wifis.add(new WifiMorsel("0:0", "WIFIS", -86));
                     wifis.add(new WifiMorsel("A3:34", "EDUROAM", -03));
-                    Location loc = new Location(4.0, 2.0, wifis);
-                    answer = loc;
+                    Location loc1 = new Location(4.0, 2.0, wifis);
+                    Location loc2 = new Location(1.0, 100.0, wifis);
+                    DataList locations = new DataList();
+                    locations.add(loc1);
+                    locations.add(loc2);
+                    answer = new Area("My room", locations);
                     break;
-                case "logout":
+                case LOGOUT:
                     sanitation.destroySession(arrival.getSessionHash());
                     answer = new Message("Logged out!");
                     break;
-                case "echo":
+                case ECHO:
                     // Simple echo test for checking if the server can parse the data
                     answer = arrival.getObject();
                     break;
                 default:
-                    log.log(TAG, "Unknown task sent: " + task);
-                    answer = new Error("POST illegal TASK", "Unknown task: <" + task + ">");
+                    log.log(TAG, "Illegal task sent: " + taskString);
+                    answer = new Error("POST illegal TASK", "Illegal task: " + taskString);
                     break;
             }
         }

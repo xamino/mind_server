@@ -4,6 +4,8 @@ import database.Data;
 import database.objects.Arrival;
 import database.objects.Error;
 import database.objects.Message;
+import database.objects.Task;
+import logger.Messenger;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -27,6 +29,10 @@ public class Sanitation {
      */
     private final long TIMEOUT = 15 * 60 * 1000;
     /**
+     * TAG for log.
+     */
+    private final String TAG = "Sanitation";
+    /**
      * HashMap containing the sessions and their last access time.
      */
     private HashMap<String, Long> sessions;
@@ -34,6 +40,10 @@ public class Sanitation {
      * SecureRandom for generating the hashes.
      */
     private SecureRandom random;
+    /**
+     * Messenger as log.
+     */
+    private Messenger log;
 
     /**
      * Private constructor. Use getInstance() to get an object reference.
@@ -41,6 +51,7 @@ public class Sanitation {
     private Sanitation() {
         sessions = new HashMap<>();
         random = new SecureRandom();
+        log = Messenger.getInstance();
     }
 
     /**
@@ -111,17 +122,49 @@ public class Sanitation {
     public Data checkArrival(Arrival arrival) {
         Data answer;
         if (arrival == null || !arrival.isValid()) {
+            // This means something went wrong. Badly.
             answer = new database.objects.Error("Illegal POST", "POST does not conform to API! Check that all keys are valid and the values set!");
             return answer;
         } else if (!checkSession(arrival.getSessionHash())) {
-            // login only available when logged out
-            if (arrival.getTask().equals("login")) {
-                answer = new Message(createSession());
-            } else {
-                answer = new Error("POST Authentication FAIL", "You seem not to be logged in!");
+            // If no session exists, the reply is either illegal or a login / registration.
+            String taskString = arrival.getTask();
+            Task.Server task = Task.Server.safeValueOf(taskString);
+            switch (task) {
+                case REGISTRATION:
+                    answer = registration(arrival);
+                    break;
+                case LOGIN:
+                    answer = login(arrival);
+                    break;
+                default:
+                    // Called when enum is ERROR!
+                    log.log(TAG, "Unknown task!");
+                    answer = new Error("POST unauthenticated TASK FAIL", "Unknown unauthenticated task, illegal! Should you be logged in?");
             }
             return answer;
         }
         return null;
+    }
+
+    /**
+     * Login method.
+     *
+     * @param arrival The Arrival object to use.
+     * @return Return message.
+     */
+    private Data login(Arrival arrival) {
+        log.log(TAG, "UNKNOWN USER logged in!");
+        return new Message(createSession());
+    }
+
+    /**
+     * Registration method.
+     *
+     * @param arrival The Arrival object to use.
+     * @return Return message.
+     */
+    private Data registration(Arrival arrival) {
+        log.log(TAG, "REGISTRATION");
+        return new Message("Registration doesn't yet work, just use LOGIN, you'll receive a valid session.");
     }
 }
