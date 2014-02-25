@@ -19,7 +19,7 @@ public class UserModule implements Module {
 
     @Override
     public Data run(Task task, Data request) {
-        if (!(request instanceof User)) {
+        if (!(request instanceof User) && request != null) {
             return new Error("WrongDataType", "The User Module requires a User Object.");
         }
 
@@ -35,6 +35,8 @@ public class UserModule implements Module {
                 return updateUser(user);
             case DELETE_USER:
                 return deleteUser(user);
+            case READ_USERS:
+                return readUser(new User("",""));
         }
 
         return null;
