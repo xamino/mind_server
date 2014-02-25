@@ -45,17 +45,17 @@ public class UserModule implements Module {
     private Data deleteUser(User user) {
         boolean op = database.delete(user);
         if (op)
-            return new Success("UserDeletionSuccess", "The user " + user.getName() + "was deleted successfully.");
+            return new Success("UserDeletionSuccess", "The user " + user.getName() + " was deleted successfully.");
         else
-            return new Error("UserDeletionFailure", "No idea why");
+            return new Error("UserDeletionFailure", "Deletion of user " + user.getName() + " failed");
     }
 
     private Data updateUser(User user) {
         boolean op = database.update(user);
         if (op)
-            return new Success("UserUpdateSuccess", "The user " + user.getName() + "was updated successfully.");
+            return new Success("UserUpdateSuccess", "The user " + user.getName() + " was updated successfully.");
         else
-            return new Error("UserUpdateFailure", "No idea why");
+            return new Error("UserUpdateFailure", "Update of user " + user.getName() + " failed!");
     }
 
     private Data readUser(User user) {
@@ -63,14 +63,14 @@ public class UserModule implements Module {
         if (data != null)
             return data;
         else
-            return new Error("UserReadFailure", "No idea why");
+            return new Error("UserReadFailure", "Reading of user " + user.getName() + " failed!");
     }
 
     private Data createUser(User user) {
         boolean op = database.create(user);
         if (op)
-            return new Success("UserCreationSuccess", "The user " + user.getName() + "was deleted successfully.");
+            return new Success("UserCreationSuccess", "The user " + user.getName() + " was created successfully.");
         else
-            return new Error("UserCreationFailure", "No idea why");
+            return new Error("UserCreationFailure", "Creation of user " + user.getName() + " failed!");
     }
 }
