@@ -12,7 +12,6 @@ import database.objects.Error;
 import io.Configuration;
 import logger.Messenger;
 import logic.EventModuleManager;
-import logic.modules.UserModule;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -121,13 +120,15 @@ public class Servlet extends HttpServlet {
     }
 
     /**
-     * This method handles all simple data requests.
+     * This method handles all simple data requests. ONLY USE FOR SIMPLE DEBUGGING, AS IT IS NOT SECURED!
      *
      * @param request
      * @param response
      */
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws IOException {
+        // Use only for DEBUGGING AND TESTS!
+        // All production code should go in POST
         User u = new User("Hans", "hans@peter.de");
         moduleManager.handleTask(Task.UserTask.CREATE_USER, u);
 
