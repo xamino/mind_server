@@ -25,17 +25,17 @@ public class UserModule implements Module {
 
         User user = (User) request;
 
-        Task.UserTask userTask = (Task.UserTask) task;
+        Task.User userTask = (Task.User) task;
         switch (userTask) {
-            case CREATE_USER:
+            case CREATE:
                 return createUser(user);
-            case READ_USER:
+            case READ:
                 return readUser(user);
-            case UPDATE_USER:
+            case UPDATE:
                 return updateUser(user);
-            case DELETE_USER:
+            case DELETE:
                 return deleteUser(user);
-            case READ_USERS:
+            case READ_ALL:
                 return readUser(new User("",""));
         }
 

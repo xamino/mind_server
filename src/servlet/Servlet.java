@@ -117,26 +117,26 @@ public class Servlet extends HttpServlet {
         // Use only for DEBUGGING AND TESTS!
         // All production code should go in POST
         User a = new User("Hans", "hans@peter.de");
-        moduleManager.handleTask(Task.UserTask.CREATE_USER, a);
+        moduleManager.handleTask(Task.User.CREATE, a);
 
-        User t = (User) moduleManager.handleTask(Task.UserTask.READ_USER, a);
+        User t = (User) moduleManager.handleTask(Task.User.CREATE, a);
 
         t.setName("Gustav");
 
-        moduleManager.handleTask(Task.UserTask.UPDATE_USER, t);
+        moduleManager.handleTask(Task.User.UPDATE, t);
 
         User b = new User("Tom", "tom@jerry.de");
         User c = new User("Jerry", "jerry@tom.de");
-        moduleManager.handleTask(Task.UserTask.CREATE_USER, b);
-        moduleManager.handleTask(Task.UserTask.CREATE_USER, c);
+        moduleManager.handleTask(Task.User.CREATE, b);
+        moduleManager.handleTask(Task.User.CREATE, c);
 
 
-        Data userList = moduleManager.handleTask(Task.UserTask.READ_USERS, null);
+        Data userList = moduleManager.handleTask(Task.User.READ_ALL, null);
         log.log("Servlet", userList.toString());
 
-        moduleManager.handleTask(Task.UserTask.DELETE_USER, a);
-        moduleManager.handleTask(Task.UserTask.DELETE_USER, b);
-        moduleManager.handleTask(Task.UserTask.DELETE_USER, c);
+        moduleManager.handleTask(Task.User.DELETE, a);
+        moduleManager.handleTask(Task.User.DELETE, b);
+        moduleManager.handleTask(Task.User.DELETE, c);
     }
 
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {

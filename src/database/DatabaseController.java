@@ -2,22 +2,13 @@ package database;
 
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
-import com.db4o.ObjectSet;
-import com.db4o.ext.Db4oDatabase;
 import com.db4o.query.Predicate;
-import com.db4o.query.Query;
-import database.objects.Area;
 import database.objects.DataList;
-import database.objects.Location;
 import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
 
-import java.sql.*;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.jar.Manifest;
 
 /**
  * @author Tamino Hartmann
@@ -65,18 +56,21 @@ public class DatabaseController {
         return connection;
     }
 
+    /**
+     * Deletes an object of type data from database.
+     *
+     * @param data the object to be deleted.
+     * @return true if deletion was successful, otherwise false
+     */
     public boolean delete(Data data) {
-
-        if (data instanceof User) {
-            User dataUser = (User) data;
-            User userToDelete = (User) read(data);
-
-            getConnection().delete(userToDelete);
-
-            log.log(CLASS, userToDelete.toString() + " deleted from DB!");
-
+        try {
+            Data dataToDelete = read(data);
+            getConnection().delete(dataToDelete);
+            log.log(CLASS, dataToDelete.toString() + " deleted from DB!");
             return true;
-        } else return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean update(Data data) {
@@ -107,7 +101,7 @@ public class DatabaseController {
                 @Override
                 public boolean match(User o) {
                     // check on unique key, empty email returns all users
-                    if(user.getEmail().equals(""))
+                    if (user.getEmail().equals(""))
                         return true;
                     return o.getEmail().equals(user.getEmail());
                 }
@@ -115,13 +109,12 @@ public class DatabaseController {
         }
 
         Data result = null;
-        if(queryResult.size() == 1){
+        if (queryResult.size() == 1) {
             result = (Data) queryResult.get(0);
-        }
-        else if(queryResult.size() > 1) {
+        } else if (queryResult.size() > 1) {
             DataList list = new DataList();
-            for(Object o : queryResult){
-                list.add((Data)o);
+            for (Object o : queryResult) {
+                list.add((Data) o);
             }
             result = list;
         }
