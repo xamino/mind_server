@@ -200,7 +200,6 @@ public final class RuntimeTypeAdapterFactory<T> implements TypeAdapterFactory {
                             + " because it does not define a field named " + typeFieldName);
                 }
                 String label = labelJsonElement.getAsString();
-                System.out.println("RTAF – READ :: " + label);
                 @SuppressWarnings("unchecked") // registration requires that subtype extends T
                         TypeAdapter<R> delegate = (TypeAdapter<R>) labelToDelegate.get(label);
                 if (delegate == null) {
@@ -214,7 +213,6 @@ public final class RuntimeTypeAdapterFactory<T> implements TypeAdapterFactory {
             public void write(JsonWriter out, R value) throws IOException {
                 Class<?> srcType = value.getClass();
                 String label = subtypeToLabel.get(srcType);
-                System.out.println("RTAF – WRITE :: " + label);
                 @SuppressWarnings("unchecked") // registration requires that subtype extends T
                         TypeAdapter<R> delegate = (TypeAdapter<R>) subtypeToDelegate.get(srcType);
                 if (delegate == null) {

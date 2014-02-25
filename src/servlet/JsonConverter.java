@@ -22,8 +22,9 @@ public class JsonConverter {
         // Base data type that we use for JSON data: ($type is the attribute name)
         RuntimeTypeAdapterFactory<Data> factory = RuntimeTypeAdapterFactory.of(Data.class, "$type");
         // Register all JSON-objects: (The strings are the types, must be unique!)
-        factory.registerSubtype(Arrival.class, "Arrival");
         factory.registerSubtype(Area.class, "Area");
+        factory.registerSubtype(Arrival.class, "Arrival");
+        factory.registerSubtype(DataList.class, "DataList");
         factory.registerSubtype(Error.class, "Error");
         factory.registerSubtype(Location.class, "Location");
         factory.registerSubtype(Message.class, "Message");

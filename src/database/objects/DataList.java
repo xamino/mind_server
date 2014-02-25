@@ -3,10 +3,11 @@ package database.objects;
 import database.Data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by Cassio on 25.02.14.
+ *
+ * Saved Tamino's sanity on Feb 25, 2014. All hail the DataList!
  */
 public class DataList extends ArrayList<Data> implements Data {
     public String toString(){

@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Dieses Servlet ist fuer alle oeffentlich zugaengliche Daten zustaendig.
@@ -79,7 +78,7 @@ public class Servlet extends HttpServlet {
             String task = arrival.getTask();
             switch (task) {
                 case "test":
-                    ArrayList<WifiMorsel> wifis = new ArrayList<>();
+                    DataList wifis = new DataList();
                     wifis.add(new WifiMorsel("0:0", "WIFIS", -86));
                     wifis.add(new WifiMorsel("A3:34", "EDUROAM", -03));
                     Location loc = new Location(4.0, 2.0, wifis);
@@ -127,8 +126,8 @@ public class Servlet extends HttpServlet {
         moduleManager.handleTask(Task.UserTask.CREATE_USER, c);
 
 
-       Data userList = moduleManager.handleTask(Task.UserTask.READ_USERS,null);
-       log.log("Servlet", userList.toString());
+        Data userList = moduleManager.handleTask(Task.UserTask.READ_USERS, null);
+        log.log("Servlet", userList.toString());
 
         moduleManager.handleTask(Task.UserTask.DELETE_USER, a);
         moduleManager.handleTask(Task.UserTask.DELETE_USER, b);
@@ -150,7 +149,6 @@ public class Servlet extends HttpServlet {
      * @param answer   The object to attach.
      * @throws IOException
      */
-    // TODO $type is still not being written... maybe do manually? But should be done, ??
     private void prepareDeparture(HttpServletResponse response, Data answer) throws IOException {
         // Must be done before write:
         response.setCharacterEncoding("UTF-8");
@@ -166,7 +164,8 @@ public class Servlet extends HttpServlet {
      * Takes the HttpServletRequest and returns the correct arrival object filled with JSON goodies.
      *
      * @param request The request to read.
-     * @return The Arrival object filled with the data.
+     * @return The Arrival object filled with the data. NULL if not a valid object, checked in Sanitation, no need for
+     * error correction.
      * @throws IOException
      */
     private Arrival getRequest(HttpServletRequest request) throws IOException {
@@ -186,6 +185,7 @@ public class Servlet extends HttpServlet {
         if (data instanceof Arrival) {
             return (Arrival) data;
         } else {
+            // No need for error handling, that is done in Sanitation
             return null;
         }
     }

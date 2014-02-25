@@ -2,17 +2,15 @@ package database.objects;
 
 import database.Data;
 
-import java.util.ArrayList;
-
 /**
  * @author Tamino Hartmann
  *         Data object for a location. References multiple WifiMorsels that have been detected at this location.
  */
 public class Location implements Data {
     private double coordinateX, coordinateY;
-    private ArrayList<WifiMorsel> wifiNetworks;
+    private DataList wifiNetworks;
 
-    public Location(double coordinateX, double coordinateY, ArrayList<WifiMorsel> wifiNetworks) {
+    public Location(double coordinateX, double coordinateY, DataList wifiNetworks) {
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
         this.wifiNetworks = wifiNetworks;
@@ -34,12 +32,11 @@ public class Location implements Data {
         this.coordinateY = coordinateY;
     }
 
-    public ArrayList<WifiMorsel> getWifiNetworks() {
+    public DataList getWifiNetworks() {
         return wifiNetworks;
     }
 
-    public void setWifiNetworks(ArrayList<WifiMorsel> wifiNetworks) {
+    public void setWifiNetworks(DataList wifiNetworks) {
         this.wifiNetworks = wifiNetworks;
     }
-
 }
