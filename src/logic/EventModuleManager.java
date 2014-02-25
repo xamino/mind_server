@@ -1,12 +1,10 @@
 package logic;
 
 import database.Data;
-import database.objects.*;
 import database.objects.Error;
+import database.objects.Task;
 import logic.modules.LocationModule;
 import logic.modules.UserModule;
-
-import java.util.ArrayList;
 
 /**
  * @author Tamino Hartmann
@@ -23,7 +21,7 @@ public class EventModuleManager {
         return INSTANCE;
     }
 
-    private EventModuleManager(){
+    private EventModuleManager() {
 
         userModule = new UserModule();
         locationModule = new LocationModule();
@@ -33,9 +31,9 @@ public class EventModuleManager {
 
     public Data handleTask(Task operation, Data task) {
 
-        if(operation instanceof Task.UserTask)
-        return userModule.run(operation, task);
+        if (operation instanceof Task.User)
+            return userModule.run(operation, task);
         else
-            return new Error("ModuleNotFound",operation.toString());
+            return new Error("ModuleNotFound", operation.toString());
     }
 }
