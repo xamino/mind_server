@@ -8,8 +8,6 @@ import database.Data;
 import database.Information;
 import database.messages.Error;
 import database.messages.Message;
-import database.objects.Arrival;
-import database.objects.DataList;
 import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
@@ -87,8 +85,6 @@ public class Servlet extends HttpServlet {
                     Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
                     answer = checkDataMessage(data);
                     if (answer == null) {
-                        if (data instanceof DataList)
-                            log.log(TAG, "LOL");
                         answer = data;
                     }
                     break;
@@ -164,7 +160,8 @@ public class Servlet extends HttpServlet {
         if (answer == null) {
             answer = new Error("Empty ANSWER", "Answer does not contain an object! Make sure your request is valid!");
         }
-        response.getWriter().write(json.toJson(answer));
+        Departure dep = new Departure(answer);
+        response.getWriter().write(json.toJson(dep));
         response.setContentType("application/json");
     }
 
@@ -206,7 +203,8 @@ public class Servlet extends HttpServlet {
      * @param data The data to check.
      * @return An Information object if data is such, else null.
      */
-    private Information checkDataMessage(Data data) {
+    // TODO public static is ugly, do something!
+    public static Information checkDataMessage(Data data) {
         if (data == null) {
             return new Error("DATA NULL", "Data requested returned NULL, should NOT HAPPEN!");
         } else if (data instanceof Information) {
@@ -216,4 +214,86 @@ public class Servlet extends HttpServlet {
             return null;
         }
     }
+
+    /**
+     * Arrival class – structure of incomming requests must conform to this class.
+     */
+    // TODO finish commenting
+    public class Arrival implements Data {
+        private String sessionHash;
+        private String task;
+        private Data object;
+
+        public Arrival(String sessionHash, String task, Data object) {
+            this.sessionHash = sessionHash;
+            this.task = task;
+            this.object = object;
+        }
+
+        public String getSessionHash() {
+            return sessionHash;
+        }
+
+        public void setSessionHash(String sessionHash) {
+            this.sessionHash = sessionHash;
+        }
+
+        @Override
+        /**
+         * Automatically generated toString method.
+         */
+        public String toString() {
+            return "Arrival{" +
+                    "sessionHash='" + sessionHash + '\'' +
+                    ", task='" + task + '\'' +
+                    ", object=" + object +
+                    '}';
+        }
+
+        /**
+         * Method that checks if all important values are not null.
+         *
+         * @return True if all values are set, otherwise false.
+         */
+        public boolean isValid() {
+            return task != null;
+        }
+
+        public String getTask() {
+            return task;
+        }
+
+        public void setTask(String task) {
+            this.task = task;
+        }
+
+        public Data getObject() {
+            return object;
+        }
+
+        public void setObject(Data object) {
+            this.object = object;
+        }
+    }
+
+    /**
+     * Wrapper object class for outgoing answers – required because lists for example can not simply be Jsonated.
+     */
+    // TODO finish commenting
+    public class Departure implements Data {
+        private Data object;
+
+        public Departure(Data object) {
+            this.object = object;
+        }
+
+        public Data getObject() {
+            return object;
+        }
+
+        public void setObject(Data object) {
+            this.object = object;
+        }
+    }
+
 }

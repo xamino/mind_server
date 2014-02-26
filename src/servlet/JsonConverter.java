@@ -3,11 +3,13 @@ package servlet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import database.Data;
+import database.messages.Error;
 import database.messages.Message;
 import database.messages.Success;
 import database.objects.*;
-import database.messages.Error;
 import logger.Messenger;
+import servlet.Servlet.Arrival;
+import servlet.Servlet.Departure;
 
 /**
  * @author Tamino Hartmann
@@ -36,6 +38,7 @@ public class JsonConverter {
         // Register all JSON-objects: (The strings are the types, must be unique!)
         factory.registerSubtype(Area.class, "Area");
         factory.registerSubtype(Arrival.class, "Arrival");
+        factory.registerSubtype(Departure.class, "Departure");
         factory.registerSubtype(DataList.class, "DataList");
         factory.registerSubtype(Error.class, "Error");
         factory.registerSubtype(Location.class, "Location");

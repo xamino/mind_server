@@ -2,13 +2,12 @@ package servlet;
 
 import database.Data;
 import database.messages.Error;
-import database.messages.Message;
 import database.messages.Success;
-import database.objects.Arrival;
 import database.objects.User;
 import logger.Messenger;
 import logic.EventModuleManager;
 import logic.Task;
+import servlet.Servlet.Arrival;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -139,6 +138,7 @@ public class Sanitation {
             String taskString = arrival.getTask();
             Task.Server task = Task.Server.safeValueOf(taskString);
             switch (task) {
+                // TODO: WHY can i register when logged in?
                 case REGISTRATION:
                     answer = registration(arrival);
                     break;
@@ -161,9 +161,30 @@ public class Sanitation {
      * @param arrival The Arrival object to use.
      * @return Return message.
      */
+    // TODO: if user isn't found, the error is given back – security hole as you can test what usernames are
     private Data login(Arrival arrival) {
-        log.log(TAG, "UNKNOWN USER logged in!");
-        return new Message(createSession());
+        Data object = arrival.getObject();
+        /*
+        // TAKE OUT; ONLY FOR DEBUG
+        if (object == null) {
+            return new Success("LOGIN", createSession());
+        }
+        */
+        if (!(object instanceof User)) {
+            return new Error("LOGIN of NON-USER object", "Wrong data type sent! Login requires User!");
+        }
+        User user = (User) object;
+        object = moduleManager.handleTask(Task.User.READ, user);
+        Data answer = Servlet.checkDataMessage(object);
+        if (answer != null) {
+            return answer;
+        }
+        User check = (User) object;
+        if (BCrypt.checkpw(user.getPwdHash(), check.getPwdHash())) {
+            return new Success("LOGIN", createSession());
+        } else {
+            return new Error("LOGIN", "Wrong user email or wrong password.");
+        }
     }
 
     /**
@@ -173,26 +194,14 @@ public class Sanitation {
      * @return Return message.
      */
     private Data registration(Arrival arrival) {
-        log.log(TAG, "REGISTRATION");
         Data object = arrival.getObject();
         if (!(object instanceof User)) {
             return new Error("REGISTRATION of NON-USER object", "Wrong data type sent! Registration requires User!");
         }
         User user = (User) object;
-        System.out.println("unhashed: " + user.getPwdHash());
-        user.setPwdHash(hashPassword(user.getPwdHash()));
-        System.out.println("hash: " + user.getPwdHash());
+        user.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));
+        // TODO check for boolean
         moduleManager.handleTask(Task.User.CREATE, user);
-        return new Success("OK", "Registration doesn't yet work, just use LOGIN, you'll receive a valid session.");
-    }
-
-    /**
-     * Function that hashes a password using a salt via BCrypt.
-     *
-     * @param password The password to salt and hash.
-     * @return The hashed password.
-     */
-    public String hashPassword(String password) {
-        return BCrypt.hashpw(password, BCrypt.gensalt(12));
+        return new Success("REGISTRATION", "Registered to " + user.getEmail() + ".");
     }
 }
