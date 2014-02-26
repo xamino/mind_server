@@ -5,9 +5,12 @@
 package servlet;
 
 import database.Data;
-import database.messages.Message;
-import database.objects.*;
+import database.Information;
 import database.messages.Error;
+import database.messages.Message;
+import database.objects.Arrival;
+import database.objects.DataList;
+import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
 import logic.EventModuleManager;
@@ -81,11 +84,10 @@ public class Servlet extends HttpServlet {
             Task.Server task = Task.Server.safeValueOf(taskString);
             switch (task) {
                 case TEST:
-                    Data usersUnknown = moduleManager.handleTask(Task.User.READ_ALL, null);
-                    if (usersUnknown == null || !(usersUnknown instanceof DataList)) {
-                        answer = new Error("READ ALL USERS TEST", "The datalist is null... Wrong type or something went wrong!");
-                    } else {
-                        answer = (DataList) usersUnknown;
+                    Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
+                    answer = checkDataMessage(data);
+                    if (answer == null) {
+                        answer = (DataList) data;
                     }
                     break;
                 case LOGOUT:
@@ -190,6 +192,25 @@ public class Servlet extends HttpServlet {
             return (Arrival) data;
         } else {
             // No need for error handling, that is done in Sanitation
+            return null;
+        }
+    }
+
+    /**
+     * Method that checkes if data returned from the modules is a message, in which case it is returned, or null, in
+     * which case an error message is returned. If the data is anything else, it is considered to be a valid reply and
+     * null is returned.
+     *
+     * @param data The data to check.
+     * @return An Information object if data is such, else null.
+     */
+    private Information checkDataMessage(Data data) {
+        if (data == null) {
+            return new Error("DATA NULL", "Data requested returned NULL, should NOT HAPPEN!");
+        } else if (data instanceof Information) {
+            return (Information) data;
+        } else {
+            // This means that answer is manually set.
             return null;
         }
     }
