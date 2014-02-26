@@ -15,7 +15,7 @@ import logic.Task;
  *
  * Auch genannt LoMo – wie slowmo, aber besser.
  */
-public class LocationModule implements Module {
+public class LocationModule extends Module {
 
     private final DatabaseController database;
 
