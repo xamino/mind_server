@@ -2,9 +2,8 @@ package logic.modules;
 
 import database.Data;
 import database.DatabaseController;
-import database.messages.Success;
-import database.objects.*;
 import database.messages.Error;
+import database.objects.User;
 import logic.Module;
 import logic.Task;
 
@@ -29,13 +28,13 @@ public class UserModule extends Module {
         Task.User userTask = (Task.User) task;
         switch (userTask) {
             case CREATE:
-                return createUser(user);
+                return create(user);
             case READ:
-                return readUser(user);
+                return read(user);
             case UPDATE:
-                return updateUser(user);
+                return update(user);
             case DELETE:
-                return deleteUser(user);
+                return delete(user);
             case READ_ALL:
                 return readAllUsers(new User("", ""));
         }
@@ -43,44 +42,11 @@ public class UserModule extends Module {
         return null;
     }
 
-
-    private Data createUser(User user) {
-        boolean op = database.create(user);
-        if (op)
-            return new Success("UserCreationSuccess", "The " + user.toString() + " was created successfully.");
-        else
-            return new Error("UserCreationFailure", "Creation of " + user.toString() + " failed!");
-    }
-
-    private Data readUser(User user) {
-        Data data = database.read(user);
-        if (data != null)
-            return data;
-        else
-            return new Error("UserReadFailure", "Reading of " + user.toString() + " failed!");
-    }
-
     private Data readAllUsers(User user) {
-        Data data = database.read(user);
+        Data data = database.readAll(user);
         if (data != null)
             return data;
         else
             return new Error("UserReadFailure", "Reading of users failed!");
-    }
-
-    private Data updateUser(User user) {
-        boolean op = database.update(user);
-        if (op)
-            return new Success("UserUpdateSuccess", "The " + user.toString() + " was updated successfully.");
-        else
-            return new Error("UserUpdateFailure", "Update of " + user.toString() + " failed!");
-    }
-
-    private Data deleteUser(User user) {
-        boolean op = database.delete(user);
-        if (op)
-            return new Success("UserDeletionSuccess", "The " + user.toString() + " was deleted successfully.");
-        else
-            return new Error("UserDeletionFailure", "Deletion of " + user.toString() + " failed");
     }
 }

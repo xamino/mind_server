@@ -120,7 +120,7 @@ public class Servlet extends HttpServlet {
         User a = new User("Hans", "hans@peter.de");
         moduleManager.handleTask(Task.User.CREATE, a);
 
-        User t = (User) moduleManager.handleTask(Task.User.CREATE, a);
+        User t = (User) moduleManager.handleTask(Task.User.READ, a);
 
         t.setName("Gustav");
 
