@@ -5,11 +5,16 @@
 package servlet;
 
 import database.Data;
-import database.objects.*;
-import database.objects.Error;
+import database.Information;
+import database.messages.Error;
+import database.messages.Message;
+import database.objects.Arrival;
+import database.objects.DataList;
+import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
 import logic.EventModuleManager;
+import logic.Task;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -79,15 +84,11 @@ public class Servlet extends HttpServlet {
             Task.Server task = Task.Server.safeValueOf(taskString);
             switch (task) {
                 case TEST:
-                    DataList wifis = new DataList();
-                    wifis.add(new WifiMorsel("0:0", "WIFIS", -86));
-                    wifis.add(new WifiMorsel("A3:34", "EDUROAM", -03));
-                    Location loc1 = new Location(4.0, 2.0, wifis);
-                    Location loc2 = new Location(1.0, 100.0, wifis);
-                    DataList locations = new DataList();
-                    locations.add(loc1);
-                    locations.add(loc2);
-                    answer = new Area("My room", locations);
+                    Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
+                    answer = checkDataMessage(data);
+                    if (answer == null) {
+                        answer = (DataList) data;
+                    }
                     break;
                 case LOGOUT:
                     sanitation.destroySession(arrival.getSessionHash());
@@ -191,6 +192,25 @@ public class Servlet extends HttpServlet {
             return (Arrival) data;
         } else {
             // No need for error handling, that is done in Sanitation
+            return null;
+        }
+    }
+
+    /**
+     * Method that checkes if data returned from the modules is a message, in which case it is returned, or null, in
+     * which case an error message is returned. If the data is anything else, it is considered to be a valid reply and
+     * null is returned.
+     *
+     * @param data The data to check.
+     * @return An Information object if data is such, else null.
+     */
+    private Information checkDataMessage(Data data) {
+        if (data == null) {
+            return new Error("DATA NULL", "Data requested returned NULL, should NOT HAPPEN!");
+        } else if (data instanceof Information) {
+            return (Information) data;
+        } else {
+            // This means that answer is manually set.
             return null;
         }
     }

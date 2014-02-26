@@ -1,11 +1,11 @@
-package database.objects;
+package database.messages;
 
-import database.Data;
+import database.Information;
 
 /**
  * @author Tamino Hartmann
  */
-public class Message implements Data {
+public class Message implements Information {
     private String message;
 
     public Message(String msg) {

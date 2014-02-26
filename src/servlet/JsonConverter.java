@@ -3,8 +3,10 @@ package servlet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import database.Data;
+import database.messages.Message;
+import database.messages.Success;
 import database.objects.*;
-import database.objects.Error;
+import database.messages.Error;
 import logger.Messenger;
 
 /**

@@ -1,7 +1,6 @@
 package logic;
 
 import database.Data;
-import database.objects.Task;
 
 /**
  * Created by tamino on 2/19/14.

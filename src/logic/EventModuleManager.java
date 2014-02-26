@@ -1,8 +1,7 @@
 package logic;
 
 import database.Data;
-import database.objects.Error;
-import database.objects.Task;
+import database.messages.Error;
 import logic.modules.LocationModule;
 import logic.modules.UserModule;
 

@@ -1,12 +1,15 @@
 package logger;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * @author Tamino Hartmann
- *
- * This class implements a thread safe timer for multiple objects and
- * standardized logging functions.
+ *         <p/>
+ *         This class implements a thread safe timer for multiple objects and
+ *         standardized logging functions.
  */
 public class Messenger {
 
@@ -15,9 +18,21 @@ public class Messenger {
      */
     private static Messenger INSTANCE;
     /**
+     * Super tag that is in all messages printed by Messenger.
+     */
+    private final String TAG = "Messenger";
+    /**
      * The stack with which the TimerResult objects are managed.
      */
     private HashMap<Object, Stack<TimerResult>> timers;
+
+    /**
+     * Private constructor that prepares class. To get an instance of
+     * Messenger, ust the getInstance Method.
+     */
+    private Messenger() {
+        this.timers = new HashMap<Object, Stack<TimerResult>>();
+    }
 
     /**
      * Method to return the singleton instance of Messenger.
@@ -31,21 +46,23 @@ public class Messenger {
     }
 
     /**
-     * Private constructor that prepares class. To get an instance of
-     * Messenger, ust the getInstance Method.
-     */
-    private Messenger() {
-        this.timers = new HashMap<Object, Stack<TimerResult>>();
-    }
-
-    /**
      * Method for logging a message to the console.
      *
      * @param tag     The tag used when logging after the internal tag.
      * @param content The content of the message to log.
      */
     public synchronized void log(final String tag, final String content) {
-        System.out.println("Messenger|" + tag + "::" + content);
+        System.out.println(TAG + "|" + tag + "::" + content);
+    }
+
+    /**
+     * Method for logging errors to the console.
+     *
+     * @param tag     The tag used when logging after the internal tag.
+     * @param content The content of the error to log.
+     */
+    public synchronized void error(final String tag, final String content) {
+        System.err.println(TAG + "|" + tag + "::" + content);
     }
 
     /**

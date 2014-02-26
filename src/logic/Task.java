@@ -1,4 +1,4 @@
-package database.objects;
+package logic;
 
 /**
  * Created by Cassio on 24.02.14.

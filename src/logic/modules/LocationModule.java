@@ -1,6 +1,7 @@
 package logic.modules;
 
 import database.Data;
+import logic.Task;
 import database.DatabaseController;
 import database.objects.*;
 import database.objects.Error;
@@ -8,8 +9,8 @@ import logic.Module;
 
 /**
  * @author Tamino Hartmann
- *         <p/>
- *         Auch genannt LoMo – wie slowmo, aber besser.
+ *
+ * Auch genannt LoMo – wie slowmo, aber besser.
  */
 public class LocationModule implements Module {
 
