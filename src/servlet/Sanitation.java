@@ -1,11 +1,12 @@
 package servlet;
 
 import database.Data;
-import database.objects.Arrival;
 import database.messages.Error;
 import database.messages.Message;
-import logic.Task;
+import database.objects.Arrival;
 import logger.Messenger;
+import logic.EventModuleManager;
+import logic.Task;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 
 //todo: – on a session timeout the session is only removed if it is used for a query again. Need to remove sessions
 //        even if they silently timeout!
+// todo: Sanitation is also a module – maybe? :P
 
 /**
  * @author Tamino Hartmann
@@ -44,6 +46,10 @@ public class Sanitation {
      * Messenger as log.
      */
     private Messenger log;
+    /**
+     * Instance of EventModuleManager.
+     */
+    private EventModuleManager moduleManager;
 
     /**
      * Private constructor. Use getInstance() to get an object reference.
@@ -52,6 +58,7 @@ public class Sanitation {
         sessions = new HashMap<>();
         random = new SecureRandom();
         log = Messenger.getInstance();
+        moduleManager = EventModuleManager.getInstance();
     }
 
     /**
