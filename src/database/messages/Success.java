@@ -1,11 +1,11 @@
-package database.objects;
+package database.messages;
 
-import database.Data;
+import database.Information;
 
 /**
  * Created by Cassio on 21.02.14.
  */
-public class Success implements Data {
+public class Success implements Information {
 
     private String message;
     private String description;

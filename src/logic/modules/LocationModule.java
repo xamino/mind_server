@@ -1,8 +1,7 @@
 package logic.modules;
 
 import database.Data;
-import database.objects.Task;
-import logic.EventModuleManager;
+import logic.Task;
 import logic.Module;
 
 /**

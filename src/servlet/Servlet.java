@@ -5,11 +5,13 @@
 package servlet;
 
 import database.Data;
+import database.messages.Message;
 import database.objects.*;
-import database.objects.Error;
+import database.messages.Error;
 import io.Configuration;
 import logger.Messenger;
 import logic.EventModuleManager;
+import logic.Task;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;

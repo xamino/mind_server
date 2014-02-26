@@ -2,9 +2,9 @@ package servlet;
 
 import database.Data;
 import database.objects.Arrival;
-import database.objects.Error;
-import database.objects.Message;
-import database.objects.Task;
+import database.messages.Error;
+import database.messages.Message;
+import logic.Task;
 import logger.Messenger;
 
 import java.math.BigInteger;
@@ -123,7 +123,7 @@ public class Sanitation {
         Data answer;
         if (arrival == null || !arrival.isValid()) {
             // This means something went wrong. Badly.
-            answer = new database.objects.Error("Illegal POST", "POST does not conform to API! Check that all keys are valid and the values set!");
+            answer = new Error("Illegal POST", "POST does not conform to API! Check that all keys are valid and the values set!");
             return answer;
         } else if (!checkSession(arrival.getSessionHash())) {
             // If no session exists, the reply is either illegal or a login / registration.

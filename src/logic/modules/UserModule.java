@@ -2,9 +2,11 @@ package logic.modules;
 
 import database.Data;
 import database.DatabaseController;
+import database.messages.Success;
 import database.objects.*;
-import database.objects.Error;
+import database.messages.Error;
 import logic.Module;
+import logic.Task;
 
 /**
  * Created by Cassio on 21.02.14.
