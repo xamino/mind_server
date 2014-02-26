@@ -1,11 +1,14 @@
 package logic.modules;
 
 import database.Data;
-import logic.Task;
 import database.DatabaseController;
-import database.objects.*;
-import database.objects.Error;
+import database.messages.Success;
+import database.messages.Error;
+import database.objects.Area;
+import database.objects.Location;
+import database.objects.WifiMorsel;
 import logic.Module;
+import logic.Task;
 
 /**
  * @author Tamino Hartmann
@@ -23,7 +26,7 @@ public class LocationModule implements Module {
     @Override
     public Data run(Task task, Data request) {
         if (!(request instanceof Area || request instanceof WifiMorsel || request instanceof Location) && request != null) {
-            return new database.objects.Error("WrongDataType", "The Location Module requires a Area, WifiMorsel or Location Object.");
+            return new Error("WrongDataType", "The Location Module requires a Area, WifiMorsel or Location Object.");
         }
 
         if (request instanceof Location) {
