@@ -8,6 +8,9 @@ import database.Data;
  */
 public class Location implements Data {
     private double coordinateX, coordinateY;
+    /**
+     * Contains WifiMorsel
+     */
     private DataList wifiNetworks;
 
     public Location(double coordinateX, double coordinateY, DataList wifiNetworks) {
@@ -38,5 +41,13 @@ public class Location implements Data {
 
     public void setWifiNetworks(DataList wifiNetworks) {
         this.wifiNetworks = wifiNetworks;
+    }
+
+    @Override
+    public String toString() {
+        return "Location{" +
+                "coordinateX=" + coordinateX +
+                ", coordinateY=" + coordinateY +
+                '}';
     }
 }

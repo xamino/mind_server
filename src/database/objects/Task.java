@@ -6,7 +6,11 @@ package database.objects;
 public interface Task {
 
     public enum User implements Task {
-        CREATE, READ, UPDATE, DELETE, READ_ALL
+        CREATE, READ, UPDATE, DELETE,
+        /**
+         * Task to fetch as List of all Users, use null as request
+         */
+        READ_ALL
     }
 
     public enum Server implements Task {
@@ -26,6 +30,30 @@ public interface Task {
                 return ERROR;
             }
         }
+    }
+
+
+    public enum WifiMorsel implements Task {
+        CREATE,READ,UPDATE,DELETE
+    }
+
+    public enum Location implements Task {
+        CREATE,READ,UPDATE,DELETE,READ_MORSELS
+    }
+
+    public enum Area implements Task {
+        CREATE,
+        READ,
+        UPDATE,
+        DELETE,
+        /**
+         * Task to fetch all Locations of an Area
+         */
+        READ_LOCATIONS,
+        /**
+         * Task to fetch a List of all available Areas
+         */
+        READ_ALL
     }
 }
 

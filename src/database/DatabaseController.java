@@ -90,6 +90,33 @@ public class DatabaseController {
 
     }
 
+    public Data readAll(final Data requestFilter) {
+        ObjectContainer con = getConnection();
+
+        List queryResult = null;
+
+        if (requestFilter instanceof User) {
+            final User user = (User) requestFilter;
+            queryResult = con.query(new Predicate<User>() {
+                @Override
+                public boolean match(User o) {
+                    return true;
+                }
+            });
+        }
+
+        DataList result = new DataList();
+        for (Object o : queryResult) {
+            result.add((Data) o);
+        }
+
+        //con.close();
+
+        log.log(CLASS, result.toString() + " read from DB!");
+
+        return result;
+    }
+
     public Data read(final Data requestFilter) {
         ObjectContainer con = getConnection();
 
@@ -100,28 +127,19 @@ public class DatabaseController {
             queryResult = con.query(new Predicate<User>() {
                 @Override
                 public boolean match(User o) {
-                    // check on unique key, empty email returns all users
-                    if (user.getEmail().equals(""))
-                        return true;
+                    // check on unique key
                     return o.getEmail().equals(user.getEmail());
                 }
             });
         }
 
         Data result = null;
-        if (queryResult.size() == 1) {
+        if (queryResult.size() != 0) {
             result = (Data) queryResult.get(0);
-        } else if (queryResult.size() > 1) {
-            DataList list = new DataList();
-            for (Object o : queryResult) {
-                list.add((Data) o);
-            }
-            result = list;
         }
-
         //con.close();
 
-        log.log(CLASS, result.toString() + " read from DB!");
+        //log.log(CLASS, result.toString() + " read from DB!");
 
         return result;
     }

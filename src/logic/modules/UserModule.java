@@ -7,7 +7,6 @@ import database.objects.Error;
 import logic.Module;
 
 /**
- * Created by Cassio on 21.02.14.
  */
 public class UserModule implements Module {
 
@@ -36,26 +35,19 @@ public class UserModule implements Module {
             case DELETE:
                 return deleteUser(user);
             case READ_ALL:
-                return readUser(new User("",""));
+                return readAllUsers(new User("", ""));
         }
 
         return null;
     }
 
-    private Data deleteUser(User user) {
-        boolean op = database.delete(user);
-        if (op)
-            return new Success("UserDeletionSuccess", "The user " + user.getName() + " was deleted successfully.");
-        else
-            return new Error("UserDeletionFailure", "Deletion of user " + user.getName() + " failed");
-    }
 
-    private Data updateUser(User user) {
-        boolean op = database.update(user);
+    private Data createUser(User user) {
+        boolean op = database.create(user);
         if (op)
-            return new Success("UserUpdateSuccess", "The user " + user.getName() + " was updated successfully.");
+            return new Success("UserCreationSuccess", "The " + user.toString() + " was created successfully.");
         else
-            return new Error("UserUpdateFailure", "Update of user " + user.getName() + " failed!");
+            return new Error("UserCreationFailure", "Creation of " + user.toString() + " failed!");
     }
 
     private Data readUser(User user) {
@@ -63,14 +55,27 @@ public class UserModule implements Module {
         if (data != null)
             return data;
         else
-            return new Error("UserReadFailure", "Reading of user " + user.getName() + " failed!");
+            return new Error("UserReadFailure", "Reading of " + user.toString() + " failed!");
     }
 
-    private Data createUser(User user) {
-        boolean op = database.create(user);
+    private Data readAllUsers(User user) {
+
+        return null;
+    }
+
+    private Data updateUser(User user) {
+        boolean op = database.update(user);
         if (op)
-            return new Success("UserCreationSuccess", "The user " + user.getName() + " was created successfully.");
+            return new Success("UserUpdateSuccess", "The " + user.toString() + " was updated successfully.");
         else
-            return new Error("UserCreationFailure", "Creation of user " + user.getName() + " failed!");
+            return new Error("UserUpdateFailure", "Update of " + user.toString() + " failed!");
+    }
+
+    private Data deleteUser(User user) {
+        boolean op = database.delete(user);
+        if (op)
+            return new Success("UserDeletionSuccess", "The " + user.toString() + " was deleted successfully.");
+        else
+            return new Error("UserDeletionFailure", "Deletion of " + user.toString() + " failed");
     }
 }
