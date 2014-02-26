@@ -81,7 +81,7 @@ public class Servlet extends HttpServlet {
                 case TEST:
                     Data usersUnknown = moduleManager.handleTask(Task.User.READ_ALL, null);
                     if (usersUnknown == null || !(usersUnknown instanceof DataList)) {
-                        answer = new Error("READ ALL USERS TEST", "The datalist is null...");
+                        answer = new Error("READ ALL USERS TEST", "The datalist is null... Wrong type or something went wrong!");
                     } else {
                         answer = (DataList) usersUnknown;
                     }
