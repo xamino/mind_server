@@ -115,6 +115,9 @@ public class Servlet extends HttpServlet {
                          HttpServletResponse response) throws IOException {
         // Use only for DEBUGGING AND TESTS!
         // All production code should go in POST
+
+        log.log(TAG,moduleManager.handleTask(Task.User.READ,new User("","blbl@sdfsd.de")).toString());
+/*
         User a = new User("Hans", "hans@peter.de");
         moduleManager.handleTask(Task.User.CREATE, a);
 
@@ -135,7 +138,7 @@ public class Servlet extends HttpServlet {
 
         moduleManager.handleTask(Task.User.DELETE, a);
         moduleManager.handleTask(Task.User.DELETE, b);
-        moduleManager.handleTask(Task.User.DELETE, c);
+        moduleManager.handleTask(Task.User.DELETE, c);*/
     }
 
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
