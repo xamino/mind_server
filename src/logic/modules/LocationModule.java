@@ -2,7 +2,6 @@ package logic.modules;
 
 import database.Data;
 import database.DatabaseController;
-import database.messages.Success;
 import database.messages.Error;
 import database.objects.Area;
 import database.objects.Location;
@@ -12,8 +11,8 @@ import logic.Task;
 
 /**
  * @author Tamino Hartmann
- *
- * Auch genannt LoMo – wie slowmo, aber besser.
+ *         <p/>
+ *         Auch genannt LoMo – wie slowmo, aber besser.
  */
 public class LocationModule extends Module {
 
@@ -35,13 +34,13 @@ public class LocationModule extends Module {
             Task.Location locationTask = (Task.Location) task;
             switch (locationTask) {
                 case CREATE:
-                    return createLocation(location);
+                    return create(location);
                 case READ:
-                    return readLocation(location);
+                    return read(location);
                 case UPDATE:
-                    return updateLocation(location);
+                    return update(location);
                 case DELETE:
-                    return deleteLocation(location);
+                    return delete(location);
                 case READ_MORSELS:
                     return readMorsels(location);
             }
@@ -59,37 +58,5 @@ public class LocationModule extends Module {
             return data;
         else
             return new Error("LocationMorselReadFailure", "Reading of " + loc.toString() + " Morsels failed!");
-    }
-
-    private Data deleteLocation(Location loc) {
-        boolean op = database.delete(loc);
-        if (op)
-            return new Success("LocationDeletionSuccess", "The " + loc.toString() + " was deleted successfully.");
-        else
-            return new Error("LocationDeletionFailure", "Deletion of " + loc.toString() + " failed");
-    }
-
-    private Data updateLocation(Location loc) {
-        boolean op = database.update(loc);
-        if (op)
-            return new Success("LocationUpdateSuccess", "The " + loc.toString() + " was updated successfully.");
-        else
-            return new Error("LocationUpdateFailure", "Update " + loc.toString() + " failed!");
-    }
-
-    private Data readLocation(Location loc) {
-        Data data = database.read(loc);
-        if (data != null)
-            return data;
-        else
-            return new Error("LocationReadFailure", "Reading of " + loc.toString() + " failed!");
-    }
-
-    private Data createLocation(Location loc) {
-        boolean op = database.create(loc);
-        if (op)
-            return new Success("LocationCreationSuccess", "The " + loc.toString() + " was created successfully.");
-        else
-            return new Error("LocationCreationFailure", "Creation of " + loc.toString() + " failed!");
     }
 }
