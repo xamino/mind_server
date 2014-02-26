@@ -3,7 +3,9 @@ package servlet;
 import database.Data;
 import database.messages.Error;
 import database.messages.Message;
+import database.messages.Success;
 import database.objects.Arrival;
+import database.objects.User;
 import logger.Messenger;
 import logic.EventModuleManager;
 import logic.Task;
@@ -172,7 +174,16 @@ public class Sanitation {
      */
     private Data registration(Arrival arrival) {
         log.log(TAG, "REGISTRATION");
-        return new Message("Registration doesn't yet work, just use LOGIN, you'll receive a valid session.");
+        Data object = arrival.getObject();
+        if (!(object instanceof User)) {
+            return new Error("REGISTRATION of NON-USER object", "Wrong data type sent! Registration requires User!");
+        }
+        User user = (User) object;
+        System.out.println("unhashed: " + user.getPwdHash());
+        user.setPwdHash(hashPassword(user.getPwdHash()));
+        System.out.println("hash: " + user.getPwdHash());
+        moduleManager.handleTask(Task.User.CREATE, user);
+        return new Success("OK", "Registration doesn't yet work, just use LOGIN, you'll receive a valid session.");
     }
 
     /**

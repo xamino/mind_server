@@ -61,7 +61,7 @@ public class UserModule extends Module {
     }
 
     private Data readAllUsers(User user) {
-        Data data = database.read(user);
+        Data data = database.readAll(user);
         if (data != null)
             return data;
         else

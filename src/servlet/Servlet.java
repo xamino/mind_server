@@ -87,7 +87,9 @@ public class Servlet extends HttpServlet {
                     Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
                     answer = checkDataMessage(data);
                     if (answer == null) {
-                        answer = (DataList) data;
+                        if (data instanceof DataList)
+                            log.log(TAG, "LOL");
+                        answer = data;
                     }
                     break;
                 case LOGOUT:
