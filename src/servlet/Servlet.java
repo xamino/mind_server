@@ -79,15 +79,12 @@ public class Servlet extends HttpServlet {
             Task.Server task = Task.Server.safeValueOf(taskString);
             switch (task) {
                 case TEST:
-                    DataList wifis = new DataList();
-                    wifis.add(new WifiMorsel("0:0", "WIFIS", -86));
-                    wifis.add(new WifiMorsel("A3:34", "EDUROAM", -03));
-                    Location loc1 = new Location(4.0, 2.0, wifis);
-                    Location loc2 = new Location(1.0, 100.0, wifis);
-                    DataList locations = new DataList();
-                    locations.add(loc1);
-                    locations.add(loc2);
-                    answer = new Area("My room", locations);
+                    Data usersUnknown = moduleManager.handleTask(Task.User.READ_ALL, null);
+                    if (usersUnknown == null || !(usersUnknown instanceof DataList)) {
+                        answer = new Error("READ ALL USERS TEST", "The datalist is null...");
+                    } else {
+                        answer = (DataList) usersUnknown;
+                    }
                     break;
                 case LOGOUT:
                     sanitation.destroySession(arrival.getSessionHash());

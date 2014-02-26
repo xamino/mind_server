@@ -167,4 +167,14 @@ public class Sanitation {
         log.log(TAG, "REGISTRATION");
         return new Message("Registration doesn't yet work, just use LOGIN, you'll receive a valid session.");
     }
+
+    /**
+     * Function that hashes a password using a salt via BCrypt.
+     *
+     * @param password The password to salt and hash.
+     * @return The hashed password.
+     */
+    public String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt(12));
+    }
 }
