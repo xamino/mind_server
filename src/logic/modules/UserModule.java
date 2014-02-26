@@ -10,7 +10,7 @@ import logic.Task;
 
 /**
  */
-public class UserModule implements Module {
+public class UserModule extends Module {
 
     private final DatabaseController database;
 
@@ -61,8 +61,11 @@ public class UserModule implements Module {
     }
 
     private Data readAllUsers(User user) {
-
-        return null;
+        Data data = database.read(user);
+        if (data != null)
+            return data;
+        else
+            return new Error("UserReadFailure", "Reading of users failed!");
     }
 
     private Data updateUser(User user) {
