@@ -14,7 +14,9 @@
 </head>
 <body>
 Blub! World! :-) !!!!
-
+<br>
 JS now enabled, open your console!
+<br>
+JS Functions currently available: login(email, password), register(email, password, name), and send(type, data).
 </body>
 </html>
