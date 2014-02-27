@@ -2,6 +2,7 @@ package servlet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import database.Data;
 import database.messages.Error;
 import database.messages.Message;
@@ -72,17 +73,27 @@ public class JsonConverter {
      * @return The string with the JSON representation.
      */
     public String toJson(Data object) {
-        return gson.toJson(object, Data.class);
+        try {
+            return gson.toJson(object, Data.class);
+        } catch (JsonParseException e) {
+            log.error(TAG, "Error parsing data to JSON! Class: " + object.getClass().getCanonicalName());
+            return null;
+        }
     }
 
     /**
      * Converts a string to the correct Data implementing class.
      *
      * @param data The string containing the JSON data.
-     * @return An object implementing Data with all the correct data.
+     * @return An object implementing Data with all the correct data. If an error happened, returns null.
      */
     public Data fromJson(String data) {
         // Returns the correct extended Data class, no need for casting.
-        return gson.fromJson(data, Data.class);
+        try {
+            return gson.fromJson(data, Data.class);
+        } catch (JsonParseException e) {
+            log.error(TAG, "Error parsing data from JSON!");
+            return null;
+        }
     }
 }
