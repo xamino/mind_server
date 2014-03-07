@@ -32,7 +32,11 @@ public class EventModuleManager {
 
         if (operation instanceof Task.User)
             return userModule.run(operation, task);
-        else
+        else if(operation instanceof Task.Location ||operation instanceof Task.Area ||operation instanceof Task.WifiMorsel)
+        {
+            return locationModule.run(operation,task);
+        }else{
             return new Error("ModuleNotFound", operation.toString());
+        }
     }
 }

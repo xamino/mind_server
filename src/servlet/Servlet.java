@@ -8,6 +8,7 @@ import database.Data;
 import database.Information;
 import database.messages.Error;
 import database.messages.Message;
+import database.objects.Area;
 import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
@@ -116,13 +117,17 @@ public class Servlet extends HttpServlet {
         // Use only for DEBUGGING AND TESTS!
         // All production code should go in POST
 
-        log.log(TAG,moduleManager.handleTask(Task.User.READ,new User("","blbl@sdfsd.de")).toString());
-/*
+        //log.log(TAG,moduleManager.handleTask(Task.User.READ,new User("","blbl@sdfsd.de")).toString());
+
+        Area area = new Area("TheBiggestRoomInTheWorld",null);
+        moduleManager.handleTask(Task.Area.CREATE, area);
+
+        Area area_r = (Area) moduleManager.handleTask(Task.Area.READ, area);
+
         User a = new User("Hans", "hans@peter.de");
         moduleManager.handleTask(Task.User.CREATE, a);
 
         User t = (User) moduleManager.handleTask(Task.User.READ, a);
-
         t.setName("Gustav");
 
         moduleManager.handleTask(Task.User.UPDATE, t);
@@ -134,11 +139,13 @@ public class Servlet extends HttpServlet {
 
 
         Data userList = moduleManager.handleTask(Task.User.READ_ALL, null);
-        log.log("Servlet", userList.toString());
+        log.log("Servlet", "List: " + userList.toString());
 
         moduleManager.handleTask(Task.User.DELETE, a);
         moduleManager.handleTask(Task.User.DELETE, b);
-        moduleManager.handleTask(Task.User.DELETE, c);*/
+        moduleManager.handleTask(Task.User.DELETE, c);
+
+        moduleManager.handleTask(Task.Area.DELETE, area_r);
     }
 
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
