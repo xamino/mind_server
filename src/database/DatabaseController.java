@@ -2,6 +2,8 @@ package database;
 
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
+import com.db4o.config.EmbeddedConfiguration;
+import com.db4o.constraints.UniqueFieldValueConstraint;
 import com.db4o.query.Predicate;
 import database.objects.*;
 import io.Configuration;
@@ -52,8 +54,11 @@ public class DatabaseController {
      */
     private ObjectContainer getConnection() {
         if (connection == null) {
-            connection = Db4oEmbedded.openFile(Db4oEmbedded
-                    .newConfiguration(), dbName); // TODO configuration (user, password, location)
+            EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
+            conf.common().objectClass(User.class).objectField("email").indexed(true);
+            conf.common().add(new UniqueFieldValueConstraint(User.class, "email"));
+
+            connection = Db4oEmbedded.openFile(conf, dbName); // TODO configuration (user, password, location)
         }
         return connection;
     }
@@ -65,6 +70,11 @@ public class DatabaseController {
      * @return true if the operation was successful and false otherwise.
      */
     public boolean create(Data data) {
+        // avoid duplicates
+        if(read(data) != null){
+            return false;
+        }
+
         try {
             ObjectContainer con = getConnection();
             con.store(data);
