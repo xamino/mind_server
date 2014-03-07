@@ -3,7 +3,6 @@ package database;
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.config.EmbeddedConfiguration;
-import com.db4o.constraints.UniqueFieldValueConstraint;
 import com.db4o.query.Predicate;
 import database.objects.*;
 import io.Configuration;
@@ -55,7 +54,7 @@ public class DatabaseController {
     private ObjectContainer getConnection() {
         if (connection == null) {
             EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
-            connection = Db4oEmbedded.openFile(conf, dbName); // TODO configuration (user, password, location)
+            connection = Db4oEmbedded.openFile(conf, dbName); // TODO configuration (user, password, locatio
         }
         return connection;
     }
