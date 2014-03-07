@@ -25,7 +25,7 @@ public abstract class Module {
         if (op)
             return new Success(filter.getClass().getSimpleName() + "CreationSuccess", "The " + filter.toString() + " was created successfully.");
         else
-            return new Error(filter.getClass().getSimpleName()+"CreationFailure", "Creation of " + filter.toString() + " failed!");
+            return new Error(filter.getClass().getSimpleName()+"CreationFailure", "Creation of " + filter.toString() + " failed! It may already exist!");
     }
 
     protected Data read(Data filter) {
