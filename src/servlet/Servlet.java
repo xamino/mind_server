@@ -7,13 +7,14 @@ package servlet;
 import database.Data;
 import database.Information;
 import database.messages.Error;
-import database.messages.Message;
+import database.messages.Success;
 import database.objects.Area;
 import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
 import logic.EventModuleManager;
 import logic.Task;
+import logic.modules.SanitationModule;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -44,8 +45,28 @@ public class Servlet extends HttpServlet {
      * Class for logging stuff.
      */
     private Messenger log;
-    private Sanitation sanitation;
+    private SanitationModule sanitationModule;
     private EventModuleManager moduleManager;
+
+    /**
+     * Method that checkes if data returned from the modules is a message, in which case it is returned, or null, in
+     * which case an error message is returned. If the data is anything else, it is considered to be a valid reply and
+     * null is returned.
+     *
+     * @param data The data to check.
+     * @return An Information object if data is such, else null.
+     */
+    // TODO public static is ugly, do something!
+    public static Information checkDataMessage(Data data) {
+        if (data == null) {
+            return new Error("DATA NULL", "Data requested returned NULL, should NOT HAPPEN!");
+        } else if (data instanceof Information) {
+            return (Information) data;
+        } else {
+            // This means that answer is manually set.
+            return null;
+        }
+    }
 
     @Override
     public void init() throws ServletException {
@@ -53,7 +74,6 @@ public class Servlet extends HttpServlet {
         Configuration.getInstance().init(getServletContext()); // must be first!!!
 
         log = Messenger.getInstance();
-        sanitation = Sanitation.getInstance();
         moduleManager = EventModuleManager.getInstance();
         json = JsonConverter.getInstance();
     }
@@ -74,7 +94,7 @@ public class Servlet extends HttpServlet {
         // Write whatever you want sent back to this object:
         Data answer = null;
         // Check if valid:
-        answer = sanitation.checkArrival(arrival);
+        answer = checkArrival(arrival);
         // If answer is still null, everything checks out (otherwise an error or message object would be in place
         // already)
         if (answer == null) {
@@ -88,10 +108,6 @@ public class Servlet extends HttpServlet {
                     if (answer == null) {
                         answer = data;
                     }
-                    break;
-                case LOGOUT:
-                    sanitation.destroySession(arrival.getSessionHash());
-                    answer = new Message("Logged out!");
                     break;
                 case ECHO:
                     // Simple echo test for checking if the server can parse the data
@@ -119,7 +135,7 @@ public class Servlet extends HttpServlet {
 
         //log.log(TAG,moduleManager.handleTask(Task.User.READ,new User("","blbl@sdfsd.de")).toString());
 
-        Area area = new Area("TheBiggestRoomInTheWorld",null);
+        Area area = new Area("TheBiggestRoomInTheWorld", null);
         moduleManager.handleTask(Task.Area.CREATE, area);
 
         Area area_r = (Area) moduleManager.handleTask(Task.Area.READ, area);
@@ -148,14 +164,6 @@ public class Servlet extends HttpServlet {
         moduleManager.handleTask(Task.Area.DELETE, area_r);
     }
 
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) {
-
-    }
-
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
-
-    }
-
     /**
      * Creates JSON object out of answer and encapsulates it in the type object.
      *
@@ -179,7 +187,7 @@ public class Servlet extends HttpServlet {
      * Takes the HttpServletRequest and returns the correct arrival object filled with JSON goodies.
      *
      * @param request The request to read.
-     * @return The Arrival object filled with the data. NULL if not a valid object, checked in Sanitation, no need for
+     * @return The Arrival object filled with the data. NULL if not a valid object, checked in SanitationModule, no need for
      * error correction.
      * @throws IOException
      */
@@ -200,28 +208,40 @@ public class Servlet extends HttpServlet {
         if (data instanceof Arrival) {
             return (Arrival) data;
         } else {
-            // No need for error handling, that is done in Sanitation
+            // No need for error handling, that is done in SanitationModule
             return null;
         }
     }
 
     /**
-     * Method that checkes if data returned from the modules is a message, in which case it is returned, or null, in
-     * which case an error message is returned. If the data is anything else, it is considered to be a valid reply and
-     * null is returned.
+     * Method that checks whether an arrival is valid and not null, then handles login if applicable and checks the session.
      *
-     * @param data The data to check.
-     * @return An Information object if data is such, else null.
+     * @param arrival The Arrival object to check.
+     * @return Either an Error or a Message if something is wrong; if everything checks out, then null.
      */
-    // TODO public static is ugly, do something!
-    public static Information checkDataMessage(Data data) {
-        if (data == null) {
-            return new Error("DATA NULL", "Data requested returned NULL, should NOT HAPPEN!");
-        } else if (data instanceof Information) {
-            return (Information) data;
-        } else {
-            // This means that answer is manually set.
-            return null;
+    public Data checkArrival(Arrival arrival) {
+        Data answer;
+        if (arrival == null || !arrival.isValid()) {
+            // This means something went wrong. Badly.
+            answer = new Error("Illegal POST", "POST does not conform to API! Check that all keys are valid and the values set!");
+            return answer;
+        }
+        // Some tasks can be done without login, here are these SanitationModule tasks:
+        Task.Sanitation task = Task.Sanitation.safeValueOf(arrival.getTask());
+        // If the task is not an error, than it IS a sanitationModule task:
+        if (task != Task.Sanitation.ERROR) {
+            return moduleManager.handleTask(task, arrival);
+        }
+        // Otherwise handle it normally:
+        else {
+            // Everything from here on out MUST be validated via login, so check the session:
+            Data msg = moduleManager.handleTask(Task.Sanitation.CHECK, arrival);
+            if (msg instanceof Success) {
+                // Success means we return null to signify that everything is valid:
+                return null;
+            } else {
+                return msg;
+            }
         }
     }
 
