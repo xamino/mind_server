@@ -67,9 +67,9 @@ public interface Task {
         }
     }
 
-    public enum WifiMorsel implements Task {
+   /* public enum WifiMorsel implements Task {
         CREATE, READ, UPDATE, DELETE
-    }
+    }*/
 
     public enum Location implements Task {
         CREATE, READ, UPDATE, DELETE, READ_MORSELS

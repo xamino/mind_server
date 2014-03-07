@@ -46,19 +46,6 @@ public class LocationModule extends Module {
             }
         } else if (request instanceof WifiMorsel) {
             //TODO are there any other operations directly on these?
-            WifiMorsel morsel = (WifiMorsel) request;
-
-            Task.WifiMorsel locationTask = (Task.WifiMorsel) task;
-            switch (locationTask) {
-                case CREATE:
-                    return create(morsel);
-                case READ:
-                    return read(morsel);
-                case UPDATE:
-                    return update(morsel);
-                case DELETE:
-                    return delete(morsel);
-            }
         } else if (request instanceof Area) {
             Area area = (Area) request;
 

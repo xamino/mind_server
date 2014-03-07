@@ -40,7 +40,7 @@ public class EventModuleManager {
 
         if (operation instanceof Task.User)
             return userModule.run(operation, task);
-        else if (operation instanceof Task.Location || operation instanceof Task.Area || operation instanceof Task.WifiMorsel) {
+        else if (operation instanceof Task.Location || operation instanceof Task.Area) {
             return locationModule.run(operation, task);
         } else if (operation instanceof Task.Sanitation) {
             return sanitationModule.run(operation, task);

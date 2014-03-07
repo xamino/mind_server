@@ -4,10 +4,12 @@ import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.query.Predicate;
-import database.objects.*;
+import database.objects.Area;
+import database.objects.DataList;
+import database.objects.Location;
+import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
-import logic.Task;
 
 import java.util.List;
 
@@ -67,7 +69,7 @@ public class DatabaseController {
      */
     public boolean create(Data data) {
         // avoid duplicates
-        if(read(data) != null){
+        if (read(data) != null) {
             return false;
         }
 
@@ -88,6 +90,7 @@ public class DatabaseController {
 
         List queryResult = null;
 
+        // Read Data depending on the objects unique key
         if (requestFilter instanceof User) {
             final User user = (User) requestFilter;
             queryResult = con.query(new Predicate<User>() {
@@ -95,6 +98,24 @@ public class DatabaseController {
                 public boolean match(User o) {
                     // check on unique key
                     return o.getEmail().equals(user.getEmail());
+                }
+            });
+        } else if (requestFilter instanceof Area) {
+            final Area area = (Area) requestFilter;
+            queryResult = con.query(new Predicate<Area>() {
+                @Override
+                public boolean match(Area o) {
+                    // check on unique key
+                    return o.getID().equals(area.getID());
+                }
+            });
+        } else if (requestFilter instanceof Location) {
+            final Location loc = (Location) requestFilter;
+            queryResult = con.query(new Predicate<Location>() {
+                @Override
+                public boolean match(Location o) {
+                    // check on unique key
+                    return loc.getCoordinateY() == o.getCoordinateY() && loc.getCoordinateX() == o.getCoordinateX();
                 }
             });
         }
@@ -157,7 +178,7 @@ public class DatabaseController {
                 });
 
                 if (queryResult.size() > 0) {
-                    result = ((Location) queryResult.get(0)).getWifiNetworks();
+                    result = ((Location) queryResult.get(0)).getWifiMorsels();
                 }
 
             } else if (requestFilter instanceof Area) {
@@ -198,7 +219,19 @@ public class DatabaseController {
                 log.log(CLASS, userToUpdate.toString() + " updated in DB!");
 
                 return true;
-            } else return false;
+            } else if (data instanceof Area) {
+                Area dataArea = (Area) data;
+                Area areaToUpdate = (Area) read(data);
+                areaToUpdate.setID(dataArea.getID());
+                areaToUpdate.setLocations(dataArea.getLocations());
+
+                getConnection().store(areaToUpdate);
+
+                log.log(CLASS, areaToUpdate.toString() + " updated in DB!");
+            }
+
+
+            return false;
         } catch (Exception e) {
             return false;
         }

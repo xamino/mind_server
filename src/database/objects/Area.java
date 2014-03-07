@@ -36,4 +36,12 @@ public class Area implements Data {
     public void setLocations(DataList locations) {
         this.locations = locations;
     }
+
+    @Override
+    public String toString() {
+        return "Area{" +
+                "ID='" + ID + '\'' +
+                ", locations=" + locations +
+                '}';
+    }
 }
