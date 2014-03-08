@@ -1,5 +1,12 @@
-//WARNING: Changes here mean the browser must be forced to FULLY RELOAD the page, otherwise the cached version
-//         is used further!
+/**
+ * ALL FUNCTIONAL CODE GOES HERE!
+ */
+
+/**
+ * Sessionhash is stored here so you don't have to keep calling it.
+ * @type {string}
+ */
+var session = "";
 
 /**
  * Function for registering a user.
@@ -8,11 +15,14 @@
  * @param name
  */
 function register(email, password, name) {
-    var regUser = new user(email, password, name);
+    var regUser = new User(email, password, name);
     // sessionHash remains empty, we don't have one yet
-    var request = new arrival("REGISTRATION", null, regUser);
-    send("POST", request);
+    var request = new Arrival("registration", null, regUser);
+    send(request, function (data) {
+        alert(data.object.description);
+    });
 }
+
 /**
  * Function for login in.
  * @param email Primary key.
@@ -20,40 +30,34 @@ function register(email, password, name) {
  */
 function login(email, password) {
     // We can keep name empty as it is not critical to this operation
-    var loginUser = new user(email, password, null);
+    var loginUser = new User(email, password, null);
     // sessionHash remains empty, we don't have one yet
-    var request = new arrival("LOGIN", null, loginUser);
-    send("POST", request);
-}
-
-/**
- * Helper function for sending data.
- * @param type Type of request, most likely POST.
- * @param data The data to send, in JSON.
- */
-function send(type, data) {
-    $.ajax({
-        url: '/Servlet/test',
-        type: type,
-        data: JSON.stringify(data),
-        contentType: 'application/json; charset=utf-8',
-        dataType: 'json',
-        async: false
+    var request = new Arrival("login", null, loginUser);
+    // send the request
+    send(request, function (data) {
+        // callback simply saves the session
+        session = data.object.description;
+        alert(session);
     });
 }
 
-// OBJECT DEFINITIONS HERE –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––-
-
-function arrival(task, sessionHash, object) {
-    this.$type = "Arrival";
-    this.sessionHash = sessionHash;
-    this.task = task;
-    this.object = object;
+/**
+ * Log a user out again.
+ */
+function logout() {
+    var request = new Arrival("logout", session);
+    send(request, function (data) {
+        alert(data.object.description);
+    });
 }
 
-function user(email, password, name) {
-    this.$type = "User";
-    this.email = email;
-    this.pwdHash = password;
-    this.name = name;
+/**
+ * Small helpful function for testing functionality in the browser console. Mainly removes the need to keep track
+ * of the sessionHash. :P
+ * @param task
+ * @param object
+ * @param callback
+ */
+function doTask(task, object, callback) {
+    send(new Arrival(task, session, object), callback);
 }

@@ -45,15 +45,56 @@ public class LocationModule extends Module {
                     return readMorsels(location);
             }
         } else if (request instanceof WifiMorsel) {
+            //TODO are there any other operations directly on these?
         } else if (request instanceof Area) {
-        } else {
+            Area area = (Area) request;
+
+            Task.Area areaTask = (Task.Area) task;
+            switch (areaTask) {
+                case CREATE:
+                    return create(area);
+                case READ:
+                    return read(area);
+                case UPDATE:
+                    return update(area);
+                case DELETE:
+                    return delete(area);
+                case READ_LOCATIONS:
+                    return readLocations(area);
+                case READ_ALL:
+                    return readAll(new Area("",null));
+            }
         }
 
-        return null;
+        return new Error("MissingOperation", "The Location Module is unable to perform the Task as it appears not to be implemented.");
     }
 
+
+    private Data readAll(Area area) {
+        Data data = database.readAll(area);
+        if (data != null)
+            return data;
+        else
+            return new Error("AreaReadFailure", "Reading of Areas failed!");
+    }
+
+    private Data readLocations(Area area) {
+        Data data = database.readChildren(area);
+        if (data != null)
+            return data;
+        else
+            return new Error("AreaLocationReadFailure", "Reading of " + area.toString() + " Locations failed!");
+    }
+
+
+    /**
+     * Returns available WifiMorsels for a specified Location
+     *
+     * @param loc The Location of the WifiMorsels to be returned
+     * @return WifiMorsels at the Location specified as parameter
+     */
     private Data readMorsels(Location loc) {
-        Data data = database.read(loc);
+        Data data = database.readChildren(loc);
         if (data != null)
             return data;
         else

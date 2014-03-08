@@ -7,20 +7,20 @@ import database.Information;
  */
 public class Success implements Information {
 
-    private String message;
+    private String name;
     private String description;
 
-    public Success(String message, String description) {
-        this.message = message;
+    public Success(String name, String description) {
+        this.name = name;
         this.description = description;
     }
 
-    public String getMessage() {
-        return message;
+    public String getName() {
+        return name;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -34,7 +34,7 @@ public class Success implements Information {
     @Override
     public String toString() {
         return "Success{" +
-                "message='" + message + '\'' +
+                "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }

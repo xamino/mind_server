@@ -6,17 +6,29 @@ import database.Information;
  * @author Tamino Hartmann
  */
 public class Message implements Information {
-    private String message;
+    private String name;
+    private String description;
 
-    public Message(String msg) {
-        this.message = msg;
+    public Message(String name, String description) {
+        this.name = name;
+        this.description = description;
     }
 
-    public String getMessage() {
-        return message;
+    public String getName() {
+        return name;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setName(String name) {
+        this.name = name;
     }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+
 }

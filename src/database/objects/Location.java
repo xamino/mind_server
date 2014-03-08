@@ -11,12 +11,12 @@ public class Location implements Data {
     /**
      * Contains WifiMorsel
      */
-    private DataList wifiNetworks;
+    private DataList wifiMorsels;
 
-    public Location(double coordinateX, double coordinateY, DataList wifiNetworks) {
+    public Location(double coordinateX, double coordinateY, DataList wifiMorsels) {
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
-        this.wifiNetworks = wifiNetworks;
+        this.wifiMorsels = wifiMorsels;
     }
 
     public double getCoordinateX() {
@@ -35,19 +35,19 @@ public class Location implements Data {
         this.coordinateY = coordinateY;
     }
 
-    public DataList getWifiNetworks() {
-        return wifiNetworks;
+    public DataList getWifiMorsels() {
+        return wifiMorsels;
     }
 
-    public void setWifiNetworks(DataList wifiNetworks) {
-        this.wifiNetworks = wifiNetworks;
+    public void setWifiMorsels(DataList wifiMorsels) {
+        this.wifiMorsels = wifiMorsels;
     }
 
     @Override
     public String toString() {
         return "Location{" +
                 "coordinateX=" + coordinateX +
-                ", coordinateY=" + coordinateY +
+                ", coordinateY=" + coordinateY + ", morsels=" + wifiMorsels +
                 '}';
     }
 }
