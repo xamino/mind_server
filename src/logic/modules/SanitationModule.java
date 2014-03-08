@@ -67,11 +67,11 @@ public class SanitationModule extends Module {
     public Data run(Task task, Data request) {
         if (!(task instanceof Task.Sanitation)) {
             // Check that it is one of our tasks...
-            return new Error("WrongTaskType", "SanitationModule module was called with the wrong task type!");
+            return new Error("WrongTaskType", "SanitationModule was called with the wrong task type!");
         }
         if (!(request instanceof Arrival)) {
             // SanitationModule ALWAYS only uses and expects Arrival!
-            return new Error("WrongObjectType", "SanitationModule module was called with the wrong object type!");
+            return new Error("WrongObjectType", "SanitationModule was called with the wrong object type!");
         }
         Arrival arrival = (Arrival) request;
         // As many operations require it, we pull the User object out now. Note that it might be NULL depending on the

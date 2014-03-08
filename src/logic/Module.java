@@ -19,7 +19,6 @@ public abstract class Module {
      */
     public abstract Data run(Task task, Data request);
 
-
     protected Data create(Data filter) {
         boolean op = DatabaseController.getInstance().create(filter);
         if (op)

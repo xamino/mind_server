@@ -229,7 +229,7 @@ public class Servlet extends HttpServlet {
         Data answer;
         if (arrival == null || !arrival.isValid()) {
             // This means something went wrong. Badly.
-            answer = new Error("Illegal POST", "POST does not conform to API! Check that all keys are valid and the values set!");
+            answer = new Error("IllegalPOST", "POST does not conform to API! Keys valid? Values set? Object correct?");
             return answer;
         }
         // Some tasks can be done without login, here are these SanitationModule tasks:
