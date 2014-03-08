@@ -76,7 +76,8 @@ public class JsonConverter {
         try {
             return gson.toJson(object, Data.class);
         } catch (JsonParseException e) {
-            log.error(TAG, "Error parsing data to JSON! Class: " + object.getClass().getCanonicalName());
+            log.error(TAG, "Error parsing data to JSON!");
+            log.error(TAG, "" + object.getClass().getCanonicalName());
             return null;
         }
     }
@@ -93,6 +94,7 @@ public class JsonConverter {
             return gson.fromJson(data, Data.class);
         } catch (JsonParseException e) {
             log.error(TAG, "Error parsing data from JSON!");
+            log.error(TAG, "" + data);
             return null;
         }
     }

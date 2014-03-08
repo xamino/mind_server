@@ -100,7 +100,7 @@ public class Servlet extends HttpServlet {
         if (answer == null) {
             // This means valid session and arrival!
             String taskString = arrival.getTask();
-            Task.Server task = Task.Server.safeValueOf(taskString);
+            Task.API task = Task.API.safeValueOf(taskString);
             switch (task) {
                 case TEST:
                     Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
@@ -112,6 +112,12 @@ public class Servlet extends HttpServlet {
                 case ECHO:
                     // Simple echo test for checking if the server can parse the data
                     answer = arrival.getObject();
+                    break;
+                case LOCATION_ADD:
+                    answer = moduleManager.handleTask(Task.Location.CREATE, arrival.getObject());
+                    break;
+                case POSITION_FIND:
+                    answer = moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
                     break;
                 default:
                     log.log(TAG, "Illegal task sent: " + taskString);
@@ -223,7 +229,7 @@ public class Servlet extends HttpServlet {
         Data answer;
         if (arrival == null || !arrival.isValid()) {
             // This means something went wrong. Badly.
-            answer = new Error("Illegal POST", "POST does not conform to API! Check that all keys are valid and the values set!");
+            answer = new Error("IllegalPOST", "POST does not conform to API! Keys valid? Values set? Object correct?");
             return answer;
         }
         // Some tasks can be done without login, here are these SanitationModule tasks:

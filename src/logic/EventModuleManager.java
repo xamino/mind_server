@@ -3,6 +3,7 @@ package logic;
 import database.Data;
 import database.messages.Error;
 import logic.modules.LocationModule;
+import logic.modules.PositionModule;
 import logic.modules.SanitationModule;
 import logic.modules.UserModule;
 
@@ -15,6 +16,7 @@ public class EventModuleManager {
     private final UserModule userModule;
     private final LocationModule locationModule;
     private final SanitationModule sanitationModule;
+    private final PositionModule positionModule;
 
     private EventModuleManager() {
 
@@ -23,11 +25,12 @@ public class EventModuleManager {
         userModule = new UserModule();
         locationModule = new LocationModule();
         sanitationModule = new SanitationModule();
-
+        positionModule = new PositionModule();
     }
 
     /**
      * Gets an instance of the EventModuleManager.
+     *
      * @return
      */
     public static EventModuleManager getInstance() {
@@ -44,6 +47,8 @@ public class EventModuleManager {
             return locationModule.run(operation, task);
         } else if (operation instanceof Task.Sanitation) {
             return sanitationModule.run(operation, task);
+        } else if (operation instanceof Task.Position) {
+            return positionModule.run(operation, task);
         } else {
             return new Error("ModuleNotFound", operation.toString());
         }
