@@ -2,8 +2,11 @@ package database;
 
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
+import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.query.Predicate;
+import database.objects.Area;
 import database.objects.DataList;
+import database.objects.Location;
 import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
@@ -20,12 +23,8 @@ public class DatabaseController {
     private static DatabaseController instance;
     private final Messenger log;
     private final String CLASS = "DatabaseController";
-    private String url;
+    private final String dbName;
     private ObjectContainer connection;
-
-    /**
-     * Verbingung zur Datenbank
-     */
 
     /**
      * Method for getting a valid reference of this object.
@@ -46,15 +45,198 @@ public class DatabaseController {
     private DatabaseController() {
         log = Messenger.getInstance();
         Configuration config = Configuration.getInstance();
+        dbName = config.getDbName();
     }
 
+    /**
+     * Returns an instance of the Database.
+     *
+     * @return A Database Connection
+     */
     private ObjectContainer getConnection() {
         if (connection == null) {
-            connection = Db4oEmbedded.openFile(Db4oEmbedded
-                    .newConfiguration(), "MIND_DB");
+            EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
+            connection = Db4oEmbedded.openFile(conf, dbName); // TODO configuration (user, password, locatio
         }
         return connection;
     }
+
+    /**
+     * Store a Data object in the Database.
+     *
+     * @param data The Object to be stored.
+     * @return true if the operation was successful and false otherwise.
+     */
+    public boolean create(Data data) {
+        // avoid duplicates
+        if (read(data) != null) {
+            return false;
+        }
+
+        try {
+            ObjectContainer con = getConnection();
+            con.store(data);
+
+            log.log(CLASS, data.toString() + " written to DB!");
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public Data read(final Data requestFilter) {
+        ObjectContainer con = getConnection();
+
+        List queryResult = null;
+
+        // Read Data depending on the objects unique key
+        if (requestFilter instanceof User) {
+            final User user = (User) requestFilter;
+            queryResult = con.query(new Predicate<User>() {
+                @Override
+                public boolean match(User o) {
+                    // check on unique key
+                    return o.getEmail().equals(user.getEmail());
+                }
+            });
+        } else if (requestFilter instanceof Area) {
+            final Area area = (Area) requestFilter;
+            queryResult = con.query(new Predicate<Area>() {
+                @Override
+                public boolean match(Area o) {
+                    // check on unique key
+                    return o.getID().equals(area.getID());
+                }
+            });
+        } else if (requestFilter instanceof Location) {
+            final Location loc = (Location) requestFilter;
+            queryResult = con.query(new Predicate<Location>() {
+                @Override
+                public boolean match(Location o) {
+                    // check on unique key
+                    return loc.getCoordinateY() == o.getCoordinateY() && loc.getCoordinateX() == o.getCoordinateX();
+                }
+            });
+        }
+
+        Data result = null;
+        if (queryResult != null && queryResult.size() > 0) {
+            result = (Data) queryResult.get(0);
+        }
+
+        if (result != null) {
+            log.log(CLASS, result.toString() + " read from DB!");
+        }
+
+        return result;
+    }
+
+    public Data readAll(final Data requestFilter) {
+        try {
+            ObjectContainer con = getConnection();
+
+            List queryResult = con.query(requestFilter.getClass());
+
+            // write query result into a Datalist
+            DataList result = new DataList();
+            if (queryResult != null) {
+                for (Object o : queryResult) {
+                    result.add((Data) o);
+                }
+            }
+
+            log.log(CLASS, result.toString() + " read from DB!");
+
+            return result;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Reads child lists of the specified Data object if any available.
+     *
+     * @param requestFilter The Data object of which the children should be fetched.
+     * @return a Datalist of children or null on error.
+     */
+    public Data readChildren(Data requestFilter) {
+        try {
+            ObjectContainer con = getConnection();
+
+            List queryResult = null;
+            DataList result = null;
+
+            // process all possible classes
+            if (requestFilter instanceof Location) {
+                final Location loc = (Location) requestFilter;
+                queryResult = con.query(new Predicate<Location>() {
+                    @Override
+                    public boolean match(Location o) {
+                        return o.getCoordinateX() == loc.getCoordinateX() && o.getCoordinateY() == loc.getCoordinateY();
+                    }
+                });
+
+                if (queryResult.size() > 0) {
+                    result = ((Location) queryResult.get(0)).getWifiMorsels();
+                }
+
+            } else if (requestFilter instanceof Area) {
+                final Area area = (Area) requestFilter;
+                queryResult = con.query(new Predicate<Area>() {
+                    @Override
+                    public boolean match(Area o) {
+                        return o.getID().equals(area.getID());
+                    }
+                });
+
+                if (queryResult.size() > 0) {
+                    result = ((Area) queryResult.get(0)).getLocations();
+                }
+            } else {
+                //TODO
+            }
+            if (result == null)
+                result = new DataList();
+
+            log.log(CLASS, result.toString() + " read from DB!");
+            return result;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public boolean update(Data data) {
+        try {
+            if (data instanceof User) {
+                User dataUser = (User) data;
+                User userToUpdate = (User) read(data);
+                userToUpdate.setName(dataUser.getName());
+                userToUpdate.setPwdHash(dataUser.getPwdHash());
+
+                getConnection().store(userToUpdate);
+
+                log.log(CLASS, userToUpdate.toString() + " updated in DB!");
+
+                return true;
+            } else if (data instanceof Area) {
+                Area dataArea = (Area) data;
+                Area areaToUpdate = (Area) read(data);
+                areaToUpdate.setID(dataArea.getID());
+                areaToUpdate.setLocations(dataArea.getLocations());
+
+                getConnection().store(areaToUpdate);
+
+                log.log(CLASS, areaToUpdate.toString() + " updated in DB!");
+            }
+
+
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 
     /**
      * Deletes an object of type data from database.
@@ -72,88 +254,6 @@ public class DatabaseController {
             return false;
         }
     }
-
-    public boolean update(Data data) {
-
-        if (data instanceof User) {
-            User dataUser = (User) data;
-            User userToUpdate = (User) read(data);
-            userToUpdate.setName(dataUser.getName());
-            userToUpdate.setPwdHash(dataUser.getPwdHash());
-
-            getConnection().store(userToUpdate);
-
-            log.log(CLASS, userToUpdate.toString() + " updated in DB!");
-
-            return true;
-        } else return false;
-
-    }
-
-    public Data readAll(final Data requestFilter) {
-        ObjectContainer con = getConnection();
-
-        List queryResult = null;
-
-        if (requestFilter instanceof User) {
-            final User user = (User) requestFilter;
-            queryResult = con.query(new Predicate<User>() {
-                @Override
-                public boolean match(User o) {
-                    return true;
-                }
-            });
-        }
-
-        DataList result = new DataList();
-        for (Object o : queryResult) {
-            result.add((Data) o);
-        }
-
-        //con.close();
-
-        log.log(CLASS, result.toString() + " read from DB!");
-
-        return result;
-    }
-
-    public Data read(final Data requestFilter) {
-        ObjectContainer con = getConnection();
-
-        List queryResult = null;
-
-        if (requestFilter instanceof User) {
-            final User user = (User) requestFilter;
-            queryResult = con.query(new Predicate<User>() {
-                @Override
-                public boolean match(User o) {
-                    // check on unique key
-                    return o.getEmail().equals(user.getEmail());
-                }
-            });
-        }
-
-        Data result = null;
-        if (queryResult.size() != 0) {
-            result = (Data) queryResult.get(0);
-        }
-        //con.close();
-
-        //log.log(CLASS, result.toString() + " read from DB!");
-
-        return result;
-    }
-
-    public boolean create(Data data) {
-        ObjectContainer con = getConnection();
-        con.store(data);
-        //con.close();
-
-        log.log(CLASS, data.toString() + " written to DB!");
-
-        return true;
-    }
-
 
     public static void listResult(List<?> result) {
         System.out.println(result.size());

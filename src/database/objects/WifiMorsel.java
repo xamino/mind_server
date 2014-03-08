@@ -49,4 +49,13 @@ public class WifiMorsel implements Data {
     public void setWifiLevel(int wifiLevel) {
         this.wifiLevel = wifiLevel;
     }
+
+    @Override
+    public String toString() {
+        return "WifiMorsel{" +
+                "wifiMac='" + wifiMac + '\'' +
+                ", wifiName='" + wifiName + '\'' +
+                ", wifiLevel=" + wifiLevel +
+                '}';
+    }
 }
