@@ -1,0 +1,123 @@
+#banner{
+	background: #cbd7dd;	/*light blue (uni color)*/
+   	height: 100px;
+    top: 0;
+    position: fixed;
+    width:100%;		/* if modified --> set padding-top of content */
+    text-align:center;
+}
+
+/************* div with navigation content and logout **************/
+#content{
+	width:auto;
+	min-width:600px;
+	padding-top:110px;		/* to put content beneath header*/
+}
+
+/************ navigation div ******************/
+#navigation{
+    margin: 0; 
+    padding: 0; 
+	width: 170px;
+	border: solid 1px #7d9aaa; 	/*dark blue (uni color)*/
+   	background: #cbd7dd;	/*light blue (uni color)*/
+   	float: left;
+   	/*position:absolute;	/*for dropdown*/
+}
+
+/* start normal menu list */
+#navigation ul{
+	list-style:none;
+	margin:0;
+	padding:0;
+}
+
+#navigation ul li{
+   list-style: none; 
+   font-size: medium; 
+   border: solid 1px #7d9aaa; 	/*dark blue (uni color)*/
+   position:relative;
+}
+
+#navigation a{
+	padding: 3px;
+	display:block;
+	color:black;			/*text color black*/
+	text-decoration: none; 
+}
+
+/* normal menu list - hover and active*/
+#navigation ul li a:active {  
+   background: #7d9aaa; 	/*dark blue (uni color)*/
+   color: #ffffff;			/*text color white*/
+}
+
+#navigation ul li a:hover { 
+   margin: 0; 
+   padding-left: 10px; 
+   text-decoration: none; 
+   font-weight: bold; 
+   font-size: medium; 
+   background-color: #97aebb; 	/*middle blue (uni color)*/
+   color: #ffffff; 			/*text color white*/
+   display: block; 
+}
+
+/* drop-down functionality */
+#navigation ul ul {
+	display: none;
+	position:absolute;
+	left: 170px; 
+	top:0;
+	width:230px;
+	background-color: #97aebb; 	/*middle blue (uni color)*/
+}
+
+#navigation ul ul li a{
+	color: #ffffff; 			/*text color white*/
+}
+
+/* drop-down functionality - hover*/
+#navigation ul li:hover > ul {
+		display: block;
+	}
+
+/* hover submenu */
+#navigation ul li:hover > ul li a:hover { 
+   margin: 0; 
+   padding-left: 10px; 
+   text-decoration: none; 
+   font-weight: bold; 
+   font-size: medium; 
+   background: #cbd7dd;	/*light blue (uni color)*/
+   color: black; 			/*text color black*/
+   display: block; 
+}
+
+/***************end navigation******************/
+
+/********** div with normal text ***************/
+#text-content{
+	padding-left:10px;
+	float:left;
+}
+
+/************** div with logout- button (more can be added) ******************/
+#logout{
+	float: right;
+	width: 100px;
+	padding-left:10px;
+}
+
+/************* clear floats *******************/
+.clear{
+	clear:both;
+}
+
+#footer{
+	background: #cbd7dd;	/*light blue (uni color)*/
+   	height: 30px;
+    bottom: 0;
+    position: fixed;
+    width:100%;
+}
