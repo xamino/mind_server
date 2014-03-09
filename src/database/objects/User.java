@@ -44,6 +44,7 @@ public class User implements Data {
                 "name='" + name + '\'' +
                 ", pwdHash='" + pwdHash + '\'' +
                 ", email='" + email + '\'' +
+                ", admin=" + admin +
                 '}';
     }
 

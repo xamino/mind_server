@@ -155,12 +155,6 @@ public class SanitationModule extends Module {
      * @return Return message.
      */
     private Data login(User user) {
-        /*
-        // TAKE OUT; ONLY FOR DEBUG
-        if (user == null) {
-            return new Success("LOGIN", createSession());
-        }
-        */
         // Try reading the user from the database
         Data object = EventModuleManager.getInstance().handleTask(Task.User.READ, user);
         // Check if message:
@@ -178,8 +172,8 @@ public class SanitationModule extends Module {
         if (BCrypt.checkpw(user.getPwdHash(), check.getPwdHash())) {
             // Everything okay, so create a hash:
             String sessionHash = new BigInteger(130, random).toString(32);
-            // Create the activeUser object:
-            ActiveUser activeUser = new ActiveUser(user, System.currentTimeMillis());
+            // Create the activeUser object using the correct, database user:
+            ActiveUser activeUser = new ActiveUser(check, System.currentTimeMillis());
             // Save the session:
             sessions.put(sessionHash, activeUser);
             // Return the hash for future references:

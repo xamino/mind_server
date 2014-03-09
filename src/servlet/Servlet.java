@@ -7,7 +7,7 @@ package servlet;
 import database.Data;
 import database.Information;
 import database.messages.Error;
-import database.messages.Success;
+import database.messages.Message;
 import database.objects.Area;
 import database.objects.User;
 import io.Configuration;
@@ -100,30 +100,17 @@ public class Servlet extends HttpServlet {
             // This means valid session and arrival!
             // Read user, should be used to read rights etc.
             User currentUser = (User) check;
-            String taskString = arrival.getTask();
-            Task.API task = Task.API.safeValueOf(taskString);
-            switch (task) {
-                case TEST:
-                    Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
-                    answer = checkDataMessage(data);
-                    if (answer == null) {
-                        answer = data;
-                    }
-                    break;
-                case ECHO:
-                    // Simple echo test for checking if the server can parse the data
-                    answer = arrival.getObject();
-                    break;
-                case LOCATION_ADD:
-                    answer = moduleManager.handleTask(Task.Location.CREATE, arrival.getObject());
-                    break;
-                case POSITION_FIND:
-                    answer = moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
-                    break;
-                default:
-                    log.log(TAG, "Illegal task sent: " + taskString);
-                    answer = new Error("POST illegal TASK", "Illegal task: " + taskString);
-                    break;
+            // First check whether it is a normal task:
+            answer = handleNormalTask(arrival, currentUser);
+            // If null, it wasn't a normal task – so check if admin rights are set
+            if (answer == null && currentUser.isAdmin()) {
+                // If yes, handle admin stuff:
+                answer = handleAdminTask(arrival, currentUser);
+            }
+            // If answer is still null, the task wasn't found (or the rights weren't set):
+            if (answer == null) {
+                log.log(TAG, "Illegal task sent: " + arrival.getTask());
+                answer = new Error("POST illegal TASK", "Illegal task: " + arrival.getTask());
             }
         } else {
             // This means the check failed, so there is a message in check that needs to be sent back
@@ -131,6 +118,54 @@ public class Servlet extends HttpServlet {
         }
         // Encapsulate answer:
         prepareDeparture(response, answer);
+    }
+
+    /**
+     * Handles all generally accessible tasks that only require a valid user.
+     * @param arrival
+     * @return
+     */
+    // TODO: Place all generally accessible tasks in this method.
+    private Data handleNormalTask(Arrival arrival, User user) {
+        Task.API task = Task.API.safeValueOf(arrival.getTask());
+        switch (task) {
+            case ECHO:
+                // Simple echo test for checking if the server can parse the data
+                return arrival.getObject();
+            case LOCATION_ADD:
+                return moduleManager.handleTask(Task.Location.CREATE, arrival.getObject());
+            case POSITION_FIND:
+                return moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
+            case ACTIVATE_ADMIN:
+                // TODO remove this, only for test!
+                user.setAdmin(true);
+                return moduleManager.handleTask(Task.User.UPDATE, user);
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Handles tasks that are specifically only for the admin class user.
+     * @param arrival
+     * @return
+     */
+    // TODO: Place all admin tasks in this method.
+    private Data handleAdminTask(Arrival arrival, User user) {
+        Task.API task = Task.API.safeValueOf(arrival.getTask());
+        switch (task) {
+            case ADMIN_TEST:
+                return new Message("AdminOkay","You're an admin all right!");
+            case TEST:
+                Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
+                Data msg = checkDataMessage(data);
+                if (msg == null) {
+                    return data;
+                }
+                return msg;
+            default:
+                return null;
+        }
     }
 
     /**
@@ -231,11 +266,9 @@ public class Servlet extends HttpServlet {
      * @return Either an Error or a Message if something is wrong; if everything checks out, then the user object.
      */
     public Data checkArrival(Arrival arrival) {
-        Data answer;
         if (arrival == null || !arrival.isValid()) {
             // This means something went wrong. Badly.
-            answer = new Error("IllegalPOST", "POST does not conform to API! Keys valid? Values set? Object correct?");
-            return answer;
+            return new Error("IllegalPOST", "POST does not conform to API! Keys valid? Values set? Object correct?");
         }
         // Some tasks can be done without login, here are these SanitationModule tasks:
         Task.Sanitation task = Task.Sanitation.safeValueOf(arrival.getTask());
