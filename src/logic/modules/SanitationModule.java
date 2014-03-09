@@ -36,7 +36,7 @@ public class SanitationModule extends Module {
     /**
      * HashMap containing the sessions and their last access time.
      */
-    private HashMap<String, Long> sessions;
+    private HashMap<String, ActiveUser> sessions;
     /**
      * SecureRandom for generating the hashes.
      */
@@ -98,7 +98,8 @@ public class SanitationModule extends Module {
                 break;
             case CHECK:
                 if (checkSession(arrival.getSessionHash())) {
-                    return new Success("ValidSession", "The session is valid.");
+                    // If valid, return the corresponding user object:
+                    return sessions.get(arrival.getSessionHash()).user;
                 } else {
                     return new Error("SessionInvalid", "The session is NOT valid!");
                 }
@@ -119,8 +120,10 @@ public class SanitationModule extends Module {
      */
     private boolean checkSession(String sessionHash) {
         if (sessions.containsKey(sessionHash)) {
+            // get ActiveUser object
+            ActiveUser user = sessions.get(sessionHash);
             // check for timeout
-            long timeDelta = System.currentTimeMillis() - sessions.get(sessionHash);
+            long timeDelta = System.currentTimeMillis() - user.timestamp;
             if (timeDelta > TIMEOUT) {
                 // this means the session has expired
                 // remove, as expired:
@@ -128,21 +131,11 @@ public class SanitationModule extends Module {
                 return false;
             }
             // update time if session is valid, resetting the timeout:
-            sessions.put(sessionHash, System.currentTimeMillis());
+            user.timestamp = System.currentTimeMillis();
+            sessions.put(sessionHash, user);
             return true;
         }
         return false;
-    }
-
-    /**
-     * Creates a session, saving it with the current time in the HashMap.
-     *
-     * @return The session hash – required for future authentication, so save it!
-     */
-    private String createSession() {
-        String sessionHash = new BigInteger(130, random).toString(32);
-        sessions.put(sessionHash, System.currentTimeMillis());
-        return sessionHash;
     }
 
     /**
@@ -157,7 +150,7 @@ public class SanitationModule extends Module {
     }
 
     /**
-     * Login method.
+     * Login method. If valid, stores the logged in user in the session map with the current time.
      *
      * @return Return message.
      */
@@ -168,7 +161,9 @@ public class SanitationModule extends Module {
             return new Success("LOGIN", createSession());
         }
         */
+        // Try reading the user from the database
         Data object = EventModuleManager.getInstance().handleTask(Task.User.READ, user);
+        // Check if message:
         Data answer = Servlet.checkDataMessage(object);
         if (answer != null) {
             // this means 99% of the time that a user wasn't found.
@@ -177,9 +172,18 @@ public class SanitationModule extends Module {
             log.log(TAG, "Unregistered user tried login!");
             return new Error("LoginFailed", "Wrong user email or wrong password.");
         }
+        // This means we have a valid user object:
         User check = (User) object;
+        // Now to check the password
         if (BCrypt.checkpw(user.getPwdHash(), check.getPwdHash())) {
-            return new Success("Login", createSession());
+            // Everything okay, so create a hash:
+            String sessionHash = new BigInteger(130, random).toString(32);
+            // Create the activeUser object:
+            ActiveUser activeUser = new ActiveUser(user, System.currentTimeMillis());
+            // Save the session:
+            sessions.put(sessionHash, activeUser);
+            // Return the hash for future references:
+            return new Success("Login", sessionHash);
         } else {
             return new Error("LoginFailed", "Wrong user email or wrong password.");
         }
@@ -195,10 +199,23 @@ public class SanitationModule extends Module {
         user.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));
         Data msg = EventModuleManager.getInstance().handleTask(Task.User.CREATE, user);
         if (msg instanceof Success) {
-            return new Success("Registered", "Registered \"" + user.getEmail() + "\".");
+            return new Success("Registered", "Registered to '" + user.getEmail() + "'.");
         } else {
             log.error(TAG, "Error creating a user!");
             return msg;
+        }
+    }
+
+    /**
+     * Small data class for storing active users with the corresponding hash and timestamp of their last action.
+     */
+    private class ActiveUser {
+        User user;
+        long timestamp;
+
+        ActiveUser(User user, long timestamp) {
+            this.user = user;
+            this.timestamp = timestamp;
         }
     }
 }

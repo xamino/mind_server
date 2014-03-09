@@ -94,11 +94,12 @@ public class Servlet extends HttpServlet {
         // Write whatever you want sent back to this object:
         Data answer = null;
         // Check if valid:
-        answer = checkArrival(arrival);
-        // If answer is still null, everything checks out (otherwise an error or message object would be in place
-        // already)
-        if (answer == null) {
+        Data check = checkArrival(arrival);
+        // If the arrival is valid, checkArrival returns the database user object
+        if (check instanceof User) {
             // This means valid session and arrival!
+            // Read user, should be used to read rights etc.
+            User currentUser = (User) check;
             String taskString = arrival.getTask();
             Task.API task = Task.API.safeValueOf(taskString);
             switch (task) {
@@ -124,7 +125,11 @@ public class Servlet extends HttpServlet {
                     answer = new Error("POST illegal TASK", "Illegal task: " + taskString);
                     break;
             }
+        } else {
+            // This means the check failed, so there is a message in check that needs to be sent back
+            answer = check;
         }
+        // Encapsulate answer:
         prepareDeparture(response, answer);
     }
 
@@ -223,7 +228,7 @@ public class Servlet extends HttpServlet {
      * Method that checks whether an arrival is valid and not null, then handles login if applicable and checks the session.
      *
      * @param arrival The Arrival object to check.
-     * @return Either an Error or a Message if something is wrong; if everything checks out, then null.
+     * @return Either an Error or a Message if something is wrong; if everything checks out, then the user object.
      */
     public Data checkArrival(Arrival arrival) {
         Data answer;
@@ -241,13 +246,7 @@ public class Servlet extends HttpServlet {
         // Otherwise handle it normally:
         else {
             // Everything from here on out MUST be validated via login, so check the session:
-            Data msg = moduleManager.handleTask(Task.Sanitation.CHECK, arrival);
-            if (msg instanceof Success) {
-                // Success means we return null to signify that everything is valid:
-                return null;
-            } else {
-                return msg;
-            }
+            return moduleManager.handleTask(Task.Sanitation.CHECK, arrival);
         }
     }
 
