@@ -36,6 +36,11 @@ public interface Task {
          * Given a location, find the position.
          */
         POSITION_FIND,
+        /**
+         * Test for rights management.
+         */
+        ADMIN_TEST,
+        ACTIVATE_ADMIN,
         ERROR;
 
         /**

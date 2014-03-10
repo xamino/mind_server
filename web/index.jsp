@@ -7,13 +7,12 @@
     <script language="JavaScript" type="text/javascript" src="run.js"></script>
 </head>
 <body>
-<<<<<<< HEAD
 button - only till we know whats on index.jsp <br>
 <input type="button" name="redirect" value="start mind" onclick="document.location.href='admin_home.jsp'">
-=======
+<br>
+<br>
 MIND test page for checking the API and as an example for later work on web interfaces.
 <br>
->>>>>>> 06e0deb7bc4bf4ddbb717722e8b77823cb8a43e4
 <br>
 JS now enabled, open your console!
 <br>
