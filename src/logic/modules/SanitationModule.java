@@ -190,6 +190,7 @@ public class SanitationModule extends Module {
      * @return Return message.
      */
     private Data registration(User user) {
+        // TODO: Is the salt persistant? Or do we need to save it somewhere across server restarts?
         user.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));
         Data msg = EventModuleManager.getInstance().handleTask(Task.User.CREATE, user);
         if (msg instanceof Success) {

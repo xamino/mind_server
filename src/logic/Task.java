@@ -20,27 +20,37 @@ public interface Task {
      */
     public enum API implements Task {
         /**
-         * Used for whatever task we are currently testing.
-         */
-        // TODO Remove when done
-        TEST,
-        /**
          * Simply returns the object sent to the server. Can be used for various parsing tests.
          */
         ECHO,
-        /**
-         * Add a location to the database.
-         */
+        // USER
+        USER_READ,
+        USER_READ_ALL,
+        USER_ADD,
+        USER_UPDATE,
+        USER_DELETE,
+        // LOCATION
+        LOCATION_READ,
+        LOCATION_READ_ALL,
         LOCATION_ADD,
+        LOCATION_UPDATE,
+        LOCATION_REMOVE,
+        // AREA
+        AREA_READ,
+        AREA_READ_ALL,
+        AREA_ADD,
+        AREA_UPDATE,
+        AREA_REMOVE,
         /**
          * Given a location, find the position.
          */
         POSITION_FIND,
+        // ADMIN
+        ADMIN_READ_ALL,
+        TOGGLE_ADMIN,
         /**
-         * Test for rights management.
+         * General error, especially when casting to a task doesn't work.
          */
-        ADMIN_TEST,
-        ACTIVATE_ADMIN,
         ERROR;
 
         /**
