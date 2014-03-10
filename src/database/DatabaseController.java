@@ -85,7 +85,7 @@ public class DatabaseController {
         }
     }
 
-    public Data read(final Data requestFilter) {
+    public <T extends Data> T read(final T requestFilter) {
         ObjectContainer con = getConnection();
 
         List queryResult = null;
@@ -120,9 +120,9 @@ public class DatabaseController {
             });
         }
 
-        Data result = null;
+        T result = null;
         if (queryResult != null && queryResult.size() > 0) {
-            result = (Data) queryResult.get(0);
+            result = (T) queryResult.get(0); // TODO unchecked!
         }
 
         if (result != null) {
@@ -132,17 +132,17 @@ public class DatabaseController {
         return result;
     }
 
-    public Data readAll(final Data requestFilter) {
+    public <T extends Data> DataList<T> readAll(final T requestFilter) {
         try {
             ObjectContainer con = getConnection();
 
             List queryResult = con.query(requestFilter.getClass());
 
             // write query result into a Datalist
-            DataList result = new DataList();
+            DataList<T> result = new DataList<>();
             if (queryResult != null) {
                 for (Object o : queryResult) {
-                    result.add((Data) o);
+                    result.add((T) o);
                 }
             }
 
@@ -164,7 +164,7 @@ public class DatabaseController {
         try {
             ObjectContainer con = getConnection();
 
-            List queryResult = null;
+            List queryResult;
             DataList result = null;
 
             // process all possible classes

@@ -6,13 +6,14 @@ import java.util.ArrayList;
 
 /**
  * Created by Cassio on 25.02.14.
- *
+ * <p/>
  * Saved Tamino's sanity on Feb 25, 2014. All hail the DataList!
  */
-public class DataList extends ArrayList<Data> implements Data {
-    public String toString(){
+public class DataList<T extends Data> extends ArrayList<T> implements Data {
 
-        Data[] a = this.toArray(new Data[]{});
+    public String toString() {
+
+        Data[] a = this.toArray(new Data[0]);
 
         if (a == null)
             return "null";

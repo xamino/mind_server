@@ -14,9 +14,9 @@ public class Area implements Data {
     /**
      * All locations that are within this area.
      */
-    private DataList locations;
+    private DataList<Location> locations;
 
-    public Area(String ID, DataList locations) {
+    public Area(String ID, DataList<Location> locations) {
         this.ID = ID;
         this.locations = locations;
     }
@@ -29,11 +29,11 @@ public class Area implements Data {
         this.ID = ID;
     }
 
-    public DataList getLocations() {
+    public DataList<Location> getLocations() {
         return locations;
     }
 
-    public void setLocations(DataList locations) {
+    public void setLocations(DataList<Location> locations) {
         this.locations = locations;
     }
 
