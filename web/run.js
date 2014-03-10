@@ -75,7 +75,7 @@ function doUnitTest() {
 
     // Check initial registration
     // EXAMPLE FOR STRICT UNITTEST!!!
-    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), new Success("Registered","Registered to 'admin@admin.de'."), null, true);
+    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), new Success("Registered","Registered to \u0027admin@admin.de\u0027."), null, true);
     // try registering again
     unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Error, null);
     // try login
@@ -122,7 +122,7 @@ function unitTest(task, object_in, object_out, session, strict) {
 
     // Strict means the object must match 100%!
     if (strict) {
-        if (!(data.object === object_out)) {
+        if (!(response.object === object_out)) {
             alert("Failed '" + task + "'");
             return null;
         } else {
