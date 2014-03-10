@@ -6,7 +6,7 @@ import database.Data;
  * @author Tamino Hartmann
  * Data object for a single wifi data morsel on a location.
  */
-public class WifiMorsel implements Data {
+public class WifiMorsel implements Data, Comparable {
     /**
      * MAC-Address of the wifi access point.
      */
@@ -57,5 +57,33 @@ public class WifiMorsel implements Data {
                 ", wifiName='" + wifiName + '\'' +
                 ", wifiLevel=" + wifiLevel +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WifiMorsel that = (WifiMorsel) o;
+
+        if (!wifiMac.equals(that.wifiMac)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return wifiMac.hashCode();
+    }
+
+    @Override
+    public int compareTo(Object obj) {
+        WifiMorsel temp = (WifiMorsel)obj;
+        if(this.wifiLevel<temp.wifiLevel)
+            return -1;
+        else if(this.wifiLevel>temp.wifiLevel)
+            return 1;
+        else
+            return 0;
     }
 }

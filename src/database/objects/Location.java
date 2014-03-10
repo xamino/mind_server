@@ -11,9 +11,9 @@ public class Location implements Data {
     /**
      * Contains WifiMorsel
      */
-    private DataList wifiMorsels;
+    private DataList<WifiMorsel> wifiMorsels;
 
-    public Location(double coordinateX, double coordinateY, DataList wifiMorsels) {
+    public Location(double coordinateX, double coordinateY, DataList<WifiMorsel> wifiMorsels) {
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
         this.wifiMorsels = wifiMorsels;
@@ -35,11 +35,11 @@ public class Location implements Data {
         this.coordinateY = coordinateY;
     }
 
-    public DataList getWifiMorsels() {
+    public DataList<WifiMorsel> getWifiMorsels() {
         return wifiMorsels;
     }
 
-    public void setWifiMorsels(DataList wifiMorsels) {
+    public void setWifiMorsels(DataList<WifiMorsel> wifiMorsels) {
         this.wifiMorsels = wifiMorsels;
     }
 
