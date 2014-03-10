@@ -2,9 +2,10 @@
 <html>
 <head>
     <title>MIND | Test Page</title>
-    <script language="JavaScript" type="text/javascript" src="jquery-2.1.0.min.js"></script>
-    <script language="JavaScript" type="text/javascript" src="library.js"></script>
-    <script language="JavaScript" type="text/javascript" src="run.js"></script>
+    <script language="JavaScript" type="text/javascript" src="javascript/jquery-2.1.0.min.js"></script>
+    <script language="JavaScript" type="text/javascript" src="javascript/library.js"></script>
+    <script language="JavaScript" type="text/javascript" src="javascript/run.js"></script>
+    <script language="JavaScript" type="text/javascript" src="javascript/unittest.js"></script>
 </head>
 <body>
 button - only till we know whats on index.jsp <br>

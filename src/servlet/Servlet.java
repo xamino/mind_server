@@ -161,6 +161,7 @@ public class Servlet extends HttpServlet {
                     return new Error("IllegalUserRemove", "To delete your user, you must not pass any object along.");
                 }
                 // Otherwise ignore all else, just delete:
+                // TODO destroy session
                 return moduleManager.handleTask(Task.User.DELETE, user);
             case POSITION_FIND:
                 // TODO Input Sanitation
