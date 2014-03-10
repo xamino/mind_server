@@ -88,7 +88,7 @@ public class PositionModule extends Module {
             }
         }
 
-        return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap, dataBaseLocations);
+        return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap);
     }
 
     /**
@@ -98,7 +98,7 @@ public class PositionModule extends Module {
      * @param locationLevelDifferenceSumMap
      * @return
      */
-    private Location getFinalMatch(HashMap<Location, Integer> locationMatchesMap, HashMap<Location, Integer> locationLevelDifferenceSumMap, DataList databaseLocations) {
+    private Location getFinalMatch(HashMap<Location, Integer> locationMatchesMap, HashMap<Location, Integer> locationLevelDifferenceSumMap) {
         List<Location> sortedLocationCandidateList;
         Location finalMatch = null;
 
