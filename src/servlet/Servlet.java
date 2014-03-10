@@ -145,14 +145,15 @@ public class Servlet extends HttpServlet {
                 User sentUser = (User) arrival.getObject();
                 // Email is primary key, thus can not be changed!
                 if (!sentUser.getEmail().equals(user.getEmail())) {
-                    return new Error("IllegalChange","Email can not be changed in an existing user");
+                    return new Error("IllegalChange", "Email can not be changed in an existing user");
                 }
                 // We need to catch a password change, as it must be hashed:
                 String password = sentUser.getPwdHash();
                 if (password != null && !password.isEmpty()) {
                     // hash:
-                    sentUser.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));
+                    sentUser.setPwdHash(BCrypt.hashpw(password, BCrypt.gensalt(12)));
                 }
+                // TODO update session user object!
                 return moduleManager.handleTask(Task.User.UPDATE, sentUser);
             case USER_DELETE:
                 // To catch some errors, we enforce that no object has been passed along:
@@ -160,8 +161,9 @@ public class Servlet extends HttpServlet {
                     // If null...
                     return new Error("IllegalUserRemove", "To delete your user, you must not pass any object along.");
                 }
+                // Remove session
+                moduleManager.handleTask(Task.Sanitation.LOGOUT, user);
                 // Otherwise ignore all else, just delete:
-                // TODO destroy session
                 return moduleManager.handleTask(Task.User.DELETE, user);
             case POSITION_FIND:
                 // TODO Input Sanitation
