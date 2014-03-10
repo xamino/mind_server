@@ -141,11 +141,14 @@ public class Servlet extends HttpServlet {
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                // TODO input sanitation? How do we differentiate unchanged values from null or empty fields?
                 User sentUser = (User) arrival.getObject();
                 // Email is primary key, thus can not be changed!
                 if (!sentUser.getEmail().equals(user.getEmail())) {
                     return new Error("IllegalChange", "Email can not be changed in an existing user");
+                }
+                // Make sure that you can't set yourself to admin
+                if (sentUser.isAdmin()) {
+                    return new Error("IllegalChange", "You do not have the rights to modify your permissions!");
                 }
                 // We need to catch a password change, as it must be hashed:
                 String password = sentUser.getPwdHash();
@@ -153,7 +156,9 @@ public class Servlet extends HttpServlet {
                     // hash:
                     sentUser.setPwdHash(BCrypt.hashpw(password, BCrypt.gensalt(12)));
                 }
-                // TODO update session user object!
+                // Note that the session user object now needs to be updated. This is done the next time the user
+                // sends a request through SanitationModule; it will always get the up to date object from the
+                // database.
                 return moduleManager.handleTask(Task.User.UPDATE, sentUser);
             case USER_DELETE:
                 // To catch some errors, we enforce that no object has been passed along:
@@ -166,7 +171,7 @@ public class Servlet extends HttpServlet {
                 // Otherwise ignore all else, just delete:
                 return moduleManager.handleTask(Task.User.DELETE, user);
             case POSITION_FIND:
-                // TODO Input Sanitation
+                // TODO position returns an error, do we even need to check here? Check with Andy!
                 return moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
@@ -223,17 +228,14 @@ public class Servlet extends HttpServlet {
                 Data msg = checkDataMessage(data);
                 if (msg == null && data instanceof DataList) {
                     DataList list = (DataList) data;
-                    /*
                     DataList<User> admins = new DataList<User>();
-                    for (Data us : list) {
+                    for (Object us : list) {
                         if (!(us instanceof User))
                             continue;
                         if (((User) us).isAdmin())
                             admins.add((User) us);
                     }
                     return admins;
-                    */
-                    return data;
                 }
                 return msg;
             default:
@@ -359,10 +361,18 @@ public class Servlet extends HttpServlet {
     /**
      * Arrival class – structure of incomming requests must conform to this class.
      */
-    // TODO finish commenting
     public class Arrival implements Data {
+        /**
+         * The session hash of the client.
+         */
         private String sessionHash;
+        /**
+         * The API task to do.
+         */
         private String task;
+        /**
+         * Voluntary object with which to work with during a task.
+         */
         private Data object;
 
         public Arrival(String sessionHash, String task, Data object) {
@@ -373,10 +383,6 @@ public class Servlet extends HttpServlet {
 
         public String getSessionHash() {
             return sessionHash;
-        }
-
-        public void setSessionHash(String sessionHash) {
-            this.sessionHash = sessionHash;
         }
 
         @Override
@@ -420,10 +426,17 @@ public class Servlet extends HttpServlet {
     /**
      * Wrapper object class for outgoing answers – required because lists for example can not simply be Jsonated.
      */
-    // TODO finish commenting
     public class Departure implements Data {
+        /**
+         * The data object that is sent.
+         */
         private Data object;
 
+        /**
+         * Constructor.
+         *
+         * @param object The object to send.
+         */
         public Departure(Data object) {
             this.object = object;
         }

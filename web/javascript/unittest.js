@@ -12,6 +12,8 @@ function doUnitTest() {
     unitTest("registration", new User("ego.trump@haha.com", "ßüöä", "Ego Trump"), Success, null);
     // try registering again
     unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Error, null);
+    // try illegal registration
+    unitTest("registration", new User("", "admin", ""), Error, null);
     // try login
     var adminSession = unitTest("login", new User("admin@admin.de", "admin", null), Success, null).description;
     var mariaSession = unitTest("login", new User("maria.heilig@gott.de", "maria", null), Success, null).description;
