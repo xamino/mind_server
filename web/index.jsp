@@ -2,9 +2,10 @@
 <html>
 <head>
     <title>MIND | Test Page</title>
-    <script language="JavaScript" type="text/javascript" src="jquery-2.1.0.min.js"></script>
-    <script language="JavaScript" type="text/javascript" src="library.js"></script>
-    <script language="JavaScript" type="text/javascript" src="run.js"></script>
+    <script language="JavaScript" type="text/javascript" src="javascript/jquery-2.1.0.min.js"></script>
+    <script language="JavaScript" type="text/javascript" src="javascript/library.js"></script>
+    <script language="JavaScript" type="text/javascript" src="javascript/run.js"></script>
+    <script language="JavaScript" type="text/javascript" src="javascript/unittest.js"></script>
 </head>
 <body>
 button - only till we know whats on index.jsp <br>
@@ -23,5 +24,9 @@ JS Functions currently available: login(email, password), register(email, passwo
 The session is saved in var session for your convenience, no need to copy & paste it. Also note that the JS consists of
 three parts: the JQuery library (don't touch!), the library.js (only touch if you're Tamino :P ), and run.js, where all
 the functional code should go.
+<br>
+<br>
+Click here to run a unit test of the API. WARNING: while the test is running, the webpage will be unresponsive!
+<input type="button" name="unittest" value="Run API unit test" onclick="doUnitTest();">
 </body>
 </html>
