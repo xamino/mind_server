@@ -7,8 +7,9 @@ package servlet;
 import database.Data;
 import database.Information;
 import database.messages.Error;
-import database.messages.Message;
 import database.objects.Area;
+import database.objects.DataList;
+import database.objects.Location;
 import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
@@ -122,6 +123,7 @@ public class Servlet extends HttpServlet {
 
     /**
      * Handles all generally accessible tasks that only require a valid user.
+     *
      * @param arrival
      * @return
      */
@@ -132,13 +134,39 @@ public class Servlet extends HttpServlet {
             case ECHO:
                 // Simple echo test for checking if the server can parse the data
                 return arrival.getObject();
-            case LOCATION_ADD:
-                return moduleManager.handleTask(Task.Location.CREATE, arrival.getObject());
+            case USER_READ:
+                // TODO: strip password hash? is that necessary?
+                return user;
+            case USER_UPDATE:
+                if (!(arrival.getObject() instanceof User)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                // TODO input sanitation? How do we differentiate unchanged values from null or empty fields?
+                User sentUser = (User) arrival.getObject();
+                // Email is primary key, thus can not be changed!
+                if (!sentUser.getEmail().equals(user.getEmail())) {
+                    return new Error("IllegalChange","Email can not be changed in an existing user");
+                }
+                // We need to catch a password change, as it must be hashed:
+                String password = sentUser.getPwdHash();
+                if (password != null && !password.isEmpty()) {
+                    // hash:
+                    sentUser.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));
+                }
+                return moduleManager.handleTask(Task.User.UPDATE, sentUser);
+            case USER_DELETE:
+                // To catch some errors, we enforce that no object has been passed along:
+                if (arrival.getObject() != null) {
+                    // If null...
+                    return new Error("IllegalUserRemove", "To delete your user, you must not pass any object along.");
+                }
+                // Otherwise ignore all else, just delete:
+                return moduleManager.handleTask(Task.User.DELETE, user);
             case POSITION_FIND:
                 return moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
-            case ACTIVATE_ADMIN:
+            case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
-                user.setAdmin(true);
+                user.setAdmin(!user.isAdmin());
                 return moduleManager.handleTask(Task.User.UPDATE, user);
             default:
                 return null;
@@ -147,6 +175,7 @@ public class Servlet extends HttpServlet {
 
     /**
      * Handles tasks that are specifically only for the admin class user.
+     *
      * @param arrival
      * @return
      */
@@ -154,13 +183,50 @@ public class Servlet extends HttpServlet {
     private Data handleAdminTask(Arrival arrival, User user) {
         Task.API task = Task.API.safeValueOf(arrival.getTask());
         switch (task) {
-            case ADMIN_TEST:
-                return new Message("AdminOkay","You're an admin all right!");
-            case TEST:
+            case USER_ADD:
+                // TODO: Input sanitation? Che
+                if (!(arrival.getObject() instanceof User)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.User.CREATE, arrival.getObject());
+            case USER_UPDATE:
+                if (!(arrival.getObject() instanceof User)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.User.UPDATE, arrival.getObject());
+            case USER_DELETE:
+                if (!(arrival.getObject() instanceof User)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.User.DELETE, arrival.getObject());
+            case LOCATION_ADD:
+                if (!(arrival.getObject() instanceof Location)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Location.CREATE, arrival.getObject());
+            case LOCATION_UPDATE:
+                if (!(arrival.getObject() instanceof Location)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Location.UPDATE, arrival.getObject());
+            case LOCATION_REMOVE:
+                if (!(arrival.getObject() instanceof Location)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Location.DELETE, arrival.getObject());
+            case ADMIN_READ_ALL:
                 Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
                 Data msg = checkDataMessage(data);
                 if (msg == null) {
-                    return data;
+                    DataList list = (DataList) data;
+                    DataList admins = new DataList();
+                    for (Data us : list) {
+                        if (!(us instanceof User))
+                            continue;
+                        if (((User) us).isAdmin())
+                            admins.add(us);
+                    }
+                    return admins;
                 }
                 return msg;
             default:
