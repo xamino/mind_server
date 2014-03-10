@@ -218,16 +218,19 @@ public class Servlet extends HttpServlet {
             case ADMIN_READ_ALL:
                 Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
                 Data msg = checkDataMessage(data);
-                if (msg == null) {
+                if (msg == null && data instanceof DataList) {
                     DataList list = (DataList) data;
-                    DataList admins = new DataList();
+                    /*
+                    DataList<User> admins = new DataList<User>();
                     for (Data us : list) {
                         if (!(us instanceof User))
                             continue;
                         if (((User) us).isAdmin())
-                            admins.add(us);
+                            admins.add((User) us);
                     }
                     return admins;
+                    */
+                    return data;
                 }
                 return msg;
             default:

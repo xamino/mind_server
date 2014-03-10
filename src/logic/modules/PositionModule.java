@@ -19,13 +19,11 @@ import java.util.*;
  */
 public class PositionModule extends Module {
 
-    private final EventModuleManager moduleManager;
     private Messenger log;
     private final int tolerance = 3;  //TODO What value?
 
     public PositionModule() {
         log = Messenger.getInstance();
-        moduleManager = EventModuleManager.getInstance();
     }
 
     @Override
@@ -47,7 +45,7 @@ public class PositionModule extends Module {
 
     private Location calculateLocation(Location request) {
         // Get Area containing all locations from database
-        Area allArea = ((DataList<Area>) moduleManager.handleTask(Task.Area.READ_ALL, null)).get(0); // TODO better way?
+        Area allArea = ((DataList<Area>) EventModuleManager.getInstance().handleTask(Task.Area.READ_ALL, null)).get(0); // TODO better way?
 
         // A Map that describes how many matches there are for this location
         HashMap<Location, Integer> locationMatchesMap = new HashMap<>();

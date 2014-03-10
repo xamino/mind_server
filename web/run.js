@@ -74,7 +74,8 @@ function doUnitTest() {
     alert("Beginning unit test!");
 
     // Check initial registration
-    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Success, null);
+    // EXAMPLE FOR STRICT UNITTEST!!!
+    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), new Success("Registered","Registered to 'admin@admin.de'."), null, true);
     // try registering again
     unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Error, null);
     // try login
