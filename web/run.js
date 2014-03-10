@@ -59,5 +59,85 @@ function logout() {
  * @param callback
  */
 function doTask(task, object, callback) {
-    send(new Arrival(task, session, object), callback);
+    if (object != null) {
+        send(new Arrival(task, session, object), callback);
+    } else {
+        send(new Arrival(task, session), callback);
+    }
+}
+
+/**
+ * Function that runs a unit test. WARNING: test is done with synchronous ajax calls, which means the webpage will be
+ * unresponsive until the unit test is done!
+ */
+function doUnitTest() {
+    alert("Beginning unit test!");
+
+    // Check initial registration
+    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Success, null);
+    // try registering again
+    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Error, null);
+    // try login
+    var adminSession = unitTest("login", new User("admin@admin.de", "admin", null), Success, null).description;
+    // try logout
+    unitTest("logout", null, Success, adminSession);
+
+    alert("Registration, login, logout done.");
+
+    // Relogin the admin
+    adminSession = unitTest("login", new User("admin@admin.de", "admin", null), Success, null).description;
+    // try admin access
+    unitTest("admin_read_all", null, Error, adminSession);
+    // Switch to admin rights:
+    unitTest("toggle_admin", null, Success, adminSession);
+
+
+    alert("Finished!")
+}
+
+/**
+ * Runs a single test.
+ * @param task The server API task to execute.
+ * @param object_in The object to send.
+ * @param object_out The comparison to use for the reply. Can be just a class if not using strict mode!
+ * @param session If applicable, the session to attach – else just use null.
+ * @param strict If set to true, the object_out will be matched fully, not just type.
+ * @return The object received from the server if the unit test was successful, else null.
+ */
+function unitTest(task, object_in, object_out, session, strict) {
+    var arrival;
+    if (object_in != null) {
+        arrival = new Arrival(task, session, object_in);
+    }
+    else {
+        arrival = new Arrival(task, session);
+    }
+    strict = (strict == true);
+    // Synchronously send:
+    var response = JSON.parse($.ajax({
+        data: JSON.stringify(arrival),
+        async: false
+    }).responseText);
+
+    // Strict means the object must match 100%!
+    if (strict) {
+        if (!(data.object === object_out)) {
+            alert("Failed '" + task + "'");
+            return null;
+        } else {
+            return response.object;
+        }
+    } else {
+        // Check if we were handed just the class or an object
+        if (object_out.$type == undefined) {
+            // If just a class, create object
+            object_out = new object_out();
+        }
+        if (!(response.object.$type === object_out.$type)) {
+            alert("Failed '" + task + "'");
+            return null;
+        } else {
+            return response.object;
+        }
+    }
 }

@@ -23,5 +23,9 @@ JS Functions currently available: login(email, password), register(email, passwo
 The session is saved in var session for your convenience, no need to copy & paste it. Also note that the JS consists of
 three parts: the JQuery library (don't touch!), the library.js (only touch if you're Tamino :P ), and run.js, where all
 the functional code should go.
+<br>
+<br>
+Click here to run a unit test of the API. WARNING: while the test is running, the webpage will be unresponsive!
+<input type="button" name="unittest" value="Run API unit test" onclick="doUnitTest();">
 </body>
 </html>

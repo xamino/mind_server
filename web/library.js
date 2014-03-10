@@ -35,3 +35,15 @@ function User(email, password, name) {
     this.pwdHash = password;
     this.name = name;
 }
+
+function Success(name, description) {
+    this.$type = "Success";
+    this.name = name;
+    this.description = description;
+}
+
+function Error(name, description) {
+    this.$type = "Error";
+    this.name = name;
+    this.description = description;
+}

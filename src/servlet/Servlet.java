@@ -163,6 +163,7 @@ public class Servlet extends HttpServlet {
                 // Otherwise ignore all else, just delete:
                 return moduleManager.handleTask(Task.User.DELETE, user);
             case POSITION_FIND:
+                // TODO Input Sanitation
                 return moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
