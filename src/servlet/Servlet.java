@@ -217,12 +217,8 @@ public class Servlet extends HttpServlet {
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
+                // TODO update area?
                 return moduleManager.handleTask(Task.Location.CREATE, arrival.getObject());
-            case LOCATION_UPDATE:
-                if (!(arrival.getObject() instanceof Location)) {
-                    return new Error("WrongObject", "You supplied a wrong object for this task!");
-                }
-                return moduleManager.handleTask(Task.Location.UPDATE, arrival.getObject());
             case LOCATION_REMOVE:
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -232,7 +228,7 @@ public class Servlet extends HttpServlet {
                 if (!(arrival.getObject() instanceof Area)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                return moduleManager.handleTask(Task.Location.READ, arrival.getObject());
+                return moduleManager.handleTask(Task.Area.READ, arrival.getObject());
             case AREA_READ_ALL:
                 return moduleManager.handleTask(Task.Area.READ_ALL, null);
             case AREA_ADD:

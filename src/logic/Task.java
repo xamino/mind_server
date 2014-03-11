@@ -33,7 +33,7 @@ public interface Task {
         LOCATION_READ,
         LOCATION_READ_ALL,
         LOCATION_ADD,
-        LOCATION_UPDATE,
+        // LOCATION_UPDATE,
         LOCATION_REMOVE,
         // AREA
         AREA_READ,
