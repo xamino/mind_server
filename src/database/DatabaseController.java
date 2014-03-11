@@ -47,6 +47,7 @@ public class DatabaseController implements ServletContextListener {
      * instance. Use getInstance() to get a reference to an object of this type.
      */
     public DatabaseController() {
+        instance = this;
     }
 
     /**
