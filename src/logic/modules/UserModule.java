@@ -46,7 +46,7 @@ public class UserModule extends Module {
     }
 
     private Data annihilateUsers() {
-        Boolean deleted = database.delete(new User("", ""));
+        Boolean deleted = database.deleteAll(new User("", ""));
         if(deleted){
             database.init();
             return new Success("UserAnnihilationSuccess", "All users were removed from Database. Use default admin.");
