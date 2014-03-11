@@ -166,7 +166,6 @@ function cleanDB() {
         data: JSON.stringify(new Arrival("user_read", adminSession)),
         async: false
     }).responseText).object;
-    alert(JSON.stringify(admin));
     if (!admin.admin) {
         unitTest("toggle_admin", null, Success, adminSession);
     }
