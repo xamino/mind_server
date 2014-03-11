@@ -163,11 +163,15 @@ function cleanDB() {
     var adminSession = unitTest("login", new User("special@admin.eu", "admin", null), Success, null).description;
     unitTest("toggle_admin", null, Success, adminSession);
     unitTest("admin_annihilate_area", null, Success, adminSession);
-    unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
+    var arealist = unitTest("area_read_all", null, Array, adminSession);
+    if (arealist == null || arealist.length != 1 || arealist[0].ID != "universe") {
+        alert("DB was NOT CLEARED of AREA!");
+    }
 
+    unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
     var list = unitTest("admin_read_all", null, Array, adminSession);
     if (list == null || list.length > 1) {
-        alert("DB was NOT CLEARED!");
+        alert("DB was NOT CLEARED of USERS!");
     } else {
         // i shouldn't exist anymore
         unitTest("check", null, Error, adminSession);
