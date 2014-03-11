@@ -3,6 +3,7 @@ package logic.modules;
 import database.Data;
 import database.DatabaseController;
 import database.messages.Error;
+import database.messages.Success;
 import database.objects.User;
 import logic.Module;
 import logic.Task;
@@ -37,9 +38,20 @@ public class UserModule extends Module {
                 return delete(user);
             case READ_ALL:
                 return readAllUsers(new User("", ""));
+            case ANNIHILATE:
+                return annihilateUsers();
         }
 
         return null;
+    }
+
+    private Data annihilateUsers() {
+        Boolean deleted = database.delete(new User("", ""));
+        if(deleted){
+            database.init();
+            return new Success("UserAnnihilationSuccess", "All users were removed from Database. Use default admin.");
+        }
+        return new Error("UserAnnihilationFailure", "Removal of users failed.");
     }
 
     private Data readAllUsers(User user) {

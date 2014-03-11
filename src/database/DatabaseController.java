@@ -10,6 +10,7 @@ import database.objects.Location;
 import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
+import servlet.BCrypt;
 
 import java.util.List;
 
@@ -46,6 +47,8 @@ public class DatabaseController {
         log = Messenger.getInstance();
         Configuration config = Configuration.getInstance();
         dbName = config.getDbName();
+
+        init();
     }
 
     /**
@@ -76,7 +79,7 @@ public class DatabaseController {
         try {
             ObjectContainer con = getConnection();
             con.store(data);
-
+            //con.close();
             log.log(CLASS, data.toString() + " written to DB!");
 
             return true;
@@ -125,9 +128,9 @@ public class DatabaseController {
             result = (T) queryResult.get(0); // TODO unchecked!
         }
 
-        if (result != null) {
+        /*if (result != null) {
             log.log(CLASS, result.toString() + " read from DB!");
-        }
+        }*/
 
         return result;
     }
@@ -259,6 +262,22 @@ public class DatabaseController {
         System.out.println(result.size());
         for (Object o : result) {
             System.out.println(o);
+        }
+    }
+
+    public void init() {
+        // Initializing Database
+        if(read(new Area("universe",null,0,0,0,0)) == null){
+            create(new Area("universe", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        }
+
+        User adminProto = new User("","");
+        adminProto.setAdmin(true);
+        if(readAll(adminProto).isEmpty()){
+            adminProto=new User("admin","admin@admin.admin");
+            adminProto.setAdmin(true);
+            adminProto.setPwdHash(BCrypt.hashpw("admin",BCrypt.gensalt(12)));
+            create(adminProto);
         }
     }
 }
