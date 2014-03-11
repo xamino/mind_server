@@ -62,7 +62,7 @@ public class LocationModule extends Module {
                 case READ_LOCATIONS:
                     return readLocations(area);
                 case READ_ALL:
-                    return readAll(new Area("",null));
+                    return readAll(new Area("",null,0,0,0,0));
             }
         }
 
