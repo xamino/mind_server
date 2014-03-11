@@ -63,7 +63,7 @@ public class LocationModule extends Module {
                 case READ_LOCATIONS:
                     return readLocations(area);
                 case READ_ALL:
-                    return readAll(new Area("",null,0,0,0,0));
+                    return readAll(new Area("", null, 0, 0, 0, 0));
                 case ANNIHILATE:
                     return annihilateAreas();
             }
@@ -73,8 +73,11 @@ public class LocationModule extends Module {
     }
 
     private Data annihilateAreas() {
-        Boolean deleted = database.deleteAll(new Area("", null,0,0,0,0));
-        if(deleted){
+        Boolean deleted = database.deleteAll(new Area("", null, 0, 0, 0, 0));
+        // Delete these to be sure...
+        deleted &= database.deleteAll(new Location(0, 0, null));
+        deleted &= database.deleteAll(new WifiMorsel("", "", 0));
+        if (deleted) {
             database.init();
             return new Success("AreaAnnihilationSuccess", "All areas were removed from Database.");
         }

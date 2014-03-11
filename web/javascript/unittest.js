@@ -5,11 +5,15 @@
 function doUnitTest() {
     alert("Beginning comprehensive unit test!");
 
+    cleanDB();
+
     adminRightsTest();
     userUpdateTest();
     userAccessTest();
     areaTest();
     positionTest();
+
+    cleanDB();
 
     alert("Comprehensive unit test finished!");
 }
