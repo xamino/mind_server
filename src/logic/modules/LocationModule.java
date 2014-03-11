@@ -47,7 +47,7 @@ public class LocationModule extends Module {
             }
         } else if (request instanceof WifiMorsel) {
             //TODO are there any other operations directly on these?
-        } else if (request instanceof Area) {
+        } else if (request instanceof Area || request == null) {
             Area area = (Area) request;
 
             Task.Area areaTask = (Task.Area) task;
