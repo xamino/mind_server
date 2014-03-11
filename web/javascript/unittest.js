@@ -65,7 +65,7 @@ function userAccessTest() {
     // Create some more users for testing purposes
     unitTest("registration", new User("ego.trump@haha.com", "ßüöä", "Ego Trump"), Success, null);
     // try registering again
-    unitTest("login", new User("admin@admin.admin", "admin", null), Error, null);
+    unitTest("registration", new User("admin@admin.admin", "admin", null), Error, null);
     // try illegal registration
     unitTest("registration", new User("", "admin", ""), Error, null);
     // try login
@@ -79,7 +79,7 @@ function userAccessTest() {
     // illegal logout
     unitTest("logout", null, Success, "not_a_hash");
     // Re-login the admin
-    adminSession = unitTest("login", new User("admin@admin.de", "admin", null), Success, null).description;
+    adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
 
     // delete
     unitTest("user_delete", null, Success, adminSession);
@@ -199,7 +199,7 @@ function cleanDB() {
     unitTest("toggle_admin", null, Success, adminSession);
     unitTest("admin_annihilate_area", null, Success, adminSession);
     unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
-    // TODO
+
     // i shouldn't exist anymore
-    // unitTest("check", null, Error, adminSession);
+    var error = unitTest("check", null, Error, adminSession);
 }

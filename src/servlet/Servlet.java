@@ -7,6 +7,7 @@ package servlet;
 import database.Data;
 import database.Information;
 import database.messages.Error;
+import database.messages.Success;
 import database.objects.Area;
 import database.objects.DataList;
 import database.objects.Location;
@@ -92,12 +93,16 @@ public class Servlet extends HttpServlet {
         // Get arrival object
         // Watch out, arrival.getData() might be NULL!
         Arrival arrival = getRequest(request);
-        // Write whatever you want sent back to this object:
-        Data answer = null;
         // Check if valid:
         Data check = checkArrival(arrival);
+        // Write whatever you want sent back to this object:
+        Data answer = null;
+        // If the task was CHECK we don't need to do anything else
+        if (Task.Sanitation.safeValueOf(arrival.getTask()) == Task.Sanitation.CHECK) {
+            answer = new Success("ValidSession","Your session is valid.");
+        }
         // If the arrival is valid, checkArrival returns the database user object
-        if (check instanceof User) {
+        else if (check instanceof User) {
             // This means valid session and arrival!
             // Read user, should be used to read rights etc.
             User currentUser = (User) check;
@@ -113,7 +118,7 @@ public class Servlet extends HttpServlet {
                 log.log(TAG, "Illegal task sent: " + arrival.getTask());
                 String error = "Illegal task: " + arrival.getTask();
                 if (!currentUser.isAdmin()) {
-                    error+= ". You may not have the necessary rights!";
+                    error += ". You may not have the necessary rights!";
                 }
                 answer = new Error("IllegalTask", error);
             }

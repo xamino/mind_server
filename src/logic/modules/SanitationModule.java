@@ -106,11 +106,11 @@ public class SanitationModule extends Module {
                     User filter = new User("", sessions.get(arrival.getSessionHash()).user.getEmail());
                     Data update = EventModuleManager.getInstance().handleTask(Task.User.READ, filter);
                     if (update instanceof User) {
-                        filter = (User) update;
+                        User currentUser = (User) update;
                         // We could check whether we even need to update the user object, but we need to reset the timer anyway
-                        ActiveUser activeUser = new ActiveUser(filter, System.currentTimeMillis());
+                        ActiveUser activeUser = new ActiveUser(currentUser, System.currentTimeMillis());
                         sessions.put(arrival.getSessionHash(), activeUser);
-                        return filter;
+                        return currentUser;
                     } else {
                         // destroy session
                         destroySession(arrival.getSessionHash());
