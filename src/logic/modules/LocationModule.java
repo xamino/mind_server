@@ -73,7 +73,7 @@ public class LocationModule extends Module {
     }
 
     private Data annihilateAreas() {
-        Boolean deleted = database.delete(new Area("", null,0,0,0,0));
+        Boolean deleted = database.deleteAll(new Area("", null,0,0,0,0));
         if(deleted){
             database.init();
             return new Success("AreaAnnihilationSuccess", "All areas were removed from Database.");

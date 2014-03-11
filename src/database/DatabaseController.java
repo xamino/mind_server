@@ -258,6 +258,22 @@ public class DatabaseController {
         }
     }
 
+    /**
+     * Deletes an object of type data from database.
+     *
+     * @param data the object to be deleted.
+     * @return true if deletion was successful, otherwise false
+     */
+    public boolean deleteAll(Data data) {
+        try {
+            getConnection().delete(data);
+            log.log(CLASS, data.toString() + " deleted from DB!");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public static void listResult(List<?> result) {
         System.out.println(result.size());
         for (Object o : result) {
