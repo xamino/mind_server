@@ -273,48 +273,6 @@ public class Servlet extends HttpServlet {
     }
 
     /**
-     * This method handles all simple data requests. ONLY USE FOR SIMPLE DEBUGGING, AS IT IS NOT SECURED!
-     *
-     * @param request
-     * @param response
-     */
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response) throws IOException {
-        // Use only for DEBUGGING AND TESTS!
-        // All production code should go in POST
-
-        //log.log(TAG,moduleManager.handleTask(Task.User.READ,new User("","blbl@sdfsd.de")).toString());
-
-        Area area = new Area("TheBiggestRoomInTheWorld", null, 1, 1, 10, 10);
-        moduleManager.handleTask(Task.Area.CREATE, area);
-
-        Area area_r = (Area) moduleManager.handleTask(Task.Area.READ, area);
-
-        User a = new User("Hans", "hans@peter.de");
-        moduleManager.handleTask(Task.User.CREATE, a);
-
-        User t = (User) moduleManager.handleTask(Task.User.READ, a);
-        t.setName("Gustav");
-
-        moduleManager.handleTask(Task.User.UPDATE, t);
-
-        User b = new User("Tom", "tom@jerry.de");
-        User c = new User("Jerry", "jerry@tom.de");
-        moduleManager.handleTask(Task.User.CREATE, b);
-        moduleManager.handleTask(Task.User.CREATE, c);
-
-
-        Data userList = moduleManager.handleTask(Task.User.READ_ALL, null);
-        log.log("Servlet", "List: " + userList.toString());
-
-        moduleManager.handleTask(Task.User.DELETE, a);
-        moduleManager.handleTask(Task.User.DELETE, b);
-        moduleManager.handleTask(Task.User.DELETE, c);
-
-        moduleManager.handleTask(Task.Area.DELETE, area_r);
-    }
-
-    /**
      * Creates JSON object out of answer and encapsulates it in the type object.
      *
      * @param response The response where the data will be written.

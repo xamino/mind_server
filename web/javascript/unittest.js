@@ -15,7 +15,7 @@ function doUnitTest() {
 
 function adminRightsTest() {
     alert("Beginning admin rights test.");
-    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Success, null);
+
     var adminSession = unitTest("login", new User("admin@admin.de", "admin", null), Success, null).description;
 
     // try admin access
@@ -58,9 +58,8 @@ function userUpdateTest() {
 function userAccessTest() {
     alert("Beginning registration, login, logout.");
     // Check initial registration
-    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Success, null);
-    // Create some more users for testing purposes
     unitTest("registration", new User("maria.heilig@gott.de", "maria", "Maria Heilig"), Success, null);
+    // Create some more users for testing purposes
     unitTest("registration", new User("ego.trump@haha.com", "ßüöä", "Ego Trump"), Success, null);
     // try registering again
     unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Error, null);
@@ -94,9 +93,7 @@ function userAccessTest() {
 function areaTest() {
     alert("Beginning area, location, position.");
 
-    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Success, null);
-    var adminSession = unitTest("login", new User("admin@admin.de", "admin", null), Success, null).description;
-    unitTest("toggle_admin", null, Success, adminSession);
+    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
 
     var wifis1 = [
         new WifiMorsel("00:19:07:07:64:00", "eduroam", -93),
@@ -130,8 +127,9 @@ function cleanDB() {
     unitTest("toggle_admin", null, Success, adminSession);
     unitTest("admin_annihilate_area", null, Success, adminSession);
     unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
+    // TODO
     // i shouldn't exist anymore
-    unitTest("check", null, Error, adminSession);
+    // unitTest("check", null, Error, adminSession);
 }
 
 /**
