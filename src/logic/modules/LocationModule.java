@@ -3,6 +3,7 @@ package logic.modules;
 import database.Data;
 import database.DatabaseController;
 import database.messages.Error;
+import database.messages.Success;
 import database.objects.Area;
 import database.objects.Location;
 import database.objects.WifiMorsel;
@@ -46,7 +47,7 @@ public class LocationModule extends Module {
             }
         } else if (request instanceof WifiMorsel) {
             //TODO are there any other operations directly on these?
-        } else if (request instanceof Area) {
+        } else if (request instanceof Area || request == null) {
             Area area = (Area) request;
 
             Task.Area areaTask = (Task.Area) task;
@@ -62,13 +63,26 @@ public class LocationModule extends Module {
                 case READ_LOCATIONS:
                     return readLocations(area);
                 case READ_ALL:
-                    return readAll(new Area("",null));
+                    return readAll(new Area("", null, 0, 0, 0, 0));
+                case ANNIHILATE:
+                    return annihilateAreas();
             }
         }
 
         return new Error("MissingOperation", "The Location Module is unable to perform the Task as it appears not to be implemented.");
     }
 
+    private Data annihilateAreas() {
+        Boolean deleted = database.deleteAll(new Area("", null, 0, 0, 0, 0));
+        // Delete these to be sure...
+        deleted &= database.deleteAll(new Location(0, 0, null));
+        deleted &= database.deleteAll(new WifiMorsel("", "", 0));
+        if (deleted) {
+            database.init();
+            return new Success("AreaAnnihilationSuccess", "All areas were removed from Database.");
+        }
+        return new Error("AreaAnnihilationFailure", "Removal of areas failed.");
+    }
 
     private Data readAll(Area area) {
         Data data = database.readAll(area);

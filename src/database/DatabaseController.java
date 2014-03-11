@@ -1,8 +1,9 @@
 package database;
 
 import com.db4o.Db4oEmbedded;
+import com.db4o.EmbeddedObjectContainer;
 import com.db4o.ObjectContainer;
-import com.db4o.config.EmbeddedConfiguration;
+import com.db4o.ObjectSet;
 import com.db4o.query.Predicate;
 import database.objects.Area;
 import database.objects.DataList;
@@ -10,21 +11,24 @@ import database.objects.Location;
 import database.objects.User;
 import io.Configuration;
 import logger.Messenger;
+import servlet.BCrypt;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import java.util.List;
 
 /**
  * @author Tamino Hartmann
  */
-public class DatabaseController {
+public class DatabaseController implements ServletContextListener {
     /**
      * Variable for storing the instance of the class.
      */
     private static DatabaseController instance;
-    private final Messenger log;
+    private Messenger log;
     private final String CLASS = "DatabaseController";
-    private final String dbName;
-    private ObjectContainer connection;
+    private ObjectContainer con;
 
     /**
      * Method for getting a valid reference of this object.
@@ -38,27 +42,13 @@ public class DatabaseController {
         return instance;
     }
 
+
     /**
      * Private constructor for DatabaseController for implementing the singleton
      * instance. Use getInstance() to get a reference to an object of this type.
      */
-    private DatabaseController() {
-        log = Messenger.getInstance();
-        Configuration config = Configuration.getInstance();
-        dbName = config.getDbName();
-    }
-
-    /**
-     * Returns an instance of the Database.
-     *
-     * @return A Database Connection
-     */
-    private ObjectContainer getConnection() {
-        if (connection == null) {
-            EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
-            connection = Db4oEmbedded.openFile(conf, dbName); // TODO configuration (user, password, locatio
-        }
-        return connection;
+    public DatabaseController() {
+        instance = this;
     }
 
     /**
@@ -74,9 +64,8 @@ public class DatabaseController {
         }
 
         try {
-            ObjectContainer con = getConnection();
             con.store(data);
-
+            //con.close();
             log.log(CLASS, data.toString() + " written to DB!");
 
             return true;
@@ -86,8 +75,6 @@ public class DatabaseController {
     }
 
     public <T extends Data> T read(final T requestFilter) {
-        ObjectContainer con = getConnection();
-
         List queryResult = null;
 
         // Read Data depending on the objects unique key
@@ -125,17 +112,15 @@ public class DatabaseController {
             result = (T) queryResult.get(0); // TODO unchecked!
         }
 
-        if (result != null) {
+        /*if (result != null) {
             log.log(CLASS, result.toString() + " read from DB!");
-        }
+        }*/
 
         return result;
     }
 
     public <T extends Data> DataList<T> readAll(final T requestFilter) {
         try {
-            ObjectContainer con = getConnection();
-
             List queryResult = con.query(requestFilter.getClass());
 
             // write query result into a Datalist
@@ -162,8 +147,6 @@ public class DatabaseController {
      */
     public Data readChildren(Data requestFilter) {
         try {
-            ObjectContainer con = getConnection();
-
             List queryResult;
             DataList result = null;
 
@@ -214,7 +197,7 @@ public class DatabaseController {
                 userToUpdate.setName(dataUser.getName());
                 userToUpdate.setPwdHash(dataUser.getPwdHash());
 
-                getConnection().store(userToUpdate);
+                con.store(userToUpdate);
 
                 log.log(CLASS, userToUpdate.toString() + " updated in DB!");
 
@@ -225,7 +208,7 @@ public class DatabaseController {
                 areaToUpdate.setID(dataArea.getID());
                 areaToUpdate.setLocations(dataArea.getLocations());
 
-                getConnection().store(areaToUpdate);
+                con.store(areaToUpdate);
 
                 log.log(CLASS, areaToUpdate.toString() + " updated in DB!");
             }
@@ -247,8 +230,27 @@ public class DatabaseController {
     public boolean delete(Data data) {
         try {
             Data dataToDelete = read(data);
-            getConnection().delete(dataToDelete);
+            con.delete(dataToDelete);
             log.log(CLASS, dataToDelete.toString() + " deleted from DB!");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Deletes an object of type data from database.
+     *
+     * @param data the object to be deleted.
+     * @return true if deletion was successful, otherwise false
+     */
+    public boolean deleteAll(Data data) {
+        try {
+            ObjectSet objects = con.query(data.getClass());
+            while (objects.hasNext()) {
+                con.delete(objects.next());
+            }
+            log.log(CLASS, data.toString() + " deleted from DB!");
             return true;
         } catch (Exception e) {
             return false;
@@ -260,5 +262,55 @@ public class DatabaseController {
         for (Object o : result) {
             System.out.println(o);
         }
+    }
+
+    public void init() {
+        // Initializing Database
+        if (read(new Area("universe", null, 0, 0, 0, 0)) == null) {
+            create(new Area("universe", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        }
+
+        User adminProto = new User("", "");
+        adminProto.setAdmin(true);
+        if (readAll(adminProto).isEmpty()) {
+            adminProto = new User("admin", "admin@admin.admin");
+            adminProto.setAdmin(true);
+            adminProto.setPwdHash(BCrypt.hashpw("admin", BCrypt.gensalt(12)));
+            create(adminProto);
+        }
+    }
+
+    @Override
+    public void contextInitialized(ServletContextEvent event) {
+        log = Messenger.getInstance();
+        Configuration config = Configuration.getInstance();
+        String dbName = config.getDbName();
+
+        ServletContext context = event.getServletContext();
+        String filePath = context.getRealPath("WEB-INF/"
+                + dbName);
+        EmbeddedObjectContainer rootContainer = Db4oEmbedded.openFile(filePath);
+        con = rootContainer;
+        //context.setAttribute("DB_SERVER", rootContainer);
+        context.log("db4o startup on " + filePath);
+
+        init();
+    }
+
+
+    @Override
+    public void contextDestroyed(ServletContextEvent event) {
+        ServletContext context = event.getServletContext();
+        //ObjectContainer rootContainer = (ObjectContainer) context.getAttribute("DB_SERVER");
+        //context.removeAttribute("DB_SERVER");
+        close(con);
+        context.log("db4o shutdown");
+    }
+
+    private void close(ObjectContainer container) {
+        if (container != null) {
+            container.close();
+        }
+        container = null;
     }
 }

@@ -34,6 +34,7 @@ function User(email, password, name) {
     this.email = email;
     this.pwdHash = password;
     this.name = name;
+    // this.admin = admin; // can not be changed by unauthorized clients, don't try :P
 }
 
 function Success(name, description) {
@@ -46,4 +47,28 @@ function Error(name, description) {
     this.$type = "Error";
     this.name = name;
     this.description = description;
+}
+
+function Area(ID, locations, topLeftX, topLeftY, width, height) {
+    this.$type = "Area";
+    this.ID = ID;
+    this.locations = locations;
+    this.topLeftX = topLeftX;
+    this.topLeftY = topLeftY;
+    this.width = width;
+    this.height = height;
+}
+
+function Location(coordinateX, coordinateY, wifiMorsels) {
+    this.$type = "Location"
+    this.coordinateX = coordinateX;
+    this.coordinateY = coordinateY;
+    this.wifiMorsels = wifiMorsels;
+}
+
+function WifiMorsel(wifiMac, wifiName, wifiLevel) {
+    this.$type = "WifiMorsel";
+    this.wifiMac = wifiMac;
+    this.wifiName = wifiName;
+    this.wifiLevel = wifiLevel;
 }

@@ -93,18 +93,35 @@ public class SanitationModule extends Module {
             // break;
             case REGISTRATION:
                 if (user != null) {
+                    if (user.getEmail().isEmpty() || user.getPwdHash().isEmpty()) {
+                        return new Error("IllegalRegistrationValues", "Email and password may not be empty!");
+                    }
                     return registration(user);
                 }
                 break;
             case CHECK:
                 if (checkSession(arrival.getSessionHash())) {
-                    // If valid, return the corresponding user object:
-                    return sessions.get(arrival.getSessionHash()).user;
+                    // If valid, return the corresponding user object. Fresh from the DB to keep in sync with updates
+                    // To do that, we first need to get the new object:
+                    User filter = new User("", sessions.get(arrival.getSessionHash()).user.getEmail());
+                    Data update = EventModuleManager.getInstance().handleTask(Task.User.READ, filter);
+                    if (update instanceof User) {
+                        User currentUser = (User) update;
+                        // We could check whether we even need to update the user object, but we need to reset the timer anyway
+                        ActiveUser activeUser = new ActiveUser(currentUser, System.currentTimeMillis());
+                        sessions.put(arrival.getSessionHash(), activeUser);
+                        return currentUser;
+                    } else {
+                        // destroy session
+                        destroySession(arrival.getSessionHash());
+                        return new Error("SessionCheckError", "User couldn't be found in DB! You have been logged out.");
+                    }
                 } else {
                     return new Error("SessionInvalid", "The session is NOT valid!");
                 }
                 // break;
             default:
+                log.error(TAG, "Unknown task #" + todo + "# sent to SanitationModule! Shouldn't happen!");
                 return new Error("UnknownTask", "Unknown task sent to SanitationModule!");
         }
         return new Error("SanitationTaskError", "A task failed to complete – have you supplied the correct object type?");

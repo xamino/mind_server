@@ -16,9 +16,60 @@ public class Area implements Data {
      */
     private DataList<Location> locations;
 
-    public Area(String ID, DataList<Location> locations) {
+    /**
+     * Position
+     */
+    private int topLeftX, topLeftY;
+    private int width, height;
+
+    public Area(String ID, DataList<Location> locations, int topLeftX, int topLeftY, int width, int height) {
         this.ID = ID;
         this.locations = locations;
+        this.topLeftX = topLeftX;
+        this.topLeftY = topLeftY;
+        this.width = width;
+        this.height = height;
+    }
+
+    /**
+     * Returns area of area.
+     * @return The integer value in m²
+     */
+    public int getArea() {
+        return width * height;
+    }
+
+    public int getTopLeftX() {
+
+        return topLeftX;
+    }
+
+    public void setTopLeftX(int topLeftX) {
+        this.topLeftX = topLeftX;
+    }
+
+    public int getTopLeftY() {
+        return topLeftY;
+    }
+
+    public void setTopLeftY(int topLeftY) {
+        this.topLeftY = topLeftY;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
     }
 
     public String getID() {

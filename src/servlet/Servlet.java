@@ -92,12 +92,16 @@ public class Servlet extends HttpServlet {
         // Get arrival object
         // Watch out, arrival.getData() might be NULL!
         Arrival arrival = getRequest(request);
-        // Write whatever you want sent back to this object:
-        Data answer = null;
         // Check if valid:
         Data check = checkArrival(arrival);
+        // Write whatever you want sent back to this object:
+        Data answer = null;
+        // If the task was CHECK we don't need to do anything else
+        if (Task.Sanitation.safeValueOf(arrival.getTask()) == Task.Sanitation.CHECK) {
+            answer = check;
+        }
         // If the arrival is valid, checkArrival returns the database user object
-        if (check instanceof User) {
+        else if (check instanceof User) {
             // This means valid session and arrival!
             // Read user, should be used to read rights etc.
             User currentUser = (User) check;
@@ -111,7 +115,11 @@ public class Servlet extends HttpServlet {
             // If answer is still null, the task wasn't found (or the rights weren't set):
             if (answer == null) {
                 log.log(TAG, "Illegal task sent: " + arrival.getTask());
-                answer = new Error("POST illegal TASK", "Illegal task: " + arrival.getTask());
+                String error = "Illegal task: " + arrival.getTask();
+                if (!currentUser.isAdmin()) {
+                    error += ". You may not have the necessary rights!";
+                }
+                answer = new Error("IllegalTask", error);
             }
         } else {
             // This means the check failed, so there is a message in check that needs to be sent back
@@ -141,11 +149,14 @@ public class Servlet extends HttpServlet {
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                // TODO input sanitation? How do we differentiate unchanged values from null or empty fields?
                 User sentUser = (User) arrival.getObject();
                 // Email is primary key, thus can not be changed!
                 if (!sentUser.getEmail().equals(user.getEmail())) {
                     return new Error("IllegalChange", "Email can not be changed in an existing user");
+                }
+                // Make sure that you can't set yourself to admin
+                if (sentUser.isAdmin()) {
+                    return new Error("IllegalChange", "You do not have the rights to modify your permissions!");
                 }
                 // We need to catch a password change, as it must be hashed:
                 String password = sentUser.getPwdHash();
@@ -153,7 +164,9 @@ public class Servlet extends HttpServlet {
                     // hash:
                     sentUser.setPwdHash(BCrypt.hashpw(password, BCrypt.gensalt(12)));
                 }
-                // TODO update session user object!
+                // Note that the session user object now needs to be updated. This is done the next time the user
+                // sends a request through SanitationModule; it will always get the up to date object from the
+                // database.
                 return moduleManager.handleTask(Task.User.UPDATE, sentUser);
             case USER_DELETE:
                 // To catch some errors, we enforce that no object has been passed along:
@@ -166,7 +179,7 @@ public class Servlet extends HttpServlet {
                 // Otherwise ignore all else, just delete:
                 return moduleManager.handleTask(Task.User.DELETE, user);
             case POSITION_FIND:
-                // TODO Input Sanitation
+                // TODO position returns an error, do we even need to check here? Check with Andy!
                 return moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
@@ -203,84 +216,68 @@ public class Servlet extends HttpServlet {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 return moduleManager.handleTask(Task.User.DELETE, arrival.getObject());
+            case LOCATION_READ:
+                if (!(arrival.getObject() instanceof Location)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Location.READ, arrival.getObject());
             case LOCATION_ADD:
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
+                // TODO update area?
                 return moduleManager.handleTask(Task.Location.CREATE, arrival.getObject());
-            case LOCATION_UPDATE:
-                if (!(arrival.getObject() instanceof Location)) {
-                    return new Error("WrongObject", "You supplied a wrong object for this task!");
-                }
-                return moduleManager.handleTask(Task.Location.UPDATE, arrival.getObject());
             case LOCATION_REMOVE:
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 return moduleManager.handleTask(Task.Location.DELETE, arrival.getObject());
+            case AREA_READ:
+                if (!(arrival.getObject() instanceof Area)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Area.READ, arrival.getObject());
+            case AREA_READ_ALL:
+                return moduleManager.handleTask(Task.Area.READ_ALL, null);
+            case AREA_ADD:
+                if (!(arrival.getObject() instanceof Area)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Area.CREATE, arrival.getObject());
+            case AREA_UPDATE:
+                if (!(arrival.getObject() instanceof Area)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Area.UPDATE, arrival.getObject());
+            case AREA_REMOVE:
+                if (!(arrival.getObject() instanceof Area)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Area.DELETE, arrival.getObject());
             case ADMIN_READ_ALL:
                 Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
                 Data msg = checkDataMessage(data);
                 if (msg == null && data instanceof DataList) {
                     DataList list = (DataList) data;
-                    /*
                     DataList<User> admins = new DataList<User>();
-                    for (Data us : list) {
+                    for (Object us : list) {
                         if (!(us instanceof User))
                             continue;
                         if (((User) us).isAdmin())
                             admins.add((User) us);
                     }
                     return admins;
-                    */
-                    return data;
                 }
                 return msg;
+            case ADMIN_ANNIHILATE_AREA:
+                log.log(TAG, "Removing all area objects!");
+                return moduleManager.handleTask(Task.Area.ANNIHILATE, null);
+            case ADMIN_ANNIHILATE_USER:
+                log.log(TAG, "Removing all users!");
+                return moduleManager.handleTask(Task.User.ANNIHILATE, null);
             default:
                 return null;
         }
-    }
-
-    /**
-     * This method handles all simple data requests. ONLY USE FOR SIMPLE DEBUGGING, AS IT IS NOT SECURED!
-     *
-     * @param request
-     * @param response
-     */
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response) throws IOException {
-        // Use only for DEBUGGING AND TESTS!
-        // All production code should go in POST
-
-        //log.log(TAG,moduleManager.handleTask(Task.User.READ,new User("","blbl@sdfsd.de")).toString());
-
-        Area area = new Area("TheBiggestRoomInTheWorld", null);
-        moduleManager.handleTask(Task.Area.CREATE, area);
-
-        Area area_r = (Area) moduleManager.handleTask(Task.Area.READ, area);
-
-        User a = new User("Hans", "hans@peter.de");
-        moduleManager.handleTask(Task.User.CREATE, a);
-
-        User t = (User) moduleManager.handleTask(Task.User.READ, a);
-        t.setName("Gustav");
-
-        moduleManager.handleTask(Task.User.UPDATE, t);
-
-        User b = new User("Tom", "tom@jerry.de");
-        User c = new User("Jerry", "jerry@tom.de");
-        moduleManager.handleTask(Task.User.CREATE, b);
-        moduleManager.handleTask(Task.User.CREATE, c);
-
-
-        Data userList = moduleManager.handleTask(Task.User.READ_ALL, null);
-        log.log("Servlet", "List: " + userList.toString());
-
-        moduleManager.handleTask(Task.User.DELETE, a);
-        moduleManager.handleTask(Task.User.DELETE, b);
-        moduleManager.handleTask(Task.User.DELETE, c);
-
-        moduleManager.handleTask(Task.Area.DELETE, area_r);
     }
 
     /**
@@ -295,6 +292,7 @@ public class Servlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         // If this happens, send back a standard error message.
         if (answer == null) {
+            log.error(TAG, "Empty ANSWER! Should never happen!");
             answer = new Error("Empty ANSWER", "Answer does not contain an object! Make sure your request is valid!");
         }
         Departure dep = new Departure(answer);
@@ -310,6 +308,7 @@ public class Servlet extends HttpServlet {
      * error correction.
      * @throws IOException
      */
+    // TODO catch "object":null !!!
     private Arrival getRequest(HttpServletRequest request) throws IOException {
         BufferedReader reader = request.getReader();
         String out = "";
@@ -359,10 +358,18 @@ public class Servlet extends HttpServlet {
     /**
      * Arrival class – structure of incomming requests must conform to this class.
      */
-    // TODO finish commenting
     public class Arrival implements Data {
+        /**
+         * The session hash of the client.
+         */
         private String sessionHash;
+        /**
+         * The API task to do.
+         */
         private String task;
+        /**
+         * Voluntary object with which to work with during a task.
+         */
         private Data object;
 
         public Arrival(String sessionHash, String task, Data object) {
@@ -373,10 +380,6 @@ public class Servlet extends HttpServlet {
 
         public String getSessionHash() {
             return sessionHash;
-        }
-
-        public void setSessionHash(String sessionHash) {
-            this.sessionHash = sessionHash;
         }
 
         @Override
@@ -420,10 +423,17 @@ public class Servlet extends HttpServlet {
     /**
      * Wrapper object class for outgoing answers – required because lists for example can not simply be Jsonated.
      */
-    // TODO finish commenting
     public class Departure implements Data {
+        /**
+         * The data object that is sent.
+         */
         private Data object;
 
+        /**
+         * Constructor.
+         *
+         * @param object The object to send.
+         */
         public Departure(Data object) {
             this.object = object;
         }

@@ -10,7 +10,11 @@ public interface Task {
         /**
          * Task to fetch as List of all Users, use null as request
          */
-        READ_ALL
+        READ_ALL,
+        /**
+         * Removes all Users from the database and restores the default admin
+         */
+        ANNIHILATE,
     }
 
     /**
@@ -29,11 +33,19 @@ public interface Task {
         USER_ADD,
         USER_UPDATE,
         USER_DELETE,
+        /**
+         * Removes all areas and locations from the database and restores the default area
+         */
+        ADMIN_ANNIHILATE_AREA,
+        /**
+         * Removes all users from the database and restores the default admin
+         */
+        ADMIN_ANNIHILATE_USER,
         // LOCATION
         LOCATION_READ,
         LOCATION_READ_ALL,
         LOCATION_ADD,
-        LOCATION_UPDATE,
+        // LOCATION_UPDATE,
         LOCATION_REMOVE,
         // AREA
         AREA_READ,
@@ -128,7 +140,11 @@ public interface Task {
         /**
          * Task to fetch a List of all available Areas
          */
-        READ_ALL
+        READ_ALL,
+        /**
+         * Removes all areas and locations from the database and restores the default area
+         */
+        ANNIHILATE
     }
 }
 
