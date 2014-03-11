@@ -156,6 +156,25 @@ function positionTest() {
 }
 
 /**
+ * Use this method to clean the DB.
+ */
+function cleanDB() {
+    unitTest("registration", new User("special@admin.eu", "admin", ""), Success, null);
+    var adminSession = unitTest("login", new User("special@admin.eu", "admin", null), Success, null).description;
+    unitTest("toggle_admin", null, Success, adminSession);
+    unitTest("admin_annihilate_area", null, Success, adminSession);
+    unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
+
+    var list = unitTest("admin_read_all", null, Array, adminSession);
+    if (list == null || list.length > 1) {
+        alert("DB was NOT CLEARED!");
+    } else {
+        // i shouldn't exist anymore
+        unitTest("check", null, Error, adminSession);
+    }
+}
+
+/**
  * Runs a single test.
  * @param task The server API task to execute.
  * @param object_in The object to send.
@@ -188,18 +207,4 @@ function unitTest(task, object_in, object_out, session) {
     } else {
         return response;
     }
-}
-
-/**
- * Use this method to clean the DB.
- */
-function cleanDB() {
-    unitTest("registration", new User("special@admin.eu", "admin", ""), Success, null);
-    var adminSession = unitTest("login", new User("special@admin.eu", "admin", null), Success, null).description;
-    unitTest("toggle_admin", null, Success, adminSession);
-    unitTest("admin_annihilate_area", null, Success, adminSession);
-    unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
-
-    // i shouldn't exist anymore
-    var error = unitTest("check", null, Error, adminSession);
 }
