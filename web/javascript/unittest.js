@@ -36,7 +36,7 @@ function doUnitTest() {
     // Do an admin task:
     unitTest("admin_read_all", null, Array, adminSession);
 
-    alert("Admin done.")
+    alert("Admin rights test done.")
 
     // Test user update
     unitTest("user_update", new User("maria.heilig@gott.de","jesus", "Maria Joseph"), Success, mariaSession);
@@ -58,6 +58,8 @@ function doUnitTest() {
     // TODO
 
     alert("Normal user done.")
+
+
 
     // Clean remaining with admin:
     unitTest("user_delete", null, Success, adminSession);

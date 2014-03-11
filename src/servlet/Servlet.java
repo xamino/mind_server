@@ -279,7 +279,7 @@ public class Servlet extends HttpServlet {
 
         //log.log(TAG,moduleManager.handleTask(Task.User.READ,new User("","blbl@sdfsd.de")).toString());
 
-        Area area = new Area("TheBiggestRoomInTheWorld", null);
+        Area area = new Area("TheBiggestRoomInTheWorld", null, 1, 1, 10, 10);
         moduleManager.handleTask(Task.Area.CREATE, area);
 
         Area area_r = (Area) moduleManager.handleTask(Task.Area.READ, area);
@@ -320,6 +320,7 @@ public class Servlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         // If this happens, send back a standard error message.
         if (answer == null) {
+            log.error(TAG, "Empty ANSWER! Should never happen!");
             answer = new Error("Empty ANSWER", "Answer does not contain an object! Make sure your request is valid!");
         }
         Departure dep = new Departure(answer);
