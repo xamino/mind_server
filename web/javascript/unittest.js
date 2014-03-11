@@ -5,10 +5,11 @@
 function doUnitTest() {
     alert("Beginning comprehensive unit test!");
 
-    adminRightsTest();
-    userUpdateTest();
-    userAccessTest();
-    areaTest();
+    //adminRightsTest();
+    //userUpdateTest();
+    //userAccessTest();
+    //areaTest();
+    positionTest();
 
     alert("Comprehensive unit test finished!");
 }
@@ -132,6 +133,42 @@ function cleanDB() {
     unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
     // i shouldn't exist anymore
     unitTest("check", null, Error, adminSession);
+}
+
+function positionTest() {
+    alert("Beginning position.");
+
+    //unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Success, null);
+    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    unitTest("toggle_admin", null, Success, adminSession);
+
+    var location1 = new Location(100, 100, [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -93),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -90),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -85)
+    ]);
+
+    var location2 = new Location(200, 200, [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -80),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -70),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -60)
+    ]);
+
+    var locationRequest = new Location(0, 0, [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -92),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -91),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -84)
+    ]);
+
+    unitTest("location_add",location1,Success,adminSession);
+    unitTest("location_add",location2,Success,adminSession);
+    var foundPosition = unitTest("position_find", locationRequest, Location, adminSession);
+
+    if (locationRequest.coordinateX != foundPosition.coordinateX || locationRequest.coordinateY != foundPosition.coordinateY) {
+        alert("Failed '" + find_position + "'\n\n" + JSON.stringify(foundPosition) + "\n\nPosition does not match the correct one.");
+    }
+
+    alert("Position done.");
 }
 
 /**
