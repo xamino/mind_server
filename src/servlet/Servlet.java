@@ -208,6 +208,11 @@ public class Servlet extends HttpServlet {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 return moduleManager.handleTask(Task.User.DELETE, arrival.getObject());
+            case LOCATION_READ:
+                if (!(arrival.getObject() instanceof Location)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Location.READ, arrival.getObject());
             case LOCATION_ADD:
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -223,6 +228,28 @@ public class Servlet extends HttpServlet {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 return moduleManager.handleTask(Task.Location.DELETE, arrival.getObject());
+            case AREA_READ:
+                if (!(arrival.getObject() instanceof Area)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Location.READ, arrival.getObject());
+            case AREA_READ_ALL:
+                return moduleManager.handleTask(Task.Area.READ_ALL, null);
+            case AREA_ADD:
+                if (!(arrival.getObject() instanceof Area)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Area.CREATE, arrival.getObject());
+            case AREA_UPDATE:
+                if (!(arrival.getObject() instanceof Area)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Area.UPDATE, arrival.getObject());
+            case AREA_REMOVE:
+                if (!(arrival.getObject() instanceof Area)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Area.DELETE, arrival.getObject());
             case ADMIN_READ_ALL:
                 Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
                 Data msg = checkDataMessage(data);
