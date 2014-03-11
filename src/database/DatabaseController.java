@@ -3,6 +3,7 @@ package database;
 import com.db4o.Db4oEmbedded;
 import com.db4o.EmbeddedObjectContainer;
 import com.db4o.ObjectContainer;
+import com.db4o.ObjectSet;
 import com.db4o.query.Predicate;
 import database.objects.Area;
 import database.objects.DataList;
@@ -25,7 +26,7 @@ public class DatabaseController implements ServletContextListener {
      * Variable for storing the instance of the class.
      */
     private static DatabaseController instance;
-    private  Messenger log;
+    private Messenger log;
     private final String CLASS = "DatabaseController";
     private ObjectContainer con;
 
@@ -146,7 +147,7 @@ public class DatabaseController implements ServletContextListener {
      */
     public Data readChildren(Data requestFilter) {
         try {
-             List queryResult;
+            List queryResult;
             DataList result = null;
 
             // process all possible classes
@@ -245,7 +246,10 @@ public class DatabaseController implements ServletContextListener {
      */
     public boolean deleteAll(Data data) {
         try {
-            con.delete(data.getClass());
+            ObjectSet objects = con.query(data.getClass());
+            while (objects.hasNext()) {
+                con.delete(objects.next());
+            }
             log.log(CLASS, data.toString() + " deleted from DB!");
             return true;
         } catch (Exception e) {
