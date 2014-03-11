@@ -114,9 +114,7 @@ public class SanitationModule extends Module {
                     } else {
                         // destroy session
                         destroySession(arrival.getSessionHash());
-                        // Database error - shouldn't happen
-                        log.error(TAG, "Database error while checking session! Shouldn't happen!");
-                        return new Error("SessionCheckError", "Database error while checking session!");
+                        return new Error("SessionCheckError", "User couldn't be found in DB! You have been logged out.");
                     }
                 } else {
                     return new Error("SessionInvalid", "The session is NOT valid!");
