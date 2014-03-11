@@ -5,10 +5,10 @@
 function doUnitTest() {
     alert("Beginning comprehensive unit test!");
 
-    //adminRightsTest();
-    //userUpdateTest();
-    //userAccessTest();
-    //areaTest();
+    adminRightsTest();
+    userUpdateTest();
+    userAccessTest();
+    areaTest();
     positionTest();
 
     alert("Comprehensive unit test finished!");
