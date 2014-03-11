@@ -245,7 +245,7 @@ public class DatabaseController implements ServletContextListener {
      */
     public boolean deleteAll(Data data) {
         try {
-            con.delete(data);
+            con.delete(data.getClass());
             log.log(CLASS, data.toString() + " deleted from DB!");
             return true;
         } catch (Exception e) {
