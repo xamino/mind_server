@@ -17,7 +17,9 @@ function doUnitTest() {
 function adminRightsTest() {
     alert("Beginning admin rights test.");
 
-    var adminSession = unitTest("login", new User("admin@admin.de", "admin", null), Success, null).description;
+    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    // Deactivate admin
+    unitTest("toggle_admin", null, Success, adminSession);
 
     // try admin access
     unitTest("admin_read_all", null, Error, adminSession);
@@ -63,11 +65,11 @@ function userAccessTest() {
     // Create some more users for testing purposes
     unitTest("registration", new User("ego.trump@haha.com", "ßüöä", "Ego Trump"), Success, null);
     // try registering again
-    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Error, null);
+    unitTest("login", new User("admin@admin.admin", "admin", null), Error, null);
     // try illegal registration
     unitTest("registration", new User("", "admin", ""), Error, null);
     // try login
-    var adminSession = unitTest("login", new User("admin@admin.de", "admin", null), Success, null).description;
+    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
     var mariaSession = unitTest("login", new User("maria.heilig@gott.de", "maria", null), Success, null).description;
     var egoSession = unitTest("login", new User("ego.trump@haha.com", "ßüöä", null), Success, null).description;
     // illegal login
@@ -119,26 +121,10 @@ function areaTest() {
     alert("Area, Location, Position done.");
 }
 
-/**
- * Use this method to clean the DB.
- */
-function cleanDB() {
-    unitTest("registration", new User("special@admin.eu", "admin", ""), Success, null);
-    var adminSession = unitTest("login", new User("special@admin.eu", "admin", null), Success, null).description;
-    unitTest("toggle_admin", null, Success, adminSession);
-    unitTest("admin_annihilate_area", null, Success, adminSession);
-    unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
-    // TODO
-    // i shouldn't exist anymore
-    // unitTest("check", null, Error, adminSession);
-}
-
 function positionTest() {
     alert("Beginning position.");
 
-    //unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Success, null);
     var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
-    unitTest("toggle_admin", null, Success, adminSession);
 
     var location1 = new Location(100, 100, [
         new WifiMorsel("00:19:07:07:64:00", "eduroam", -93),
@@ -158,8 +144,8 @@ function positionTest() {
         new WifiMorsel("00:19:07:07:64:02", "welcome", -84)
     ]);
 
-    unitTest("location_add",location1,Success,adminSession);
-    unitTest("location_add",location2,Success,adminSession);
+    unitTest("location_add", location1, Success, adminSession);
+    unitTest("location_add", location2, Success, adminSession);
     var foundPosition = unitTest("position_find", locationRequest, Location, adminSession);
 
     if (locationRequest.coordinateX != foundPosition.coordinateX || locationRequest.coordinateY != foundPosition.coordinateY) {
@@ -202,4 +188,18 @@ function unitTest(task, object_in, object_out, session) {
     } else {
         return response;
     }
+}
+
+/**
+ * Use this method to clean the DB.
+ */
+function cleanDB() {
+    unitTest("registration", new User("special@admin.eu", "admin", ""), Success, null);
+    var adminSession = unitTest("login", new User("special@admin.eu", "admin", null), Success, null).description;
+    unitTest("toggle_admin", null, Success, adminSession);
+    unitTest("admin_annihilate_area", null, Success, adminSession);
+    unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
+    // TODO
+    // i shouldn't exist anymore
+    // unitTest("check", null, Error, adminSession);
 }

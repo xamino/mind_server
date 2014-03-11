@@ -111,7 +111,11 @@ public class Servlet extends HttpServlet {
             // If answer is still null, the task wasn't found (or the rights weren't set):
             if (answer == null) {
                 log.log(TAG, "Illegal task sent: " + arrival.getTask());
-                answer = new Error("POST illegal TASK", "Illegal task: " + arrival.getTask());
+                String error = "Illegal task: " + arrival.getTask();
+                if (!currentUser.isAdmin()) {
+                    error+= ". You may not have the necessary rights!";
+                }
+                answer = new Error("IllegalTask", error);
             }
         } else {
             // This means the check failed, so there is a message in check that needs to be sent back
