@@ -34,6 +34,7 @@ function User(email, password, name) {
     this.email = email;
     this.pwdHash = password;
     this.name = name;
+    // this.admin = admin; // can not be changed by unauthorized clients, don't try :P
 }
 
 function Success(name, description) {

@@ -309,6 +309,7 @@ public class Servlet extends HttpServlet {
      * error correction.
      * @throws IOException
      */
+    // TODO catch "object":null !!!
     private Arrival getRequest(HttpServletRequest request) throws IOException {
         BufferedReader reader = request.getReader();
         String out = "";

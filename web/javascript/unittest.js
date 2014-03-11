@@ -161,13 +161,23 @@ function positionTest() {
 function cleanDB() {
     unitTest("registration", new User("special@admin.eu", "admin", ""), Success, null);
     var adminSession = unitTest("login", new User("special@admin.eu", "admin", null), Success, null).description;
-    unitTest("toggle_admin", null, Success, adminSession);
+    // Check if we are currently an admin... :P
+    var admin = JSON.parse($.ajax({
+        data: JSON.stringify(new Arrival("user_read", adminSession)),
+        async: false
+    }).responseText).object;
+    alert(JSON.stringify(admin));
+    if (!admin.admin) {
+        unitTest("toggle_admin", null, Success, adminSession);
+    }
+    // Destroy areas
     unitTest("admin_annihilate_area", null, Success, adminSession);
     var arealist = unitTest("area_read_all", null, Array, adminSession);
     if (arealist == null || arealist.length != 1 || arealist[0].ID != "universe") {
         alert("DB was NOT CLEARED of AREA!");
     }
 
+    // Destroy users
     unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
     var list = unitTest("admin_read_all", null, Array, adminSession);
     if (list == null || list.length > 1) {
