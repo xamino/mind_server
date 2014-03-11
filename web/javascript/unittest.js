@@ -148,9 +148,14 @@ function positionTest() {
     unitTest("location_add", location2, Success, adminSession);
     var foundPosition = unitTest("position_find", locationRequest, Location, adminSession);
 
-    if (locationRequest.coordinateX != foundPosition.coordinateX || locationRequest.coordinateY != foundPosition.coordinateY) {
-        alert("Failed '" + find_position + "'\n\n" + JSON.stringify(foundPosition) + "\n\nPosition does not match the correct one.");
+    // Becuase we night not find the position :P
+    if (foundPosition != null) {
+        if (locationRequest.coordinateX != foundPosition.coordinateX || locationRequest.coordinateY != foundPosition.coordinateY) {
+            alert("Failed '" + find_position + "'\n\n" + JSON.stringify(foundPosition) + "\n\nPosition does not match the correct one.");
+        }
     }
+
+    cleanDB();
 
     alert("Position done.");
 }
@@ -178,13 +183,16 @@ function cleanDB() {
 
     // Destroy users
     unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
-    var list = unitTest("admin_read_all", null, Array, adminSession);
+    // Now check with default admin, as admin above was now deleted!
+    var newSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    var list = unitTest("admin_read_all", null, Array, newSession);
     if (list == null || list.length > 1) {
         alert("DB was NOT CLEARED of USERS!");
     } else {
         // i shouldn't exist anymore
         unitTest("check", null, Error, adminSession);
     }
+    unitTest("logout", null, Success, newSession);
 }
 
 /**

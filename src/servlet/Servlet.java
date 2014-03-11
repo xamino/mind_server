@@ -7,7 +7,6 @@ package servlet;
 import database.Data;
 import database.Information;
 import database.messages.Error;
-import database.messages.Success;
 import database.objects.Area;
 import database.objects.DataList;
 import database.objects.Location;
@@ -99,7 +98,7 @@ public class Servlet extends HttpServlet {
         Data answer = null;
         // If the task was CHECK we don't need to do anything else
         if (Task.Sanitation.safeValueOf(arrival.getTask()) == Task.Sanitation.CHECK) {
-            answer = new Success("ValidSession","Your session is valid.");
+            answer = check;
         }
         // If the arrival is valid, checkArrival returns the database user object
         else if (check instanceof User) {

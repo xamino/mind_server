@@ -2,6 +2,7 @@ package logic.modules;
 
 import database.Data;
 import database.messages.Error;
+import database.messages.Message;
 import database.objects.Area;
 import database.objects.DataList;
 import database.objects.Location;
@@ -19,8 +20,8 @@ import java.util.*;
  */
 public class PositionModule extends Module {
 
-    private Messenger log;
     private final int tolerance = 3;  //TODO What value?
+    private Messenger log;
 
     public PositionModule() {
         log = Messenger.getInstance();
@@ -35,12 +36,11 @@ public class PositionModule extends Module {
             return new Error("WrongObjectType", "PositionModule was called with the wrong object type!");
         }
         // Everything okay from here on out:
-        // todo put algorithm here
-
-        return calculateLocation((Location) request);
-
-
-        //return new Message("PositionUnimplemented", "Position has not been implemented yet!");
+        Location position = calculateLocation((Location) request);
+        if (position == null) {
+            return new Message("PositionUnfound", "Your position could not be found.");
+        }
+        return position;
     }
 
     private Location calculateLocation(Location request) {
@@ -108,12 +108,12 @@ public class PositionModule extends Module {
             //Trim list so it only contains non-best candidates TODO better way?
             for (int i = 0; i < sortedLocationCandidateList.size() - 1; i++) {
                 if (locationMatchesMap.get(sortedLocationCandidateList.get(i)) > locationMatchesMap.get(sortedLocationCandidateList.get(i + 1))) {
-                    sortedLocationCandidateList = sortedLocationCandidateList.subList(i+1, sortedLocationCandidateList.size());
+                    sortedLocationCandidateList = sortedLocationCandidateList.subList(i + 1, sortedLocationCandidateList.size());
                 }
             }
 
             Set<Location> keySet = locationLevelDifferenceSumMap.keySet();
-            for(Location loc : sortedLocationCandidateList){
+            for (Location loc : sortedLocationCandidateList) {
                 locationLevelDifferenceSumMap.remove(loc);
             }
 
@@ -122,13 +122,13 @@ public class PositionModule extends Module {
             //Reduce to a single match if there are still more than one candidates.
             if (sortedLocationCandidateList.size() > 1) {
                 //sort points in respect of level
-                sortedLocationCandidateList  = locationMapToSortedList(locationLevelDifferenceSumMap);
+                sortedLocationCandidateList = locationMapToSortedList(locationLevelDifferenceSumMap);
                 Collections.reverse(sortedLocationCandidateList); //reverse -> smallest to biggest
 
                 //Trim list so it only contains best candidates (smallest levelDifferenceSum) TODO better way?
                 for (int i = 0; i < sortedLocationCandidateList.size() - 1; i++) {
                     if (locationLevelDifferenceSumMap.get(sortedLocationCandidateList.get(i)) < locationLevelDifferenceSumMap.get(sortedLocationCandidateList.get(i + 1))) {
-                        sortedLocationCandidateList = sortedLocationCandidateList.subList(0, i+1);
+                        sortedLocationCandidateList = sortedLocationCandidateList.subList(0, i + 1);
                     }
                 }
 
