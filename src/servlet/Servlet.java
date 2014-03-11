@@ -261,6 +261,12 @@ public class Servlet extends HttpServlet {
                     return admins;
                 }
                 return msg;
+            case ADMIN_ANNIHILATE_AREA:
+                log.log(TAG, "Removing all area objects!");
+                return moduleManager.handleTask(Task.Area.ANNIHILATE, null);
+            case ADMIN_ANNIHILATE_USER:
+                log.log(TAG, "Removing all users!");
+                return moduleManager.handleTask(Task.User.ANNIHILATE, null);
             default:
                 return null;
         }
