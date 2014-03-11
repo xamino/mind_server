@@ -25,7 +25,7 @@ function adminRightsTest() {
     // Do an admin task:
     unitTest("admin_read_all", null, Array, adminSession);
 
-    unitTest("user_delete", null, Success, adminSession);
+    cleanDB();
 
     alert("Admin rights test done.");
 }
@@ -50,7 +50,7 @@ function userUpdateTest() {
     // changing email shouldn't work
     unitTest("user_update", new User("maria.schein.heilig@gott.de", "adam", "Peter Peter"), Error, mariaSession);
 
-    unitTest("user_delete", null, Success, mariaSession);
+    cleanDB();
 
     alert("User update test done.");
 }
@@ -86,6 +86,8 @@ function userAccessTest() {
     // Illegal delete
     unitTest("user_delete", null, Error, "illegal_hash");
 
+    cleanDB();
+
     alert("Registration, login, logout done.");
 }
 
@@ -101,15 +103,35 @@ function areaTest() {
         new WifiMorsel("00:19:07:07:64:01", "eduroam", -90),
         new WifiMorsel("00:19:07:07:64:02", "welcome", -85)
     ];
-    unitTest("echo", new Area("Office Prof. Gott", [new Location(34, 57, wifis1)], 34, 56, 3, 4), Area, adminSession);
     unitTest("area_add", new Area("Office Prof. Gott", [new Location(34, 57, wifis1)], 34, 56, 3, 4), Success, adminSession);
     // test universe area
+    var wifis2 = [
+        new WifiMorsel("00:19:07:00:65:00", "eduroam", -54),
+        new WifiMorsel("00:19:07:00:65:01", "welcome", -34),
+        new WifiMorsel("00:19:07:00:66:02", "welcome", -12)
+    ];
+    unitTest("location_add", new Location(1, 1, wifis2), Success, adminSession);
+    var uniArea = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
+    if (!(uniArea instanceof Area && uniArea.locations.length >= 1)) {
+        alert("Writing a location directly to the universal area failed!");
+    }
 
-    // Clear area data
-    unitTest("area_remove", new Area("Office Prof. Gott", null, 0, 0, 0, 0), Success, adminSession);
-    unitTest("user_delete", null, Success, adminSession);
+    cleanDB();
 
     alert("Area, Location, Position done.");
+}
+
+/**
+ * Use this method to clean the DB.
+ */
+function cleanDB() {
+    unitTest("registration", new User("special@admin.eu", "admin", ""), Success, null);
+    var adminSession = unitTest("login", new User("special@admin.eu", "admin", null), Success, null).description;
+    unitTest("toggle_admin", null, Success, adminSession);
+    unitTest("admin_annihilate_area", null, Success, adminSession);
+    unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
+    // i shouldn't exist anymore
+    unitTest("check", null, Error, adminSession);
 }
 
 /**
