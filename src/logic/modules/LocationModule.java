@@ -6,7 +6,6 @@ import database.messages.Error;
 import database.messages.Success;
 import database.objects.Area;
 import database.objects.Location;
-import database.objects.User;
 import database.objects.WifiMorsel;
 import logic.Module;
 import logic.Task;

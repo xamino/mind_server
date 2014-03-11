@@ -3,8 +3,60 @@
  * unresponsive until the unit test is done!
  */
 function doUnitTest() {
-    alert("Beginning unit test!");
+    alert("Beginning comprehensive unit test!");
 
+    adminRightsTest();
+    userUpdateTest();
+    userAccessTest();
+    areaTest();
+
+    alert("Comprehensive unit test finished!");
+}
+
+function adminRightsTest() {
+    alert("Beginning admin rights test.");
+    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Success, null);
+    var adminSession = unitTest("login", new User("admin@admin.de", "admin", null), Success, null).description;
+
+    // try admin access
+    unitTest("admin_read_all", null, Error, adminSession);
+    // Switch to admin rights:
+    unitTest("toggle_admin", null, Success, adminSession);
+    // Do an admin task:
+    unitTest("admin_read_all", null, Array, adminSession);
+
+    unitTest("user_delete", null, Success, adminSession);
+
+    alert("Admin rights test done.");
+}
+
+function userUpdateTest() {
+    alert("Beginning user update test.");
+
+    unitTest("registration", new User("maria.heilig@gott.de", "maria", "Maria Heilig"), Success, null);
+    var mariaSession = unitTest("login", new User("maria.heilig@gott.de", "maria", null), Success, null).description;
+    // Test user update
+    unitTest("user_update", new User("maria.heilig@gott.de", "jesus", "Maria Joseph"), Success, mariaSession);
+    var readMaria = unitTest("user_read", null, User, mariaSession);
+    if (!("maria.heilig@gott.de" === readMaria.email && "Maria Joseph" === readMaria.name)) {
+        alert("User update failed!");
+    }
+    // logout && login
+    unitTest("logout", null, Success, mariaSession);
+    // Old login should fail
+    unitTest("login", new User("maria.heilig@gott.de", "maria", null), Error, null);
+    // new one should work
+    mariaSession = unitTest("login", new User("maria.heilig@gott.de", "jesus", null), Success, null).description;
+    // changing email shouldn't work
+    unitTest("user_update", new User("maria.schein.heilig@gott.de", "adam", "Peter Peter"), Error, mariaSession);
+
+    unitTest("user_delete", null, Success, mariaSession);
+
+    alert("User update test done.");
+}
+
+function userAccessTest() {
+    alert("Beginning registration, login, logout.");
     // Check initial registration
     unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Success, null);
     // Create some more users for testing purposes
@@ -24,51 +76,40 @@ function doUnitTest() {
     unitTest("logout", null, Success, adminSession);
     // illegal logout
     unitTest("logout", null, Success, "not_a_hash");
-
-    alert("Registration, login, logout done.");
-
     // Re-login the admin
     adminSession = unitTest("login", new User("admin@admin.de", "admin", null), Success, null).description;
-    // try admin access
-    unitTest("admin_read_all", null, Error, adminSession);
-    // Switch to admin rights:
-    unitTest("toggle_admin", null, Success, adminSession);
-    // Do an admin task:
-    unitTest("admin_read_all", null, Array, adminSession);
 
-    alert("Admin rights test done.")
-
-    // Test user update
-    unitTest("user_update", new User("maria.heilig@gott.de","jesus", "Maria Joseph"), Success, mariaSession);
-    var readMaria = unitTest("user_read", null, User, mariaSession);
-    if (!("maria.heilig@gott.de" === readMaria.email && "Maria Joseph" === readMaria.name)) {
-        alert("User update failed!");
-    }
-    // logout && login
-    unitTest("logout", null, Success, mariaSession);
-    // Old login should fail
-    unitTest("login", new User("maria.heilig@gott.de", "maria", null), Error, null);
-    // new one should work
-    mariaSession = unitTest("login", new User("maria.heilig@gott.de", "jesus", null), Success, null).description;
-    // changing email shouldn't work
-    unitTest("user_update", new User("maria.schein.heilig@gott.de","adam", "Peter Peter"), Error, mariaSession);
-
-    alert("User update test done.")
-
-    // TODO
-
-    alert("Normal user done.")
-
-
-
-    // Clean remaining with admin:
+    // delete
     unitTest("user_delete", null, Success, adminSession);
     unitTest("user_delete", null, Success, mariaSession);
     unitTest("user_delete", null, Success, egoSession);
     // Illegal delete
     unitTest("user_delete", null, Error, "illegal_hash");
 
-    alert("Cleaning done. Finished!")
+    alert("Registration, login, logout done.");
+}
+
+function areaTest() {
+    alert("Beginning area, location, position.");
+
+    unitTest("registration", new User("admin@admin.de", "admin", "Peter Maier"), Success, null);
+    var adminSession = unitTest("login", new User("admin@admin.de", "admin", null), Success, null).description;
+    unitTest("toggle_admin", null, Success, adminSession);
+
+    var wifis1 = [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -93),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -90),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -85)
+    ];
+    unitTest("echo", new Area("Office Prof. Gott", [new Location(34, 57, wifis1)], 34, 56, 3, 4), Area, adminSession);
+    unitTest("area_add", new Area("Office Prof. Gott", [new Location(34, 57, wifis1)], 34, 56, 3, 4), Success, adminSession);
+    // test universe area
+
+    // Clear area data
+    unitTest("area_remove", new Area("Office Prof. Gott", null, 0, 0, 0, 0), Success, adminSession);
+    unitTest("user_delete", null, Success, adminSession);
+
+    alert("Area, Location, Position done.");
 }
 
 /**
