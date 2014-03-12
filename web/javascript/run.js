@@ -79,9 +79,7 @@ function doTask(task, object, callback) {
 
 function isAdmin(data) {
 	
-	alert(JSON.stringify(data));
 	var user = data.object;
-	alert(JSON.stringify(user.type));
 	if (!(instanceOf(user,User))) {
 		alert("user not user");
 		logout();
@@ -112,3 +110,16 @@ $(document).on("submit", "#loginForm", function(event) {
 	});
 
 });
+
+
+function checkSessionFromURL(){
+	alert(session);
+	var urlSession = getURLParameter("session");
+	alert(urlSession);
+	doTask("check", urlSession, function (data){
+		if(!data){
+			alert("You have to be logged in.");
+			window.location.href = "login.jsp";
+		}
+	});
+}
