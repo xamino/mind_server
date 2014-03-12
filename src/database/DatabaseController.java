@@ -25,9 +25,9 @@ public class DatabaseController implements ServletContextListener {
      * Variable for storing the instance of the class.
      */
     private static DatabaseController instance;
+    private ObjectContainer con;
     private Messenger log;
     private final String TAG = "DatabaseController";
-    private ObjectContainer con;
 
     /**
      * Method for getting a valid reference of this object.
@@ -280,6 +280,9 @@ public class DatabaseController implements ServletContextListener {
     }
 
     public void init() {
+        //
+        Configuration config =  Configuration.getInstance();
+
         // Initializing Database
         log.log(TAG, "Running DB init.");
         DataList<Area> areaData = read(new Area("universe", null, 0, 0, 0, 0));
@@ -295,9 +298,9 @@ public class DatabaseController implements ServletContextListener {
         // test for existing single admin or list of admins
         if (adminData == null || adminData.isEmpty()) {
             log.log(TAG, "Admin not existing, creating one.");
-            adminProto = new User("admin", "admin@admin.admin");
+            adminProto = new User(config.getAdminName(), config.getAdminEmail());
             adminProto.setAdmin(true);
-            adminProto.setPwdHash(BCrypt.hashpw("admin", BCrypt.gensalt(12)));
+            adminProto.setPwdHash(BCrypt.hashpw(config.getAdminPassword(), BCrypt.gensalt(12)));
             create(adminProto);
         }
     }
@@ -309,9 +312,8 @@ public class DatabaseController implements ServletContextListener {
         config.init(context); // must be first!!!
         log = Messenger.getInstance();
 
-        String dbName = config.getDbName();
         String filePath = context.getRealPath("WEB-INF/"
-                + dbName);
+                + config.getDbName());
         con = Db4oEmbedded.openFile(filePath);
 
         context.log("db4o startup on " + filePath);
