@@ -7,11 +7,11 @@ package servlet;
 import database.Data;
 import database.Information;
 import database.messages.Error;
+import database.messages.Success;
 import database.objects.Area;
 import database.objects.DataList;
 import database.objects.Location;
 import database.objects.User;
-import io.Configuration;
 import logger.Messenger;
 import logic.EventModuleManager;
 import logic.Task;
@@ -94,7 +94,12 @@ public class Servlet extends HttpServlet {
         Data answer = null;
         // If the task was CHECK we don't need to do anything else
         if (Task.Sanitation.safeValueOf(arrival.getTask()) == Task.Sanitation.CHECK) {
-            answer = check;
+            // Avoid sending the user object
+            answer = checkDataMessage(check);
+            if (answer == null) {
+                answer = new Success("CheckOkay", "Your session is valid!");
+            }
+            // answer shouldn't be null here!
         }
         // If the arrival is valid, checkArrival returns the database user object
         else if (check instanceof User) {
