@@ -31,7 +31,7 @@ import java.io.IOException;
  * Datenbank fuer den Index.
  */
 
-@WebServlet("/Servlet/*")
+@WebServlet("/Servlet")
 public class Servlet extends HttpServlet {
 
     /**

@@ -4,13 +4,16 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<script src="javascript/jquery-2.1.0.min.js"></script>
+<script src="javascript/library.js"></script>
+<script src="javascript/run.js"></script>
 <title>Login</title>
 </head>
 
 <body>
 <!-- TODO: CSS muss ich noch machen -->
 <div id="banner">
-<img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
+<!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
 <h2>MIND</h2>
 </div>
 
@@ -19,13 +22,13 @@
 You have to be logged in to work with mind.
 </div>
 <div id="login">
-	<form action="Servlet" method="POST">
+	<form id="loginForm">
        <table>
           <tr>
-              <td> Username  : </td><td> <input name="username" size=20 type="text" /> </td> 
+              <td> E-Mail  : </td><td> <input name="email" id="email" size=40 type="text" /> </td> 
           </tr>
               <tr>
-          <td> Password  : </td><td> <input name="password" size=20 type="text" /> </td> 
+          <td> Password  : </td><td> <input name="password" id="password" size=20 type="text" /> </td> 
               </tr>
        </table>
        <input type="submit" value="Login" />
