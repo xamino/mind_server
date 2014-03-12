@@ -45,7 +45,7 @@ public class PositionModule extends Module {
 
     private Location calculateLocation(Location request) {
         // Get Area containing all locations from database
-        Area allArea = ((DataList<Area>) EventModuleManager.getInstance().handleTask(Task.Area.READ, null)).get(0); // TODO better way?
+        Area uniArea = (Area)EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe",null,0,0,0,0));
 
         // A Map that describes how many matches there are for this location
         HashMap<Location, Integer> locationMatchesMap = new HashMap<>();
@@ -53,7 +53,7 @@ public class PositionModule extends Module {
         //Map of the sum of all wifi levels under the tolerance for a location.
         HashMap<Location, Integer> locationLevelDifferenceSumMap = new HashMap<>();
 
-        DataList<Location> dataBaseLocations = allArea.getLocations();
+        DataList<Location> dataBaseLocations = uniArea.getLocations();
 
         DataList<WifiMorsel> requestWifiMorsels = request.getWifiMorsels();
 
