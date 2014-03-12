@@ -82,18 +82,18 @@ function isAdmin(data) {
 	alert(JSON.stringify(data));
 	var user = data.object;
 	alert(JSON.stringify(user.type));
-	if (!(instanceOf(user, User))) {
+	if (!(instanceOf(user,User))) {
 		alert("user not user");
 		logout();
 	} else {
 		if (data.object.admin) {
-			window.location.href = "/admin_home.jsp?session="+session;
+			window.location.href = "admin_home.jsp?session="+session;
 		} else {
 			alert("user not admin");
 			logout();
 		}
 	}
-
+	
 }
 
 var potentialAdmin;
