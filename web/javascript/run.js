@@ -73,17 +73,10 @@ $(document).on("submit","#loginForm", function(event){
 	password=$("#password").val();
 	alert(email + password);
 	
+	
+	
 	login(email, password);
+	
+	
 });
-
-//$("#loginForm").submit(function (event){
-//	event.preventDefault();
-//	var email, password;
-//	email=$("#email").val();
-//	password=$("#password").val();
-//	
-//	login(email, password);
-//	
-//	
-//});
 

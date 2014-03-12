@@ -4,7 +4,7 @@
 
 // Setup some general AJAX stuff (always executed)
 $.ajaxSetup({
-    url: '/Servlet/bla',
+    url: '/Servlet',
     type: 'POST',
     contentType: 'application/json; charset=utf-8',
     dataType: 'json'
@@ -60,7 +60,7 @@ function Area(ID, locations, topLeftX, topLeftY, width, height) {
 }
 
 function Location(coordinateX, coordinateY, wifiMorsels) {
-    this.$type = "Location"
+    this.$type = "Location";
     this.coordinateX = coordinateX;
     this.coordinateY = coordinateY;
     this.wifiMorsels = wifiMorsels;
