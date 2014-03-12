@@ -17,7 +17,7 @@
 <div id="content">
 <div id="navigation">
 	<ul>
-		<li><a href="admin_home">Home</a></li>
+		<li><a href="admin_home.jsp">Home</a></li>
 		<li><a href="#">User Management</a></li>
 		<li><a href="admin_system_management.jsp">System Management</a>
 			<ul>
