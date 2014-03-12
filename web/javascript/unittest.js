@@ -121,11 +121,16 @@ function areaTest() {
     ];
     unitTest("location_add", new Location(1, 1, wifis2), Success, adminSession);
     var area = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
-    alert(area instanceof Area);
-    alert(JSON.stringify(area.locations[0]));
-    if (!(area instanceof Area && area.locations[0].coordinateX == 1 && area.locations[0].coordinateY == 1)) {
-        alert("Writing a location directly to the universal area failed!");
+    if (!instanceOf(area, Area)) {
+        alert("Reading universe failed – not Area type object!")
+    } else {
+        var location = area.locations[0];
+        if (location == null && !((location.coordinateX == 1) && (location.coordinateY == 1))) {
+            alert("Writing a location directly to the universal area failed!");
+        }
     }
+
+    // TODO complete
 
     cleanDB();
 

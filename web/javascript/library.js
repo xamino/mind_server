@@ -20,6 +20,28 @@ function send(data, callback) {
     $.ajax({data: JSON.stringify(data)}).done(callback);
 }
 
+/**
+ * Function that checks whether two objects are of the same instance. ONLY FOR OBJECTS THAT DEFINE $type FIELD!
+ * @param object_a
+ * @param object_b
+ */
+function instanceOf(object_a, object_b) {
+    // If null, might be class (if null, next step will return false)
+    if (object_a.$type == undefined) {
+        object_a = new object_a();
+    }
+    if (object_b.$type == undefined) {
+        object_b = new object_b();
+    }
+    // Check if we can compare
+    if (object_a.$type == undefined || object_b.$type == undefined)
+        return false;
+    // And now compare
+    if (object_a.$type == object_b.$type)
+        return true;
+    return false;
+}
+
 // OBJECT DEFINITIONS HERE –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––-
 
 function Arrival(task, sessionHash, object) {

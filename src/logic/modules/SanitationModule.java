@@ -164,6 +164,7 @@ public class SanitationModule extends Module {
      *
      * @param sessionHash The identifying session hash that will be removed.
      */
+    // TODO remove all hashes of one user when destrying the session!
     private void destroySession(String sessionHash) {
         if (sessions.containsKey(sessionHash)) {
             sessions.remove(sessionHash);
