@@ -120,17 +120,10 @@ function areaTest() {
         new WifiMorsel("00:19:07:00:66:02", "welcome", -12)
     ];
     unitTest("location_add", new Location(1, 1, wifis2), Success, adminSession);
-    var area = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
-    if (!instanceOf(area, Area)) {
-        alert("Reading universe failed – not Area type object!")
-    } else {
-        var location = area.locations[0];
-        if (location == null && !((location.coordinateX == 1) && (location.coordinateY == 1))) {
-            alert("Writing a location directly to the universal area failed!");
-        }
+    var areas = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
+    if (!(uniArea instanceof Area && uniArea.locations.length >= 1)) {
+        alert("Writing a location directly to the universal area failed!");
     }
-
-    // TODO complete
 
     cleanDB();
 
@@ -154,20 +147,44 @@ function positionTest() {
         new WifiMorsel("00:19:07:07:64:02", "welcome", -60)
     ]);
 
-    var locationRequest = new Location(0, 0, [
+    var location3 = new Location(150, 150, [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -100),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -50),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -30)
+    ]);
+
+    var locationRequest1 = new Location(0, 0, [
         new WifiMorsel("00:19:07:07:64:00", "eduroam", -92),
         new WifiMorsel("00:19:07:07:64:01", "eduroam", -91),
         new WifiMorsel("00:19:07:07:64:02", "welcome", -84)
     ]);
 
+    var locationRequest2 = new Location(1, 1, [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -94),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -90),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -83)
+    ]);
+
     unitTest("location_add", location1, Success, adminSession);
     unitTest("location_add", location2, Success, adminSession);
-    var foundPosition = unitTest("position_find", locationRequest, Location, adminSession);
+    unitTest("location_add", location2, Success, adminSession);
 
-    // Becuase we night not find the position :P
-    if (foundPosition != null) {
-        if (locationRequest.coordinateX != foundPosition.coordinateX || locationRequest.coordinateY != foundPosition.coordinateY) {
-            alert("Failed 'find_position'\n\n" + JSON.stringify(foundPosition) + "\n\nPosition does not match the correct one.");
+    // Test exact location match
+    {
+        var match = unitTest("position_find", locationRequest1, Location, adminSession);
+        if (instanceOf(match, Location)) {
+            if (match.coordinateX != location1.coordinateX || match.coordinateY != location1.coordinateY) {
+                alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
+            }
+        }
+    }
+    // Test close location match
+    {
+        var match = unitTest("position_find", locationRequest2, Location, adminSession);
+        if (instanceOf(match, Location)) {
+            if (match.coordinateX != location1.coordinateX || match.coordinateY != location1.coordinateY) {
+                alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
+            }
         }
     }
 
