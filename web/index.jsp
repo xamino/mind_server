@@ -27,6 +27,13 @@ the functional code should go.
 <br>
 <br>
 Click here to run a unit test of the API. WARNING: while the test is running, the webpage will be unresponsive!
-<input type="button" name="unittest" value="Run API unit test" onclick="doUnitTest();">
+<br>
+<input type="button" name="unittest" value="Run API Unit Test" onclick="doUnitTest();">
+<br>
+<input type="button" name="areatest" value="Area Unit Test" onclick="areaTest();">
+<br>
+<input type="button" name="positiontest" value="Position Unit Test" onclick="positionTest();">
+<br>
+<input type="button" name="cleandb" value="WARNING: Clean DB" onclick="cleanDB();alert('Done');">
 </body>
 </html>

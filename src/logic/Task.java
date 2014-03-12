@@ -25,7 +25,6 @@ public interface Task {
         ECHO,
         // USER
         USER_READ,
-        USER_READ_ALL,
         USER_ADD,
         USER_UPDATE,
         USER_DELETE,
@@ -39,13 +38,11 @@ public interface Task {
         ADMIN_ANNIHILATE_USER,
         // LOCATION
         LOCATION_READ,
-        LOCATION_READ_ALL,
         LOCATION_ADD,
         // LOCATION_UPDATE,
         LOCATION_REMOVE,
         // AREA
         AREA_READ,
-        AREA_READ_ALL,
         AREA_ADD,
         AREA_UPDATE,
         AREA_REMOVE,

@@ -106,23 +106,27 @@ public class SanitationModule extends Module {
                     // To do that, we first need to get the new object:
                     User filter = new User("", sessions.get(arrival.getSessionHash()).user.getEmail());
                     Data update = EventModuleManager.getInstance().handleTask(Task.User.READ, filter);
-                    if (update instanceof DataList) { //TODO dirty fix for the read return is a list now
-                        DataList<Data> updateList = (DataList<Data>) update;
-                        if (updateList != null && !updateList.isEmpty()) {
-                            Data dataUser = updateList.get(0);
+                    if (update instanceof DataList) {
+                        DataList updateList = (DataList) update;
+                        if (!((DataList) update).isEmpty()) {
+                            Object dataUser = updateList.get(0);
                             if (dataUser instanceof User) {
+                                // If everything is okay, we return the current user and leave this method
                                 User currentUser = (User) dataUser;
                                 // We could check whether we even need to update the user object, but we need to reset the timer anyway
                                 ActiveUser activeUser = new ActiveUser(currentUser, System.currentTimeMillis());
                                 sessions.put(arrival.getSessionHash(), activeUser);
                                 return currentUser;
+                            } else {
+                                log.error(TAG, "WARNING: Check failed because no user was returned from DB!");
                             }
+                        } else {
+                            log.error(TAG, "WARNING: Check failed because user list from DB is empty!");
                         }
-                    } else {
-                        // destroy session
-                        destroySession(arrival.getSessionHash());
-                        return new Error("SessionCheckError", "User couldn't be found in DB! You have been logged out.");
                     }
+                    // destroy session
+                    destroySession(arrival.getSessionHash());
+                    return new Error("SessionCheckError", "User couldn't be found in DB! You have been logged out.");
                 } else {
                     return new Error("SessionInvalid", "The session is NOT valid!");
                 }
@@ -183,7 +187,7 @@ public class SanitationModule extends Module {
         Data object = EventModuleManager.getInstance().handleTask(Task.User.READ, user);
         // Check if message:
         Data answer = Servlet.checkDataMessage(object);
-        if (answer != null) {
+        if (answer != null || !(object instanceof DataList) || ((DataList) object).size() != 1) {
             // this means 99% of the time that a user wasn't found.
             // To avoid allowing to find usernames with this method, we return the same message as if the login
             // simply used the wrong information.
@@ -191,7 +195,7 @@ public class SanitationModule extends Module {
             return new Error("LoginFailed", "Wrong user email or wrong password.");
         }
         // This means we have a valid user object:
-        User check = ((DataList<User>) object).get(0);
+        User check = (User) ((DataList) object).get(0);
         // Now to check the password
         if (BCrypt.checkpw(user.getPwdHash(), check.getPwdHash())) {
             // Everything okay, so create a hash:
