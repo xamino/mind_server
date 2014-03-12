@@ -42,6 +42,27 @@ function instanceOf(object_a, object_b) {
     return false;
 }
 
+/**
+ * Function for reading parameters out of an URL. Returns an empty string if
+ * none found. Credit: http://www.netlobo.com/url_query_string_javascript.html
+ *
+ * @param parameterName
+ *            The name of the parameter tor read.
+ * @returns The value of the parameter. Null if none found.
+ */
+function getURLParameter(parameterName) {
+    parameterName = parameterName.replace(/[\[]/, "\\\[").replace(/[\]]/,
+        "\\\]");
+    var regexS = "[\\?&]" + parameterName + "=([^&#]*)";
+    var regex = new RegExp(regexS);
+    var results = regex.exec(window.location.href);
+    if (results == null) {
+        return "";
+    } else {
+        return results[1];
+    }
+}
+
 // OBJECT DEFINITIONS HERE –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––-
 
 function Arrival(task, sessionHash, object) {
