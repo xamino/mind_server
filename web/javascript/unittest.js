@@ -3,6 +3,11 @@
  * unresponsive until the unit test is done!
  */
 function doUnitTest() {
+
+    if (!confirm("WARNING: This will clear the DB! Do you really want to continue?")) {
+        return;
+    }
+
     alert("Beginning comprehensive unit test!");
 
     cleanDB();
