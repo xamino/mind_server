@@ -59,5 +59,9 @@ function logout() {
  * @param callback
  */
 function doTask(task, object, callback) {
-    send(new Arrival(task, session, object), callback);
+    if (object != null) {
+        send(new Arrival(task, session, object), callback);
+    } else {
+        send(new Arrival(task, session), callback);
+    }
 }

@@ -3,6 +3,7 @@ package logic.modules;
 import database.Data;
 import database.messages.Error;
 import database.messages.Success;
+import database.objects.DataList;
 import database.objects.User;
 import logger.Messenger;
 import logic.EventModuleManager;
@@ -36,7 +37,7 @@ public class SanitationModule extends Module {
     /**
      * HashMap containing the sessions and their last access time.
      */
-    private HashMap<String, Long> sessions;
+    private HashMap<String, ActiveUser> sessions;
     /**
      * SecureRandom for generating the hashes.
      */
@@ -93,17 +94,41 @@ public class SanitationModule extends Module {
             // break;
             case REGISTRATION:
                 if (user != null) {
+                    if (user.getEmail().isEmpty() || user.getPwdHash().isEmpty()) {
+                        return new Error("IllegalRegistrationValues", "Email and password may not be empty!");
+                    }
                     return registration(user);
                 }
                 break;
             case CHECK:
                 if (checkSession(arrival.getSessionHash())) {
-                    return new Success("ValidSession", "The session is valid.");
+                    // If valid, return the corresponding user object. Fresh from the DB to keep in sync with updates
+                    // To do that, we first need to get the new object:
+                    User filter = new User("", sessions.get(arrival.getSessionHash()).user.getEmail());
+                    Data update = EventModuleManager.getInstance().handleTask(Task.User.READ, filter);
+                    if (update instanceof DataList) { //TODO dirty fix for the read return is a list now
+                        DataList<Data> updateList = (DataList<Data>) update;
+                        if (updateList != null && !updateList.isEmpty()) {
+                            Data dataUser = updateList.get(0);
+                            if (dataUser instanceof User) {
+                                User currentUser = (User) dataUser;
+                                // We could check whether we even need to update the user object, but we need to reset the timer anyway
+                                ActiveUser activeUser = new ActiveUser(currentUser, System.currentTimeMillis());
+                                sessions.put(arrival.getSessionHash(), activeUser);
+                                return currentUser;
+                            }
+                        }
+                    } else {
+                        // destroy session
+                        destroySession(arrival.getSessionHash());
+                        return new Error("SessionCheckError", "User couldn't be found in DB! You have been logged out.");
+                    }
                 } else {
                     return new Error("SessionInvalid", "The session is NOT valid!");
                 }
                 // break;
             default:
+                log.error(TAG, "Unknown task #" + todo + "# sent to SanitationModule! Shouldn't happen!");
                 return new Error("UnknownTask", "Unknown task sent to SanitationModule!");
         }
         return new Error("SanitationTaskError", "A task failed to complete – have you supplied the correct object type?");
@@ -119,8 +144,10 @@ public class SanitationModule extends Module {
      */
     private boolean checkSession(String sessionHash) {
         if (sessions.containsKey(sessionHash)) {
+            // get ActiveUser object
+            ActiveUser user = sessions.get(sessionHash);
             // check for timeout
-            long timeDelta = System.currentTimeMillis() - sessions.get(sessionHash);
+            long timeDelta = System.currentTimeMillis() - user.timestamp;
             if (timeDelta > TIMEOUT) {
                 // this means the session has expired
                 // remove, as expired:
@@ -128,21 +155,11 @@ public class SanitationModule extends Module {
                 return false;
             }
             // update time if session is valid, resetting the timeout:
-            sessions.put(sessionHash, System.currentTimeMillis());
+            user.timestamp = System.currentTimeMillis();
+            sessions.put(sessionHash, user);
             return true;
         }
         return false;
-    }
-
-    /**
-     * Creates a session, saving it with the current time in the HashMap.
-     *
-     * @return The session hash – required for future authentication, so save it!
-     */
-    private String createSession() {
-        String sessionHash = new BigInteger(130, random).toString(32);
-        sessions.put(sessionHash, System.currentTimeMillis());
-        return sessionHash;
     }
 
     /**
@@ -157,18 +174,14 @@ public class SanitationModule extends Module {
     }
 
     /**
-     * Login method.
+     * Login method. If valid, stores the logged in user in the session map with the current time.
      *
      * @return Return message.
      */
     private Data login(User user) {
-        /*
-        // TAKE OUT; ONLY FOR DEBUG
-        if (user == null) {
-            return new Success("LOGIN", createSession());
-        }
-        */
+        // Try reading the user from the database
         Data object = EventModuleManager.getInstance().handleTask(Task.User.READ, user);
+        // Check if message:
         Data answer = Servlet.checkDataMessage(object);
         if (answer != null) {
             // this means 99% of the time that a user wasn't found.
@@ -177,9 +190,18 @@ public class SanitationModule extends Module {
             log.log(TAG, "Unregistered user tried login!");
             return new Error("LoginFailed", "Wrong user email or wrong password.");
         }
-        User check = (User) object;
+        // This means we have a valid user object:
+        User check = ((DataList<User>) object).get(0);
+        // Now to check the password
         if (BCrypt.checkpw(user.getPwdHash(), check.getPwdHash())) {
-            return new Success("Login", createSession());
+            // Everything okay, so create a hash:
+            String sessionHash = new BigInteger(130, random).toString(32);
+            // Create the activeUser object using the correct, database user:
+            ActiveUser activeUser = new ActiveUser(check, System.currentTimeMillis());
+            // Save the session:
+            sessions.put(sessionHash, activeUser);
+            // Return the hash for future references:
+            return new Success("Login", sessionHash);
         } else {
             return new Error("LoginFailed", "Wrong user email or wrong password.");
         }
@@ -195,10 +217,23 @@ public class SanitationModule extends Module {
         user.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));
         Data msg = EventModuleManager.getInstance().handleTask(Task.User.CREATE, user);
         if (msg instanceof Success) {
-            return new Success("Registered", "Registered \"" + user.getEmail() + "\".");
+            return new Success("Registered", "Registered to '" + user.getEmail() + "'.");
         } else {
             log.error(TAG, "Error creating a user!");
             return msg;
+        }
+    }
+
+    /**
+     * Small data class for storing active users with the corresponding hash and timestamp of their last action.
+     */
+    private class ActiveUser {
+        User user;
+        long timestamp;
+
+        ActiveUser(User user, long timestamp) {
+            this.user = user;
+            this.timestamp = timestamp;
         }
     }
 }

@@ -8,9 +8,9 @@ public interface Task {
     public enum User implements Task {
         CREATE, READ, UPDATE, DELETE,
         /**
-         * Task to fetch as List of all Users, use null as request
+         * Removes all Users from the database and restores the default admin
          */
-        READ_ALL
+        ANNIHILATE,
     }
 
     /**
@@ -20,22 +20,45 @@ public interface Task {
      */
     public enum API implements Task {
         /**
-         * Used for whatever task we are currently testing.
-         */
-        // TODO Remove when done
-        TEST,
-        /**
          * Simply returns the object sent to the server. Can be used for various parsing tests.
          */
         ECHO,
+        // USER
+        USER_READ,
+        USER_READ_ALL,
+        USER_ADD,
+        USER_UPDATE,
+        USER_DELETE,
         /**
-         * Add a location to the database.
+         * Removes all areas and locations from the database and restores the default area
          */
+        ADMIN_ANNIHILATE_AREA,
+        /**
+         * Removes all users from the database and restores the default admin
+         */
+        ADMIN_ANNIHILATE_USER,
+        // LOCATION
+        LOCATION_READ,
+        LOCATION_READ_ALL,
         LOCATION_ADD,
+        // LOCATION_UPDATE,
+        LOCATION_REMOVE,
+        // AREA
+        AREA_READ,
+        AREA_READ_ALL,
+        AREA_ADD,
+        AREA_UPDATE,
+        AREA_REMOVE,
         /**
          * Given a location, find the position.
          */
         POSITION_FIND,
+        // ADMIN
+        ADMIN_READ_ALL,
+        TOGGLE_ADMIN,
+        /**
+         * General error, especially when casting to a task doesn't work.
+         */
         ERROR;
 
         /**
@@ -111,9 +134,9 @@ public interface Task {
          */
         READ_LOCATIONS,
         /**
-         * Task to fetch a List of all available Areas
+         * Removes all areas and locations from the database and restores the default area
          */
-        READ_ALL
+        ANNIHILATE
     }
 }
 

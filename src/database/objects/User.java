@@ -11,6 +11,7 @@ public class User implements Data {
     private String name;
     private String pwdHash;
     private String email;
+    private boolean admin;
 
     public User(String name, String email) {
         this.name = name;
@@ -43,7 +44,15 @@ public class User implements Data {
                 "name='" + name + '\'' +
                 ", pwdHash='" + pwdHash + '\'' +
                 ", email='" + email + '\'' +
+                ", admin=" + admin +
                 '}';
     }
 
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
 }

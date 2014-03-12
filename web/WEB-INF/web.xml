@@ -8,4 +8,8 @@
 		<servlet-name>Servlet</servlet-name>
 		<servlet-class>servlet.Servlet</servlet-class>
 	</servlet>
+
+    <listener>
+        <listener-class>database.DatabaseController</listener-class>
+    </listener>
 </web-app>
