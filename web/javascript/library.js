@@ -60,7 +60,7 @@ function Area(ID, locations, topLeftX, topLeftY, width, height) {
 }
 
 function Location(coordinateX, coordinateY, wifiMorsels) {
-    this.$type = "Location"
+    this.$type = "Location";
     this.coordinateX = coordinateX;
     this.coordinateY = coordinateY;
     this.wifiMorsels = wifiMorsels;
