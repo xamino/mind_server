@@ -4,10 +4,7 @@ import database.Data;
 import database.DatabaseController;
 import database.messages.Error;
 import database.messages.Success;
-import database.objects.Area;
-import database.objects.DataList;
-import database.objects.Location;
-import database.objects.WifiMorsel;
+import database.objects.*;
 import logic.Module;
 import logic.Task;
 
@@ -56,7 +53,7 @@ public class LocationModule extends Module {
                 case CREATE:
                     return create(area);
                 case READ:
-                    return area == null ? read(new Area(null, null, 0, 0, 0, 0)) : read(area);
+                    return readArea(area);
                 case UPDATE:
                     return update(area);
                 case DELETE:
@@ -69,6 +66,21 @@ public class LocationModule extends Module {
         }
 
         return new Error("MissingOperation", "The Location Module is unable to perform the Task as it appears not to be implemented.");
+    }
+
+    private Data readArea(Area area) {
+       // get all Users
+        if(area==null)
+            return read(new User(null, null));
+        // get filtered Users
+        if(area.getID()==null)
+            return read(area);
+
+        // from here on single users were requested
+        Data data = read(area);
+        if(data instanceof DataList)
+            return ((DataList<Data>)data).get(0);
+        else return data; // Error
     }
 
     private Data createLocation(final Location location) {

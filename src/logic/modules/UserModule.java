@@ -4,6 +4,7 @@ import database.Data;
 import database.DatabaseController;
 import database.messages.Error;
 import database.messages.Success;
+import database.objects.DataList;
 import database.objects.User;
 import logic.Module;
 import logic.Task;
@@ -31,7 +32,7 @@ public class UserModule extends Module {
             case CREATE:
                 return create(user);
             case READ:
-                return user == null ? read(new User(null, null)) : read(user);
+                return readUser(user);
             case UPDATE:
                 return update(user);
             case DELETE:
@@ -41,6 +42,21 @@ public class UserModule extends Module {
         }
 
         return new Error("UserTaskNotImplemented","The task " + task.toString() + " is not implemented.");
+    }
+
+    private Data readUser(User user) {
+        // get all Users
+        if(user==null)
+            return read(new User(null, null));
+        // get filtered Users
+        if(user.getEmail()==null)
+            return read(user);
+
+        // from here on single users were requested
+        Data data = read(user);
+        if(data instanceof DataList)
+            return ((DataList<Data>)data).get(0);
+        else return data; // Error
     }
 
     private Data annihilateUsers() {
