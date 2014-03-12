@@ -66,6 +66,20 @@ function doTask(task, object, callback) {
     }
 }
 
+function isAdmin(data){
+	
+	if(!(data instanceof User)){
+		alert("user not user");
+	}else{
+		if(data.admin){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+}
+
 $(document).on("submit","#loginForm", function(event){
 	event.preventDefault();
 	var email, password;
@@ -73,9 +87,16 @@ $(document).on("submit","#loginForm", function(event){
 	password=$("#password").val();
 	alert(email + password);
 	
+	var potentialAdmin = new User(email, null, null);
 	
+	if(doTask("user_read",potentialAdmin,isAdmin(potentialAdmin))){
+		var login = login(email, password);	
+		var session = login.session;
+		
+	}else{
+		alert("user is not admin");
+	}
 	
-	login(email, password);
 	
 	
 });
