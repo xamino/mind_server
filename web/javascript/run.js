@@ -85,8 +85,10 @@ function isAdmin(data) {
 		logout();
 	} else {
 		if (data.object.admin) {
+			writeCookie("MIND_Admin_C",session);
 			window.location.href = "admin_home.jsp?session="+session;
 		} else {
+			//TODO write cookie for user
 			alert("user not admin");
 			logout();
 		}
@@ -111,15 +113,56 @@ $(document).on("submit", "#loginForm", function(event) {
 
 });
 
-
+/**
+ * Checks if the session in the url matches the user session
+ * if false - return to login.jsp
+ */
 function checkSessionFromURL(){
-	alert(session);
 	var urlSession = getURLParameter("session");
-	alert(urlSession);
-	doTask("check", urlSession, function (data){
-		if(!data){
-			alert("You have to be logged in.");
-			window.location.href = "login.jsp";
-		}
-	});
+	alert("url: "+urlSession);
+	var session = readCookie("MIND_Admin_C");
+	alert("cookie: "+session);
+	if(urlSession != session){
+		alert("You have to be logged in.");
+		window.location.href = "login.jsp";
+		
+	}
 }
+
+/**
+ * Writes a Cookie - credit to http://stackoverflow.com/questions/2257631/how-create-a-session-using-javascript
+ * @param name The name of the cookie (set in isAdmin)
+ * @param value The value (session)
+ */
+function writeCookie(name,value) {
+    var date, expires;
+//    if (days) {
+        date = new Date();
+        date.setTime(date.getTime()+(15*60*1000));
+        expires = "; expires=" + date.toGMTString();
+//            }else{
+//        expires = "";
+//    }
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+/**
+ * returns a Cookie corresponding to the forwarded parameter 'name'
+ * credit to http://stackoverflow.com/questions/2257631/how-create-a-session-using-javascript
+ */
+function readCookie(name) {
+    var i, c, ca, nameEQ = name + "=";
+    ca = document.cookie.split(';');
+    for(i=0;i < ca.length;i++) {
+        c = ca[i];
+        while (c.charAt(0)==' ') {
+            c = c.substring(1,c.length);
+        }
+        if (c.indexOf(nameEQ) == 0) {
+            return c.substring(nameEQ.length,c.length);
+        }
+    }
+    return '';
+}
+
+
