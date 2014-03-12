@@ -75,22 +75,31 @@ public class DatabaseController implements ServletContextListener {
         }
     }
 
+    /**
+     * Reads an object from the database.
+     *
+     * @param requestFilter Filter of objects to be returned. An object constructed with default constructor (null,0 or false values) returns all instances.
+     *                      Changing an object parameter filters the returned objects.
+     * @param <T>           A DataType extending Data.
+     * @return A DataList of the specified filter parameter Type or null on error.
+     */
     public <T extends Data> DataList<T> read(final T requestFilter) {
         List queryResult = null;
 
         try {
-            // Read Data depending on the objects unique key
+            // Differentiate Object types
             if (requestFilter instanceof User) {
                 final User user = (User) requestFilter;
 
-                // on empty key query using the filter
+                // unique key of the User object is the email field.
+                // When this is empty directly use the user Object as filter.
                 if (user.getEmail() == null) {
                     queryResult = con.queryByExample(user);
-                } else {
+                } else { // When the email key is set, only return the single instance matching the key
                     queryResult = con.query(new Predicate<User>() {
                         @Override
                         public boolean match(User o) {
-                            // check on unique keyl
+                            // email is Users unique key
                             return o.getEmail().equals(user.getEmail());
                         }
                     });
@@ -99,6 +108,9 @@ public class DatabaseController implements ServletContextListener {
 
             } else if (requestFilter instanceof Area) {
                 final Area area = (Area) requestFilter;
+
+                // unique key of the Area object is the ID field.
+                // When this is empty directly use the user Object as filter.
                 if (area.getID() == null && (area.getLocations() == null || area.getLocations().isEmpty())) {
                     queryResult = con.queryByExample(area);
                 } else {
@@ -113,7 +125,7 @@ public class DatabaseController implements ServletContextListener {
                                 if ((x < area.getTopLeftX() || y < area.getTopLeftY()) || x > area.getTopLeftX() + area.getWidth() || y > area.getTopLeftY() + area.getHeight())
                                     return false;
                                 return true;
-                            } else // check on unique key
+                            } else /// ID is Areas unique key
                                 return o.getID().equals(area.getID());
                         }
                     });
@@ -133,6 +145,7 @@ public class DatabaseController implements ServletContextListener {
                 }
             }
 
+            // Write query results to DataList
             DataList<T> result = new DataList<>();
             if (queryResult != null && queryResult.size() > 0) {
                 for (Object o : queryResult) {
@@ -295,11 +308,12 @@ public class DatabaseController implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
-        log = Messenger.getInstance();
-        Configuration config = Configuration.getInstance();
-        String dbName = config.getDbName();
-
         ServletContext context = event.getServletContext();
+        Configuration config = Configuration.getInstance();
+        config.init(context); // must be first!!!
+        log = Messenger.getInstance();
+
+        String dbName = config.getDbName();
         String filePath = context.getRealPath("WEB-INF/"
                 + dbName);
         EmbeddedObjectContainer rootContainer = Db4oEmbedded.openFile(filePath);

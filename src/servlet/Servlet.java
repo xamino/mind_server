@@ -70,8 +70,6 @@ public class Servlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        Configuration.getInstance().init(getServletContext()); // must be first!!!
-
         log = Messenger.getInstance();
         moduleManager = EventModuleManager.getInstance();
         json = JsonConverter.getInstance();
