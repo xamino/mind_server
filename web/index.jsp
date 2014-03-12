@@ -2,14 +2,14 @@
 <html>
 <head>
     <title>MIND | Test Page</title>
-    <script language="JavaScript" type="text/javascript" src="javascript/jquery-2.1.0.min.js"></script>
+    <script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
     <script language="JavaScript" type="text/javascript" src="javascript/library.js"></script>
     <script language="JavaScript" type="text/javascript" src="javascript/run.js"></script>
     <script language="JavaScript" type="text/javascript" src="javascript/unittest.js"></script>
 </head>
 <body>
 button - only till we know whats on index.jsp <br>
-<input type="button" name="redirect" value="start mind" onclick="document.location.href='admin_home.jsp'">
+<input type="button" name="redirect" value="start mind" onclick="document.location.href='login.jsp'">
 <br>
 <br>
 MIND test page for checking the API and as an example for later work on web interfaces.

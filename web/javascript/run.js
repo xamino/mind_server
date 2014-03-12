@@ -65,3 +65,18 @@ function doTask(task, object, callback) {
         send(new Arrival(task, session), callback);
     }
 }
+
+$(document).on("submit","#loginForm", function(event){
+	event.preventDefault();
+	var email, password;
+	email=$("#email").val();	
+	password=$("#password").val();
+	alert(email + password);
+	
+	
+	
+	login(email, password);
+	
+	
+});
+
