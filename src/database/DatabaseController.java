@@ -1,7 +1,6 @@
 package database;
 
 import com.db4o.Db4oEmbedded;
-import com.db4o.EmbeddedObjectContainer;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
 import com.db4o.query.Predicate;
@@ -27,7 +26,7 @@ public class DatabaseController implements ServletContextListener {
      */
     private static DatabaseController instance;
     private Messenger log;
-    private final String CLASS = "DatabaseController";
+    private final String TAG = "DatabaseController";
     private ObjectContainer con;
 
     /**
@@ -67,7 +66,7 @@ public class DatabaseController implements ServletContextListener {
         try {
             con.store(data);
             //con.close();
-            log.log(CLASS, data.toString() + " written to DB!");
+            log.log(TAG, data.toString() + " written to DB!");
 
             return true;
         } catch (Exception e) {
@@ -122,9 +121,7 @@ public class DatabaseController implements ServletContextListener {
                                 Location contained = area.getLocations().get(0);
                                 double x = contained.getCoordinateX();
                                 double y = contained.getCoordinateY();
-                                if ((x < area.getTopLeftX() || y < area.getTopLeftY()) || x > area.getTopLeftX() + area.getWidth() || y > area.getTopLeftY() + area.getHeight())
-                                    return false;
-                                return true;
+                                return !((x < area.getTopLeftX() || y < area.getTopLeftY()) || x > area.getTopLeftX() + area.getWidth() || y > area.getTopLeftY() + area.getHeight());
                             } else /// ID is Areas unique key
                                 return o.getID().equals(area.getID());
                         }
@@ -197,12 +194,12 @@ public class DatabaseController implements ServletContextListener {
                     result = ((Area) queryResult.get(0)).getLocations();
                 }
             } else {
-                //TODO
+                return null;
             }
             if (result == null)
                 result = new DataList();
 
-            log.log(CLASS, result.toString() + " read from DB!");
+            log.log(TAG, result.toString() + " read from DB!");
             return result;
         } catch (Exception e) {
             return null;
@@ -213,19 +210,19 @@ public class DatabaseController implements ServletContextListener {
         try {
             if (data instanceof User) {
                 User dataUser = (User) data;
-                User userToUpdate = (User) read(data).get(0); // TODO check
+                User userToUpdate = read(dataUser).get(0); // TODO Empty/NullCheck
                 userToUpdate.setName(dataUser.getName());
                 userToUpdate.setPwdHash(dataUser.getPwdHash());
                 userToUpdate.setAdmin(dataUser.isAdmin());
 
                 con.store(userToUpdate);
 
-                log.log(CLASS, userToUpdate.toString() + " updated in DB!");
+                log.log(TAG, userToUpdate.toString() + " updated in DB!");
 
                 return true;
             } else if (data instanceof Area) {
                 Area dataArea = (Area) data;
-                Area areaToUpdate = (Area) read(data).get(0);// TODO check
+                Area areaToUpdate = read(dataArea).get(0); // TODO Empty/NullCheck
                 areaToUpdate.setID(dataArea.getID());
                 areaToUpdate.setLocations(dataArea.getLocations());
                 areaToUpdate.setHeight(dataArea.getHeight());
@@ -235,10 +232,9 @@ public class DatabaseController implements ServletContextListener {
 
                 con.store(areaToUpdate);
 
-                log.log(CLASS, areaToUpdate.toString() + " updated in DB!");
+                log.log(TAG, areaToUpdate.toString() + " updated in DB!");
                 return true;
             }
-
 
             return false;
         } catch (Exception e) {
@@ -257,7 +253,7 @@ public class DatabaseController implements ServletContextListener {
         try {
             Data dataToDelete = read(data);
             con.delete(dataToDelete);
-            log.log(CLASS, dataToDelete.toString() + " deleted from DB!");
+            log.log(TAG, dataToDelete.toString() + " deleted from DB!");
             return true;
         } catch (Exception e) {
             return false;
@@ -276,7 +272,7 @@ public class DatabaseController implements ServletContextListener {
             while (objects.hasNext()) {
                 con.delete(objects.next());
             }
-            log.log(CLASS, data.toString() + " deleted from DB!");
+            log.log(TAG, data.toString() + " deleted from DB!");
             return true;
         } catch (Exception e) {
             return false;
@@ -285,10 +281,10 @@ public class DatabaseController implements ServletContextListener {
 
     public void init() {
         // Initializing Database
-        log.log(CLASS, "Running DB init.");
+        log.log(TAG, "Running DB init.");
         DataList<Area> areaData = read(new Area("universe", null, 0, 0, 0, 0));
         if (areaData == null || areaData.isEmpty()) {
-            log.log(CLASS, "Universe not existing, creating it.");
+            log.log(TAG, "Universe not existing, creating it.");
             create(new Area("universe", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
         }
 
@@ -298,7 +294,7 @@ public class DatabaseController implements ServletContextListener {
         DataList<User> adminData = read(adminProto);
         // test for existing single admin or list of admins
         if (adminData == null || adminData.isEmpty()) {
-            log.log(CLASS, "Admin not existing, creating one.");
+            log.log(TAG, "Admin not existing, creating one.");
             adminProto = new User("admin", "admin@admin.admin");
             adminProto.setAdmin(true);
             adminProto.setPwdHash(BCrypt.hashpw("admin", BCrypt.gensalt(12)));
@@ -316,9 +312,8 @@ public class DatabaseController implements ServletContextListener {
         String dbName = config.getDbName();
         String filePath = context.getRealPath("WEB-INF/"
                 + dbName);
-        EmbeddedObjectContainer rootContainer = Db4oEmbedded.openFile(filePath);
-        con = rootContainer;
-        //context.setAttribute("DB_SERVER", rootContainer);
+        con = Db4oEmbedded.openFile(filePath);
+
         context.log("db4o startup on " + filePath);
 
         init();
@@ -328,8 +323,6 @@ public class DatabaseController implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent event) {
         ServletContext context = event.getServletContext();
-        //ObjectContainer rootContainer = (ObjectContainer) context.getAttribute("DB_SERVER");
-        //context.removeAttribute("DB_SERVER");
         close(con);
         context.log("db4o shutdown");
     }
@@ -338,6 +331,5 @@ public class DatabaseController implements ServletContextListener {
         if (container != null) {
             container.close();
         }
-        container = null;
     }
 }
