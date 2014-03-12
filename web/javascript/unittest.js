@@ -120,7 +120,7 @@ function areaTest() {
         new WifiMorsel("00:19:07:00:66:02", "welcome", -12)
     ];
     unitTest("location_add", new Location(1, 1, wifis2), Success, adminSession);
-    var uniArea = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
+    var areas = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
     if (!(uniArea instanceof Area && uniArea.locations.length >= 1)) {
         alert("Writing a location directly to the universal area failed!");
     }
@@ -160,7 +160,7 @@ function positionTest() {
     // Becuase we night not find the position :P
     if (foundPosition != null) {
         if (locationRequest.coordinateX != foundPosition.coordinateX || locationRequest.coordinateY != foundPosition.coordinateY) {
-            alert("Failed '" + find_position + "'\n\n" + JSON.stringify(foundPosition) + "\n\nPosition does not match the correct one.");
+            alert("Failed 'find_position'\n\n" + JSON.stringify(foundPosition) + "\n\nPosition does not match the correct one.");
         }
     }
 
