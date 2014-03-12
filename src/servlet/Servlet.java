@@ -201,6 +201,7 @@ public class Servlet extends HttpServlet {
     private Data handleAdminTask(Arrival arrival, User user) {
         Task.API task = Task.API.safeValueOf(arrival.getTask());
         switch (task) {
+            // TODO: user_read_any missing!
             case USER_ADD:
                 // TODO: Input sanitation? Che
                 if (!(arrival.getObject() instanceof User)) {
@@ -213,6 +214,7 @@ public class Servlet extends HttpServlet {
                 }
                 return moduleManager.handleTask(Task.User.UPDATE, arrival.getObject());
             case USER_DELETE:
+                // TODO not USER_REMOVE?
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
@@ -254,6 +256,7 @@ public class Servlet extends HttpServlet {
                 }
                 return moduleManager.handleTask(Task.Area.DELETE, arrival.getObject());
             case ADMIN_READ_ALL:
+                // TODO: can now be drastly improved with new filter, change!
                 Data data = moduleManager.handleTask(Task.User.READ, null);
                 Data msg = checkDataMessage(data);
                 if (msg == null && data instanceof DataList) {

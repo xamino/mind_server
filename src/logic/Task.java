@@ -25,6 +25,7 @@ public interface Task {
         ECHO,
         // USER
         USER_READ,
+        USER_READ_ANY,  // Required for admin user read!
         USER_ADD,
         USER_UPDATE,
         USER_DELETE,
