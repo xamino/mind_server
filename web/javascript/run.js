@@ -27,8 +27,9 @@ function register(email, password, name) {
  * Function for login in.
  * @param email Primary key.
  * @param password Password.
+ * @param callback With no values!
  */
-function login(email, password) {
+function login(email, password, callback) {
     // We can keep name empty as it is not critical to this operation
     var loginUser = new User(email, password, null);
     // sessionHash remains empty, we don't have one yet
@@ -37,7 +38,7 @@ function login(email, password) {
     send(request, function (data) {
         // callback simply saves the session
         session = data.object.description;
-        alert(session);
+        callback();
     });
 }
 
@@ -56,7 +57,7 @@ function logout() {
  * of the sessionHash. :P
  * @param task
  * @param object
- * @param callback
+ * @param callback Callback(data) !
  */
 function doTask(task, object, callback) {
     if (object != null) {
