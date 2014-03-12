@@ -3,6 +3,11 @@
  * unresponsive until the unit test is done!
  */
 function doUnitTest() {
+
+    if (!confirm("WARNING: This will clear the DB! Do you really want to continue?")) {
+        return;
+    }
+
     alert("Beginning comprehensive unit test!");
 
     cleanDB();
@@ -180,7 +185,7 @@ function cleanDB() {
     }
     // Destroy areas
     unitTest("admin_annihilate_area", null, Success, adminSession);
-    var arealist = unitTest("area_read_all", null, Array, adminSession);
+    var arealist = unitTest("area_read", new Area(), Array, adminSession);
     if (arealist == null || arealist.length != 1 || arealist[0].ID != "universe") {
         alert("DB was NOT CLEARED of AREA!");
     }

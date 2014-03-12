@@ -223,6 +223,7 @@ public class DatabaseController implements ServletContextListener {
                 con.store(areaToUpdate);
 
                 log.log(CLASS, areaToUpdate.toString() + " updated in DB!");
+                return true;
             }
 
 

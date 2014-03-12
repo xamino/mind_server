@@ -4,7 +4,7 @@
 
 // Setup some general AJAX stuff (always executed)
 $.ajaxSetup({
-    url: '/Servlet',
+    url: '/Servlet/bla',
     type: 'POST',
     contentType: 'application/json; charset=utf-8',
     dataType: 'json'
