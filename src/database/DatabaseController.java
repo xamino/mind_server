@@ -59,7 +59,8 @@ public class DatabaseController implements ServletContextListener {
      */
     public boolean create(Data data) {
         // avoid duplicates
-        if (read(data) != null) {
+        DataList<Data> readData = read(data);
+        if (readData != null && !readData.isEmpty()) {
             return false;
         }
 
@@ -74,66 +75,72 @@ public class DatabaseController implements ServletContextListener {
         }
     }
 
-    public <T extends Data> T read(final T requestFilter) {
+    public <T extends Data> DataList<T> read(final T requestFilter) {
         List queryResult = null;
 
-        // Read Data depending on the objects unique key
-        if (requestFilter instanceof User) {
-            final User user = (User) requestFilter;
-            queryResult = con.query(new Predicate<User>() {
-                @Override
-                public boolean match(User o) {
-                    // check on unique key
-                    return o.getEmail().equals(user.getEmail());
-                }
-            });
-        } else if (requestFilter instanceof Area) {
-            final Area area = (Area) requestFilter;
-            queryResult = con.query(new Predicate<Area>() {
-                @Override
-                public boolean match(Area o) {
-                    // check on unique key
-                    return o.getID().equals(area.getID());
-                }
-            });
-        } else if (requestFilter instanceof Location) {
-            final Location loc = (Location) requestFilter;
-            queryResult = con.query(new Predicate<Location>() {
-                @Override
-                public boolean match(Location o) {
-                    // check on unique key
-                    return loc.getCoordinateY() == o.getCoordinateY() && loc.getCoordinateX() == o.getCoordinateX();
-                }
-            });
-        }
-
-        T result = null;
-        if (queryResult != null && queryResult.size() > 0) {
-            result = (T) queryResult.get(0); // TODO unchecked!
-        }
-
-        /*if (result != null) {
-            log.log(CLASS, result.toString() + " read from DB!");
-        }*/
-
-        return result;
-    }
-
-    public <T extends Data> DataList<T> readAll(final T requestFilter) {
         try {
-            List queryResult = con.query(requestFilter.getClass());
+            // Read Data depending on the objects unique key
+            if (requestFilter instanceof User) {
+                final User user = (User) requestFilter;
 
-            // write query result into a Datalist
+                // on empty key query using the filter
+                if (user.getEmail() == null) {
+                    queryResult = con.queryByExample(user);
+                } else {
+                    queryResult = con.query(new Predicate<User>() {
+                        @Override
+                        public boolean match(User o) {
+                            // check on unique keyl
+                            return o.getEmail().equals(user.getEmail());
+                        }
+                    });
+
+                }
+
+            } else if (requestFilter instanceof Area) {
+                final Area area = (Area) requestFilter;
+                if (area.getID() == null && (area.getLocations() == null || area.getLocations().isEmpty())) {
+                    queryResult = con.queryByExample(area);
+                } else {
+                    queryResult = con.query(new Predicate<Area>() {
+                        @Override
+                        public boolean match(Area o) {
+                            // return all areas that include the single location contained in the requestfilter
+                            if (area.getID() == null && area.getLocations() != null && area.getLocations().size() == 1) {
+                                Location contained = area.getLocations().get(0);
+                                double x = contained.getCoordinateX();
+                                double y = contained.getCoordinateY();
+                                if ((x < area.getTopLeftX() || y < area.getTopLeftY()) || x > area.getTopLeftX() + area.getWidth() || y > area.getTopLeftY() + area.getHeight())
+                                    return false;
+                                return true;
+                            } else // check on unique key
+                                return o.getID().equals(area.getID());
+                        }
+                    });
+                }
+            } else if (requestFilter instanceof Location) {
+                final Location loc = (Location) requestFilter;
+                if (loc.getCoordinateX() == 0 && loc.getCoordinateY() == 0) {
+                    queryResult = con.queryByExample(loc);
+                } else {
+                    queryResult = con.query(new Predicate<Location>() {
+                        @Override
+                        public boolean match(Location o) {
+                            // check on unique key
+                            return loc.getCoordinateY() == o.getCoordinateY() && loc.getCoordinateX() == o.getCoordinateX();
+                        }
+                    });
+                }
+            }
+
             DataList<T> result = new DataList<>();
-            if (queryResult != null) {
+            if (queryResult != null && queryResult.size() > 0) {
                 for (Object o : queryResult) {
                     result.add((T) o);
                 }
             }
-
-            log.log(CLASS, result.toString() + " read from DB!");
-
             return result;
+
         } catch (Exception e) {
             return null;
         }
@@ -193,9 +200,10 @@ public class DatabaseController implements ServletContextListener {
         try {
             if (data instanceof User) {
                 User dataUser = (User) data;
-                User userToUpdate = (User) read(data);
+                User userToUpdate = (User) read(data).get(0); // TODO check
                 userToUpdate.setName(dataUser.getName());
                 userToUpdate.setPwdHash(dataUser.getPwdHash());
+                userToUpdate.setAdmin(dataUser.isAdmin());
 
                 con.store(userToUpdate);
 
@@ -204,9 +212,13 @@ public class DatabaseController implements ServletContextListener {
                 return true;
             } else if (data instanceof Area) {
                 Area dataArea = (Area) data;
-                Area areaToUpdate = (Area) read(data);
+                Area areaToUpdate = (Area) read(data).get(0);// TODO check
                 areaToUpdate.setID(dataArea.getID());
                 areaToUpdate.setLocations(dataArea.getLocations());
+                areaToUpdate.setHeight(dataArea.getHeight());
+                areaToUpdate.setWidth(dataArea.getWidth());
+                areaToUpdate.setTopLeftX(dataArea.getTopLeftX());
+                areaToUpdate.setTopLeftY(dataArea.getTopLeftY());
 
                 con.store(areaToUpdate);
 
@@ -257,22 +269,22 @@ public class DatabaseController implements ServletContextListener {
         }
     }
 
-    public static void listResult(List<?> result) {
-        System.out.println(result.size());
-        for (Object o : result) {
-            System.out.println(o);
-        }
-    }
-
     public void init() {
         // Initializing Database
-        if (read(new Area("universe", null, 0, 0, 0, 0)) == null) {
+        log.log(CLASS, "Running DB init.");
+        DataList<Area> areaData = read(new Area("universe", null, 0, 0, 0, 0));
+        if (areaData == null || areaData.isEmpty()) {
+            log.log(CLASS, "Universe not existing, creating it.");
             create(new Area("universe", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
         }
 
-        User adminProto = new User("", "");
+        // Create default admin if no other admin exists
+        User adminProto = new User(null, null);
         adminProto.setAdmin(true);
-        if (readAll(adminProto).isEmpty()) {
+        DataList<User> adminData = read(adminProto);
+        // test for existing single admin or list of admins
+        if (adminData == null || adminData.isEmpty()) {
+            log.log(CLASS, "Admin not existing, creating one.");
             adminProto = new User("admin", "admin@admin.admin");
             adminProto.setAdmin(true);
             adminProto.setPwdHash(BCrypt.hashpw("admin", BCrypt.gensalt(12)));

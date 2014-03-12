@@ -31,34 +31,24 @@ public class UserModule extends Module {
             case CREATE:
                 return create(user);
             case READ:
-                return read(user);
+                return user == null ? read(new User(null, null)) : read(user);
             case UPDATE:
                 return update(user);
             case DELETE:
                 return delete(user);
-            case READ_ALL:
-                return readAllUsers(new User("", ""));
             case ANNIHILATE:
                 return annihilateUsers();
         }
 
-        return null;
+        return new Error("UserTaskNotImplemented","The task " + task.toString() + " is not implemented.");
     }
 
     private Data annihilateUsers() {
-        Boolean deleted = database.deleteAll(new User("", ""));
-        if(deleted){
+        Boolean deleted = database.deleteAll(new User(null, null));
+        if (deleted) {
             database.init();
             return new Success("UserAnnihilationSuccess", "All users were removed from Database. Use default admin.");
         }
         return new Error("UserAnnihilationFailure", "Removal of users failed.");
-    }
-
-    private Data readAllUsers(User user) {
-        Data data = database.readAll(user);
-        if (data != null)
-            return data;
-        else
-            return new Error("UserReadFailure", "Reading of users failed!");
     }
 }

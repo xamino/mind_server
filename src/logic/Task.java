@@ -8,10 +8,6 @@ public interface Task {
     public enum User implements Task {
         CREATE, READ, UPDATE, DELETE,
         /**
-         * Task to fetch as List of all Users, use null as request
-         */
-        READ_ALL,
-        /**
          * Removes all Users from the database and restores the default admin
          */
         ANNIHILATE,
@@ -137,10 +133,6 @@ public interface Task {
          * Task to fetch all Locations of an Area
          */
         READ_LOCATIONS,
-        /**
-         * Task to fetch a List of all available Areas
-         */
-        READ_ALL,
         /**
          * Removes all areas and locations from the database and restores the default area
          */

@@ -3,6 +3,7 @@ package logic.modules;
 import database.Data;
 import database.messages.Error;
 import database.messages.Success;
+import database.objects.DataList;
 import database.objects.User;
 import logger.Messenger;
 import logic.EventModuleManager;
@@ -105,12 +106,18 @@ public class SanitationModule extends Module {
                     // To do that, we first need to get the new object:
                     User filter = new User("", sessions.get(arrival.getSessionHash()).user.getEmail());
                     Data update = EventModuleManager.getInstance().handleTask(Task.User.READ, filter);
-                    if (update instanceof User) {
-                        User currentUser = (User) update;
-                        // We could check whether we even need to update the user object, but we need to reset the timer anyway
-                        ActiveUser activeUser = new ActiveUser(currentUser, System.currentTimeMillis());
-                        sessions.put(arrival.getSessionHash(), activeUser);
-                        return currentUser;
+                    if (update instanceof DataList) { //TODO dirty fix for the read return is a list now
+                        DataList<Data> updateList = (DataList<Data>) update;
+                        if (updateList != null && !updateList.isEmpty()) {
+                            Data dataUser = updateList.get(0);
+                            if (dataUser instanceof User) {
+                                User currentUser = (User) dataUser;
+                                // We could check whether we even need to update the user object, but we need to reset the timer anyway
+                                ActiveUser activeUser = new ActiveUser(currentUser, System.currentTimeMillis());
+                                sessions.put(arrival.getSessionHash(), activeUser);
+                                return currentUser;
+                            }
+                        }
                     } else {
                         // destroy session
                         destroySession(arrival.getSessionHash());
@@ -184,7 +191,7 @@ public class SanitationModule extends Module {
             return new Error("LoginFailed", "Wrong user email or wrong password.");
         }
         // This means we have a valid user object:
-        User check = (User) object;
+        User check = ((DataList<User>) object).get(0);
         // Now to check the password
         if (BCrypt.checkpw(user.getPwdHash(), check.getPwdHash())) {
             // Everything okay, so create a hash:

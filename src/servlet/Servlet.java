@@ -238,7 +238,7 @@ public class Servlet extends HttpServlet {
                 }
                 return moduleManager.handleTask(Task.Area.READ, arrival.getObject());
             case AREA_READ_ALL:
-                return moduleManager.handleTask(Task.Area.READ_ALL, null);
+                return moduleManager.handleTask(Task.Area.READ, null);
             case AREA_ADD:
                 if (!(arrival.getObject() instanceof Area)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -255,7 +255,7 @@ public class Servlet extends HttpServlet {
                 }
                 return moduleManager.handleTask(Task.Area.DELETE, arrival.getObject());
             case ADMIN_READ_ALL:
-                Data data = moduleManager.handleTask(Task.User.READ_ALL, null);
+                Data data = moduleManager.handleTask(Task.User.READ, null);
                 Data msg = checkDataMessage(data);
                 if (msg == null && data instanceof DataList) {
                     DataList list = (DataList) data;

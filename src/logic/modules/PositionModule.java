@@ -45,7 +45,7 @@ public class PositionModule extends Module {
 
     private Location calculateLocation(Location request) {
         // Get Area containing all locations from database
-        Area allArea = ((DataList<Area>) EventModuleManager.getInstance().handleTask(Task.Area.READ_ALL, null)).get(0); // TODO better way?
+        Area allArea = ((DataList<Area>) EventModuleManager.getInstance().handleTask(Task.Area.READ, null)).get(0); // TODO better way?
 
         // A Map that describes how many matches there are for this location
         HashMap<Location, Integer> locationMatchesMap = new HashMap<>();

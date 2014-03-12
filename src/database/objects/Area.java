@@ -39,6 +39,14 @@ public class Area implements Data {
         return width * height;
     }
 
+    /**
+     * Adds a location to the area.
+     * @param location
+     */
+    public void addLocation(Location location){
+        locations.add(location);
+    }
+
     public int getTopLeftX() {
 
         return topLeftX;
@@ -92,7 +100,7 @@ public class Area implements Data {
     public String toString() {
         return "Area{" +
                 "ID='" + ID + '\'' +
-                ", locations=" + locations +
-                '}';
+                ", locations='" + locations +
+                "'}";
     }
 }

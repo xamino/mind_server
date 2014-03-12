@@ -5,6 +5,7 @@ import database.DatabaseController;
 import database.messages.Error;
 import database.messages.Success;
 import database.objects.Area;
+import database.objects.DataList;
 import database.objects.Location;
 import database.objects.WifiMorsel;
 import logic.Module;
@@ -35,7 +36,7 @@ public class LocationModule extends Module {
             Task.Location locationTask = (Task.Location) task;
             switch (locationTask) {
                 case CREATE:
-                    return create(location);
+                    return createLocation(location);
                 case READ:
                     return read(location);
                 case UPDATE:
@@ -55,15 +56,13 @@ public class LocationModule extends Module {
                 case CREATE:
                     return create(area);
                 case READ:
-                    return read(area);
+                    return area == null ? read(new Area(null, null, 0, 0, 0, 0)) : read(area);
                 case UPDATE:
                     return update(area);
                 case DELETE:
                     return delete(area);
                 case READ_LOCATIONS:
                     return readLocations(area);
-                case READ_ALL:
-                    return readAll(new Area("", null, 0, 0, 0, 0));
                 case ANNIHILATE:
                     return annihilateAreas();
             }
@@ -72,24 +71,47 @@ public class LocationModule extends Module {
         return new Error("MissingOperation", "The Location Module is unable to perform the Task as it appears not to be implemented.");
     }
 
+    private Data createLocation(final Location location) {
+        // A location is always part of the default area
+        DataList<Area> data = database.read(new Area("universe", null, 0, 0, 0, 0));
+        Area universe;
+        if (data != null && !data.isEmpty()) {
+            universe = data.get(0);
+            universe.addLocation(location);
+            boolean op = database.update(universe);
+            if (!op)
+                return new Error("CreateLocationFailure", "Update of " + universe.toString() + " with " + location.toString() + " failed!");
+        } else
+            return new Error("CreateLocationFailure", "Universe Area could not be read from Database. This should be impossible.");
+
+        // Now read all Areas from DB where the Location coordinates are contained
+        DataList<Location> locations = new DataList<>();
+        locations.add(location);
+        DataList<Area> containedAreas = database.read(new Area(null, locations, 0, 0, 0, 0));
+
+        for (Area area : containedAreas) {
+            area.addLocation(location);
+            database.update(area);
+        }
+
+        return new Success("CreateLocationSuccess", "The Location " + location.toString() + " was stored in the Database.");
+    }
+
+    /**
+     * Removes all location specific information from the database then restores the default area.
+     *
+     * @return
+     */
     private Data annihilateAreas() {
-        Boolean deleted = database.deleteAll(new Area("", null, 0, 0, 0, 0));
+        Boolean deleted = database.deleteAll(new Area(null, null, 0, 0, 0, 0));
         // Delete these to be sure...
         deleted &= database.deleteAll(new Location(0, 0, null));
-        deleted &= database.deleteAll(new WifiMorsel("", "", 0));
+        deleted &= database.deleteAll(new WifiMorsel(null, null, 0));
         if (deleted) {
             database.init();
             return new Success("AreaAnnihilationSuccess", "All areas were removed from Database.");
         }
         return new Error("AreaAnnihilationFailure", "Removal of areas failed.");
-    }
-
-    private Data readAll(Area area) {
-        Data data = database.readAll(area);
-        if (data != null)
-            return data;
-        else
-            return new Error("AreaReadFailure", "Reading of Areas failed!");
     }
 
     private Data readLocations(Area area) {
