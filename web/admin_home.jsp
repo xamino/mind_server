@@ -37,7 +37,7 @@ In the 'System Management' you can:<br>
 - 'Administrate Public Dicplays'
 </div>
 <div id="logout">
-       <input type="submit" value="Logout" />
+       <input type="submit" value="Logout" onClick="logout; window.location='index.jsp'" />
 </div>
 <div class="clear"></div>
 </div>
