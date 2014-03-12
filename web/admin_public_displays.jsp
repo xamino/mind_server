@@ -31,7 +31,7 @@
 TODO: Some cool stuff
 </div>
 <div id="logout">
-       <input type="submit" value="Logout" />
+       <input type="submit" value="Logout" onClick="logout; window.location='index.jsp'"/>
 </div>
 <div class="clear"></div>
 </div>
