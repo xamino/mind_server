@@ -180,7 +180,7 @@ function cleanDB() {
     }
     // Destroy areas
     unitTest("admin_annihilate_area", null, Success, adminSession);
-    var arealist = unitTest("area_read_all", null, Array, adminSession);
+    var arealist = unitTest("area_read", new Area(), Array, adminSession);
     if (arealist == null || arealist.length != 1 || arealist[0].ID != "universe") {
         alert("DB was NOT CLEARED of AREA!");
     }

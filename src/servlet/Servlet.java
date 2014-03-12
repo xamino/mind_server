@@ -26,9 +26,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 /**
- * Dieses Servlet ist fuer alle oeffentlich zugaengliche Daten zustaendig.
- * Insbesondere betrifft dies den Abruf aller verfuegbaren Angebote aus der
- * Datenbank fuer den Index.
+ * Main REST API servlet class of the server. All requests go through here, are validated, parsed, and processed.
  */
 
 @WebServlet("/Servlet/*")
@@ -237,8 +235,6 @@ public class Servlet extends HttpServlet {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 return moduleManager.handleTask(Task.Area.READ, arrival.getObject());
-            case AREA_READ_ALL:
-                return moduleManager.handleTask(Task.Area.READ, null);
             case AREA_ADD:
                 if (!(arrival.getObject() instanceof Area)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
