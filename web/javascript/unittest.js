@@ -120,10 +120,17 @@ function areaTest() {
         new WifiMorsel("00:19:07:00:66:02", "welcome", -12)
     ];
     unitTest("location_add", new Location(1, 1, wifis2), Success, adminSession);
-    var areas = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
-    if (!(uniArea instanceof Area && uniArea.locations.length >= 1)) {
-        alert("Writing a location directly to the universal area failed!");
+    var area = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
+    if (!instanceOf(area, Area)) {
+        alert("Reading universe failed - not Area type object!");
+    } else {
+        var location = area.locations[0];
+        if (location == null && !((location.coordinateX == 1) && (location.coordinateY == 1) )) {
+            alert("Writing a location directly to the universal area failed!");
+        }
     }
+
+    // TODO complete
 
     cleanDB();
 
