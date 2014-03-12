@@ -30,6 +30,8 @@ Click here to run a unit test of the API. WARNING: while the test is running, th
 <br>
 <input type="button" name="unittest" value="Run API Unit Test" onclick="doUnitTest();">
 <br>
+<input type="button" name="usertest" value="User Unit Test" onclick="userAccessTest();">
+<br>
 <input type="button" name="areatest" value="Area Unit Test" onclick="areaTest();">
 <br>
 <input type="button" name="positiontest" value="Position Unit Test" onclick="positionTest();">
