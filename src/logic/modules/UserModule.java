@@ -54,8 +54,12 @@ public class UserModule extends Module {
 
         // from here on single users were requested
         Data data = read(user);
-        if(data instanceof DataList)
+        if(data instanceof DataList) {
+            if (((DataList)data).isEmpty()) {
+                return new Error("UserMissing","User could not be found!");
+            }
             return ((DataList<Data>)data).get(0);
+        }
         else return data; // Error
     }
 

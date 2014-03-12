@@ -3,7 +3,6 @@ package logic.modules;
 import database.Data;
 import database.messages.Error;
 import database.messages.Success;
-import database.objects.DataList;
 import database.objects.User;
 import logger.Messenger;
 import logic.EventModuleManager;
@@ -106,25 +105,19 @@ public class SanitationModule extends Module {
                     // To do that, we first need to get the new object:
                     User filter = new User("", sessions.get(arrival.getSessionHash()).user.getEmail());
                     Data update = EventModuleManager.getInstance().handleTask(Task.User.READ, filter);
-                    if (update instanceof DataList) {
-                        DataList updateList = (DataList) update;
-                        if (!((DataList) update).isEmpty()) {
-                            Object dataUser = updateList.get(0);
-                            if (dataUser instanceof User) {
-                                // If everything is okay, we return the current user and leave this method
-                                User currentUser = (User) dataUser;
-                                // We could check whether we even need to update the user object, but we need to reset the timer anyway
-                                ActiveUser activeUser = new ActiveUser(currentUser, System.currentTimeMillis());
-                                sessions.put(arrival.getSessionHash(), activeUser);
-                                return currentUser;
-                            } else {
-                                log.error(TAG, "WARNING: Check failed because no user was returned from DB!");
-                            }
-                        } else {
-                            log.error(TAG, "WARNING: Check failed because user list from DB is empty!");
-                        }
+                    if (update instanceof User) {
+                        // If everything is okay, we return the current user and leave this method
+                        User currentUser = (User) update;
+                        // We could check whether we even need to update the user object, but we need to reset the timer anyway
+                        ActiveUser activeUser = new ActiveUser(currentUser, System.currentTimeMillis());
+                        sessions.put(arrival.getSessionHash(), activeUser);
+                        return currentUser;
+                    } else if (!(update instanceof Error)) {
+                        // DB returns an error if no user was found, in which case this warning is not required
+                        log.error(TAG, "WARNING: Check failed because no user or error was returned from DB!");
                     }
-                    // destroy session
+                    // If we haven't returned, something went wrong
+                    // destroy session to be safe
                     destroySession(arrival.getSessionHash());
                     return new Error("SessionCheckError", "User couldn't be found in DB! You have been logged out.");
                 } else {
@@ -187,7 +180,7 @@ public class SanitationModule extends Module {
         Data object = EventModuleManager.getInstance().handleTask(Task.User.READ, user);
         // Check if message:
         Data answer = Servlet.checkDataMessage(object);
-        if (answer != null || !(object instanceof DataList) || ((DataList) object).size() != 1) {
+        if (answer != null || !(object instanceof User)) {
             // this means 99% of the time that a user wasn't found.
             // To avoid allowing to find usernames with this method, we return the same message as if the login
             // simply used the wrong information.
@@ -195,7 +188,7 @@ public class SanitationModule extends Module {
             return new Error("LoginFailed", "Wrong user email or wrong password.");
         }
         // This means we have a valid user object:
-        User check = (User) ((DataList) object).get(0);
+        User check = (User) object;
         // Now to check the password
         if (BCrypt.checkpw(user.getPwdHash(), check.getPwdHash())) {
             // Everything okay, so create a hash:
