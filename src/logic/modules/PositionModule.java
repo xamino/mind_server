@@ -137,11 +137,12 @@ public class PositionModule extends Module {
                     int currentsum = Integer.MAX_VALUE; // TODO Something wrong here!
 
                     for (Location point : sortedLocationCandidateList) { //for each point with same diff level
-                        if (currentsum < locationLevelDifferenceSumMap.get(point)) {
+                        if(locationLevelDifferenceSumMap.get(point)<currentsum){
                             //get point with max total level
                             currentsum = locationLevelDifferenceSumMap.get(point);
                             finalMatch = point;
                         }
+
                     }
                 }
             }
