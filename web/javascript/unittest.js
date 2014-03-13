@@ -81,6 +81,8 @@ function userAccessTest() {
     var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
     var mariaSession = unitTest("login", new User("maria.heilig@gott.de", "maria", null), Success, null).description;
     var egoSession = unitTest("login", new User("ego.trump@haha.com", "ßüöä", null), Success, null).description;
+    // double session test
+    var egoTwoSession = unitTest("login", new User("ego.trump@haha.com", "ßüöä", null), Success, null).description;
     // illegal login
     unitTest("login", new User("mister.x@world.org", "bomb", null), Error, null);
     // try logout
@@ -89,6 +91,13 @@ function userAccessTest() {
     unitTest("logout", null, Success, "not_a_hash");
     // Re-login the admin
     adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    // Check
+    unitTest("check", null, Success, egoSession);
+    unitTest("check", null, Success, egoTwoSession);
+    // double session stuff
+    unitTest("logout", null, Success, egoTwoSession);
+    unitTest("check", null, Error, egoSession);
+    egoSession = unitTest("login", new User("ego.trump@haha.com", "ßüöä", null), Success, null).description;
 
     // delete
     unitTest("user_delete", null, Success, adminSession);

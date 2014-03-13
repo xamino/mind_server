@@ -14,6 +14,8 @@ import servlet.Servlet.Arrival;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 //todo: – on a session timeout the session is only removed if it is used for a query again. Need to remove sessions
@@ -109,7 +111,7 @@ public class SanitationModule extends Module {
                         // If everything is okay, we return the current user and leave this method
                         User currentUser = (User) update;
                         // We could check whether we even need to update the user object, but we need to reset the timer anyway
-                        ActiveUser activeUser = new ActiveUser(currentUser, System.currentTimeMillis());
+                        ActiveUser activeUser = new ActiveUser(currentUser, System.currentTimeMillis(), arrival.getSessionHash());
                         sessions.put(arrival.getSessionHash(), activeUser);
                         return currentUser;
                     } else if (!(update instanceof Error)) {
@@ -160,14 +162,26 @@ public class SanitationModule extends Module {
     }
 
     /**
-     * Destroys a session, removing it from the system.
+     * Destroys a session, removing it from the system. Will also log out all other sessions of the user!
      *
      * @param sessionHash The identifying session hash that will be removed.
      */
-    // TODO remove all hashes of one user when destrying the session!
     private void destroySession(String sessionHash) {
         if (sessions.containsKey(sessionHash)) {
+            ActiveUser activeUser = sessions.get(sessionHash);
+            // remove primary session
             sessions.remove(sessionHash);
+            // remove all other sessions with the same user
+            Collection<ActiveUser> values = sessions.values();
+            ArrayList<String> hashes = new ArrayList<>();
+            for (ActiveUser check : values) {
+                if (check.user.getEmail().equals(activeUser.user.getEmail())) {
+                    hashes.add(check.hash);
+                }
+            }
+            for (String hash : hashes) {
+                sessions.remove(hash);
+            }
         }
     }
 
@@ -195,7 +209,7 @@ public class SanitationModule extends Module {
             // Everything okay, so create a hash:
             String sessionHash = new BigInteger(130, random).toString(32);
             // Create the activeUser object using the correct, database user:
-            ActiveUser activeUser = new ActiveUser(check, System.currentTimeMillis());
+            ActiveUser activeUser = new ActiveUser(check, System.currentTimeMillis(), sessionHash);
             // Save the session:
             sessions.put(sessionHash, activeUser);
             // Return the hash for future references:
@@ -228,10 +242,12 @@ public class SanitationModule extends Module {
     private class ActiveUser {
         User user;
         long timestamp;
+        String hash;
 
-        ActiveUser(User user, long timestamp) {
+        ActiveUser(User user, long timestamp, String hash) {
             this.user = user;
             this.timestamp = timestamp;
+            this.hash = hash;
         }
     }
 }
