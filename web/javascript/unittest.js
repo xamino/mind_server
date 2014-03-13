@@ -116,6 +116,7 @@ function areaTest() {
 
     var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
 
+    // test adding a new area
     var wifis1 = [
         new WifiMorsel("00:19:07:07:64:00", "eduroam", -93),
         new WifiMorsel("00:19:07:07:64:01", "eduroam", -90),
@@ -138,8 +139,29 @@ function areaTest() {
             alert("Writing a location directly to the universal area failed!");
         }
     }
-
-    // TODO complete
+    // TODO finish & FIX! (see also todo in JsonConverter!)
+    /*
+    // Test adding a location to multiple ares
+    unitTest("location_add", new Location(35, 58, wifis1), Success, adminSession);
+    var universe = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
+    var office = unitTest("area_read", new Area("Office Prof. Gott", null, 0, 0, 0, 0), Area, adminSession);
+    // should be in both
+    var test = false;
+    for (var loc in universe.locations) {
+        if (loc.coordinateX == 35 && loc.coordinateY == 58)
+            test = true;
+    }
+    if (!test) {
+        alert("Multiple area location failed! Not in universe.")
+    }
+    for (var loc in office.locations) {
+        if (loc.coordinateX == 35 && loc.coordinateY == 58)
+            test = true;
+    }
+    if (!test) {
+        alert("Multiple area location failed! Not in office.")
+    }
+    */
 
     cleanDB();
 

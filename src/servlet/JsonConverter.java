@@ -20,7 +20,6 @@ import servlet.Servlet.Departure;
  *         be converted to JSON, but does NOT contain the required $type field to be parsed again! Make sure to use
  *         objects that extend the Data interface for EVERYTHING you send.
  */
-// TODO: can i require data interface for everything somehow, enforcing it in hard code? Would remove need for non-existant error messages. :P
 public class JsonConverter {
 
     private static JsonConverter INSTANCE;
@@ -72,6 +71,7 @@ public class JsonConverter {
      * @param object The object to write to JSON.
      * @return The string with the JSON representation.
      */
+    // TODO objects in lists are missing the $type descriptor!
     public String toJson(Data object) {
         try {
             return gson.toJson(object, Data.class);
