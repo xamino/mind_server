@@ -42,6 +42,8 @@ public class LocationModule extends Module {
                     return delete(location);
                 case READ_MORSELS:
                     return readMorsels(location);
+                    //TODO READ_BEST_AREA
+                    //TODO area add, update -> update locations
             }
         } else if (request instanceof WifiMorsel) {
             //TODO are there any other operations directly on these?

@@ -112,7 +112,7 @@ public class PositionModule extends Module {
                 }
             }
 
-            Set<Location> keySet = locationLevelDifferenceSumMap.keySet();
+            Set<Location> keySet = locationLevelDifferenceSumMap.keySet(); //TODO used for?
             for (Location loc : sortedLocationCandidateList) {
                 locationLevelDifferenceSumMap.remove(loc);
             }
