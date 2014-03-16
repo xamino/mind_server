@@ -4,11 +4,14 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
+<script src="javascript/library.js"></script>
+<script src="javascript/run.js"></script>
 <link href="${pageContext.request.contextPath}/css/admin.css" rel="stylesheet" type="text/css">
 <title>Admin - User Management</title>
 </head>
 
-<body>
+<body onload="loadUsers()">
 <div id="banner">
 <!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
 <h2>MIND</h2>
@@ -28,6 +31,51 @@
 	</ul>
 </div>
 <div id="text-content">
+	<script type="text/javascript">
+	    function popupOpen() {
+	      //window.open('about:blank');
+	      var leftPosition = (window.screen.width / 2) - ((400 / 2));
+	      var topPosition = (window.screen.height / 2) - ((200 / 2));
+	      var newwindow = window.open('addUser_popup.jsp', 'Add User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
+	      if (window.focus) {newwindow.focus();}
+	    }
+	    
+	    window.onunload = refreshParent;
+    	function refreshParent() {
+        	window.opener.location.reload();
+    	}
+  	 </script>
+	 <input type="submit" value="Add User" onClick="javascript:popupOpen()" />
+	 
+	 <table border ="1">
+        <tr>
+            <td>User Name:</td>
+            <td>User Email:</td>
+            <td>User Password:</td>
+            <td>Edit:</td>
+            <td>Remove:</td>
+        </tr>
+        <tr>      
+                <td>x</td>
+                <td>y</td>
+                <td>z</td>
+                <td><input type="submit" value="Edit User" onClick="javascript:popupOpen()" /></td>
+                <td><input type="submit" value="Remove User" onClick="javascript:popupOpen()" /></td>  
+            </tr>
+       <!--  for(int i = 0; i < allFestivals.size(); i+=1) { %>
+            <tr>      
+                <td>${allFestivals.get(i).getFestivalName()}</td>
+                <td>${allFestivals.get(i).getLocation()}</td>
+                <td>${allFestivals.get(i).getStartDate()}</td>
+                <td><input type="submit" value="Add User" onClick="javascript:popupOpen()" /></td>
+                <td>${allFestivals.get(i).getURL()}</td>  
+            </tr>
+        } -->
+    </table> 
+	<div id="table_space">
+    
+	</div> 
+
 
 </div>
 <div id="logout">

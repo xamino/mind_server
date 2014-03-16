@@ -77,6 +77,9 @@ function doTask(task, object, callback) {
 	}
 }
 
+/**
+ * Checks weather the user (who wants to log in) is an admin
+ */
 function isAdmin(data) {
 	
 	var user = data.object;
@@ -98,12 +101,16 @@ function isAdmin(data) {
 
 var potentialAdmin;
 
+/**
+ * on Button click 'Login' in login.jsp
+ * reads the input data and checks weather this user is an admin
+ */
 $(document).on("submit", "#loginForm", function(event) {
 	event.preventDefault();
 	var email, password;
 	email = $("#email").val();
 	password = $("#password").val();
-	alert(email + password);
+	//alert(email + password);
 
 	potentialAdmin = new User(email, null, null);
 
@@ -112,6 +119,116 @@ $(document).on("submit", "#loginForm", function(event) {
 	});
 
 });
+
+/**
+ * on Button click 'Add User' in admin_user_management.jsp
+ * registers a new user with the given name, email and password
+ */
+$(document).on("submit", "#addUserForm", function(event) {
+	event.preventDefault();
+	var name, email, password;
+	name = $("#name").val();
+	email = $("#email").val();
+	password = $("#password").val();
+
+	newUser = new User(email, password, name);
+
+	doTask("user_add", newUser, null);
+	//register(email, password, name);
+	
+	window.close();	//other solutions??
+
+});
+
+/**
+ * loads all users on load of page admin_user_management.jsp 
+ */
+function loadUsers() {
+	
+	users = new User(null, null, null);
+	
+	doTask("user_read", users, function (event){
+//		alert(JSON.stringify(data.object.description));
+		
+		 var tablecontents = "";
+		    tablecontents = "<table>";
+		    tablecontents += "<tr>";
+		    tablecontents += "<td>User Name: </td>";
+		    tablecontents += "<td>User Email: </td>";
+		    tablecontents += "<td>User Password: </td>";
+		    tablecontents += "<td>Edit User: </td>";
+		    tablecontents += "<td>Remove User: </td>";
+		    tablecontents += "</tr>";
+		    
+		    for (var i = 0; i < 5; i ++)
+		   {
+		      tablecontents += "<tr>";
+		      tablecontents += "<td>" + i + "</td>";
+		      tablecontents += "<td>" + i * 100 + "</td>";
+		      tablecontents += "<td>" + i * 1000 + "</td>";
+		      tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen()' id='editUser" +i+ "'/></td>";
+		      tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen()' id='removeUser" +i+ "'/></td>";
+		      tablecontents += "</tr>";
+		   }
+		   tablecontents += "</table>";
+		   document.getElementById("table_space").innerHTML = tablecontents;
+		
+		
+//		
+//		var myTableDiv = document.getElementById("metric_results");
+//        var table = document.createElement('TABLE');
+//        var tableBody = document.createElement('TBODY');
+//        alert("ja");
+//        table.border = '1';
+//        table.appendChild(tableBody);
+//
+//        var heading = new Array();
+//        heading[0] = "User Name";
+//        heading[1] = "User Email";
+//        heading[2] = "User Password";
+//        heading[3] = "Edit";
+//        heading[4] = "Remove";
+//
+//        var stock = new Array();
+//        stock[0] = new Array("Cars", "88.625", "85.50", "85.81", "987");
+//        stock[1] = new Array("Veggies", "88.625", "85.50", "85.81", "988");
+//        stock[2] = new Array("Colors", "88.625", "85.50", "85.81", "989");
+//        stock[3] = new Array("Numbers", "88.625", "85.50", "85.81", "990");
+//        stock[4] = new Array("Requests", "88.625", "85.50", "85.81", "991");
+//
+//        //TABLE COLUMNS
+//        for (var i = 0; i < stock.length; i++) {
+//            var tr = document.createElement('TR');
+//            for (var j = 0; j < stock[i].length; j++) {
+//                var td = document.createElement('TD');
+//                td.appendChild(document.createTextNode(stock[i][j]));
+//                tr.appendChild(td);
+//            }
+//            tableBody.appendChild(tr);
+//        }
+//
+//        //TABLE ROWS
+//        var tr = document.createElement('TR');
+//        tableBody.appendChild(tr);
+//
+//        for (i = 0; i < stock.length; i++) {
+//            for (j = 0; j < stock[i].length; j++) {
+//                var td = document.createElement('TD');
+//                td.appendChild(document.createTextNode(stock[i][j]));
+//                td.appendChild(td);
+//            }
+//        }
+//
+//        myTableDiv.appendChild(table);
+//		
+		
+	});
+	
+
+
+}
+
+
 
 /**
  * Checks if the session in the url matches the user session
