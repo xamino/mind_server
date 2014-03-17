@@ -224,9 +224,11 @@ function loadUsers() {
 	
 	users = new User(null, null, null);
 	
-	doTask("user_read", users, function (event){
-//		event.preventDefault();
-//		alert(JSON.stringify(data.object.description));
+	doTask("user_read_any", users, writeUsers);
+}
+
+function writeUsers (data){
+		alert(JSON.stringify.data);
 		
 		//TODO if there are no users: (realize if)
 //		(if ... == null){		
@@ -261,7 +263,7 @@ function loadUsers() {
 //		}
 		
 		
-	});
+//	});
 	
 
 
