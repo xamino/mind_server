@@ -228,7 +228,7 @@ function loadUsers() {
 //		event.preventDefault();
 //		alert(JSON.stringify(data.object.description));
 		
-		//TODO is there are no users: (realize if)
+		//TODO if there are no users: (realize if)
 //		(if ... == null){		
 //			var noUserInDatabase = "There are currently no users in the database.<br> Use the button 'Add Users' to add users to the system.";
 //			document.getElementById("table_space").innerHTML = noUserInDatabase;
