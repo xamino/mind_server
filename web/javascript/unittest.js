@@ -140,7 +140,6 @@ function areaTest() {
         }
     }
     // TODO finish & FIX! (see also todo in JsonConverter!)
-    /*
     // Test adding a location to multiple ares
     unitTest("location_add", new Location(35, 58, wifis1), Success, adminSession);
     var universe = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
@@ -161,7 +160,6 @@ function areaTest() {
     if (!test) {
         alert("Multiple area location failed! Not in office.")
     }
-    */
 
     cleanDB();
 
