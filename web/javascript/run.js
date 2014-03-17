@@ -153,7 +153,7 @@ $(document).on("submit", "#addUserForm", function(event) {
 	password = $("#password").val();
 
 	newUser = new User(email, password, name);
-
+	alert(newUser);
 	doTask("user_add", newUser, function(event){
 		var element;
 		element = document.getElementById("addUserForm");
@@ -224,11 +224,18 @@ function loadUsers() {
 	
 	users = new User(null, null, null);
 	
-	doTask("user_read_any", users, writeUsers);
+	doTask("user_read", users, writeUsers);
 }
 
 function writeUsers (data){
-		alert(JSON.stringify.data);
+	
+	alert(data.object.description);
+		if(data.object.description == "Answer does not contain an object! Make sure your request is valid!"){
+			alert("do something");
+		}
+		else{
+		alert(JSON.stringify(data));
+//		alert(JSON.stringify.data);
 		
 		//TODO if there are no users: (realize if)
 //		(if ... == null){		
@@ -260,6 +267,8 @@ function writeUsers (data){
 		   }
 		   tablecontents += "</table>";
 		   document.getElementById("table_space").innerHTML = tablecontents;
+		   
+		}
 //		}
 		
 		

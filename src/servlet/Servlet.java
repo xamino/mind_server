@@ -93,39 +93,42 @@ public class Servlet extends HttpServlet {
         // Write whatever you want sent back to this object:
         Data answer = null;
         // If the task was CHECK we don't need to do anything else
-        if (Task.Sanitation.safeValueOf(arrival.getTask()) == Task.Sanitation.CHECK) {
-            // Avoid sending the user object
-            answer = checkDataMessage(check);
-            if (answer == null) {
-                answer = new Success("CheckOkay", "Your session is valid!");
-            }
-            // answer shouldn't be null here!
-        }
-        // If the arrival is valid, checkArrival returns the database user object
-        else if (check instanceof User) {
-            // This means valid session and arrival!
-            // Read user, should be used to read rights etc.
-            User currentUser = (User) check;
-            // First check whether it is a normal task:
-            answer = handleNormalTask(arrival, currentUser);
-            // If null, it wasn't a normal task – so check if admin rights are set
-            if (answer == null && currentUser.isAdmin()) {
-                // If yes, handle admin stuff:
-                answer = handleAdminTask(arrival, currentUser);
-            }
-            // If answer is still null, the task wasn't found (or the rights weren't set):
-            if (answer == null) {
-                log.log(TAG, "Illegal task sent: " + arrival.getTask());
-                String error = "Illegal task: " + arrival.getTask();
-                if (!currentUser.isAdmin()) {
-                    error += ". You may not have the necessary rights!";
-                }
-                answer = new Error("IllegalTask", error);
-            }
-        } else {
-            // This means the check failed, so there is a message in check that needs to be sent back
-            answer = check;
-        }
+//////////TODO: Commit back in when session check is possible (at the moment --> Error: Invalid session////////////////
+//        if (Task.Sanitation.safeValueOf(arrival.getTask()) == Task.Sanitation.CHECK) {
+//            // Avoid sending the user object
+//            answer = checkDataMessage(check);
+//            if (answer == null) {
+//                answer = new Success("CheckOkay", "Your session is valid!");
+//            }
+//            // answer shouldn't be null here!
+//        }
+//        // If the arrival is valid, checkArrival returns the database user object
+//        else if (check instanceof User) {
+//            // This means valid session and arrival!
+//            // Read user, should be used to read rights etc.
+//            User currentUser = (User) check;
+//            // First check whether it is a normal task:
+//            answer = handleNormalTask(arrival, currentUser);
+//            // If null, it wasn't a normal task – so check if admin rights are set
+//            if (answer == null && currentUser.isAdmin()) {
+//                // If yes, handle admin stuff:
+//                answer = handleAdminTask(arrival, currentUser);
+//            }
+//            // If answer is still null, the task wasn't found (or the rights weren't set):
+//            if (answer == null) {
+//                log.log(TAG, "Illegal task sent: " + arrival.getTask());
+//                String error = "Illegal task: " + arrival.getTask();
+//                if (!currentUser.isAdmin()) {
+//                    error += ". You may not have the necessary rights!";
+//                }
+//                answer = new Error("IllegalTask", error);
+//            }
+//        } else {
+//            // This means the check failed, so there is a message in check that needs to be sent back
+//            answer = check;
+//        }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
         // Encapsulate answer:
         prepareDeparture(response, answer);
     }
