@@ -26,7 +26,7 @@
                     <td><input name="password" id="password" size=40 type="text"/></td>
                 </tr>
             </table>
-            <input type="submit" value="Back"/>
+            <input type="button" name="back" value="Back" onclick="window.close()"/>
             <input type="submit" value="Add User"/>
         </form>
 

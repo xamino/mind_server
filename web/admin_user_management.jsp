@@ -32,22 +32,45 @@
 </div>
 <div id="text-content">
 	<script type="text/javascript">
-	    function popupOpen() {
+	    function popupOpen_addUser() {
 	      //window.open('about:blank');
 	      var leftPosition = (window.screen.width / 2) - ((400 / 2));
 	      var topPosition = (window.screen.height / 2) - ((200 / 2));
-	      var newwindow = window.open('addUser_popup.jsp', 'Add User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
+	      var newwindow = window.open('admin_popup_addUser.jsp', 'Add User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
 	      if (window.focus) {newwindow.focus();}
 	    }
 	    
 	    window.onunload = refreshParent;
+    	
+    	
+    	function popupOpen_editUser() {
+	      //window.open('about:blank');
+	      var leftPosition = (window.screen.width / 2) - ((400 / 2));
+	      var topPosition = (window.screen.height / 2) - ((200 / 2));
+	      var newwindow = window.open('admin_popup_editUser.jsp', 'Edit User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
+	      if (window.focus) {newwindow.focus();}
+	    }
+	    
+	    window.onunload = refreshParent;
+	    
+	    function popupOpen_removeUser() {
+	      //window.open('about:blank');
+	      var leftPosition = (window.screen.width / 2) - ((400 / 2));
+	      var topPosition = (window.screen.height / 2) - ((200 / 2));
+	      var newwindow = window.open('admin_popup_removeUser.jsp', 'Remove User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
+	      if (window.focus) {newwindow.focus();}
+	    }
+	    
+	    window.onunload = refreshParent;
+	    
+	    //reload window after changes
     	function refreshParent() {
         	window.opener.location.reload();
     	}
   	 </script>
-	 <input type="submit" value="Add User" onClick="javascript:popupOpen()" />
+	 <input type="submit" value="Add User" onClick="javascript:popupOpen_addUser()" />
 	 
-	 <table border ="1">
+	<!-- <table border ="1">
         <tr>
             <td>User Name:</td>
             <td>User Email:</td>
@@ -62,7 +85,7 @@
                 <td><input type="submit" value="Edit User" onClick="javascript:popupOpen()" /></td>
                 <td><input type="submit" value="Remove User" onClick="javascript:popupOpen()" /></td>  
             </tr>
-       <!--  for(int i = 0; i < allFestivals.size(); i+=1) { %>
+         for(int i = 0; i < allFestivals.size(); i+=1) { %>
             <tr>      
                 <td>${allFestivals.get(i).getFestivalName()}</td>
                 <td>${allFestivals.get(i).getLocation()}</td>
@@ -70,8 +93,8 @@
                 <td><input type="submit" value="Add User" onClick="javascript:popupOpen()" /></td>
                 <td>${allFestivals.get(i).getURL()}</td>  
             </tr>
-        } -->
-    </table> 
+        } 
+    </table> -->
 	<div id="table_space">
     
 	</div> 
