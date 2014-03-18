@@ -7,6 +7,7 @@ package servlet;
 import database.Data;
 import database.messages.Error;
 import database.messages.Success;
+import database.objects.PublicDisplay;
 import database.objects.User;
 import logger.Messenger;
 import logic.EventModuleManager;
@@ -98,6 +99,9 @@ public class Servlet extends HttpServlet {
                 }
                 answer = new Error("IllegalTask", error);
             }
+        } else if (check instanceof PublicDisplay) {
+            // TODO
+            functions.handleDisplayTask(arrival, (PublicDisplay)check);
         } else {
             // This means the check failed, so there is a message in check that needs to be sent back
             answer = check;

@@ -1,5 +1,6 @@
 package database.objects;
 
+import database.Authenticated;
 import database.Data;
 
 /**
@@ -7,7 +8,7 @@ import database.Data;
  * <p/>
  * zB placeholder user class
  */
-public class User implements Data {
+public class User implements Data, Authenticated {
     private String name;
     private String pwdHash;
     private String email;
@@ -65,5 +66,15 @@ public class User implements Data {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    @Override
+    public String readIdentification() {
+        return email;
+    }
+
+    @Override
+    public String readAuthentication() {
+        return pwdHash;
     }
 }

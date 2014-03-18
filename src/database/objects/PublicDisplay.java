@@ -1,17 +1,21 @@
 package database.objects;
 
+import database.Authenticated;
+import database.Data;
+
 /**
  * Public display user object.
  */
-public class PublicDisplay {
+public class PublicDisplay implements Data, Authenticated {
 
-    private String location, identification;
+    private String location, identification, token;
     private int coordinateX;
     private int coordinateY;
 
-    public PublicDisplay(String location, String identification, int coordinateX, int coordinateY) {
+    public PublicDisplay(String location, String identification, String token, int coordinateX, int coordinateY) {
         this.location = location;
         this.identification = identification;
+        this.token = token;
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
     }
@@ -47,5 +51,23 @@ public class PublicDisplay {
 
     public void setCoordinateY(int coordinateY) {
         this.coordinateY = coordinateY;
+    }
+
+    @Override
+    public String readIdentification() {
+        return identification;
+    }
+
+    @Override
+    public String readAuthentication() {
+        return token;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }
