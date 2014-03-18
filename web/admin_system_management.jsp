@@ -31,9 +31,9 @@
 	</ul>
 </div>
 <div id="text-content">
-You can <a href="admin_import_map_location.jsp">Import Map and Location Data</a><br>
+You can <a href="admin_import_map_location.jsp" class="adminlink">Import Map and Location Data</a><br>
 <br>
-You can <a href="admin_public_displays.jsp">Administrate Public Dicplays</a>
+You can <a href="admin_public_displays.jsp" class="adminlink">Administrate Public Dicplays</a>
 </div>
 <div id="logout">
        <input type="submit" value="Logout" onClick="logout; window.location='index.jsp'"/>
