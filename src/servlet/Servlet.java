@@ -93,7 +93,6 @@ public class Servlet extends HttpServlet {
         // Write whatever you want sent back to this object:
         Data answer = null;
         // If the task was CHECK we don't need to do anything else
-//////////TODO: Commit back in when session check is possible (at the moment --> Error: Invalid session////////////////
         if (Task.Sanitation.safeValueOf(arrival.getTask()) == Task.Sanitation.CHECK) {
             // Avoid sending the user object
             answer = checkDataMessage(check);
@@ -127,8 +126,7 @@ public class Servlet extends HttpServlet {
             // This means the check failed, so there is a message in check that needs to be sent back
             answer = check;
         }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
+
         // Encapsulate answer:
         prepareDeparture(response, answer);
     }
@@ -148,7 +146,9 @@ public class Servlet extends HttpServlet {
                 return arrival.getObject();
             case USER_READ:
                 // TODO: strip password hash? is that necessary?
-                return moduleManager.handleTask(Task.User.READ, arrival.getObject());
+                // WARNING: do NOT allow ANY USER TO BE READ HERE – SECURITY LEAK!
+                // Admin should use user_read_any!
+                return user;
             case USER_UPDATE:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -204,9 +204,15 @@ public class Servlet extends HttpServlet {
     private Data handleAdminTask(Arrival arrival, User user) {
         Task.API task = Task.API.safeValueOf(arrival.getTask());
         switch (task) {
-            // TODO: user_read_any missing!
+            case USER_READ_ANY:
+                if (!(arrival.getObject() instanceof User)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                log.log(TAG, "Admin read any.");
+                // TODO: strip password?
+                return moduleManager.handleTask(Task.User.READ, arrival.getObject());
             case USER_ADD:
-                // TODO: Input sanitation? Che
+                // TODO: Input sanitation? Check!
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
@@ -217,7 +223,6 @@ public class Servlet extends HttpServlet {
                 }
                 return moduleManager.handleTask(Task.User.UPDATE, arrival.getObject());
             case USER_DELETE:
-                // TODO not USER_REMOVE?
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }

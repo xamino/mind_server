@@ -225,7 +225,7 @@ function loadUsers() {
 	alert("loadusers");
 	var users = new User(null,null,null);
 //	var users = null;
-	doTask("user_read", users, writeUsers);
+	doTask("user_read_any", users, writeUsers);
 }
 
 function writeUsers (data){
