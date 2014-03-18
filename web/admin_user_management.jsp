@@ -39,34 +39,24 @@
 	      var newwindow = window.open('admin_popup_addUser.jsp', 'Add User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
 	      if (window.focus) {newwindow.focus();}
 	    }
-	    
-	    window.onunload = refreshParent;
-    	
-    	
-    	function popupOpen_editUser() {
+
+    	function popupOpen_editUser(id) {
 	      //window.open('about:blank');
 	      var leftPosition = (window.screen.width / 2) - ((400 / 2));
 	      var topPosition = (window.screen.height / 2) - ((200 / 2));
-	      var newwindow = window.open('admin_popup_editUser.jsp', 'Edit User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
+	      var id_number = +id.replace('editUser','');
+	      var newwindow = window.open('admin_popup_editUser.jsp?id='+id_number+"", 'Edit User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
 	      if (window.focus) {newwindow.focus();}
 	    }
 	    
-	    window.onunload = refreshParent;
-	    
-	    function popupOpen_removeUser() {
+	    function popupOpen_removeUser(id) {
 	      //window.open('about:blank');
 	      var leftPosition = (window.screen.width / 2) - ((400 / 2));
 	      var topPosition = (window.screen.height / 2) - ((200 / 2));
-	      var newwindow = window.open('admin_popup_removeUser.jsp', 'Remove User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
+	      var id_number = +id.replace('removeUser','');
+	      var newwindow = window.open('admin_popup_removeUser.jsp?id='+id_number+"", 'Remove User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
 	      if (window.focus) {newwindow.focus();}
 	    }
-	    
-	    window.onunload = refreshParent;
-	    
-	    //reload window after changes
-    	function refreshParent() {
-        	window.opener.location.reload();
-    	}
   	 </script>
 	 <input type="submit" value="Add User" onClick="javascript:popupOpen_addUser()" />
 	 

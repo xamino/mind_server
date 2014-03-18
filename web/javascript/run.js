@@ -8,6 +8,7 @@
  * @type {string}
  */
 var session = "";
+var currentID = "";
 
 /**
  * Function for registering a user.
@@ -18,12 +19,13 @@ var session = "";
  *            Plaintext password (server-side hashing)
  * @param name
  */
-function register(email, password, name) {
+function register(email, password, name, callback) {		//needed callback here (from Laura)
 	var regUser = new User(email, password, name);
 	// sessionHash remains empty, we don't have one yet
 	var request = new Arrival("registration", null, regUser);
 	send(request, function(data) {
 		alert(data.object.description);
+		callback();
 	});
 }
 
@@ -137,7 +139,7 @@ $(document).on("submit", "#registerForm", function(event) {
 		alert("falsch");
 	}
 	else{
-	register(email, password, name); 	//TODO: callback
+	register(email, password, name, null);
 	}
 
 });
@@ -154,12 +156,14 @@ $(document).on("submit", "#addUserForm", function(event) {
 	password = $("#password").val();
 
 	newUser = new User(email, password, name);
-	alert(newUser);
-	doTask("user_add", newUser, function(event){
+	alert(email);
+	alert(password);
+//	doTask("user_add", newUser, function(event){			//TODO: check why this didn't work (--> simply didn't create a user)
+	register(email, password, name, function(event){
 		var element;
 		element = document.getElementById("addUserForm");
 		if (element) {
-		    element.innerHTML = "The user has been added. <br> <input type='button' name='ok' value='OK' onclick='window.close()'/>";
+		    element.innerHTML = "The user has been added. <br> <input type='button' name='ok' value='OK' onclick='window.opener.location.reload(); window.close()'/>";
 		    
 		}
 	});
@@ -172,6 +176,16 @@ $(document).on("submit", "#addUserForm", function(event) {
  */
 $(document).on("submit", "#editUserForm", function(event) {
 	event.preventDefault();
+	
+//	var numberID = +currentID.replace('editUser','');
+//	alert(numberID);
+	
+	//all users
+	var users = new User(null,null,null);
+	doTask("user_read", users, function(event){
+		
+	alert(JSON.stringify(data.object[1].name));	
+		
 	var name, email, password;
 	name = $("#name").val();
 	email = $("#email").val();
@@ -184,10 +198,14 @@ $(document).on("submit", "#editUserForm", function(event) {
 		var element;
 		element = document.getElementById("editUserForm");
 		if (element) {
-		    element.innerHTML = "The user has been modifyed. <br> <input type='button' name='ok' value='OK' onclick='window.close()'/>";
+		    element.innerHTML = "The user has been modifyed. <br> <input type='button' name='ok' value='OK' onclick='window.opener.location.reload(); window.close()'/>";
 		    
 		}
+	});	
 	});
+
+	
+	
 
 });
 
@@ -198,23 +216,87 @@ $(document).on("submit", "#editUserForm", function(event) {
  */
 $(document).on("submit", "#removeUserForm", function(event) {
 	event.preventDefault();
-	var name, email, password;
-	name = $("#name").val();
-	email = $("#email").val();
-	password = $("#password").val();
-
-	deleteUser = new User(email, password, name);
-
-	doTask("user_delete", deleteUser, function(event){
-		var element;
-		element = document.getElementById("deleteUserForm");
-		if (element) {
-		    element.innerHTML = "The user has been removed. <br> <input type='button' name='ok' value='OK' onclick='window.close()'/>";
-		    
-		}
+//	alert("ID2: "+window.currentID);
+//	var numberID = +currentID.replace('removeUser','');
+//	alert(numberID);
+//	var id = request.getParameter("name");
+//	alert("YAY: "+id);
+	//all users
+	var users = new User(null,null,null);
+	doTask("user_read", users, test);
 	});
 
-});
+function test (data){
+//function(event){
+		alert(data.object.length);
+		alert("hier");
+		alert(data.object[1].email);
+		alert("da");
+		var email = data.object[1].email;
+		var password = data.object[1].password;
+		var name = data.object[1].name;
+		
+		
+		deleteUser = new User(email, password, name); 
+		}
+		
+//		doTask("user_delete", deleteUser, function(event){
+//    		var element;
+//    		element = document.getElementById("removeUserForm");
+//    		if (element) {
+//    		    element.innerHTML = "The user has been removed. <br> <input type='button' name='ok' value='OK' onclick='window.opener.location.reload(); window.close()'/>";
+//    		    
+//    		}
+//    	});
+			
+//		alert(data.object[1].name);
+//	});
+	
+
+	
+//	});
+			
+			
+//function test (data){
+//		alert(JSON.stringify(data));
+////		var da = data.object[numberID].name;
+////	alert(da);
+////	currentID = "";
+//	numberID = null;}
+	
+
+//        alert("ID: "+this.id);
+		
+//		var numeric = +this.id.replace('removeUser','');
+//		alert(numeric);
+		
+//        var content ="";
+//    	content += "Do you want to remove the User (Name: xxx)?<br><button type='button' name='back' onclick='window.close()'>Back</button><input type='submit' value='Remove User' />";
+ 
+	
+	
+//    	var name, email, password;
+//    	name = $("#name").val();
+//    	email = $("#email").val();
+//    	password = $("#password").val();
+//
+//    	deleteUser = new User(email, password, name);
+//
+//    	doTask("user_delete", deleteUser, function(event){
+//    		var element;
+//    		element = document.getElementById("deleteUserForm");
+//    		if (element) {
+//    		    element.innerHTML = "The user has been removed. <br> <input type='button' name='ok' value='OK' onclick='window.opener.location.reload(); window.close()'/>";
+//    		    
+//    		}
+//    	});
+        
+//    };
+//	});
+	
+	
+
+//});
 
 
 
@@ -222,7 +304,6 @@ $(document).on("submit", "#removeUserForm", function(event) {
  * loads all users on load of page admin_user_management.jsp 
  */
 function loadUsers() {
-	alert("loadusers");
 	var users = new User(null,null,null);
 //	var users = null;
 	doTask("user_read", users, writeUsers);
@@ -231,18 +312,13 @@ function loadUsers() {
 function writeUsers (data){
 	
 
-		if(data.object.description == "Answer does not contain an object! Make sure your request is valid!"){
-			alert("do something");
+		if(data.object.length == null){
+			var noUserInDatabase = "There are currently no users in the database.<br> Use the button 'Add Users' to add users to the system.";
+			document.getElementById("table_space").innerHTML = noUserInDatabase;
 		}
 		else{
-		alert(JSON.stringify(data));
-		
-		//TODO if there are no users: (realize if)
-//		(if ... == null){		
-//			var noUserInDatabase = "There are currently no users in the database.<br> Use the button 'Add Users' to add users to the system.";
-//			document.getElementById("table_space").innerHTML = noUserInDatabase;
-//		}
-//		else{		
+//		alert(JSON.stringify(data));
+		alert("Test: "+data.object.length);
 	
 		 var tablecontents = "";
 		    tablecontents = "<table border ='1'>";
@@ -250,33 +326,44 @@ function writeUsers (data){
 		    tablecontents += "<td>User Name: </td>";
 		    tablecontents += "<td>User Email: </td>";
 		    tablecontents += "<td>User Password: </td>";
+		    tablecontents += "<td>Is Admin: </td>";
 		    tablecontents += "<td>Edit User: </td>";
 		    tablecontents += "<td>Remove User: </td>";
 		    tablecontents += "</tr>";
 		    
-		    //TODO: user-data in table
-		    for (var i = 0; i < 5; i ++)
+		    for (var i = 0; i < data.object.length; i ++)
 		   {
 		      tablecontents += "<tr>";
-		      tablecontents += "<td>" + i + "</td>";
-		      tablecontents += "<td>" + i * 1 + "</td>";
-		      tablecontents += "<td>" + i * 2 + "</td>";
-		      tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen_editUser()' id='editUser" +i+ "'/></td>";
-		      tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen()' id='removeUser" +i+ "'/></td>";
-		      tablecontents += "</tr>";
+		      tablecontents += "<td>" + data.object[i].name + "</td>";
+		      tablecontents += "<td>" + data.object[i].email + "</td>";
+		      //TODO: Hash back in password
+		      tablecontents += "<td>" + data.object[i].pwdHash + "</td>";
+		      tablecontents += "<td>" + data.object[i].admin + "</td>";
+		      tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen_editUser(this.id)' id='editUser" +i+ "'/></td>";
+		      tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen_removeUser(this.id)' id='removeUser" +i+ "'/></td>";
+		      tablecontents += "</tr>";												//getIdFromButtonClick_remove(this.id) ?id="+this.id+"
 		   }
 		   tablecontents += "</table>";
 		   document.getElementById("table_space").innerHTML = tablecontents;
 		   
 		}
-//		}
-		
-		
-//	});
-	
-
 
 }
+
+
+//function getIdFromButtonClick_edit(clicked_id)
+//{
+//	currentID = clicked_id;
+//	alert("ID: "+currentID);
+//	javascript:popupOpen_editUser();
+//}
+//
+//function getIdFromButtonClick_remove(clicked_id)
+//{
+//	currentID = clicked_id;
+//	alert("ID: "+currentID);
+//	javascript:popupOpen_removeUser(currentID);
+//}
 
 
 
@@ -354,5 +441,4 @@ function readCookie(name) {
     }
     return '';
 }
-
 

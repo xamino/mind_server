@@ -7,12 +7,12 @@
 <script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
-<title>Add User</title>
+<title>Remove User</title>
 </head>
 <body>
 
 <form id="removeUserForm">
-	Do you want to remove the User (Name: xxx)?<br>
+	Do you want to remove the User Nr. <%= request.getParameter("id") %> (Name: xxx)?<br>
     <button type="button" name="back" onclick="window.close()">Back</button>
     <input type="submit" value="Remove User"/>
 </form>
