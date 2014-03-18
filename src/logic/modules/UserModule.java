@@ -45,12 +45,15 @@ public class UserModule extends Module {
     }
 
     private Data readUser(User user) {
+    	
         // get all Users
-        if(user==null)
+        if(user==null){
             return read(new User(null, null));
+        }
         // get filtered Users
-        if(user.getEmail()==null)
+        if(user.getEmail()==null){
             return read(user);
+        }
 
         // from here on single users were requested
         Data data = read(user);

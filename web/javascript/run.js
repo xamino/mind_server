@@ -78,16 +78,17 @@ function doTask(task, object, callback) {
 }
 
 /**
- * Checks weather the user (who wants to log in) is an admin
+ * Checks weather the user (who intends to log-in) is an admin
  */
 function isAdmin(data) {
 	
 	var user = data.object;
+
 	if (!(instanceOf(user,User))) {
 		alert("user not user");
 		logout();
 	} else {
-		if (data.object.admin) {
+		if (data.object.admin) {		
 			writeCookie("MIND_Admin_C",session);
 			window.location.href = "admin_home.jsp?session="+session;
 		} else {
@@ -221,21 +222,20 @@ $(document).on("submit", "#removeUserForm", function(event) {
  * loads all users on load of page admin_user_management.jsp 
  */
 function loadUsers() {
-	
-	users = new User(null, null, null);
-	
+	alert("loadusers");
+	var users = new User(null,null,null);
+//	var users = null;
 	doTask("user_read", users, writeUsers);
 }
 
 function writeUsers (data){
 	
-	alert(data.object.description);
+
 		if(data.object.description == "Answer does not contain an object! Make sure your request is valid!"){
 			alert("do something");
 		}
 		else{
 		alert(JSON.stringify(data));
-//		alert(JSON.stringify.data);
 		
 		//TODO if there are no users: (realize if)
 //		(if ... == null){		
@@ -286,14 +286,37 @@ function writeUsers (data){
  */
 function checkSessionFromURL(){
 	var urlSession = getURLParameter("session");
-	alert("url: "+urlSession);
+//	alert("url:"+urlSession);
 	var session = readCookie("MIND_Admin_C");
-	alert("cookie: "+session);
+//	alert("cookie:"+session);
 	if(urlSession != session){
 		alert("You have to be logged in.");
 		window.location.href = "login.jsp";
 		
+	}else{
+		return session;		
 	}
+	
+	
+}
+
+/**
+ * This function is called onLoad of each admin page.
+ * The session will be checked by the checkSessionFromURL function
+ * and the session id will be added to all links classified as "adminlink"
+ */
+function onLoadOfAdminPage(){
+	//the current session - if correct - else this session variable is never set -> redirection to login.jsp
+	session = checkSessionFromURL();
+	
+	//all links that are classified as "adminlink"
+	var links = document.getElementsByClassName("adminlink");
+	
+	//add sessionid to URLs which are classified as "adminlink"
+	[].forEach.call(links, function(link) {
+	    //add session to link
+		link.setAttribute("href",link+"?session="+session);
+	});
 }
 
 /**

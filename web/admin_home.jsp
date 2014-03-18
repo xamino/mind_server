@@ -11,7 +11,7 @@
 <title>Admin - Home</title>
 </head>
 
-<body onload="checkSessionFromURL()">
+<body onload="onLoadOfAdminPage()">
 <div id="banner">
 <!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
 <h2>MIND</h2>
@@ -20,12 +20,12 @@
 <div id="content">
 <div id="navigation">
 	<ul>
-		<li><a href="#">Home</a></li>
-		<li><a href="admin_user_management.jsp">User Management</a></li>
-		<li><a href="admin_system_management.jsp">System Management</a>
+		<li><a href="admin_home.jsp" class="adminlink">Home</a></li>
+		<li><a href="admin_user_management.jsp" class="adminlink">User Management</a></li>
+		<li><a href="admin_system_management.jsp" class="adminlink">System Management</a>
 			<ul>
-				<li><a href="admin_import_map_location.jsp">Import Map and Location Data</a></li>
-				<li><a href="admin_public_displays.jsp">Administrate Public Displays</a></li>
+				<li><a href="admin_import_map_location.jsp" class="adminlink">Import Map and Location Data</a></li>
+				<li><a href="admin_public_displays.jsp" class="adminlink">Administrate Public Displays</a></li>
 			</ul>
 		</li>
 	</ul>
