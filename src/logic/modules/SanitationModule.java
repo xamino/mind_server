@@ -11,6 +11,7 @@ import logic.Task;
 import servlet.BCrypt;
 import servlet.Servlet;
 import servlet.Servlet.Arrival;
+import servlet.ServletFunctions;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -194,7 +195,7 @@ public class SanitationModule extends Module {
         // Try reading the user from the database
         Data object = EventModuleManager.getInstance().handleTask(Task.User.READ, user);
         // Check if message:
-        Data answer = Servlet.checkDataMessage(object);
+        Data answer = ServletFunctions.getInstance().checkDataMessage(object);
         if (answer != null || !(object instanceof User)) {
             // this means 99% of the time that a user wasn't found.
             // To avoid allowing to find usernames with this method, we return the same message as if the login

@@ -10,7 +10,7 @@ import logic.Task;
 
 /**
  * @author Tamino Hartmann
- * Class for handling all the serious tasks of the servlet. Mainly there to keep Servlet comparatively clean.
+ *         Class for handling all the serious tasks of the servlet. Mainly there to keep Servlet comparatively clean.
  */
 public class ServletFunctions {
     private static ServletFunctions INSTANCE;
@@ -109,7 +109,9 @@ public class ServletFunctions {
                 data = moduleManager.handleTask(Task.User.READ, arrival.getObject());
                 message = checkDataMessage(data);
                 if (message == null) {
-                    return ((User) data).safeClone();
+                    // todo how to strip password from all users?
+                    // return ((User) data).safeClone();
+                    return data;
                 } else {
                     return message;
                 }
@@ -118,6 +120,9 @@ public class ServletFunctions {
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
+                // We need to hash the password
+                User tempUser = (User) arrival.getObject();
+                tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
                 return moduleManager.handleTask(Task.User.CREATE, arrival.getObject());
             case USER_UPDATE:
                 if (!(arrival.getObject() instanceof User)) {
@@ -215,5 +220,4 @@ public class ServletFunctions {
             return null;
         }
     }
-
 }
