@@ -54,6 +54,7 @@
 	      var leftPosition = (window.screen.width / 2) - ((400 / 2));
 	      var topPosition = (window.screen.height / 2) - ((200 / 2));
 	      var id_number = +id.replace('removeUser','');
+	      //requestScope.put("id", "id");
 	      var newwindow = window.open('admin_popup_removeUser.jsp?id='+id_number+"", 'Remove User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
 	      if (window.focus) {newwindow.focus();}
 	    }

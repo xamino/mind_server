@@ -8,7 +8,6 @@
  * @type {string}
  */
 var session = "";
-var currentID = "";
 
 /**
  * Function for registering a user.
@@ -156,8 +155,6 @@ $(document).on("submit", "#addUserForm", function(event) {
 	password = $("#password").val();
 
 	newUser = new User(email, password, name);
-	alert(email);
-	alert(password);
 //	doTask("user_add", newUser, function(event){			//TODO: check why this didn't work (--> simply didn't create a user)
 	register(email, password, name, function(event){
 		var element;
@@ -182,9 +179,12 @@ $(document).on("submit", "#editUserForm", function(event) {
 	
 	//all users
 	var users = new User(null,null,null);
-	doTask("user_read", users, function(event){
+	doTask("user_read_any", users, function(event){
+	
+	var id = getURLParameter("id");
 		
-	alert(JSON.stringify(data.object[1].name));	
+	alert(JSON.stringify(data));				//TODO: funzt ned --> data is iwie ned ansprechbar
+//	alert(JSON.stringify(data.object[1].email));	
 		
 	var name, email, password;
 	name = $("#name").val();
@@ -209,35 +209,34 @@ $(document).on("submit", "#editUserForm", function(event) {
 
 });
 
-
 /**
  * on Button click 'Remove User' in admin_user_management.jsp
  * removes the selected user
  */
 $(document).on("submit", "#removeUserForm", function(event) {
 	event.preventDefault();
-//	alert("ID2: "+window.currentID);
-//	var numberID = +currentID.replace('removeUser','');
-//	alert(numberID);
-//	var id = request.getParameter("name");
-//	alert("YAY: "+id);
-	//all users
+//	var id = gup( 'id' );
+//	alert("YAY - ID: "+id);
 	var users = new User(null,null,null);
-	doTask("user_read", users, test);
-	});
+	doTask("user_read_any", users, removeUser);
+});
 
-function test (data){
-//function(event){
-		alert(data.object.length);
-		alert("hier");
-		alert(data.object[1].email);
+	
+/**
+ * removes the selected user
+ */
+function removeUser (data){
+	var id = getURLParameter("id");
+//	var id = gup( 'id' );
+	alert("YAY - ID: "+id);
+		alert(JSON.stringify(data));	//TODO: session is not valid???
 		alert("da");
-		var email = data.object[1].email;
-		var password = data.object[1].password;
-		var name = data.object[1].name;
+//		var email = data.object[1].email;
+//		var password = data.object[1].password;
+//		var name = data.object[1].name;
 		
 		
-		deleteUser = new User(email, password, name); 
+//		deleteUser = new User(email, password, name); 
 		}
 		
 //		doTask("user_delete", deleteUser, function(event){
@@ -249,54 +248,14 @@ function test (data){
 //    		}
 //    	});
 			
-//		alert(data.object[1].name);
 //	});
 	
 
 	
 //	});
 			
-			
-//function test (data){
-//		alert(JSON.stringify(data));
-////		var da = data.object[numberID].name;
-////	alert(da);
-////	currentID = "";
-//	numberID = null;}
-	
 
-//        alert("ID: "+this.id);
-		
-//		var numeric = +this.id.replace('removeUser','');
-//		alert(numeric);
-		
-//        var content ="";
-//    	content += "Do you want to remove the User (Name: xxx)?<br><button type='button' name='back' onclick='window.close()'>Back</button><input type='submit' value='Remove User' />";
- 
-	
-	
-//    	var name, email, password;
-//    	name = $("#name").val();
-//    	email = $("#email").val();
-//    	password = $("#password").val();
-//
-//    	deleteUser = new User(email, password, name);
-//
-//    	doTask("user_delete", deleteUser, function(event){
-//    		var element;
-//    		element = document.getElementById("deleteUserForm");
-//    		if (element) {
-//    		    element.innerHTML = "The user has been removed. <br> <input type='button' name='ok' value='OK' onclick='window.opener.location.reload(); window.close()'/>";
-//    		    
-//    		}
-//    	});
-        
-//    };
-//	});
-	
-	
 
-//});
 
 
 
@@ -311,14 +270,14 @@ function loadUsers() {
 
 function writeUsers (data){
 	
-
+		alert(JSON.stringify(data));
 		if(data.object.length == null){
 			var noUserInDatabase = "There are currently no users in the database.<br> Use the button 'Add Users' to add users to the system.";
 			document.getElementById("table_space").innerHTML = noUserInDatabase;
 		}
 		else{
 //		alert(JSON.stringify(data));
-		alert("Test: "+data.object.length);
+//		alert("Test: "+data.object.length);
 	
 		 var tablecontents = "";
 		    tablecontents = "<table border ='1'>";
