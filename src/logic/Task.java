@@ -47,6 +47,10 @@ public interface Task {
         AREA_ADD,
         AREA_UPDATE,
         AREA_REMOVE,
+        DISPLAY_READ,
+        DISPLAY_ADD,
+        DISPLAY_UPDATE,
+        DISPLAY_REMOVE,
         /**
          * Given a location, find the position.
          */
@@ -135,6 +139,12 @@ public interface Task {
          * Removes all areas and locations from the database and restores the default area
          */
         ANNIHILATE
+    }
+
+    public enum Display implements Task {
+        ADD_DISPLAY,
+        UPDATE_DISPLAY,
+        REMOVE_DISPLAY
     }
 }
 
