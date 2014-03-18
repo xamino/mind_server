@@ -33,9 +33,18 @@ function adminRightsTest() {
     // try admin access
     unitTest("admin_read_all", null, Error, adminSession);
     // Switch to admin rights:
+    // TODO this shouldn't work later on!
     unitTest("toggle_admin", null, Success, adminSession);
     // Do an admin task:
-    unitTest("admin_read_all", null, Array, adminSession);
+    unitTest("user_add", new User("maria.heilig@gott.de", "maria", "Maria Heilig"), Success, adminSession);
+    var list = unitTest("admin_read_all", null, Array, adminSession);
+    if (list == null || list.length != 1) {
+        alert("There should be only one admin in the DB at this point!");
+    }
+    list = unitTest("user_read_any", new User(null, null, null), Array, adminSession);
+    if (list == null || list.length != 2) {
+        alert("There should be only two users in the DB!");
+    }
 
     cleanDB();
 
@@ -98,6 +107,11 @@ function userAccessTest() {
     unitTest("logout", null, Success, egoTwoSession);
     unitTest("check", null, Error, egoSession);
     egoSession = unitTest("login", new User("ego.trump@haha.com", "ßüöä", null), Success, null).description;
+    // check that all users are in db
+    var list = unitTest("user_read_any", new User(null, null, null), Array, adminSession);
+    if (list == null || list.length != 3) {
+        alert("Wrong number of users read from server!");
+    }
 
     // delete
     unitTest("user_delete", null, Success, adminSession);

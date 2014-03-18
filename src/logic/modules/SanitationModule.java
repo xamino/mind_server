@@ -1,5 +1,6 @@
 package logic.modules;
 
+import database.Authenticated;
 import database.Data;
 import database.messages.Error;
 import database.messages.Success;
@@ -9,8 +10,8 @@ import logic.EventModuleManager;
 import logic.Module;
 import logic.Task;
 import servlet.BCrypt;
-import servlet.Servlet;
 import servlet.Servlet.Arrival;
+import servlet.ServletFunctions;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -23,7 +24,8 @@ import java.util.HashMap;
 
 /**
  * @author Tamino Hartmann
- *         Class that handles the user sessions.
+ *         Class that handles the user sessions. Note that this includes the PublicDisplays, but ONLY for CHECK.
+ *         Otherwise the public displays must be managed by the admin or users.
  */
 public class SanitationModule extends Module {
 
@@ -76,12 +78,12 @@ public class SanitationModule extends Module {
             return new Error("WrongObjectType", "SanitationModule was called with the wrong object type!");
         }
         Arrival arrival = (Arrival) request;
-        // As many operations require it, we pull the User object out now. Note that it might be NULL depending on the
-        // task! As this might be legal, we do not throw an immediate error.
-        User user = null;
-        if (arrival.getObject() instanceof User) {
-            user = (User) arrival.getObject();
+        // Pull out authenticated
+        Authenticated user = null;
+        if (arrival.getObject() instanceof Authenticated) {
+            user = (Authenticated) arrival.getObject();
         }
+        // Correctly cast
         final Task.Sanitation todo = (Task.Sanitation) task;
         switch (todo) {
             case LOGIN:
@@ -94,18 +96,20 @@ public class SanitationModule extends Module {
                 return new Success("LoggedOut", "You have been successfully logged out.");
             // break;
             case REGISTRATION:
-                if (user != null) {
-                    if (user.getEmail().isEmpty() || user.getPwdHash().isEmpty()) {
+                // Registration REQUIRES a User object!
+                if (user != null && user instanceof User) {
+                    if (user.readIdentification().isEmpty() || user.readAuthentication().isEmpty()) {
                         return new Error("IllegalRegistrationValues", "Email and password may not be empty!");
                     }
-                    return registration(user);
+                    return registration((User) user);
                 }
                 break;
             case CHECK:
+                // TODO make this work for Authenticated
                 if (checkSession(arrival.getSessionHash())) {
                     // If valid, return the corresponding user object. Fresh from the DB to keep in sync with updates
                     // To do that, we first need to get the new object:
-                    User filter = new User("", sessions.get(arrival.getSessionHash()).user.getEmail());
+                    User filter = new User("", sessions.get(arrival.getSessionHash()).user.readIdentification());
                     Data update = EventModuleManager.getInstance().handleTask(Task.User.READ, filter);
                     if (update instanceof User) {
                         // If everything is okay, we return the current user and leave this method
@@ -175,7 +179,7 @@ public class SanitationModule extends Module {
             Collection<ActiveUser> values = sessions.values();
             ArrayList<String> hashes = new ArrayList<>();
             for (ActiveUser check : values) {
-                if (check.user.getEmail().equals(activeUser.user.getEmail())) {
+                if (check.user.readIdentification().equals(activeUser.user.readIdentification())) {
                     hashes.add(check.hash);
                 }
             }
@@ -190,11 +194,13 @@ public class SanitationModule extends Module {
      *
      * @return Return message.
      */
-    private Data login(User user) {
+    // TODO make it work for Authenticated
+    private Data login(Authenticated user) {
         // Try reading the user from the database
-        Data object = EventModuleManager.getInstance().handleTask(Task.User.READ, user);
+        Data object = EventModuleManager.getInstance().handleTask(Task.User.READ, new User(null, user.readIdentification()));
         // Check if message:
-        Data answer = Servlet.checkDataMessage(object);
+        Data answer = ServletFunctions.getInstance().checkDataMessage(object);
+        // TODO here -->
         if (answer != null || !(object instanceof User)) {
             // this means 99% of the time that a user wasn't found.
             // To avoid allowing to find usernames with this method, we return the same message as if the login
@@ -205,7 +211,7 @@ public class SanitationModule extends Module {
         // This means we have a valid user object:
         User check = (User) object;
         // Now to check the password
-        if (BCrypt.checkpw(user.getPwdHash(), check.getPwdHash())) {
+        if (BCrypt.checkpw(user.readAuthentication(), check.getPwdHash())) {
             // Everything okay, so create a hash:
             String sessionHash = new BigInteger(130, random).toString(32);
             // Create the activeUser object using the correct, database user:
@@ -220,7 +226,7 @@ public class SanitationModule extends Module {
     }
 
     /**
-     * Registration method.
+     * Registration method. Only works for users!
      *
      * @param user The user object to register.
      * @return Return message.
@@ -240,11 +246,11 @@ public class SanitationModule extends Module {
      * Small data class for storing active users with the corresponding hash and timestamp of their last action.
      */
     private class ActiveUser {
-        User user;
+        Authenticated user;
         long timestamp;
         String hash;
 
-        ActiveUser(User user, long timestamp, String hash) {
+        ActiveUser(Authenticated user, long timestamp, String hash) {
             this.user = user;
             this.timestamp = timestamp;
             this.hash = hash;
