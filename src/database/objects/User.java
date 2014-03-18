@@ -48,6 +48,17 @@ public class User implements Data {
                 '}';
     }
 
+    /**
+     * Method for getting a copy of this user object without the sensitive information.
+     * @return Copy of this object with empty password string.
+     */
+    public User safeClone() {
+        User user =  new User(this.name, this.email);
+        user.setAdmin(this.admin);
+        user.setPwdHash("");
+        return user;
+    }
+
     public boolean isAdmin() {
         return admin;
     }

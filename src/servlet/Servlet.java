@@ -145,10 +145,9 @@ public class Servlet extends HttpServlet {
                 // Simple echo test for checking if the server can parse the data
                 return arrival.getObject();
             case USER_READ:
-                // TODO: strip password hash? is that necessary?
                 // WARNING: do NOT allow ANY USER TO BE READ HERE – SECURITY LEAK!
                 // Admin should use user_read_any!
-                return user;
+                return user.safeClone();
             case USER_UPDATE:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -203,14 +202,20 @@ public class Servlet extends HttpServlet {
     // TODO: Place all admin tasks in this method.
     private Data handleAdminTask(Arrival arrival, User user) {
         Task.API task = Task.API.safeValueOf(arrival.getTask());
+        // Because we'll need these two rather often:
+        Data data, message;
         switch (task) {
             case USER_READ_ANY:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                log.log(TAG, "Admin read any.");
-                // TODO: strip password?
-                return moduleManager.handleTask(Task.User.READ, arrival.getObject());
+                data = moduleManager.handleTask(Task.User.READ, arrival.getObject());
+                message = checkDataMessage(data);
+                if (message == null) {
+                    return ((User) data).safeClone();
+                } else {
+                    return message;
+                }
             case USER_ADD:
                 // TODO: Input sanitation? Check!
                 if (!(arrival.getObject() instanceof User)) {
@@ -265,9 +270,9 @@ public class Servlet extends HttpServlet {
                 return moduleManager.handleTask(Task.Area.DELETE, arrival.getObject());
             case ADMIN_READ_ALL:
                 // TODO: can now be drastly improved with new filter, change!
-                Data data = moduleManager.handleTask(Task.User.READ, null);
-                Data msg = checkDataMessage(data);
-                if (msg == null && data instanceof DataList) {
+                data = moduleManager.handleTask(Task.User.READ, null);
+                message = checkDataMessage(data);
+                if (message == null && data instanceof DataList) {
                     DataList list = (DataList) data;
                     DataList<User> admins = new DataList<User>();
                     for (Object us : list) {
@@ -278,7 +283,7 @@ public class Servlet extends HttpServlet {
                     }
                     return admins;
                 }
-                return msg;
+                return message;
             case ADMIN_ANNIHILATE_AREA:
                 log.log(TAG, "Removing all area objects!");
                 return moduleManager.handleTask(Task.Area.ANNIHILATE, null);
