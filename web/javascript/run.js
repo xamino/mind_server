@@ -209,46 +209,46 @@ $(document).on("submit", "#editUserForm", function(event) {
 
 });
 
-/**
- * on Button click 'Remove User' in admin_user_management.jsp
- * removes the selected user
- */
-$(document).on("submit", "#removeUserForm", function(event) {
-	event.preventDefault();
-//	var id = gup( 'id' );
-//	alert("YAY - ID: "+id);
-	var users = new User(null,null,null);
-	doTask("user_read_any", users, removeUser);
-});
+///**
+// * on Button click 'Remove User' in admin_user_management.jsp
+// * removes the selected user
+// */
+//$(document).on("submit", "#removeUserForm", function(event) {
+//	event.preventDefault();
+////	var id = gup( 'id' );
+////	alert("YAY - ID: "+id);
+//	var users = new User(null,null,null);
+//	doTask("user_read_any", users, removeUser);
+//});
 
 	
-/**
- * removes the selected user
- */
-function removeUser (data){
-	var id = getURLParameter("id");
-//	var id = gup( 'id' );
-	alert("YAY - ID: "+id);
-		alert(JSON.stringify(data));	//TODO: session is not valid???
-		alert("da");
-//		var email = data.object[1].email;
-//		var password = data.object[1].password;
-//		var name = data.object[1].name;
-		
-		
-//		deleteUser = new User(email, password, name); 
-		}
-		
-//		doTask("user_delete", deleteUser, function(event){
-//    		var element;
-//    		element = document.getElementById("removeUserForm");
-//    		if (element) {
-//    		    element.innerHTML = "The user has been removed. <br> <input type='button' name='ok' value='OK' onclick='window.opener.location.reload(); window.close()'/>";
-//    		    
-//    		}
-//    	});
-			
-//	});
+///**
+// * removes the selected user
+// */
+//function removeUser (data){
+//	var id = getURLParameter("id");
+////	var id = gup( 'id' );
+//	alert("YAY - ID: "+id);
+//		alert(JSON.stringify(data));	//TODO: session is not valid???
+//		alert("da");
+////		var email = data.object[1].email;
+////		var password = data.object[1].password;
+////		var name = data.object[1].name;
+//		
+//		
+////		deleteUser = new User(email, password, name); 
+//		}
+//		
+////		doTask("user_delete", deleteUser, function(event){
+////    		var element;
+////    		element = document.getElementById("removeUserForm");
+////    		if (element) {
+////    		    element.innerHTML = "The user has been removed. <br> <input type='button' name='ok' value='OK' onclick='window.opener.location.reload(); window.close()'/>";
+////    		    
+////    		}
+////    	});
+//			
+////	});
 	
 
 	
@@ -270,7 +270,7 @@ function loadUsers() {
 
 function writeUsers (data){
 	
-		alert(JSON.stringify(data));
+//		alert(JSON.stringify(data));
 		if(data.object.length == null){
 			var noUserInDatabase = "There are currently no users in the database.<br> Use the button 'Add Users' to add users to the system.";
 			document.getElementById("table_space").innerHTML = noUserInDatabase;
@@ -299,7 +299,8 @@ function writeUsers (data){
 		      tablecontents += "<td>" + data.object[i].pwdHash + "</td>";
 		      tablecontents += "<td>" + data.object[i].admin + "</td>";
 		      tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen_editUser(this.id)' id='editUser" +i+ "'/></td>";
-		      tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen_removeUser(this.id)' id='removeUser" +i+ "'/></td>";
+		      //tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen_removeUser(this.id)' id='removeUser" +i+ "'/></td>";
+		      tablecontents += "<td><input type='submit' value='Remove User' onClick='removeUserViaPopup("+JSON.stringify(data.object[i])+")'/></td>";
 		      tablecontents += "</tr>";												//getIdFromButtonClick_remove(this.id) ?id="+this.id+"
 		   }
 		   tablecontents += "</table>";
@@ -307,6 +308,24 @@ function writeUsers (data){
 		   
 		}
 
+}
+
+/**
+ * Creates a popup, enabling the admin to delete the user
+ * @param data
+ * the user data that can be deleted (JSON.stringified)
+ */
+function removeUserViaPopup(data)
+{
+	var r=confirm("Do you want to remove the User '"+data.name+"' ?");
+	if (r==true)
+	{
+	  var usertodelete = new User(data.email,null,null);
+	  alert("FILTER OBJECT FOR USER DELETE: "+JSON.stringify(usertodelete));
+	  doTask("user_delete", usertodelete, function(event){
+		  //TODO relaod page
+  		});
+	}
 }
 
 

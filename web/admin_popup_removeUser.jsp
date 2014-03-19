@@ -12,8 +12,8 @@
 <body>
 
 <form id="removeUserForm">
-	Do you want to remove the User Nr. <%= request.getParameter("id") %> (Name: xxx)?<br>
-    <button type="button" name="back" onclick="window.close()">Back</button>
+	 Do you want to remove the User Nr. <%= request.getParameter("id") %> (Name: xxx)?<br>
+    <button type="button" name="back" onclick="window.close()">Back</button> 
     <input type="submit" value="Remove User"/>
 </form>
 
