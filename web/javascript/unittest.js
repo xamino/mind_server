@@ -46,6 +46,19 @@ function adminRightsTest() {
     if (list == null || list.length != 2) {
         alert("There should be only two users in the DB!");
     }
+    // admin user management
+    unitTest("admin_user_add", new User("email", "password", "name"), Success, adminSession);
+    unitTest("admin_user_add", new User("lang@email.de", "password", "Etwas längerer Name, mit Sonderzeichen und so!"), Success, adminSession);
+    unitTest("admin_user_update", new User("email", null, "name name"), Success, adminSession);
+    // test password remains untouched:
+    unitTest("login", new User("email", "password", null), Success, null);
+    unitTest("admin_user_update", new User("email", "new password", null), Success, adminSession);
+    unitTest("login", new User("email", "new password", null), Success, null);
+    // remove
+    unitTest("admin_user_delete", new User("email", null, null), Success, adminSession);
+    // test that there is only one other user left
+    var list = unitTest("admin_user_read", new User(null, null, null), Array, adminSession);
+    // TODO finish
 
     cleanDB();
 
