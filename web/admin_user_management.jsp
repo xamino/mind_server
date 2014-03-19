@@ -60,7 +60,7 @@
 	    }
   	 </script>
 	 <input type="submit" value="Add User" onClick="javascript:popupOpen_addUser()" />
-	 
+	 <div id="infoText"></div>
 	<!-- <table border ="1">
         <tr>
             <td>User Name:</td>

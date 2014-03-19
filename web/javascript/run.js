@@ -324,6 +324,14 @@ function removeUserViaPopup(data)
 	  alert("FILTER OBJECT FOR USER DELETE: "+JSON.stringify(usertodelete));
 	  doTask("user_delete", usertodelete, function(event){
 		  //TODO relaod page
+		var element;
+		element = document.getElementById("infoText");
+		if (element) {
+		    element.innerHTML = "The user (name:"+data.name+") has been removed.";
+		    
+		}
+		window.opener.location.reload();
+		  
   		});
 	}
 }
