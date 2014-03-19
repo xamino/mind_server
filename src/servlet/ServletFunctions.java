@@ -56,7 +56,7 @@ public class ServletFunctions {
                     return new Error("IllegalChange", "Email can not be changed in an existing user");
                 }
                 // Make sure that you can't set yourself to admin
-                if (sentUser.isAdmin()) {
+                if (sentUser.isAdmin() && !user.isAdmin()) {
                     return new Error("IllegalChange", "You do not have the rights to modify your permissions!");
                 }
                 // We need to catch a password change, as it must be hashed:
@@ -98,11 +98,18 @@ public class ServletFunctions {
      * @return
      */
     public Data handleAdminTask(Servlet.Arrival arrival, User user) {
+        // Better safe than sorry:
+        if (!user.isAdmin()) {
+            log.error(TAG, "User " + user.readIdentification() + " almost accessed admin functions!");
+            return new Error("IllegalAccess", "You do not have permission for this task.");
+        }
         Task.API task = Task.API.safeValueOf(arrival.getTask());
         // Because we'll need these two rather often:
         Data data, message;
         User tempUser;
+        PublicDisplay display;
         switch (task) {
+            // USERS -----------------------------------------------------------------------------
             case ADMIN_USER_READ:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -113,34 +120,50 @@ public class ServletFunctions {
                     // todo how to strip password from all users?
                     // return ((User) data).safeClone();
                     return data;
-                } else {
-                    return message;
                 }
+                return nullMessageCatch(message);
             case ADMIN_USER_ADD:
-                // TODO: Input sanitation? Check!
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                // We need to hash the password
                 tempUser = (User) arrival.getObject();
-                tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
-                return moduleManager.handleTask(Task.User.CREATE, arrival.getObject());
+                if (tempUser.getEmail() != null && !tempUser.getEmail().isEmpty()) {
+                    if (tempUser.getPwdHash() != null && !tempUser.getPwdHash().isEmpty()) {
+                        tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
+                        return moduleManager.handleTask(Task.User.CREATE, arrival.getObject());
+                    }
+                    return new Error("IllegalAdd", "Password must be set!");
+                }
+                return new Error("IllegalAdd", "Email is primary key! May not be empty.");
             case ADMIN_USER_UPDATE:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 tempUser = (User) arrival.getObject();
-                // If a value is in password, we need to update it:
-                if (tempUser.getPwdHash() != null && !tempUser.getPwdHash().isEmpty()) {
-                    tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
+                if (tempUser.getEmail() == null || tempUser.getEmail().isEmpty()) {
+                    return new Error("IllegalChange", "Email must not be empty!");
                 }
-                return moduleManager.handleTask(Task.User.UPDATE, arrival.getObject());
+                data = moduleManager.handleTask(Task.User.READ, new User(null, tempUser.getEmail()));
+                message = checkDataMessage(data);
+                if (message == null && data instanceof User) {
+                    User originalUser = (User) data;
+                    tempUser.setEmail(originalUser.getEmail());
+                    if (tempUser.getPwdHash() != null && !tempUser.getPwdHash().isEmpty()) {
+                        tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
+                    } else {
+                        tempUser.setPwdHash(originalUser.getPwdHash());
+                    }
+                    return moduleManager.handleTask(Task.Display.UPDATE, tempUser);
+                }
+                return nullMessageCatch(message);
             case ADMIN_USER_DELETE:
                 log.log("DELETE", arrival.getObject().toString());
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 return moduleManager.handleTask(Task.User.DELETE, arrival.getObject());
+            // LOCATION --------------------------------------------------------------------------
+            // TODO sanitize and make sane!
             case LOCATION_READ:
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -150,13 +173,14 @@ public class ServletFunctions {
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                // TODO update area?
                 return moduleManager.handleTask(Task.Location.CREATE, arrival.getObject());
             case LOCATION_REMOVE:
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 return moduleManager.handleTask(Task.Location.DELETE, arrival.getObject());
+            // AREAS -----------------------------------------------------------------------------
+            // TODO sanitize and make sane!
             case AREA_READ:
                 if (!(arrival.getObject() instanceof Area)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -187,12 +211,42 @@ public class ServletFunctions {
                 if (!(arrival.getObject() instanceof PublicDisplay)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                return moduleManager.handleTask(Task.Display.CREATE, arrival.getObject());
+                display = (PublicDisplay) arrival.getObject();
+                if (display.getIdentification() != null && !display.getIdentification().isEmpty()) {
+                    if (display.getToken() != null && !display.getToken().isEmpty()) {
+                        display.setToken(BCrypt.hashpw(display.getToken(), BCrypt.gensalt(12)));
+                        return moduleManager.handleTask(Task.Display.CREATE, arrival.getObject());
+                    }
+                    return new Error("IllegalAdd", "Token must be set!");
+                }
+                return new Error("IllegalAdd", "Identification is primary key! May not be empty.");
             case DISPLAY_UPDATE:
                 if (!(arrival.getObject() instanceof PublicDisplay)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                return moduleManager.handleTask(Task.Display.UPDATE, arrival.getObject());
+                // id and token require special consideration
+                display = (PublicDisplay) arrival.getObject();
+                if (display.getIdentification() == null || display.getIdentification().isEmpty()) {
+                    return new Error("IllegalChange", "Identification must not be empty!");
+                }
+                data = moduleManager.handleTask(Task.Display.READ, new PublicDisplay(null, display.getIdentification(), null, 0, 0));
+                message = checkDataMessage(data);
+                if (message == null) {
+                    if (data instanceof PublicDisplay) {
+                        PublicDisplay originalDisplay = (PublicDisplay) data;
+                        display.setIdentification(originalDisplay.getIdentification());
+                        if (display.getToken() != null && !display.getToken().isEmpty()) {
+                            display.setToken(BCrypt.hashpw(display.getToken(), BCrypt.gensalt(12)));
+                        } else {
+                            display.setToken(originalDisplay.getToken());
+                        }
+                        return moduleManager.handleTask(Task.Display.UPDATE, display);
+                    } else if (data instanceof DataList) {
+                        // TODO this should be able to be removed once update throws an error if an object doesn't exist
+                        return new Error("IllegalChange", "The display seems not to exist.");
+                    }
+                }
+                return nullMessageCatch(message);
             case DISPLAY_REMOVE:
                 if (!(arrival.getObject() instanceof PublicDisplay)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -214,7 +268,7 @@ public class ServletFunctions {
                     }
                     return admins;
                 }
-                return message;
+                return nullMessageCatch(message);
             case ADMIN_ANNIHILATE_AREA:
                 log.log(TAG, "Removing all area objects!");
                 return moduleManager.handleTask(Task.Area.ANNIHILATE, null);
@@ -248,5 +302,20 @@ public class ServletFunctions {
             // This means that answer is manually set.
             return null;
         }
+    }
+
+    /**
+     * Safety catch for messages. Should prevent receiving illegal task messages when the task was legal but no
+     * message was written.
+     *
+     * @param msg The message variable to check for null.
+     * @return A message. Guaranteed!
+     */
+    private Information nullMessageCatch(Data msg) {
+        if (msg == null || !(msg instanceof Information)) {
+            log.error(TAG, "NullMessage happened! Shouldn't happen, so fix!");
+            return new Error("NullMessage", "Something went wrong in the task but no message was written!");
+        }
+        return (Information) msg;
     }
 }

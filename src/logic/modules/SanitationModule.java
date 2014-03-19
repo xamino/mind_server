@@ -186,6 +186,7 @@ public class SanitationModule extends Module {
             for (String hash : hashes) {
                 sessions.remove(hash);
             }
+            log.log(TAG, "User " + activeUser.user.readIdentification() + " has logged out.");
         }
     }
 
@@ -218,6 +219,7 @@ public class SanitationModule extends Module {
             ActiveUser activeUser = new ActiveUser(check, System.currentTimeMillis(), sessionHash);
             // Save the session:
             sessions.put(sessionHash, activeUser);
+            log.log(TAG, "User " + check.readIdentification() + " has logged in.");
             // Return the hash for future references:
             return new Success("Login", sessionHash);
         } else {
@@ -235,6 +237,7 @@ public class SanitationModule extends Module {
         user.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));
         Data msg = EventModuleManager.getInstance().handleTask(Task.User.CREATE, user);
         if (msg instanceof Success) {
+            log.log(TAG, "User " + user.readIdentification() + " has been registered.");
             return new Success("Registered", "Registered to '" + user.getEmail() + "'.");
         } else {
             log.error(TAG, "Error creating a user!");

@@ -84,6 +84,7 @@ public class PublicDisplay implements Data, Authenticated {
         return "PublicDisplay{" +
                 "location='" + location + '\'' +
                 ", identification='" + identification + '\'' +
+                ", token='" + token + '\'' +
                 '}';
     }
 }
