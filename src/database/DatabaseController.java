@@ -253,6 +253,9 @@ public class DatabaseController implements ServletContextListener {
                 displayUpdate.setIdentification(dataDisplay.getIdentification());
                 displayUpdate.setLocation(dataDisplay.getLocation());
                 displayUpdate.setToken(dataDisplay.getToken());
+                con.store(displayUpdate);
+                log.log(TAG, displayUpdate.toString() + " updated in DB!");
+                return true;
             }
 
             return false;

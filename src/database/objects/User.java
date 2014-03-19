@@ -39,6 +39,10 @@ public class User implements Data, Authenticated {
         return email;
     }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -51,10 +55,11 @@ public class User implements Data, Authenticated {
 
     /**
      * Method for getting a copy of this user object without the sensitive information.
+     *
      * @return Copy of this object with empty password string.
      */
     public User safeClone() {
-        User user =  new User(this.name, this.email);
+        User user = new User(this.name, this.email);
         user.setAdmin(this.admin);
         user.setPwdHash("");
         return user;

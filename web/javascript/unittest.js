@@ -256,17 +256,24 @@ function displayTest() {
     }
 
     var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
-    // register a display:
+    // register some displays:
     unitTest("display_add", new PublicDisplay("Office Prof. Herman", "office_herman", "herman_token", 56, 78), Success, adminSession);
+    unitTest("display_add", new PublicDisplay("Sekretariat", "instituts_sek", "sekretariat", 33, 23), Success, adminSession);
+    // should fail
+    unitTest("display_add", new PublicDisplay("___", "instituts_sek", "___", 343, 234), Error, adminSession);
     // should not be allowed as normal user
     unitTest("registration", new User("ego.trump@haha.com", "ßüöä", "Ego Trump"), Success, null);
     var egoSession = unitTest("login", new User("ego.trump@haha.com", "ßüöä", null), Success, null).description;
     unitTest("display_add", new PublicDisplay("MEINS", "office_ego", "das hier erratet ihr nie!", 156, 178), Error, egoSession);
     // test
     var displays = unitTest("display_read", new PublicDisplay(null, null, null, null, null), Array, adminSession);
-    if (displays != null && displays.length != 1) {
-        alert("Wrong number of displays! Should be 1 here.");
+    if (displays != null && displays.length != 2) {
+        alert("Wrong number of displays! Should be 2 here.");
     }
+    // update
+    unitTest("display_update", new PublicDisplay("Office Prof. Herman", "office_doof", "herman_token", 56, 78), Error, adminSession);
+    unitTest("display_update", new PublicDisplay("Office Herman", "office_herman", null, 56, 78), Success, adminSession);
+    unitTest("display_read", new PublicDisplay(null, null, null, null, null), Array, adminSession);
 
     cleanDB();
     alert("Display test done.")
@@ -341,7 +348,7 @@ function unitTest(task, object_in, object_out, session) {
         object_out = new object_out();
     }
     if (!(response.$type === object_out.$type)) {
-        alert("Failed '" + task + "'\n\n" + JSON.stringify(response));
+        alert("Failed '" + task + "'. Expected type '" + object_out.constructor.name + "'.\n\n" + JSON.stringify(response));
         return null;
     } else {
         return response;
