@@ -31,7 +31,8 @@
 	</ul>
 </div>
 <div id="text-content">
-	<script type="text/javascript">
+	<!-- <script type="text/javascript">
+	//////////////// old function -> leave because of the popup example //////////////////
 	    function popupOpen_addUser() {
 	      //window.open('about:blank');
 	      var leftPosition = (window.screen.width / 2) - ((400 / 2));
@@ -58,8 +59,8 @@
 	      var newwindow = window.open('admin_popup_removeUser.jsp?id='+id_number+'', 'Remove User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
 	      if (window.focus) {newwindow.focus();}
 	    }
-  	 </script>
-	 <input type="submit" value="Add User" onClick="javascript:popupOpen_addUser()" />
+  	 </script>-->
+	 <input type="submit" value="Add User" onClick="addUserViaPopup()" /> <!-- javascript:popupOpen_addUser()" />-->
 	 <div id="infoText"></div>
 	<!-- <table border ="1">
         <tr>

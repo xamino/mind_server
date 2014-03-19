@@ -143,71 +143,73 @@ $(document).on("submit", "#registerForm", function(event) {
 
 });
 
-/**
- * on Button click 'Add User' in admin_user_management.jsp
- * registers a new user with the given name, email and password
- */
-$(document).on("submit", "#addUserForm", function(event) {
-	event.preventDefault();
-	var name, email, password;
-	name = $("#name").val();
-	email = $("#email").val();
-	password = $("#password").val();
+////////////////old add function --> leave because of the popup example //////////////////
 
-	newUser = new User(email, password, name);
-//	doTask("user_add", newUser, function(event){			//TODO: check why this didn't work (--> simply didn't create a user)
-	register(email, password, name, function(event){
-		var element;
-		element = document.getElementById("addUserForm");
-		if (element) {
-		    element.innerHTML = "The user has been added. <br> <input type='button' name='ok' value='OK' onclick='window.opener.location.reload(); window.close()'/>";
-		    
-		}
-	});
+///**
+// * on Button click 'Add User' in admin_user_management.jsp
+// * registers a new user with the given name, email and password
+// */
+//$(document).on("submit", "#addUserForm", function(event) {
+//	event.preventDefault();
+//	var name, email, password;
+//	name = $("#name").val();
+//	email = $("#email").val();
+//	password = $("#password").val();
+//
+//	newUser = new User(email, password, name);
+//	doTask("user_add", newUser, function(event){
+//		var element;
+//		element = document.getElementById("addUserForm");
+//		if (element) {
+//		    element.innerHTML = "The user has been added. <br> <input type='button' name='ok' value='OK' onclick='window.opener.location.reload(); window.close()'/>";
+//		    
+//		}
+//	});
+//
+//});
 
-});
+////////////////old remove function --> leave because of the popup example //////////////////
+///**
+// * on Button click 'Edit User' in admin_user_management.jsp
+// * edits the selected user
+// */
+//$(document).on("submit", "#editUserForm", function(event) {
+//	event.preventDefault();
+//	
+////	var numberID = +currentID.replace('editUser','');
+////	alert(numberID);
+//	
+//	//all users
+//	var users = new User(null,null,null);
+//	doTask("user_read_any", users, function(event){
+//	
+//	var id = getURLParameter("id");
+//		
+//	alert(JSON.stringify(data));				//funzt ned --> data is iwie ned ansprechbar
+////	alert(JSON.stringify(data.object[1].email));	
+//		
+//	var name, email, password;
+//	name = $("#name").val();
+//	email = $("#email").val();
+//	password = $("#password").val();
+//
+//	//have to choose right user data
+//	editUser = new User(email, password, name);
+//
+//	doTask("user_update", editUser, function(event){
+//		var element;
+//		element = document.getElementById("editUserForm");
+//		if (element) {
+//		    element.innerHTML = "The user has been modifyed. <br> <input type='button' name='ok' value='OK' onclick='window.opener.location.reload(); window.close()'/>";
+//		    
+//		}
+//	});	
+//	});
+//});
 
-/**
- * on Button click 'Edit User' in admin_user_management.jsp
- * edits the selected user
- */
-$(document).on("submit", "#editUserForm", function(event) {
-	event.preventDefault();
-	
-//	var numberID = +currentID.replace('editUser','');
-//	alert(numberID);
-	
-	//all users
-	var users = new User(null,null,null);
-	doTask("user_read_any", users, function(event){
-	
-	var id = getURLParameter("id");
-		
-	alert(JSON.stringify(data));				//TODO: funzt ned --> data is iwie ned ansprechbar
-//	alert(JSON.stringify(data.object[1].email));	
-		
-	var name, email, password;
-	name = $("#name").val();
-	email = $("#email").val();
-	password = $("#password").val();
 
-	//TODO: right user data
-	editUser = new User(email, password, name);
 
-	doTask("user_update", editUser, function(event){
-		var element;
-		element = document.getElementById("editUserForm");
-		if (element) {
-		    element.innerHTML = "The user has been modifyed. <br> <input type='button' name='ok' value='OK' onclick='window.opener.location.reload(); window.close()'/>";
-		    
-		}
-	});	
-	});
-
-	
-	
-
-});
+//////////////// old remove function --> leave because of the popup example //////////////////
 
 ///**
 // * on Button click 'Remove User' in admin_user_management.jsp
@@ -229,7 +231,7 @@ $(document).on("submit", "#editUserForm", function(event) {
 //	var id = getURLParameter("id");
 ////	var id = gup( 'id' );
 //	alert("YAY - ID: "+id);
-//		alert(JSON.stringify(data));	//TODO: session is not valid???
+//		alert(JSON.stringify(data));	//session is not valid???
 //		alert("da");
 ////		var email = data.object[1].email;
 ////		var password = data.object[1].password;
@@ -249,9 +251,6 @@ $(document).on("submit", "#editUserForm", function(event) {
 ////    	});
 //			
 ////	});
-	
-
-	
 //	});
 			
 
@@ -298,15 +297,111 @@ function writeUsers (data){
 		      //TODO: Hash back in password
 		      tablecontents += "<td>" + data.object[i].pwdHash + "</td>";
 		      tablecontents += "<td>" + data.object[i].admin + "</td>";
-		      tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen_editUser(this.id)' id='editUser" +i+ "'/></td>";
+		      //tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen_editUser(this.id)' id='editUser" +i+ "'/></td>";
 		      //tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen_removeUser(this.id)' id='removeUser" +i+ "'/></td>";
+		      tablecontents += "<td><input type='submit' value='Edit User' onClick='editUserViaPopup("+JSON.stringify(data.object[i])+")'/></td>";
 		      tablecontents += "<td><input type='submit' value='Remove User' onClick='removeUserViaPopup("+JSON.stringify(data.object[i])+")'/></td>";
-		      tablecontents += "</tr>";												//getIdFromButtonClick_remove(this.id) ?id="+this.id+"
+		      tablecontents += "</tr>";												
 		   }
 		   tablecontents += "</table>";
 		   document.getElementById("table_space").innerHTML = tablecontents;
 		   
 		}
+
+}
+
+
+/**
+* on Button click 'Add User' in admin_user_management.jsp
+* registers a new user with the given name, email and password
+*/
+function addUserViaPopup()
+{
+
+	var name = prompt("Please enter the name of the user you want to add:");
+	
+	var email = prompt("Please enter the email of the user you want to add:");
+	
+	var password = prompt("Please enter the password of the user you want to add:");
+
+	if (name != "" && email != "" && password != ""){	//everything is given
+		newUser = new User(email, password, name);
+		doTask("user_add", newUser, function(event){
+			var element;
+			element = document.getElementById("infoText");
+			if (element) {
+			    element.innerHTML = "The user (name: "+name+") has been added. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+			    
+			}
+	//		window.location.reload();		//--> text will not be visible --> button ??
+		});
+	}
+	else{
+		alert("You have to specify name, email and password. None of them can be empty!");
+	}
+
+}
+
+
+/**
+ * on Button click 'Edit User' in admin_user_management.jsp
+ * edits the selected user
+ */
+function editUserViaPopup(data)
+{
+
+	var name = prompt("If you want to change the name: "+data.name+" simply enter the new name. If you don't want to change something, leave it empty.");
+	
+	var email = prompt("If you want to change the email: "+data.email+" simply enter the new email. If you don't want to change something, leave it empty.");
+	
+	var password = prompt("If you want to change the password: "+data.password+" simply enter the new password. If you don't want to change something, leave it empty.");
+
+	//nothing has been changed
+	if (name == "" && email == "" && password == ""){
+		var element;
+		element = document.getElementById("infoText");
+		if (element) {
+		    element.innerHTML = "You didn't change anything. <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+		    
+		}
+	}
+	//something has been changed
+	else{
+		var newName, newPassword, newEmail;
+		oldUser = new User(data.email, null, null);
+		
+		if (name != ""){
+			newName = name;
+		}
+		else{
+			newName = null;
+		}
+		if (email != ""){
+			newEmail = password;
+		}
+		else{
+			newEmail = null;
+		}
+		if (password != ""){
+			newPassword = password;
+		}
+		else{
+			newPassword = null;
+		}
+		
+		updateUser = new User(newEmail, newPassword, newName);
+		//TODO: select right user
+		doTask("user_update", oldUser, function(event){
+			var element;
+			element = document.getElementById("infoText");
+			if (element) {
+			    element.innerHTML = "The user (name: "+newName+") has been modified. Bis click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+			    
+			}
+	//		window.location.reload();		--> text will not be visible --> button ??
+		});
+	}
+	
 
 }
 
@@ -317,7 +412,7 @@ function writeUsers (data){
  */
 function removeUserViaPopup(data)
 {
-	var r=confirm("Do you want to remove the User '"+data.name+"' ?");
+	var r=confirm("Do you want to remove the user '"+data.name+"' ?");
 	if (r==true)
 	{
 	  var usertodelete = new User(data.email,null,null);
@@ -327,29 +422,14 @@ function removeUserViaPopup(data)
 		var element;
 		element = document.getElementById("infoText");
 		if (element) {
-		    element.innerHTML = "The user (name:"+data.name+") has been removed.";
+		    element.innerHTML = "The user (name:"+data.name+") has been removed. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
 		    
 		}
-		window.opener.location.reload();
+//		window.location.reload();	//--> text will not be visible --> button ?? 
 		  
   		});
 	}
 }
-
-
-//function getIdFromButtonClick_edit(clicked_id)
-//{
-//	currentID = clicked_id;
-//	alert("ID: "+currentID);
-//	javascript:popupOpen_editUser();
-//}
-//
-//function getIdFromButtonClick_remove(clicked_id)
-//{
-//	currentID = clicked_id;
-//	alert("ID: "+currentID);
-//	javascript:popupOpen_removeUser(currentID);
-//}
 
 
 
