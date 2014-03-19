@@ -153,7 +153,7 @@ public class ServletFunctions {
                     } else {
                         tempUser.setPwdHash(originalUser.getPwdHash());
                     }
-                    return moduleManager.handleTask(Task.Display.UPDATE, tempUser);
+                    return moduleManager.handleTask(Task.User.UPDATE, tempUser);
                 }
                 return nullMessageCatch(message);
             case ADMIN_USER_DELETE:

@@ -368,31 +368,20 @@ function editUserViaPopup(data)
 	}
 	//something has been changed
 	else{
-		var newName, newPassword, newEmail;
-		oldUser = new User(data.email, null, null);
-		
+		var newName = data.name, newPassword = data.password, newEmail = data.email;
 		if (name != ""){
 			newName = name;
-		}
-		else{
-			newName = null;
 		}
 		if (email != ""){
 			newEmail = password;
 		}
-		else{
-			newEmail = null;
-		}
 		if (password != ""){
 			newPassword = password;
 		}
-		else{
-			newPassword = null;
-		}
 		
-		updateUser = new User(newEmail, newPassword, newName);
+		var updateUser = new User(newEmail, newPassword, newName);
 		//TODO: select right user
-		doTask("ADMIN_USER_UPDATE", oldUser, function(event){
+		doTask("ADMIN_USER_UPDATE", updateUser, function(event){
 			var element;
 			element = document.getElementById("infoText");
 			if (element) {
