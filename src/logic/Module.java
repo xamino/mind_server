@@ -44,7 +44,6 @@ public abstract class Module {
     }
 
     protected Data delete(Data filter) {
-    	System.out.println(filter);
         boolean op = DatabaseController.getInstance().delete(filter);
         if (op)
             return new Success(filter.getClass().getSimpleName() + "DeletionSuccess", "The " + filter.toString() + " was deleted successfully.");

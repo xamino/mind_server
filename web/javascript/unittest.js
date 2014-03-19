@@ -268,15 +268,8 @@ function displayTest() {
         alert("Wrong number of displays! Should be 1 here.");
     }
 
-    // TODO move this to cleanDB() when it works
-    // Destroy displays
-    unitTest("display_remove", new PublicDisplay(), Success, adminSession);
-    var displayList = unitTest("display_read", new PublicDisplay(), Array, adminSession);
-    if (displayList == null || displayList.length != 0) {
-        alert("DB was NOT CLEARED of PUBLIC DISPLAYS!");
-    }
-
     cleanDB();
+    alert("Display test done.")
 }
 
 /**
@@ -298,6 +291,12 @@ function cleanDB() {
     var arealist = unitTest("area_read", new Area(), Array, adminSession);
     if (arealist == null || arealist.length != 1 || arealist[0].ID != "universe") {
         alert("DB was NOT CLEARED of AREA!");
+    }
+    // Destroy displays
+    unitTest("display_remove", new PublicDisplay(), Success, adminSession);
+    var displayList = unitTest("display_read", new PublicDisplay(), Array, adminSession);
+    if (displayList == null || displayList.length != 0) {
+        alert("DB was NOT CLEARED of PUBLIC DISPLAYS!");
     }
 
     // Destroy users

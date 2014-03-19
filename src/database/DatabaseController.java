@@ -4,10 +4,7 @@ import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
 import com.db4o.query.Predicate;
-import database.objects.Area;
-import database.objects.DataList;
-import database.objects.Location;
-import database.objects.User;
+import database.objects.*;
 import io.Configuration;
 import logger.Messenger;
 import servlet.BCrypt;
@@ -142,6 +139,18 @@ public class DatabaseController implements ServletContextListener {
                         }
                     });
                 }
+            } else if (requestFilter instanceof PublicDisplay) {
+                final PublicDisplay displayFilter = (PublicDisplay) requestFilter;
+                if (displayFilter.getIdentification() == null) {
+                    queryResult = con.queryByExample(displayFilter);
+                } else {
+                    queryResult = con.query(new Predicate<PublicDisplay>() {
+                        @Override
+                        public boolean match(PublicDisplay publicDisplay) {
+                            return displayFilter.getIdentification().equals(publicDisplay.getIdentification());
+                        }
+                    });
+                }
             }
 
             // Write query results to DataList
@@ -236,6 +245,14 @@ public class DatabaseController implements ServletContextListener {
 
                 log.log(TAG, areaToUpdate.toString() + " updated in DB!");
                 return true;
+            } else if (data instanceof PublicDisplay) {
+                PublicDisplay dataDisplay = (PublicDisplay) data;
+                PublicDisplay displayUpdate = read(dataDisplay).get(0); // TODO Empty/NullCheck
+                displayUpdate.setCoordinateX(dataDisplay.getCoordinateX());
+                displayUpdate.setCoordinateY(dataDisplay.getCoordinateY());
+                displayUpdate.setIdentification(dataDisplay.getIdentification());
+                displayUpdate.setLocation(dataDisplay.getLocation());
+                displayUpdate.setToken(dataDisplay.getToken());
             }
 
             return false;
@@ -254,12 +271,17 @@ public class DatabaseController implements ServletContextListener {
     public boolean delete(Data data) {
         try {
             DataList<Data> dataList = read(data);
-            if (dataList != null && !dataList.isEmpty()) {
+            // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
+            if (dataList != null && dataList.isEmpty()) {
+                return true;
+            } else if (dataList != null && !dataList.isEmpty()) {
                 Data dataToDelete = dataList.get(0);
                 con.delete(dataToDelete);
                 log.log(TAG, dataToDelete.toString() + " deleted from DB!");
                 return true;
-            } else return false;
+            } else {
+                return false;
+            }
 
         } catch (Exception e) {
             return false;

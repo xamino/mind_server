@@ -8,7 +8,15 @@ import database.Data;
  */
 public class PublicDisplay implements Data, Authenticated {
 
-    private String location, identification, token;
+    private String location;
+    /**
+     * Primary key of PublicDisplay!
+     */
+    private String identification;
+    /**
+     * Aka password.
+     */
+    private String token;
     private int coordinateX;
     private int coordinateY;
 
@@ -69,5 +77,13 @@ public class PublicDisplay implements Data, Authenticated {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    @Override
+    public String toString() {
+        return "PublicDisplay{" +
+                "location='" + location + '\'' +
+                ", identification='" + identification + '\'' +
+                '}';
     }
 }
