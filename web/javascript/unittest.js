@@ -17,6 +17,7 @@ function doUnitTest() {
     userAccessTest();
     areaTest();
     positionTest();
+    displayTest();
 
     cleanDB();
 
@@ -160,7 +161,7 @@ function areaTest() {
     // should be in both
     var test = false;
     var locations = universe.locations;
-    for (var i =0; i<locations.length; i++) {
+    for (var i = 0; i < locations.length; i++) {
         if (locations[i].coordinateX == 35 && locations[i].coordinateY == 58)
             test = true;
     }
@@ -168,7 +169,7 @@ function areaTest() {
         alert("Multiple area location failed! Not in universe.")
     }
     locations = office.locations;
-    for (var i =0; i<locations.length; i++) {
+    for (var i = 0; i < locations.length; i++) {
         if (locations[i].coordinateX == 35 && locations[i].coordinateY == 58)
             test = true;
     }
@@ -242,6 +243,40 @@ function positionTest() {
     cleanDB();
 
     alert("Position done.");
+}
+
+/**
+ * Test all functionality for the public displays.
+ */
+function displayTest() {
+
+    // TODO remove when it should work
+    if (!confirm("Display test will most likely fail for a while yet! Still try?")) {
+        return;
+    }
+
+    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    // register a display:
+    unitTest("display_add", new PublicDisplay("Office Prof. Herman", "office_herman", "herman_token", 56, 78), Success, adminSession);
+    // should not be allowed as normal user
+    unitTest("registration", new User("ego.trump@haha.com", "ßüöä", "Ego Trump"), Success, null);
+    var egoSession = unitTest("login", new User("ego.trump@haha.com", "ßüöä", null), Success, null).description;
+    unitTest("display_add", new PublicDisplay("MEINS", "office_ego", "das hier erratet ihr nie!", 156, 178), Error, egoSession);
+    // test
+    var displays = unitTest("display_read", new PublicDisplay(null, null, null, null, null), Array, adminSession);
+    if (displays != null && displays.length != 1) {
+        alert("Wrong number of displays! Should be 1 here.");
+    }
+
+    // TODO move this to cleanDB() when it works
+    // Destroy displays
+    unitTest("display_remove", new PublicDisplay(), Success, adminSession);
+    var displayList = unitTest("display_read", new PublicDisplay(), Array, adminSession);
+    if (displayList == null || displayList.length != 0) {
+        alert("DB was NOT CLEARED of PUBLIC DISPLAYS!");
+    }
+
+    cleanDB();
 }
 
 /**

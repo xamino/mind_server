@@ -5,6 +5,7 @@
 package servlet;
 
 import database.Data;
+import database.Information;
 import database.messages.Error;
 import database.messages.Success;
 import database.objects.PublicDisplay;
@@ -70,7 +71,7 @@ public class Servlet extends HttpServlet {
         // Write whatever you want sent back to this object:
         Data answer = null;
         // If the task was CHECK we don't need to do anything else
-        if (Task.Sanitation.safeValueOf(arrival.getTask()) == Task.Sanitation.CHECK) {
+        if (!(check instanceof Information) && Task.Sanitation.safeValueOf(arrival.getTask()) == Task.Sanitation.CHECK) {
             // Avoid sending the user object
             answer = functions.checkDataMessage(check);
             if (answer == null) {

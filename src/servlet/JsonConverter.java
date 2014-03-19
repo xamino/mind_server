@@ -43,6 +43,7 @@ public class JsonConverter {
         factory.registerSubtype(Error.class, "Error");
         factory.registerSubtype(Location.class, "Location");
         factory.registerSubtype(Message.class, "Message");
+        factory.registerSubtype(PublicDisplay.class, "Display");
         factory.registerSubtype(Success.class, "Success");
         factory.registerSubtype(User.class, "User");
         factory.registerSubtype(WifiMorsel.class, "WifiMorsel");

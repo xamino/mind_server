@@ -115,3 +115,12 @@ function WifiMorsel(wifiMac, wifiName, wifiLevel) {
     this.wifiName = wifiName;
     this.wifiLevel = wifiLevel;
 }
+
+function PublicDisplay(location, identification, token, coordinateX, coordinateY) {
+    this.$type = "Display";
+    this.location = location;
+    this.identification = identification;
+    this.token = token;
+    this.coordinateX = coordinateX;
+    this.coordinateY = coordinateY;
+}

@@ -144,9 +144,10 @@ public interface Task {
     }
 
     public enum Display implements Task {
-        ADD_DISPLAY,
-        UPDATE_DISPLAY,
-        REMOVE_DISPLAY
+        CREATE,
+        READ,
+        UPDATE,
+        DELETE
     }
 }
 

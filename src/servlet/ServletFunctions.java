@@ -177,6 +177,28 @@ public class ServletFunctions {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 return moduleManager.handleTask(Task.Area.DELETE, arrival.getObject());
+            // DISPLAYS ---------------------------------------------------------------------------
+            case DISPLAY_READ:
+                if (!(arrival.getObject() instanceof PublicDisplay)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Display.READ, arrival.getObject());
+            case DISPLAY_ADD:
+                if (!(arrival.getObject() instanceof PublicDisplay)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Display.CREATE, arrival.getObject());
+            case DISPLAY_UPDATE:
+                if (!(arrival.getObject() instanceof PublicDisplay)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Display.UPDATE, arrival.getObject());
+            case DISPLAY_REMOVE:
+                if (!(arrival.getObject() instanceof PublicDisplay)) {
+                    return new Error("WrongObject", "You supplied a wrong object for this task!");
+                }
+                return moduleManager.handleTask(Task.Display.DELETE, arrival.getObject());
+            // Special admin stuff ---------------------------------------------------------------
             case READ_ALL_ADMIN:
                 // TODO: can now be drastly improved with new filter, change!
                 data = moduleManager.handleTask(Task.User.READ, null);
