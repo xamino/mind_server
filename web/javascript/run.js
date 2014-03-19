@@ -117,7 +117,7 @@ $(document).on("submit", "#loginForm", function(event) {
 	potentialAdmin = new User(email, null, null);
 
 	login(email, password, function() {
-		doTask("user_read", potentialAdmin, isAdmin);
+		doTask("ADMIN_USER_READ", potentialAdmin, isAdmin);
 	});
 
 });
@@ -157,7 +157,7 @@ $(document).on("submit", "#registerForm", function(event) {
 //	password = $("#password").val();
 //
 //	newUser = new User(email, password, name);
-//	doTask("user_add", newUser, function(event){
+//	doTask("ADMIN_USER_ADD", newUser, function(event){
 //		var element;
 //		element = document.getElementById("addUserForm");
 //		if (element) {
@@ -168,7 +168,7 @@ $(document).on("submit", "#registerForm", function(event) {
 //
 //});
 
-////////////////old remove function --> leave because of the popup example //////////////////
+////////////////old edit function --> leave because of the popup example //////////////////
 ///**
 // * on Button click 'Edit User' in admin_user_management.jsp
 // * edits the selected user
@@ -181,7 +181,7 @@ $(document).on("submit", "#registerForm", function(event) {
 //	
 //	//all users
 //	var users = new User(null,null,null);
-//	doTask("user_read_any", users, function(event){
+//	doTask("READ_ALL_ADMIN", users, function(event){
 //	
 //	var id = getURLParameter("id");
 //		
@@ -196,7 +196,7 @@ $(document).on("submit", "#registerForm", function(event) {
 //	//have to choose right user data
 //	editUser = new User(email, password, name);
 //
-//	doTask("user_update", editUser, function(event){
+//	doTask("ADMIN_USER_UPDATE", editUser, function(event){
 //		var element;
 //		element = document.getElementById("editUserForm");
 //		if (element) {
@@ -220,7 +220,7 @@ $(document).on("submit", "#registerForm", function(event) {
 ////	var id = gup( 'id' );
 ////	alert("YAY - ID: "+id);
 //	var users = new User(null,null,null);
-//	doTask("user_read_any", users, removeUser);
+//	doTask("READ_ALL_ADMIN", users, removeUser);
 //});
 
 	
@@ -241,7 +241,7 @@ $(document).on("submit", "#registerForm", function(event) {
 ////		deleteUser = new User(email, password, name); 
 //		}
 //		
-////		doTask("user_delete", deleteUser, function(event){
+////		doTask("ADMIN_USER_DELETE", deleteUser, function(event){
 ////    		var element;
 ////    		element = document.getElementById("removeUserForm");
 ////    		if (element) {
@@ -264,7 +264,7 @@ $(document).on("submit", "#registerForm", function(event) {
 function loadUsers() {
 	var users = new User(null,null,null);
 //	var users = null;
-	doTask("user_read_any", users, writeUsers);
+	doTask("READ_ALL_ADMIN", users, writeUsers);
 }
 
 function writeUsers (data){
@@ -326,7 +326,8 @@ function addUserViaPopup()
 
 	if (name != "" && email != "" && password != ""){	//everything is given
 		newUser = new User(email, password, name);
-		doTask("user_add", newUser, function(event){
+		alert(email+", "+password+", "+name);
+		doTask("ADMIN_USER_ADD", newUser, function(event){
 			var element;
 			element = document.getElementById("infoText");
 			if (element) {
@@ -391,7 +392,7 @@ function editUserViaPopup(data)
 		
 		updateUser = new User(newEmail, newPassword, newName);
 		//TODO: select right user
-		doTask("user_update", oldUser, function(event){
+		doTask("ADMIN_USER_UPDATE", oldUser, function(event){
 			var element;
 			element = document.getElementById("infoText");
 			if (element) {
@@ -417,7 +418,7 @@ function removeUserViaPopup(data)
 	{
 	  var usertodelete = new User(data.email,null,null);
 	  alert("FILTER OBJECT FOR USER DELETE: "+JSON.stringify(usertodelete));
-	  doTask("user_delete", usertodelete, function(event){
+	  doTask("ADMIN_USER_DELETE", usertodelete, function(event){
 		  //TODO relaod page
 		var element;
 		element = document.getElementById("infoText");
