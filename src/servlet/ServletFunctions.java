@@ -130,6 +130,7 @@ public class ServletFunctions {
                 }
                 return moduleManager.handleTask(Task.User.UPDATE, arrival.getObject());
             case USER_DELETE:
+            	log.log("DELETE", arrival.getObject().toString());
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
