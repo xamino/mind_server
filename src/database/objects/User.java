@@ -47,7 +47,7 @@ public class User implements Data, Authenticated {
     public String toString() {
         return "User{" +
                 "name='" + name + '\'' +
-                ", pwdHash='" + pwdHash + '\'' +
+                // ", pwdHash='" + pwdHash + '\'' +
                 ", email='" + email + '\'' +
                 ", admin=" + admin +
                 '}';

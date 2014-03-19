@@ -50,16 +50,28 @@ function adminRightsTest() {
     // admin user management
     unitTest("admin_user_add", new User("email", "password", "name"), Success, adminSession);
     unitTest("admin_user_add", new User("lang@email.de", "password", "Etwas längerer Name, mit Sonderzeichen und so!"), Success, adminSession);
+    unitTest("admin_user_add", new User("","", null), Error, adminSession);
+    unitTest("admin_user_add", new User("legal","", null), Error, adminSession);
+    unitTest("admin_user_add", new User("","legal", null), Error, adminSession);
+    // update tests
     unitTest("admin_user_update", new User("email", null, "name name"), Success, adminSession);
+    unitTest("admin_user_update", new User("lang@email.de", null, null, true), Success, adminSession);
     // test password remains untouched:
     unitTest("login", new User("email", "password", null), Success, null);
     unitTest("admin_user_update", new User("email", "new password", null), Success, adminSession);
     unitTest("login", new User("email", "new password", null), Success, null);
+    // check if really admin
+    var langSession = unitTest("login", new User("lang@email.de", "password"), Success, null).description;
+    unitTest("admin_user_read", new User(null, null, null, true), Array, langSession);
     // remove
     unitTest("admin_user_delete", new User("email", null, null), Success, adminSession);
     // test that there is only one other user left
     var list = unitTest("admin_user_read", new User(null, null, null), Array, adminSession);
-    // TODO finish
+    if (list != null && list.length != 3) {
+        // 3 because Maria is still there :P
+        alert("Too many few users! Should be only 3 here.")
+    }
+    // TODO complete
 
     cleanDB();
 
