@@ -65,6 +65,10 @@ public class ServletFunctions {
                     // hash:
                     sentUser.setPwdHash(BCrypt.hashpw(password, BCrypt.gensalt(12)));
                 }
+                // This means that the name isn't to be changed:
+                if (sentUser.getName() == null) {
+                    sentUser.setName(user.getName());
+                }
                 // Note that the session user object now needs to be updated. This is done the next time the user
                 // sends a request through SanitationModule; it will always get the up to date object from the
                 // database.
@@ -152,6 +156,10 @@ public class ServletFunctions {
                         tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
                     } else {
                         tempUser.setPwdHash(originalUser.getPwdHash());
+                    }
+                    // This means the name isn't to be changed:
+                    if (tempUser.getName() == null) {
+                        tempUser.setName(originalUser.getName());
                     }
                     return moduleManager.handleTask(Task.User.UPDATE, tempUser);
                 }

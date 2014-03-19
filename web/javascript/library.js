@@ -67,60 +67,88 @@ function getURLParameter(parameterName) {
 
 function Arrival(task, sessionHash, object) {
     this.$type = "Arrival";
-    this.sessionHash = sessionHash;
-    this.task = task;
-    this.object = object;
+    if (sessionHash != null)
+        this.sessionHash = sessionHash;
+    if (task != null)
+        this.task = task;
+    if (object != null)
+        this.object = object;
 }
 
-function User(email, password, name) {
+function User(email, password, name, admin) {
     this.$type = "User";
-    this.email = email;
-    this.pwdHash = password;
-    this.name = name;
-    // this.admin = admin; // can not be changed by unauthorized clients, don't try :P
+    if (email != null)
+        this.email = email;
+    if (password != null)
+        this.pwdHash = password;
+    if (name != null)
+        this.name = name;
+    if (admin != null)
+        this.admin = admin; // can not be changed by unauthorized clients, don't try :P
 }
 
 function Success(name, description) {
     this.$type = "Success";
-    this.name = name;
-    this.description = description;
+    if (name != null)
+        this.name = name;
+    if (description != null)
+        this.description = description;
 }
 
 function Error(name, description) {
     this.$type = "Error";
-    this.name = name;
-    this.description = description;
+    if (name != null)
+        this.name = name;
+    if (description != null)
+        this.description = description;
 }
 
 function Area(ID, locations, topLeftX, topLeftY, width, height) {
     this.$type = "Area";
-    this.ID = ID;
-    this.locations = locations;
-    this.topLeftX = topLeftX;
-    this.topLeftY = topLeftY;
-    this.width = width;
-    this.height = height;
+    if (ID != null)
+        this.ID = ID;
+    if (locations != null)
+        this.locations = locations;
+    if (topLeftX != null)
+        this.topLeftX = topLeftX;
+    if (topLeftY != null)
+        this.topLeftY = topLeftY;
+    if (width != null)
+        this.width = width;
+    if (height != null)
+        this.height = height;
 }
 
 function Location(coordinateX, coordinateY, wifiMorsels) {
     this.$type = "Location";
-    this.coordinateX = coordinateX;
-    this.coordinateY = coordinateY;
-    this.wifiMorsels = wifiMorsels;
+    if (coordinateX != null)
+        this.coordinateX = coordinateX;
+    if (coordinateY != null)
+        this.coordinateY = coordinateY;
+    if (wifiMorsels != null)
+        this.wifiMorsels = wifiMorsels;
 }
 
 function WifiMorsel(wifiMac, wifiName, wifiLevel) {
     this.$type = "WifiMorsel";
-    this.wifiMac = wifiMac;
-    this.wifiName = wifiName;
-    this.wifiLevel = wifiLevel;
+    if (wifiMac != null)
+        this.wifiMac = wifiMac;
+    if (wifiName != null)
+        this.wifiName = wifiName;
+    if (wifiLevel != null)
+        this.wifiLevel = wifiLevel;
 }
 
 function PublicDisplay(location, identification, token, coordinateX, coordinateY) {
     this.$type = "Display";
-    this.location = location;
-    this.identification = identification;
-    this.token = token;
-    this.coordinateX = coordinateX;
-    this.coordinateY = coordinateY;
+    if (location != null)
+        this.location = location;
+    if (identification != null)
+        this.identification = identification;
+    if (token != null)
+        this.token = token;
+    if (coordinateX != null)
+        this.coordinateX = coordinateX;
+    if (coordinateY != null)
+        this.coordinateY = coordinateY;
 }
