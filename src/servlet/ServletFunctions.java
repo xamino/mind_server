@@ -59,11 +59,15 @@ public class ServletFunctions {
                 if (sentUser.isAdmin() && !user.isAdmin()) {
                     return new Error("IllegalChange", "You do not have the rights to modify your permissions!");
                 }
+                // Also make sure you keep your admin status
+                sentUser.setAdmin(user.isAdmin());
                 // We need to catch a password change, as it must be hashed:
                 String password = sentUser.getPwdHash();
                 if (password != null && !password.isEmpty()) {
                     // hash:
                     sentUser.setPwdHash(BCrypt.hashpw(password, BCrypt.gensalt(12)));
+                } else {
+                    sentUser.setPwdHash(user.getPwdHash());
                 }
                 // This means that the name isn't to be changed:
                 if (sentUser.getName() == null) {

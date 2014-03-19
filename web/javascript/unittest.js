@@ -103,6 +103,7 @@ function userUpdateTest() {
     alert("User update test done.");
 }
 
+// todo move this to the others
 function adminUpdateTest() {
     alert("Beginning admin update test.");
 
