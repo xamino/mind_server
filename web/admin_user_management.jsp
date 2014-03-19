@@ -61,6 +61,8 @@
 	    }
   	 </script>-->
 	 <input type="submit" value="Add User" onClick="addUserViaPopup()" /> <!-- javascript:popupOpen_addUser()" />-->
+	 <br> Info - Add User: You have to add a name, an email and a password. 
+	 <br>Info - Edit User: You can't edit a user's email. <br>If you want to change an email you have to add a new user with the desired email (and remove the user with the old email).
 	 <div id="infoText"></div>
 	<!-- <table border ="1">
         <tr>
