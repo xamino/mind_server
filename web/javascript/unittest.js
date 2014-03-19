@@ -17,7 +17,7 @@ function doUnitTest() {
     userAccessTest();
     areaTest();
     positionTest();
-    displayTest();
+    displayAdminTest();
 
     cleanDB();
 
@@ -248,12 +248,9 @@ function positionTest() {
 /**
  * Test all functionality for the public displays.
  */
-function displayTest() {
+function displayAdminTest() {
 
-    // TODO remove when it should work
-    if (!confirm("Display test will most likely fail for a while yet! Still try?")) {
-        return;
-    }
+    alert("Beginning display admin test.")
 
     var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
     // register some displays:
@@ -273,10 +270,19 @@ function displayTest() {
     // update
     unitTest("display_update", new PublicDisplay("Office Prof. Herman", "office_doof", "herman_token", 56, 78), Error, adminSession);
     unitTest("display_update", new PublicDisplay("Office Herman", "office_herman", null, 56, 78), Success, adminSession);
-    unitTest("display_read", new PublicDisplay(null, null, null, null, null), Array, adminSession);
+    var test = unitTest("display_read", new PublicDisplay(null, "office_herman", null, null, null), PublicDisplay, adminSession);
+    if (test.location != "Office Herman") {
+        alert("Update failed!");
+    }
+    // legal remove:
+    unitTest("display_remove", new PublicDisplay(null, "instituts_sek", null, null, null), Success, adminSession);
+    // illegal remove:
+    unitTest("display_remove", new PublicDisplay(null, "i don't exist!", null, null, null), Success, adminSession);
+    // test, should be only one remaining now
+    unitTest("display_read", new PublicDisplay(null, null, null, null, null), PublicDisplay, adminSession);
 
     cleanDB();
-    alert("Display test done.")
+    alert("Display admin test done.")
 }
 
 /**
