@@ -320,27 +320,37 @@ function addUserViaPopup()
 
 	var name = prompt("Please enter the name of the user you want to add:");
 	
-	var email = prompt("Please enter the email of the user you want to add:");
+	if(name != null){	// if Cancel Button isn't clicked
 	
-	var password = prompt("Please enter the password of the user you want to add:");
-
-	if (name != "" && email != "" && password != ""){	//everything is given
-		newUser = new User(email, password, name);
-		alert(email+", "+password+", "+name);
-		doTask("ADMIN_USER_ADD", newUser, function(event){
-			var element;
-			element = document.getElementById("infoText");
-			if (element) {
-			    element.innerHTML = "The user (name: "+name+") has been added. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
-			    
+		var email = prompt("Please enter the email of the user you want to add:");
+		
+		if(email != null){	// if Cancel Button isn't clicked
+		
+			var password = prompt("Please enter the password of the user you want to add:");
+			
+			if(password != null){	// if Cancel Button isn't clicked
+		
+				if (name != "" && email != "" && password != ""){	//everything is given
+					newUser = new User(email, password, name);
+					alert(email+", "+password+", "+name);
+					doTask("ADMIN_USER_ADD", newUser, function(event){
+						var element;
+						element = document.getElementById("infoText");
+						if (element) {
+						    element.innerHTML = "The user (name: "+name+") has been added. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+						    
+						}
+				//		window.location.reload();		//--> text will not be visible --> button ??
+					});
+				}
+				else{
+					alert("You have to specify name, email and password. None of them can be empty!");
+				}
+			
 			}
-	//		window.location.reload();		//--> text will not be visible --> button ??
-		});
-	}
-	else{
-		alert("You have to specify name, email and password. None of them can be empty!");
-	}
 
+		}
+	}
 }
 
 
@@ -348,48 +358,54 @@ function addUserViaPopup()
  * on Button click 'Edit User' in admin_user_management.jsp
  * edits the selected user
  */
-function editUserViaPopup(data)
-{
+function editUserViaPopup(data){
 
-	var name = prompt("If you want to change the name: "+data.name+" simply enter the new name. If you don't want to change something, leave it empty.");
+	var name = prompt("EDIT NAME - If you want to change the name: "+data.name+" simply enter the new name. If you don't want to change something, leave it empty.");
 	
-	var email = prompt("If you want to change the email: "+data.email+" simply enter the new email. If you don't want to change something, leave it empty.");
+//	var email = prompt("If you want to change the email: "+data.email+" simply enter the new email. If you don't want to change something, leave it empty.");
 	
-	var password = prompt("If you want to change the password: "+data.password+" simply enter the new password. If you don't want to change something, leave it empty.");
-
-	//nothing has been changed
-	if (name == "" && email == "" && password == ""){
-		var element;
-		element = document.getElementById("infoText");
-		if (element) {
-		    element.innerHTML = "You didn't change anything. <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
-		    
-		}
-	}
-	//something has been changed
-	else{
-		var newName = data.name, newPassword = data.password, newEmail = data.email;
-		if (name != ""){
-			newName = name;
-		}
-		if (email != ""){
-			newEmail = password;
-		}
-		if (password != ""){
-			newPassword = password;
-		}
+	if(name != null){	// if Cancel Button isn't clicked
+	
+		var password = prompt("EDIT PASSWORD - If you want to change the password: "+data.password+" simply enter the new password. If you don't want to change something, leave it empty.");
+	
+		if(password != null){	// if Cancel Button isn't clicked
 		
-		var updateUser = new User(newEmail, newPassword, newName);
-		//TODO: select right user
-		doTask("ADMIN_USER_UPDATE", updateUser, function(event){
-			var element;
-			element = document.getElementById("infoText");
-			if (element) {
-			    element.innerHTML = "The user (name: "+newName+") has been modified. Bis click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
-			    
+			//nothing has been changed
+			if (name == "" && password == ""){
+				var element;
+				element = document.getElementById("infoText");
+				if (element) {
+				    element.innerHTML = "You didn't change anything. <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+				    
+				}
 			}
-	//		window.location.reload();		--> text will not be visible --> button ??
-		});
+			//something has been changed
+			else{
+				var newName = data.name, newPassword = data.password, newEmail = data.email;
+				if (name != ""){
+					newName = name;
+				}
+		//		if (email != ""){
+		//			newEmail = password;
+		//		}
+				if (password != ""){
+					newPassword = password;
+				}
+				
+				var updateUser = new User(newEmail, newPassword, newName);
+				//TODO: select right user
+				doTask("ADMIN_USER_UPDATE", updateUser, function(event){
+					var element;
+					element = document.getElementById("infoText");
+					if (element) {
+					    element.innerHTML = "The user (name: "+newName+") has been modified. Bis click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+					    
+					}
+			//		window.location.reload();		--> text will not be visible --> button ??
+				});
+			}
+		
+		}
 	}
 	
 
