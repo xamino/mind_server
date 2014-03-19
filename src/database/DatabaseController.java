@@ -25,9 +25,17 @@ public class DatabaseController implements ServletContextListener {
      * Variable for storing the instance of the class.
      */
     private static DatabaseController instance;
+    private final String TAG = "DatabaseController";
     private ObjectContainer con;
     private Messenger log;
-    private final String TAG = "DatabaseController";
+
+    /**
+     * Private constructor for DatabaseController for implementing the singleton
+     * instance. Use getInstance() to get a reference to an object of this type.
+     */
+    public DatabaseController() {
+        instance = this;
+    }
 
     /**
      * Method for getting a valid reference of this object.
@@ -39,15 +47,6 @@ public class DatabaseController implements ServletContextListener {
             instance = new DatabaseController();
         }
         return instance;
-    }
-
-
-    /**
-     * Private constructor for DatabaseController for implementing the singleton
-     * instance. Use getInstance() to get a reference to an object of this type.
-     */
-    public DatabaseController() {
-        instance = this;
     }
 
     /**
@@ -252,7 +251,11 @@ public class DatabaseController implements ServletContextListener {
     public boolean delete(Data data) {
         try {
             Data dataToDelete = read(data);
-            con.delete((User)dataToDelete);
+            // TODO @Andy: passt das so? READ gibt hier eine liste der length 1 zurück!
+            if (dataToDelete instanceof DataList) {
+                dataToDelete = (Data) ((DataList) dataToDelete).get(0);
+            }
+            con.delete(dataToDelete);
             log.log(TAG, dataToDelete.toString() + " deleted from DB!");
             return true;
         } catch (Exception e) {
@@ -281,7 +284,7 @@ public class DatabaseController implements ServletContextListener {
 
     public void init() {
         //
-        Configuration config =  Configuration.getInstance();
+        Configuration config = Configuration.getInstance();
 
         // Initializing Database
         log.log(TAG, "Running DB init.");

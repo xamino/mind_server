@@ -31,17 +31,17 @@ function adminRightsTest() {
     unitTest("toggle_admin", null, Success, adminSession);
 
     // try admin access
-    unitTest("admin_read_all", null, Error, adminSession);
+    unitTest("read_all_admin", null, Error, adminSession);
     // Switch to admin rights:
     // TODO this shouldn't work later on!
     unitTest("toggle_admin", null, Success, adminSession);
     // Do an admin task:
-    unitTest("user_add", new User("maria.heilig@gott.de", "maria", "Maria Heilig"), Success, adminSession);
-    var list = unitTest("admin_read_all", null, Array, adminSession);
+    unitTest("admin_user_add", new User("maria.heilig@gott.de", "maria", "Maria Heilig"), Success, adminSession);
+    var list = unitTest("read_all_admin", null, Array, adminSession);
     if (list == null || list.length != 1) {
         alert("There should be only one admin in the DB at this point!");
     }
-    list = unitTest("user_read_any", new User(null, null, null), Array, adminSession);
+    list = unitTest("admin_user_read", new User(null, null, null), Array, adminSession);
     if (list == null || list.length != 2) {
         alert("There should be only two users in the DB!");
     }
@@ -108,7 +108,7 @@ function userAccessTest() {
     unitTest("check", null, Error, egoSession);
     egoSession = unitTest("login", new User("ego.trump@haha.com", "ßüöä", null), Success, null).description;
     // check that all users are in db
-    var list = unitTest("user_read_any", new User(null, null, null), Array, adminSession);
+    var list = unitTest("admin_user_read", new User(null, null, null), Array, adminSession);
     if (list == null || list.length != 3) {
         alert("Wrong number of users read from server!");
     }
@@ -268,7 +268,7 @@ function cleanDB() {
     unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
     // Now check with default admin, as admin above was now deleted!
     var newSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
-    var list = unitTest("admin_read_all", null, Array, newSession);
+    var list = unitTest("read_all_admin", null, Array, newSession);
     if (list == null || list.length > 1) {
         alert("DB was NOT CLEARED of USERS!");
     } else {

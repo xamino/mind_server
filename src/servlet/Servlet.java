@@ -85,10 +85,6 @@ public class Servlet extends HttpServlet {
             User currentUser = (User) check;
             // First check whether it is a normal task:
             answer = functions.handleNormalTask(arrival, currentUser);
-            //TODO special treatment - when admin tries to delete a user, handleNormalTask returns not null
-            if(arrival.task.toLowerCase().equals("user_delete")&&currentUser.isAdmin()){
-            	answer = null;
-            }
             // If null, it wasn't a normal task – so check if admin rights are set
             if (answer == null && currentUser.isAdmin()) {
                 // If yes, handle admin stuff:
@@ -105,7 +101,7 @@ public class Servlet extends HttpServlet {
             }
         } else if (check instanceof PublicDisplay) {
             // TODO
-            functions.handleDisplayTask(arrival, (PublicDisplay)check);
+            functions.handleDisplayTask(arrival, (PublicDisplay) check);
         } else {
             // This means the check failed, so there is a message in check that needs to be sent back
             answer = check;

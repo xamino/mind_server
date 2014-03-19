@@ -25,18 +25,8 @@ public interface Task {
         ECHO,
         // USER
         USER_READ,
-        USER_READ_ANY,  // Required for admin user read!
-        USER_ADD,
         USER_UPDATE,
         USER_DELETE,
-        /**
-         * Removes all areas and locations from the database and restores the default area
-         */
-        ADMIN_ANNIHILATE_AREA,
-        /**
-         * Removes all users from the database and restores the default admin
-         */
-        ADMIN_ANNIHILATE_USER,
         // LOCATION
         LOCATION_READ,
         LOCATION_ADD,
@@ -56,7 +46,19 @@ public interface Task {
          */
         POSITION_FIND,
         // ADMIN
-        ADMIN_READ_ALL,
+        READ_ALL_ADMIN,
+        ADMIN_USER_READ,
+        ADMIN_USER_ADD,
+        ADMIN_USER_UPDATE,
+        ADMIN_USER_DELETE,
+        /**
+         * Removes all areas and locations from the database and restores the default area
+         */
+        ADMIN_ANNIHILATE_AREA,
+        /**
+         * Removes all users from the database and restores the default admin
+         */
+        ADMIN_ANNIHILATE_USER,
         TOGGLE_ADMIN,
         /**
          * General error, especially when casting to a task doesn't work.

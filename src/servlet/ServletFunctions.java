@@ -44,7 +44,7 @@ public class ServletFunctions {
                 return arrival.getObject();
             case USER_READ:
                 // WARNING: do NOT allow ANY USER TO BE READ HERE – SECURITY LEAK!
-                // Admin should use user_read_any!
+                // Admin should use admin_user_read!
                 return user.safeClone();
             case USER_UPDATE:
                 if (!(arrival.getObject() instanceof User)) {
@@ -102,7 +102,7 @@ public class ServletFunctions {
         // Because we'll need these two rather often:
         Data data, message;
         switch (task) {
-            case USER_READ_ANY:
+            case ADMIN_USER_READ:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
@@ -115,7 +115,7 @@ public class ServletFunctions {
                 } else {
                     return message;
                 }
-            case USER_ADD:
+            case ADMIN_USER_ADD:
                 // TODO: Input sanitation? Check!
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -124,12 +124,12 @@ public class ServletFunctions {
                 User tempUser = (User) arrival.getObject();
                 tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
                 return moduleManager.handleTask(Task.User.CREATE, arrival.getObject());
-            case USER_UPDATE:
+            case ADMIN_USER_UPDATE:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 return moduleManager.handleTask(Task.User.UPDATE, arrival.getObject());
-            case USER_DELETE:
+            case ADMIN_USER_DELETE:
             	log.log("DELETE", arrival.getObject().toString());
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -171,7 +171,7 @@ public class ServletFunctions {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 return moduleManager.handleTask(Task.Area.DELETE, arrival.getObject());
-            case ADMIN_READ_ALL:
+            case READ_ALL_ADMIN:
                 // TODO: can now be drastly improved with new filter, change!
                 data = moduleManager.handleTask(Task.User.READ, null);
                 message = checkDataMessage(data);
