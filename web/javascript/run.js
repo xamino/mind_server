@@ -340,7 +340,7 @@ function addUserViaPopup()
 						    element.innerHTML = "The user (name: "+name+") has been added. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
 						    
 						}
-				//		window.location.reload();		//--> text will not be visible --> button ??
+				//		window.location.reload();		//--> text will not be visible --> button or is alert better??
 					});
 				}
 				else{
@@ -401,7 +401,7 @@ function editUserViaPopup(data){
 					    element.innerHTML = "The user (name: "+newName+") has been modified. Bis click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
 					    
 					}
-			//		window.location.reload();		--> text will not be visible --> button ??
+			//		window.location.reload();		--> text will not be visible --> button or is alert better??
 				});
 			}
 		
@@ -431,7 +431,7 @@ function removeUserViaPopup(data)
 		    element.innerHTML = "The user (name:"+data.name+") has been removed. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
 		    
 		}
-//		window.location.reload();	//--> text will not be visible --> button ?? 
+//		window.location.reload();	//--> text will not be visible --> button or is alert better?? 
 		  
   		});
 	}
