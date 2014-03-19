@@ -250,14 +250,14 @@ public class DatabaseController implements ServletContextListener {
      */
     public boolean delete(Data data) {
         try {
-            Data dataToDelete = read(data);
-            // TODO @Andy: passt das so? READ gibt hier eine liste der length 1 zurück!
-            if (dataToDelete instanceof DataList) {
-                dataToDelete = (Data) ((DataList) dataToDelete).get(0);
-            }
-            con.delete(dataToDelete);
-            log.log(TAG, dataToDelete.toString() + " deleted from DB!");
-            return true;
+            DataList<Data> dataList = read(data);
+            if (dataList != null && !dataList.isEmpty()) {
+                Data dataToDelete = dataList.get(0);
+                con.delete(dataToDelete);
+                log.log(TAG, dataToDelete.toString() + " deleted from DB!");
+                return true;
+            } else return false;
+
         } catch (Exception e) {
             return false;
         }
