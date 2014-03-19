@@ -114,15 +114,18 @@ public class DatabaseController implements ServletContextListener {
                 } else {
                     queryResult = con.query(new Predicate<Area>() {
                         @Override
-                        public boolean match(Area o) {
+                        public boolean match(Area match) {
                             // return all areas that include the single location contained in the requestfilter
                             if (area.getID() == null && area.getLocations() != null && area.getLocations().size() == 1) {
                                 Location contained = area.getLocations().get(0);
                                 double x = contained.getCoordinateX();
                                 double y = contained.getCoordinateY();
-                                return !((x < area.getTopLeftX() || y < area.getTopLeftY()) || x > area.getTopLeftX() + area.getWidth() || y > area.getTopLeftY() + area.getHeight());
+                                return (x >= match.getTopLeftX())
+                                        && (y >= match.getTopLeftY())
+                                        && (x <= (match.getTopLeftX() + match.getWidth()))
+                                        && (y <= (match.getTopLeftY() + match.getHeight()));
                             } else /// ID is Areas unique key
-                                return o.getID().equals(area.getID());
+                                return match.getID().equals(area.getID());
                         }
                     });
                 }

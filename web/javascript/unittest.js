@@ -161,6 +161,7 @@ function areaTest() {
     // should be in both
     var test = false;
     for (var loc in universe.locations) {
+        // alert("universe " + loc.coordinateX + " " + loc.coordinateY);
         if (loc.coordinateX == 35 && loc.coordinateY == 58)
             test = true;
     }
@@ -168,6 +169,7 @@ function areaTest() {
         alert("Multiple area location failed! Not in universe.")
     }
     for (var loc in office.locations) {
+        // alert("office " + loc.coordinateX + " " + loc.coordinateY);
         if (loc.coordinateX == 35 && loc.coordinateY == 58)
             test = true;
     }

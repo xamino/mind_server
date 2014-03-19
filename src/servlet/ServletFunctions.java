@@ -101,6 +101,7 @@ public class ServletFunctions {
         Task.API task = Task.API.safeValueOf(arrival.getTask());
         // Because we'll need these two rather often:
         Data data, message;
+        User tempUser;
         switch (task) {
             case ADMIN_USER_READ:
                 if (!(arrival.getObject() instanceof User)) {
@@ -121,16 +122,21 @@ public class ServletFunctions {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 // We need to hash the password
-                User tempUser = (User) arrival.getObject();
+                tempUser = (User) arrival.getObject();
                 tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
                 return moduleManager.handleTask(Task.User.CREATE, arrival.getObject());
             case ADMIN_USER_UPDATE:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
+                tempUser = (User) arrival.getObject();
+                // If a value is in password, we need to update it:
+                if (tempUser.getPwdHash() != null && !tempUser.getPwdHash().isEmpty()) {
+                    tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
+                }
                 return moduleManager.handleTask(Task.User.UPDATE, arrival.getObject());
             case ADMIN_USER_DELETE:
-            	log.log("DELETE", arrival.getObject().toString());
+                log.log("DELETE", arrival.getObject().toString());
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }

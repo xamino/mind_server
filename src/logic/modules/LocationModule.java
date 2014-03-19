@@ -42,8 +42,8 @@ public class LocationModule extends Module {
                     return delete(location);
                 case READ_MORSELS:
                     return readMorsels(location);
-                    //TODO READ_BEST_AREA
-                    //TODO area add, update -> update locations
+                //TODO READ_BEST_AREA
+                //TODO area add, update -> update locations
             }
         } else if (request instanceof WifiMorsel) {
             //TODO are there any other operations directly on these?
@@ -71,32 +71,30 @@ public class LocationModule extends Module {
     }
 
     private Data readArea(Area area) {
-       // get all Users
-        if(area==null)
+        // get all Users
+        if (area == null)
             return read(new User(null, null));
         // get filtered Users
-        if(area.getID()==null)
+        if (area.getID() == null)
             return read(area);
 
         // from here on single users were requested
         Data data = read(area);
-        if(data instanceof DataList)
-            return ((DataList<Data>)data).get(0);
+        if (data instanceof DataList)
+            return ((DataList<Data>) data).get(0);
         else return data; // Error
     }
 
+    /**
+     * Adds a location to all relevant areas in the database.
+     *
+     * @param location The location to add.
+     * @return A message signifying status.
+     */
     private Data createLocation(final Location location) {
-        // A location is always part of the default area
-        DataList<Area> data = database.read(new Area("universe", null, 0, 0, 0, 0));
-        Area universe;
-        if (data != null && !data.isEmpty()) {
-            universe = data.get(0);
-            universe.addLocation(location);
-            boolean op = database.update(universe);
-            if (!op)
-                return new Error("CreateLocationFailure", "Update of " + universe.toString() + " with " + location.toString() + " failed!");
-        } else
-            return new Error("CreateLocationFailure", "Universe Area could not be read from Database. This should be impossible.");
+        // TODO
+        // Locations must always be in universe! Should always work automatically. Don't forcibly add it in advance,
+        // the location will then be added twice! How do we enforce this better?
 
         // Now read all Areas from DB where the Location coordinates are contained
         DataList<Location> locations = new DataList<>();
