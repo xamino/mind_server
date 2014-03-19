@@ -264,7 +264,7 @@ $(document).on("submit", "#registerForm", function(event) {
 function loadUsers() {
 	var users = new User(null,null,null);
 //	var users = null;
-	doTask("READ_ALL_ADMIN", users, writeUsers);
+	doTask("admin_user_read", users, writeUsers);
 }
 
 function writeUsers (data){
