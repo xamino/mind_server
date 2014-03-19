@@ -153,24 +153,23 @@ function areaTest() {
             alert("Writing a location directly to the universal area failed!");
         }
     }
-    // TODO finish & FIX! (see also todo in JsonConverter!)
     // Test adding a location to multiple ares
     unitTest("location_add", new Location(35, 58, wifis1), Success, adminSession);
     var universe = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
     var office = unitTest("area_read", new Area("Office Prof. Gott", null, 0, 0, 0, 0), Area, adminSession);
     // should be in both
     var test = false;
-    for (var loc in universe.locations) {
-        // alert("universe " + loc.coordinateX + " " + loc.coordinateY);
-        if (loc.coordinateX == 35 && loc.coordinateY == 58)
+    var locations = universe.locations;
+    for (var i =0; i<locations.length; i++) {
+        if (locations[i].coordinateX == 35 && locations[i].coordinateY == 58)
             test = true;
     }
     if (!test) {
         alert("Multiple area location failed! Not in universe.")
     }
-    for (var loc in office.locations) {
-        // alert("office " + loc.coordinateX + " " + loc.coordinateY);
-        if (loc.coordinateX == 35 && loc.coordinateY == 58)
+    locations = office.locations;
+    for (var i =0; i<locations.length; i++) {
+        if (locations[i].coordinateX == 35 && locations[i].coordinateY == 58)
             test = true;
     }
     if (!test) {
