@@ -20,24 +20,52 @@
 
 <div id="content">
 <div id="navigation">
-	<ul>
-		<li><a href="admin_home.jsp" class="adminlink">Home</a></li>
-		<li><a href="admin_user_management.jsp" class="adminlink">User Management</a></li>
-		<li><a href="admin_system_management.jsp" class="adminlink">System Management</a>
-			<ul>
-				<li><a href="admin_import_map_location.jsp" class="adminlink">Import Map and Location Data</a></li>
-				<li><a href="admin_public_displays.jsp" class="adminlink">Administrate Public Displays</a></li>
-			</ul>
-		</li>
-	</ul>
+    <ul>
+        <li><a href="admin_home.jsp" class="adminlink">Home</a></li>
+        <li><a href="admin_user_management.jsp" class="adminlink">User Management</a></li>
+        <li><a href="admin_system_management.jsp" class="adminlink">System Management</a>
+            <ul>
+                <li><a href="admin_import_map_location.jsp" class="adminlink">Import Map and Location Data</a></li>
+                <li><a href="admin_public_displays.jsp" class="adminlink">Administrate Public Displays</a></li>
+            </ul>
+        </li>
+    </ul>
 </div>
 <div id="text-content">
 
-
-		<!-- <form action="map.jpg" method="post" enctype="multipart/form-data">
-        <input type="file" name="map" />
-        <input type="submit" value="Upload" />
-        </form>-->
+<input id="fileupload" type="file" name="files[]" data-url="images" multiple>
+<script src="javascript/fileupload/jquery.ui.widget.js"></script>
+<script src="javascript/fileupload/jquery.iframe-transport.js"></script>
+<script src="javascript/fileupload/jquery.fileupload.js"></script>
+<script>
+$(function () {
+    $('#fileupload').fileupload({
+        dataType: 'json',
+        add: function (e, data) {
+        	
+            data.context = $('<button/>').text('Upload')
+                .appendTo(document.body)
+                .click(function () {
+                    data.context = $('<p/>').text('Uploading...').replaceAll($(this));
+                    data.submit();
+                });
+        },
+        done: function (e, data) {
+            data.context.text('Upload finished.');
+        }
+    });
+});
+/*$(function () {
+    $('#fileupload').fileupload({
+        dataType: 'json',
+        done: function (e, data) {
+            $.each(data.result.files, function (index, file) {
+                $('<p/>').text(file.name).appendTo(document.body);
+            });
+        }
+    });
+}); */
+</script>
 
 
 </div>

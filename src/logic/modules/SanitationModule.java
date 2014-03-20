@@ -198,6 +198,7 @@ public class SanitationModule extends Module {
      * @return Return message.
      */
     private Data login(Authenticated user) {
+    	
         Data object = readAuthFromDB(user);
         // Check if message:
         Data answer = ServletFunctions.getInstance().checkDataMessage(object);
