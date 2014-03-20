@@ -52,6 +52,29 @@ function login(email, password, callback) {
 }
 
 /**
+ * Function for login in - public display.
+ * 
+ * @param identification
+ *            Primary key.
+ * @param password
+ *            Password.
+ * @param callback
+ *            With no values!
+ */
+function loginDisplay(identification, password, callback) {
+	// We can keep name empty as it is not critical to this operation
+	var loginDisplay = new PublicDisplay(identification, password, null, 0, 0);
+	// sessionHash remains empty, we don't have one yet
+	var request = new Arrival("login", null, loginDisplay);
+	// send the request
+	send(request, function(data) {
+		// callback simply saves the session
+		session = data.object.description;
+		callback();
+	});
+}
+
+/**
  * Log a user out again.
  */
 function logout() {
@@ -141,6 +164,25 @@ $(document).on("submit", "#registerForm", function(event) {
 	else{
 	register(email, password, name, null);
 	}
+
+});
+
+
+/**
+ * on Button click 'Login' in public_display_login.jsp
+ * reads the input data
+ */
+$(document).on("submit", "#loginDisplayForm", function(event) {
+	event.preventDefault();
+	var identification, password;
+	identification = $("#identification").val();
+	password = $("#password").val();
+
+	login(identification, password, function(event){
+		window.location.href = "public_display_start.jsp";	   //?session="+session;
+	});
+//		doTask("ADMIN_USER_READ", potentialAdmin, isAdmin);
+	
 
 });
 
