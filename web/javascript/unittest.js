@@ -49,10 +49,10 @@ function adminRightsTest() {
     // admin user management
     unitTest("admin_user_add", new User("email", "password", "name"), Success, adminSession);
     unitTest("admin_user_add", new User("lang@email.de", "password", "Etwas längerer Name, mit Sonderzeichen und so!"), Success, adminSession);
-    unitTest("admin_user_add", new User("","", null), Error, adminSession);
-    unitTest("admin_user_add", new User("","legal", null), Error, adminSession);
+    unitTest("admin_user_add", new User("", "", null), Error, adminSession);
+    unitTest("admin_user_add", new User("", "legal", null), Error, adminSession);
     // this should return a key
-    unitTest("admin_user_add", new User("legal","", null), Message, adminSession);
+    unitTest("admin_user_add", new User("legal", "", null), Message, adminSession);
     // update tests
     unitTest("admin_user_update", new User("email", null, "name name"), Success, adminSession);
     unitTest("admin_user_update", new User("lang@email.de", null, null, true), Success, adminSession);
@@ -289,6 +289,9 @@ function displayAdminTest() {
     unitTest("display_add", new PublicDisplay("Sekretariat", "instituts_sek", "sekretariat", 33, 23), Success, adminSession);
     // should fail
     unitTest("display_add", new PublicDisplay("___", "instituts_sek", "___", 343, 234), Error, adminSession);
+    // key test
+    unitTest("display_add", new PublicDisplay("Earth", "terra", null, 3435, 34534), Message, adminSession);
+    unitTest("display_remove", new PublicDisplay(null, "terra", null, null, null), Success, adminSession);
     // should not be allowed as normal user
     unitTest("registration", new User("ego.trump@haha.com", "ßüöä", "Ego Trump"), Success, null);
     var egoSession = unitTest("login", new User("ego.trump@haha.com", "ßüöä", null), Success, null).description;
