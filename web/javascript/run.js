@@ -475,7 +475,7 @@ function writeDisplays (data){
 			document.getElementById("table_space").innerHTML = noDisplayInDatabase;
 		}
 		else{
-	
+		alert(data.object.length);
 		 var tablecontents = "";
 		    tablecontents = "<table border ='1'>";
 		    tablecontents += "<tr>";
@@ -538,7 +538,7 @@ function addDisplayViaPopup(){
 										"X-Coordinate: "+xCoordinate+"\n"+
 										"Y-Coordinate: "+yCoordinate);
 							}else{
-								alert("The following "+userstring+" has been added:\n"+
+								alert("The following display has been added:\n"+
 										"Identification: "+identification+"\n"+
 										"Location: "+location+"\n"+
 										"Password: "+password+"\n"+
