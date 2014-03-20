@@ -3,6 +3,8 @@ package database.objects;
 import database.Authenticated;
 import database.Data;
 
+import java.util.Date;
+
 /**
  * Created by tamino on 2/19/14.
  * <p/>
@@ -13,6 +15,7 @@ public class User implements Data, Authenticated {
     private String pwdHash;
     private String email;
     private boolean admin;
+    private Date lastAccess;
 
     public User(String name, String email) {
         this.name = name;
@@ -71,6 +74,14 @@ public class User implements Data, Authenticated {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    public void setLastAccess(Date lastAccess) {
+        this.lastAccess = lastAccess;
+    }
+
+    public Date getLastAccess() {
+        return lastAccess;
     }
 
     @Override
