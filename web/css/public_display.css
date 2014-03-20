@@ -1,0 +1,76 @@
+/*****************************TODO: relation of display and content****************************************/
+
+html, body {
+   margin:0;
+   padding:0;
+   height:100%;
+}
+
+#content {	/*contains settings and location/login*/
+   min-height:100%;
+   position:relative;
+}
+
+#map{
+	width:70%;
+	height:100%;
+	border:5px solid green;
+	float:left;
+	background-image:url(../images/o27_n3_small.png);
+	height:100%;
+	background-repeat:no-repeat;
+	background-size: contain;
+}
+
+#content{
+	width:29%;
+	height:100%;
+	float:right;
+	border:4px solid blue;
+}
+
+#app_settings{
+	float:left;
+}
+
+#app_settings{
+	float:right;
+}
+
+#app_settings_img {
+    background-image:url(http://ran.ge/content/uploads/2009/11/logo-trimmed.png);
+    display:block;
+    height:50px;
+    width:240px;
+}
+
+#display_settings_img {
+    background-image:url(http://ran.ge/content/uploads/2009/11/logo-trimmed.png);
+    display:block;
+    height:50px;
+    width:240px;
+}
+
+#content_popup{
+	border: 1px solid orange;	/*height should be 100% - settings - login_location*/
+}
+
+#login_location{
+	bottom:0px;
+	position:absolute;
+	height:150px;
+	border: 1px solid yellow;
+	width:100%;
+}
+
+#location, #login, #privacy{
+	float:left;
+	width:33.3%;
+}
+
+#location_img, #login_img, #privacy_img{
+	 background-image:url(http://ran.ge/content/uploads/2009/11/logo-trimmed.png);
+     display:block;
+     width:100%;
+     height:100px;
+}
