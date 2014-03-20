@@ -10,6 +10,7 @@ $.ajaxSetup({
     dataType: 'json'
 });
 
+
 /**
  * Helper method for sending data. Just give it a JSON object (mostly always Arrival) and, if desired, a callback
  * function that looks so: function(data) {...}.
@@ -159,4 +160,40 @@ function PublicDisplay(location, identification, token, coordinateX, coordinateY
         this.coordinateX = coordinateX;
     if (coordinateY != null)
         this.coordinateY = coordinateY;
+}
+
+/**
+ * Writes a Cookie - credit to http://stackoverflow.com/questions/2257631/how-create-a-session-using-javascript
+ * @param name The name of the cookie (set in isAdmin)
+ * @param value The value (session)
+ */
+function writeCookie(name,value) {
+    var date, expires;
+//    if (days) {
+        date = new Date();
+        date.setTime(date.getTime()+(15*60*1000));
+        expires = "; expires=" + date.toGMTString();
+//            }else{
+//        expires = "";
+//    }
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+/**
+ * returns a Cookie corresponding to the forwarded parameter 'name'
+ * credit to http://stackoverflow.com/questions/2257631/how-create-a-session-using-javascript
+ */
+function readCookie(name) {
+    var i, c, ca, nameEQ = name + "=";
+    ca = document.cookie.split(';');
+    for(i=0;i < ca.length;i++) {
+        c = ca[i];
+        while (c.charAt(0)==' ') {
+            c = c.substring(1,c.length);
+        }
+        if (c.indexOf(nameEQ) == 0) {
+            return c.substring(nameEQ.length,c.length);
+        }
+    }
+    return '';
 }
