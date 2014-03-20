@@ -20,7 +20,7 @@ public class PublicDisplay implements Data, Authenticated {
     private int coordinateX;
     private int coordinateY;
 
-    public PublicDisplay(String location, String identification, String token, int coordinateX, int coordinateY) {
+    public PublicDisplay(String identification, String token, String location, int coordinateX, int coordinateY) {
         this.location = location;
         this.identification = identification;
         this.token = token;
@@ -82,8 +82,8 @@ public class PublicDisplay implements Data, Authenticated {
     @Override
     public String toString() {
         return "PublicDisplay{" +
-                "location='" + location + '\'' +
-                ", identification='" + identification + '\'' +
+                "identification='" + identification + '\'' +
+                ", location='" + location + '\'' +
                 ", token='" + token + '\'' +
                 '}';
     }

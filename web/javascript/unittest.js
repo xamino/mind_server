@@ -297,25 +297,28 @@ function displayAdminTest() {
     // should not be allowed as normal user
     unitTest("registration", new User("ego.trump@haha.com", "ßüöä", "Ego Trump"), Success, null);
     var egoSession = unitTest("login", new User("ego.trump@haha.com", "ßüöä", null), Success, null).description;
-    unitTest("display_add", new PublicDisplay( "office_ego", "das hier erratet ihr nie!","MEINS", 156, 178), Error, egoSession);
+    unitTest("display_add", new PublicDisplay("office_ego", "das hier erratet ihr nie!", "MEINS", 156, 178), Error, egoSession);
     // test
     var displays = unitTest("display_read", new PublicDisplay(null, null, null, 0, 0), Array, adminSession);
     if (displays != null && displays.length != 2) {
         alert("Wrong number of displays! Should be 2 here.");
     }
     // update
-    unitTest("display_update", new PublicDisplay( "office_doof", "herman_token", "Office Prof. Herman",56, 78), Error, adminSession);
-    unitTest("display_update", new PublicDisplay( "office_herman", null,"Office Herman", 56, 78), Success, adminSession);
-    var test = unitTest("display_read", new PublicDisplay( "office_herman", null, null,0, 0), PublicDisplay, adminSession);
-    if (test.location != "Office Herman") {
+    unitTest("display_update", new PublicDisplay("office_doof", "herman_token", "Office Prof. Herman", 56, 78), Error, adminSession);
+    unitTest("display_update", new PublicDisplay("office_herman", null, "Office Herman", 56, 78), Success, adminSession);
+    var test = unitTest("display_read", new PublicDisplay("office_herman", null, null, 0, 0), Array, adminSession);
+    if (test.length != 1 || test[0].location != "Office Herman") {
         alert("Update failed!");
     }
     // legal remove:
-    unitTest("display_remove", new PublicDisplay( "instituts_sek", null,null, null, null), Success, adminSession);
+    unitTest("display_remove", new PublicDisplay("instituts_sek", null, null, null, null), Success, adminSession);
     // illegal remove:
-    unitTest("display_remove", new PublicDisplay( "i don't exist!", null,null, null, null), Success, adminSession);
+    unitTest("display_remove", new PublicDisplay("i don't exist!", null, null, null, null), Success, adminSession);
     // test, should be only one remaining now
-    unitTest("display_read", new PublicDisplay(null, null, null, null, null), PublicDisplay, adminSession);
+    test = unitTest("display_read", new PublicDisplay(null, null, null, null, null), Array, adminSession);
+    if (test.length != 1) {
+        alert("Too many few displays exist!");
+    }
 
     cleanDB();
     alert("Display admin test done.")
@@ -327,10 +330,10 @@ function displayUserTest() {
     var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
     // register some displays:
     unitTest("display_add", new PublicDisplay("office_herman", "herman_token", "Office Prof. Herman", 56, 78), Success, adminSession);
-    unitTest("display_add", new PublicDisplay( "instituts_sek", "sekretariat","Sekretariat", 33, 23), Success, adminSession);
+    unitTest("display_add", new PublicDisplay("instituts_sek", "sekretariat", "Sekretariat", 33, 23), Success, adminSession);
 
     // login as displays
-    var dispOne = unitTest("login", new PublicDisplay( "office_herman", "herman_token"), Success, null).description;
+    var dispOne = unitTest("login", new PublicDisplay("office_herman", "herman_token"), Success, null).description;
     // try user task
     unitTest("position_find", new Location(), Error, dispOne);
     // try admin task
