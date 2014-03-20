@@ -4,7 +4,6 @@ import database.Data;
 import database.DatabaseController;
 import database.messages.Error;
 import database.messages.Success;
-import database.objects.DataList;
 import database.objects.PublicDisplay;
 import logger.Messenger;
 import logic.Module;
@@ -33,12 +32,7 @@ public class DisplayModule extends Module {
                 case CREATE:
                     return create((PublicDisplay) request);
                 case READ:
-                    Data possiblyList = read((PublicDisplay) request);
-                    // If single object, return single object:
-                    if (possiblyList != null && possiblyList instanceof DataList && ((DataList) possiblyList).size() == 1) {
-                        return (Data) ((DataList) possiblyList).get(0);
-                    }
-                    return possiblyList;
+                    return read((PublicDisplay) request);
                 case UPDATE:
                     return update((PublicDisplay) request);
                 case DELETE:
