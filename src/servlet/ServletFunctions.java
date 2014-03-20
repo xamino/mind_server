@@ -173,8 +173,8 @@ public class ServletFunctions {
                 }
                 data = moduleManager.handleTask(Task.User.READ, new User(null, tempUser.getEmail()));
                 message = checkDataMessage(data);
-                if (message == null && data instanceof User) {
-                    User originalUser = (User) data;
+                if (message == null && data instanceof DataList && ((DataList) data).size()==1) {
+                    User originalUser = (User) ((DataList) data).get(0);
                     tempUser.setEmail(originalUser.getEmail());
                     tempUser.setLastAccess(originalUser.getLastAccess());
                     if (tempUser.getPwdHash() != null && !tempUser.getPwdHash().isEmpty()) {

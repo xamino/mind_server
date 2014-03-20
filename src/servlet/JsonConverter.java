@@ -1,8 +1,12 @@
 package servlet;
 
+import com.github.julman99.gsonfire.GsonFireBuilder;
+import com.github.julman99.gsonfire.PostProcessor;
+import com.github.julman99.gsonfire.TypeSelector;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
 import database.Data;
 import database.messages.Error;
 import database.messages.Message;
@@ -33,24 +37,58 @@ public class JsonConverter {
      */
     private JsonConverter() {
         log = Messenger.getInstance();
-        // Base data type that we use for JSON data: ($type is the attribute name)
-        RuntimeTypeAdapterFactory<Data> factory = RuntimeTypeAdapterFactory.of(Data.class, "$type");
-        // Register all JSON-objects: (The strings are the types, must be unique!)
-        factory.registerSubtype(Area.class, "Area");
-        factory.registerSubtype(Arrival.class, "Arrival");
-        factory.registerSubtype(Departure.class, "Departure");
-        factory.registerSubtype(DataList.class, "DataList");
-        factory.registerSubtype(Error.class, "Error");
-        factory.registerSubtype(Location.class, "Location");
-        factory.registerSubtype(Message.class, "Message");
-        factory.registerSubtype(PublicDisplay.class, "Display");
-        factory.registerSubtype(Success.class, "Success");
-        factory.registerSubtype(User.class, "User");
-        factory.registerSubtype(WifiMorsel.class, "WifiMorsel");
-        // Register adapter
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(factory);
-        gson = builder.create();
+        GsonFireBuilder builder = new GsonFireBuilder();
+        // register in switch
+        builder.registerTypeSelector(Data.class, new TypeSelector<Data>() {
+            @Override
+            public Class<? extends Data> getClassForElement(JsonElement readElement) {
+                String kind = readElement.getAsJsonObject().get("$type").getAsString();
+                if (kind.equals("Area")) {
+                    return Area.class;
+                } else if (kind.equals("Arrival")) {
+                    return Arrival.class;
+                } else if (kind.equals("Departure")) {
+                    return Departure.class;
+                } else if (kind.equals("DataList")) {
+                    return DataList.class;
+                } else if (kind.equals("Error")) {
+                    return Error.class;
+                } else if (kind.equals("Location")) {
+                    return Location.class;
+                } else if (kind.equals("Message")) {
+                    return Message.class;
+                } else if (kind.equals("PublicDisplay")) {
+                    return PublicDisplay.class;
+                } else if (kind.equals("Success")) {
+                    return Success.class;
+                } else if (kind.equals("User")) {
+                    return User.class;
+                } else if (kind.equals("WifiMorsel")) {
+                    return WifiMorsel.class;
+                } else {
+                    return null;
+                }
+            }
+        });
+        // add out switch
+        builder.registerPostProcessor(Data.class, new PostProcessor<Data>() {
+            @Override
+            public void postDeserialize(Data data, JsonElement jsonElement, Gson gson) {
+            }
+
+            @Override
+            public void postSerialize(JsonElement jsonElement, Data data, Gson gson) {
+                // If it's just an array, return
+                if (!jsonElement.isJsonObject()) {
+                    return;
+                }
+                // if it is an object, write $type to it
+                String name = data.getClass().getCanonicalName();
+                name = name.substring(name.lastIndexOf('.') + 1, name.length());
+                jsonElement.getAsJsonObject().add("$type", new JsonPrimitive(name));
+            }
+        });
+        gson = builder.createGson();
         log.log(TAG, "Created.");
     }
 
@@ -75,7 +113,7 @@ public class JsonConverter {
     // TODO objects in lists are missing the $type descriptor!
     public String toJson(Data object) {
         try {
-            return gson.toJson(object, Data.class);
+            return gson.toJson(object);
         } catch (JsonParseException e) {
             log.error(TAG, "Error parsing data to JSON!");
             log.error(TAG, "" + object.getClass().getCanonicalName());

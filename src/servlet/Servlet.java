@@ -186,7 +186,8 @@ public class Servlet extends HttpServlet {
             answer = new Error("Empty ANSWER", "Answer does not contain an object! Make sure your request is valid!");
         }
         Departure dep = new Departure(answer);
-        response.getWriter().write(json.toJson(dep));
+        String blub = json.toJson(dep);
+        response.getWriter().write(blub);
         response.setContentType("application/json");
     }
 

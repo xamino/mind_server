@@ -41,29 +41,30 @@ public class UserModule extends Module {
                 return annihilateUsers();
         }
 
-        return new Error("UserTaskNotImplemented","The task " + task.toString() + " is not implemented.");
+        return new Error("UserTaskNotImplemented", "The task " + task.toString() + " is not implemented.");
     }
 
     private Data readUser(User user) {
-    	
+
         // get all Users
-        if(user==null){
+        if (user == null) {
             return read(new User(null, null));
         }
         // get filtered Users
-        if(user.getEmail()==null){
+        if (user.getEmail() == null) {
             return read(user);
         }
 
         // from here on single users were requested
         Data data = read(user);
-        if(data instanceof DataList) {
-            if (((DataList)data).isEmpty()) {
-                return new Error("UserMissing","User could not be found!");
+        if (data instanceof DataList) {
+            if (((DataList) data).isEmpty()) {
+                return new Error("UserMissing", "User could not be found!");
             }
-            return ((DataList<Data>)data).get(0);
+            return data;
+        } else {
+            return data; // Error
         }
-        else return data; // Error
     }
 
     private Data annihilateUsers() {

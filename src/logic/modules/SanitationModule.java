@@ -5,6 +5,7 @@ import database.Data;
 import database.messages.Error;
 import database.messages.Message;
 import database.messages.Success;
+import database.objects.DataList;
 import database.objects.PublicDisplay;
 import database.objects.User;
 import logger.Messenger;
@@ -198,7 +199,6 @@ public class SanitationModule extends Module {
      * @return Return message.
      */
     private Data login(Authenticated user) {
-    	
         Data object = readAuthFromDB(user);
         // Check if message:
         Data answer = ServletFunctions.getInstance().checkDataMessage(object);
@@ -269,14 +269,21 @@ public class SanitationModule extends Module {
      * @return User, PublicDisplay, or Information.
      */
     private Data readAuthFromDB(final Authenticated incomplete) {
+        Data tempData;
         if (incomplete instanceof User) {
             // Try reading the user from the database
-            return EventModuleManager.getInstance().handleTask(Task.User.READ, new User(null, incomplete.readIdentification()));
+            tempData = EventModuleManager.getInstance().handleTask(Task.User.READ, new User(null, incomplete.readIdentification()));
+            if (tempData instanceof DataList && ((DataList) tempData).size() == 1) {
+                return (Data) ((DataList) tempData).get(0);
+            }
         } else if (incomplete instanceof PublicDisplay) {
-            return EventModuleManager.getInstance().handleTask(Task.Display.READ, new PublicDisplay(null, incomplete.readIdentification(), null, 0, 0));
-        } else {
-            return new Error("UnknownAuthenticatedType", "Unknown user object tried login!");
+            tempData = EventModuleManager.getInstance().handleTask(Task.Display.READ, new PublicDisplay(incomplete.readIdentification(), null, null, 0, 0));
+            if (tempData instanceof DataList && ((DataList) tempData).size() == 1) {
+                return (Data) ((DataList) tempData).get(0);
+            }
         }
+        // If we reach this, we've found an error
+        return new Error("UnknownAuthenticatedType", "Unknown user object tried login!");
     }
 
     /**
