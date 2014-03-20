@@ -50,8 +50,9 @@ function adminRightsTest() {
     unitTest("admin_user_add", new User("email", "password", "name"), Success, adminSession);
     unitTest("admin_user_add", new User("lang@email.de", "password", "Etwas längerer Name, mit Sonderzeichen und so!"), Success, adminSession);
     unitTest("admin_user_add", new User("","", null), Error, adminSession);
-    unitTest("admin_user_add", new User("legal","", null), Error, adminSession);
     unitTest("admin_user_add", new User("","legal", null), Error, adminSession);
+    // this should return a key
+    unitTest("admin_user_add", new User("legal","", null), Message, adminSession);
     // update tests
     unitTest("admin_user_update", new User("email", null, "name name"), Success, adminSession);
     unitTest("admin_user_update", new User("lang@email.de", null, null, true), Success, adminSession);
@@ -66,9 +67,9 @@ function adminRightsTest() {
     unitTest("admin_user_delete", new User("email", null, null), Success, adminSession);
     // test that there is only one other user left
     var list = unitTest("admin_user_read", new User(null, null, null), Array, adminSession);
-    if (list != null && list.length != 3) {
-        // 3 because Maria is still there :P
-        alert("Too many few users! Should be only 3 here.")
+    if (list != null && list.length != 4) {
+        // 4 because Maria is still there and legal :P
+        alert("Too many few users! Should be only 4 here.")
     }
     // Test user update
     unitTest("user_update", new User("admin@admin.admin", null, "administrator"), Success, adminSession);

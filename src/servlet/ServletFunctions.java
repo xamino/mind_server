@@ -146,13 +146,13 @@ public class ServletFunctions {
                     if (tempUser.getPwdHash() != null && !tempUser.getPwdHash().isEmpty()) {
                         String newPassword = tempUser.getPwdHash();
                         tempUser.setPwdHash(BCrypt.hashpw(newPassword, BCrypt.gensalt(12)));
-                        return moduleManager.handleTask(Task.User.CREATE, arrival.getObject());
+                        return moduleManager.handleTask(Task.User.CREATE, tempUser);
                     } else {
                         // This means that we generate a password
                         String key = new BigInteger(130, random).toString(32);
                         // hash it
                         tempUser.setPwdHash(BCrypt.hashpw(key, BCrypt.gensalt(12)));
-                        data = moduleManager.handleTask(Task.User.CREATE, arrival.getObject());
+                        data = moduleManager.handleTask(Task.User.CREATE, tempUser);
                         // If the operation was a success, we need to send the generated key back
                         if (data instanceof Success) {
                             data = new Message("UserAddSuccessKey", key);
@@ -246,8 +246,18 @@ public class ServletFunctions {
                     if (display.getToken() != null && !display.getToken().isEmpty()) {
                         display.setToken(BCrypt.hashpw(display.getToken(), BCrypt.gensalt(12)));
                         return moduleManager.handleTask(Task.Display.CREATE, arrival.getObject());
+                    } else {
+                        // This means that we generate a password
+                        String key = new BigInteger(130, random).toString(32);
+                        // hash it
+                        display.setToken(BCrypt.hashpw(key, BCrypt.gensalt(12)));
+                        data = moduleManager.handleTask(Task.Display.CREATE, display);
+                        // If the operation was a success, we need to send the generated key back
+                        if (data instanceof Success) {
+                            data = new Message("DisplayAddSuccessKey", key);
+                        }
+                        return data;
                     }
-                    return new Error("IllegalAdd", "Token must be set!");
                 }
                 return new Error("IllegalAdd", "Identification is primary key! May not be empty.");
             case DISPLAY_UPDATE:

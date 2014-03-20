@@ -220,6 +220,7 @@ public class SanitationModule extends Module {
             // Save the session:
             sessions.put(sessionHash, activeUser);
             log.log(TAG, "User " + check.readIdentification() + " has logged in.");
+            // Todo return message when lat was null
             // Return the hash for future references:
             return new Success("Login", sessionHash);
         } else {

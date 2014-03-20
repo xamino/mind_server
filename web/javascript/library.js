@@ -104,6 +104,14 @@ function Error(name, description) {
         this.description = description;
 }
 
+function Message(name, description) {
+    this.$type = "Message";
+    if (name != null)
+        this.name = name;
+    if (description != null)
+        this.description = description;
+}
+
 function Area(ID, locations, topLeftX, topLeftY, width, height) {
     this.$type = "Area";
     if (ID != null)
