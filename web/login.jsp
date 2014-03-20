@@ -26,11 +26,11 @@
         <form id="loginForm">
             <table>
                 <tr>
-                    <td> E-Mail :</td>
+                    <td>E-Mail:</td>
                     <td><input name="email" id="email" size=40 type="text"/></td>
                 </tr>
                 <tr>
-                    <td> Password :</td>
+                    <td>Password:</td>
                     <td><input name="password" id="password" size=20 type="text"/></td>
                 </tr>
             </table>
