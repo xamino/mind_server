@@ -11,7 +11,7 @@
 <title>Admin - Administrate Public Displays</title>
 </head>
 
-<body onload="onLoadOfAdminPage()">
+<body onload="onLoadOfAdminPage();loadDisplays();">
 <div id="container">
 <div id="banner">
 <!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
@@ -32,7 +32,11 @@
 	</ul>
 </div>
 <div id="text-content">
-TODO: Some cool stuff
+<input type="submit" value="Add Display" onClick="addDisplayViaPopup()" />
+	 <br> Info - Add User: You have to add a name, an email and a password. 
+	 <br>Info - Edit User: You can't edit a user's email. <br>If you want to change an email you have to add a new user with the desired email (and remove the user with the old email).
+	 <div id="infoText"></div>
+	 <div id="table_space"></div> 
 </div>
 <div id="logout">
        <input type="submit" value="Logout" onClick="logout; window.location='index.jsp'"/>

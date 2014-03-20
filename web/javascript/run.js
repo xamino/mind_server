@@ -256,7 +256,7 @@ $(document).on("submit", "#registerForm", function(event) {
 			
 
 
-
+/****************Admin - User Management****************/
 
 
 /**
@@ -459,6 +459,191 @@ function removeUserViaPopup(data)
 	}
 }
 
+
+/****************** Admin - Display Management *****************/
+
+function loadDisplays() {
+	var displays = new PublicDisplay(null,null,null,0,0);
+//	var users = null;
+	doTask("DISPLAY_READ", displays, writeDisplays);
+}
+
+function writeDisplays (data){
+		if(data.object.length == null){
+			var noUserInDatabase = "There are currently no displays in the database.<br> Use the button 'Add Display' to add displays to the system.";
+			document.getElementById("table_space").innerHTML = noUserInDatabase;
+		}
+		else{
+	
+		 var tablecontents = "";
+		    tablecontents = "<table border ='1'>";
+		    tablecontents += "<tr>";
+		    tablecontents += "<td>Display Identification: </td>";
+		    tablecontents += "<td>Display Location: </td>";
+		    tablecontents += "<td>Edit User: </td>";
+		    tablecontents += "<td>Remove User: </td>";
+		    tablecontents += "</tr>";
+		    
+		    for (var i = 0; i < data.object.length; i ++)
+		   {
+		      tablecontents += "<tr>";
+		      tablecontents += "<td>" + data.object[i].identification + "</td>";
+		      tablecontents += "<td>" + data.object[i].location + "</td>";
+		      tablecontents += "<td><input type='submit' value='Edit Display' onClick='editDisplayViaPopup("+JSON.stringify(data.object[i])+")'/></td>";
+		    	  tablecontents += "<td><input type='submit' value='Remove Display' onClick='removeDisplayViaPopup("+JSON.stringify(data.object[i])+")'/></td>";
+		      tablecontents += "</tr>";												
+		   }
+		   tablecontents += "</table>";
+		   document.getElementById("table_space").innerHTML = tablecontents;
+		   
+		}
+
+}
+
+/**
+* on Button click 'Add User' in admin_user_management.jsp
+* registers a new user with the given name, email and password
+*/
+function addDisplayViaPopup(){
+	
+	var identification = prompt("Please enter the identification of the display you want to add:");
+	
+	if(identification != null){	// if Cancel Button isn't clicked
+	
+		var password = prompt("Please enter the password of the display you want to add:");
+		
+		if(password != null){	// if Cancel Button isn't clicked
+		
+			var location = prompt("Please enter the location of the display you want to add:");
+			
+			if(location != null){	// if Cancel Button isn't clicked
+			
+				var xCoordinate = prompt("Please enter the x-coordinate of the display you want to add:");
+				
+				if(xCoordinate != null){	// if Cancel Button isn't clicked
+					 
+					var yCoordinate = prompt("Please enter the y-coordinate of the display you want to add:");
+					
+					if(yCoordinate != null){	// if Cancel Button isn't clicked
+			
+						if (identification != "" && location != "" && xCoordinate != "" && yCoordinate != ""){	//everything is given
+							newDisplay = new User(identification, password, location, xCoordinate, yCoordinate);
+							doTask("ADMIN_USER_ADD", newUser, function(data){
+							if(password == "" || password==null){
+								alert("The following "+userstring+" has been added:\n"+
+										"Name: "+name+"\n"+
+										"Email: "+email+"\n"+
+										"Generated Password: "+data.object.description);
+							}else{
+								alert("The following "+userstring+" has been added:\n"+
+										"Name: "+name+"\n"+
+										"Email: "+email+"\n"+
+										"Password: "+password);							
+							}
+
+								window.location.reload();
+							});
+
+						}
+				
+					}
+				}
+						
+			}
+
+		}
+	}
+}
+
+
+/**
+ * on Button click 'Edit User' in admin_user_management.jsp
+ * edits the selected user
+ */
+function editDisplayViaPopup(data){
+
+	var name = prompt("EDIT NAME - If you want to change the name: '"+data.name+"' simply enter the new name. If you don't want to change anything, leave it empty.");
+	
+//	var email = prompt("If you want to change the email: "+data.email+" simply enter the new email. If you don't want to change something, leave it empty.");
+	
+	if(name != null){	// if Cancel Button isn't clicked
+	
+		var password = prompt("EDIT PASSWORD - If you want a new password, simply enter the new password. If you don't want to change anything, leave it empty.");
+	
+		if(password != null){	// if Cancel Button isn't clicked
+		
+			//nothing has been changed
+			if (name == "" && password == ""){
+				var element;
+				element = document.getElementById("infoText");
+				if (element) {
+				    element.innerHTML = "You didn't change anything. <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+				    
+				}
+			}
+			//something has been changed
+			else{
+				var newName = data.name, newPassword = data.password, newEmail = data.email;
+				if (name != ""){
+					newName = name;
+				}
+		//		if (email != ""){
+		//			newEmail = password;
+		//		}
+				if (password != ""){
+					newPassword = password;
+				}
+				
+				var updateUser = new User(newEmail, newPassword, newName);
+				//TODO: select right user
+				doTask("ADMIN_USER_UPDATE", updateUser, function(event){
+					var element;
+					element = document.getElementById("infoText");
+					if (element) {
+					    element.innerHTML = "The user (name: "+newName+") has been modified. Bis click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+					    
+					}
+			//		window.location.reload();		--> text will not be visible --> button or is alert better??
+				});
+			}
+		
+		}
+	}
+	
+
+}
+
+/**
+ * Creates a popup, enabling the admin to delete the user
+ * @param data
+ * the user data that can be deleted (JSON.stringified)
+ */
+function removeDisplayViaPopup(data)
+{
+	var r=confirm("Do you want to remove the user '"+data.name+"' ?");
+	if (r==true)
+	{
+	  var usertodelete = new User(data.email,null,null);
+//	  alert("FILTER OBJECT FOR USER DELETE: "+JSON.stringify(usertodelete));
+	  doTask("ADMIN_USER_DELETE", usertodelete, function(event){
+		  //TODO relaod page
+//		var element;
+//		element = document.getElementById("infoText");
+//		if (element) {
+//		    element.innerHTML = "The user (name:"+data.name+") has been removed. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+//		    
+//		}
+		  alert("The following user has been deleted:\n"+
+				  "Name: "+data.name+
+				  "\nEmail: "+data.email);
+		window.location.reload();	//--> text will not be visible --> button or is alert better?? 
+		  
+  		});
+	}
+}
+
+
+/******************** session/cookie*****************/
 
 
 /**
