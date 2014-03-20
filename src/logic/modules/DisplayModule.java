@@ -53,6 +53,6 @@ public class DisplayModule extends Module {
                     break;
             }
         }
-        return new Error("UnknownDisplayTask", "The requested task could not be executed in DisplayModule!");
+        return null;
     }
 }

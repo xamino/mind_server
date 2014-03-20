@@ -3,7 +3,9 @@ package logic.modules;
 import database.Authenticated;
 import database.Data;
 import database.messages.Error;
+import database.messages.Message;
 import database.messages.Success;
+import database.objects.PublicDisplay;
 import database.objects.User;
 import logger.Messenger;
 import logic.EventModuleManager;
@@ -17,6 +19,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 
 //todo: – on a session timeout the session is only removed if it is used for a query again. Need to remove sessions
@@ -90,6 +93,7 @@ public class SanitationModule extends Module {
                 if (user != null) {
                     return login(user);
                 }
+                // todo why not return an error?
                 break;
             case LOGOUT:
                 destroySession(arrival.getSessionHash());
@@ -105,22 +109,20 @@ public class SanitationModule extends Module {
                 }
                 break;
             case CHECK:
-                // TODO make this work for Authenticated
                 if (checkSession(arrival.getSessionHash())) {
                     // If valid, return the corresponding user object. Fresh from the DB to keep in sync with updates
                     // To do that, we first need to get the new object:
-                    User filter = new User("", sessions.get(arrival.getSessionHash()).user.readIdentification());
-                    Data update = EventModuleManager.getInstance().handleTask(Task.User.READ, filter);
-                    if (update instanceof User) {
-                        // If everything is okay, we return the current user and leave this method
-                        User currentUser = (User) update;
-                        // We could check whether we even need to update the user object, but we need to reset the timer anyway
-                        ActiveUser activeUser = new ActiveUser(currentUser, System.currentTimeMillis(), arrival.getSessionHash());
-                        sessions.put(arrival.getSessionHash(), activeUser);
-                        return currentUser;
-                    } else if (!(update instanceof Error)) {
-                        // DB returns an error if no user was found, in which case this warning is not required
+                    ActiveUser activeUser = sessions.get(arrival.getSessionHash());
+                    Data object = readAuthFromDB(activeUser.user);
+                    Data msg = ServletFunctions.getInstance().checkDataMessage(object);
+                    if (msg != null) {
                         log.error(TAG, "WARNING: Check failed because no user or error was returned from DB!");
+                    } else if (object instanceof Authenticated) {
+                        // If everything is okay, we return the current user and leave this method
+                        Authenticated currentUser = ((Authenticated) object);
+                        activeUser = new ActiveUser(currentUser, System.currentTimeMillis(), arrival.getSessionHash());
+                        sessions.put(arrival.getSessionHash(), activeUser);
+                        return (Data) currentUser;
                     }
                     // If we haven't returned, something went wrong
                     // destroy session to be safe
@@ -195,14 +197,11 @@ public class SanitationModule extends Module {
      *
      * @return Return message.
      */
-    // TODO make it work for Authenticated
     private Data login(Authenticated user) {
-        // Try reading the user from the database
-        Data object = EventModuleManager.getInstance().handleTask(Task.User.READ, new User(null, user.readIdentification()));
+        Data object = readAuthFromDB(user);
         // Check if message:
         Data answer = ServletFunctions.getInstance().checkDataMessage(object);
-        // TODO here -->
-        if (answer != null || !(object instanceof User)) {
+        if (answer != null) {
             // this means 99% of the time that a user wasn't found.
             // To avoid allowing to find usernames with this method, we return the same message as if the login
             // simply used the wrong information.
@@ -210,19 +209,32 @@ public class SanitationModule extends Module {
             return new Error("LoginFailed", "Wrong user email or wrong password.");
         }
         // This means we have a valid user object:
-        User check = (User) object;
+        Authenticated auth = (Authenticated) object;
         // Now to check the password
-        if (BCrypt.checkpw(user.readAuthentication(), check.getPwdHash())) {
+        if (BCrypt.checkpw(user.readAuthentication(), auth.readAuthentication())) {
             // Everything okay, so create a hash:
             String sessionHash = new BigInteger(130, random).toString(32);
+            // Set to false as default so PD don't trigger last access time
+            boolean dateIsNull = false;
+            // If user, change last access time
+            if (user instanceof User) {
+                User check = ((User) auth);
+                // Set last access time
+                dateIsNull = (check.getLastAccess() == null);
+                check.setLastAccess(new Date());
+            }
             // Create the activeUser object using the correct, database user:
-            ActiveUser activeUser = new ActiveUser(check, System.currentTimeMillis(), sessionHash);
+            ActiveUser activeUser = new ActiveUser(auth, System.currentTimeMillis(), sessionHash);
             // Save the session:
             sessions.put(sessionHash, activeUser);
-            log.log(TAG, "User " + check.readIdentification() + " has logged in.");
-            // Todo return message when lat was null
-            // Return the hash for future references:
-            return new Success("Login", sessionHash);
+            log.log(TAG, "User " + auth.readIdentification() + " has logged in.");
+            // If the date was null, the user has never logged in before, so we signal that to the client
+            if (dateIsNull) {
+                return new Message("FirstLogin", sessionHash);
+            } else {
+                // Return the hash for future references:
+                return new Success("Login", sessionHash);
+            }
         } else {
             return new Error("LoginFailed", "Wrong user email or wrong password.");
         }
@@ -235,7 +247,10 @@ public class SanitationModule extends Module {
      * @return Return message.
      */
     private Data registration(User user) {
+        // hash pwd
         user.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));
+        // set access time
+        user.setLastAccess(new Date());
         Data msg = EventModuleManager.getInstance().handleTask(Task.User.CREATE, user);
         if (msg instanceof Success) {
             log.log(TAG, "User " + user.readIdentification() + " has been registered.");
@@ -243,6 +258,23 @@ public class SanitationModule extends Module {
         } else {
             log.error(TAG, "Error creating a user!");
             return msg;
+        }
+    }
+
+    /**
+     * Helper method that reads the correct object from the DB depending on its super type.
+     *
+     * @param incomplete The authenticated object which to read.
+     * @return User, PublicDisplay, or Information.
+     */
+    private Data readAuthFromDB(final Authenticated incomplete) {
+        if (incomplete instanceof User) {
+            // Try reading the user from the database
+            return EventModuleManager.getInstance().handleTask(Task.User.READ, new User(null, incomplete.readIdentification()));
+        } else if (incomplete instanceof PublicDisplay) {
+            return EventModuleManager.getInstance().handleTask(Task.Display.READ, new PublicDisplay(null, incomplete.readIdentification(), null, 0, 0));
+        } else {
+            return new Error("UnknownAuthenticatedType", "Unknown user object tried login!");
         }
     }
 
