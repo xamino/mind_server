@@ -32,7 +32,14 @@
 	</ul>
 </div>
 <div id="text-content">
-TODO: Some cool stuff
+
+
+		<!-- <form action="map.jpg" method="post" enctype="multipart/form-data">
+        <input type="file" name="map" />
+        <input type="submit" value="Upload" />
+        </form>-->
+
+
 </div>
 <div id="logout">
        <input type="submit" value="Logout" onClick="logout; window.location='index.jsp'" />

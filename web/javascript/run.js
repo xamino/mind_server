@@ -320,20 +320,20 @@ function addUserViaPopup()
 {
 	
 	var isadmin = confirm("Do you want the user to be an admin?");
-	var userstring = "user";
+	var userstatus = "user";
 	if(isadmin){
-		userstring = "admin";
+		userstatus = "admin";
 	}
 	
-	var name = prompt("Please enter the name of the "+userstring+" you want to add:");
+	var name = prompt("Please enter the name of the "+userstatus+" you want to add:");
 	
 	if(name != null){	// if Cancel Button isn't clicked
 	
-		var email = prompt("Please enter the email of the "+userstring+" you want to add:");
+		var email = prompt("Please enter the email of the "+userstatus+" you want to add:");
 		
 		if(email != null){	// if Cancel Button isn't clicked
 		
-			var password = prompt("Please enter the password of the "+userstring+" you want to add:");
+			var password = prompt("Please enter the password of the "+userstatus+" you want to add:");
 			
 		//	if(password != null){	// if Cancel Button isn't clicked
 		
@@ -341,12 +341,12 @@ function addUserViaPopup()
 					newUser = new User(email, password, name, isadmin);
 					doTask("ADMIN_USER_ADD", newUser, function(data){
 					if(password == "" || password==null){
-						alert("The following "+userstring+" has been added:\n"+
+						alert("The following "+userstatus+" has been added:\n"+
 								"Name: "+name+"\n"+
 								"Email: "+email+"\n"+
 								"Generated Password: "+data.object.description);
 					}else{
-						alert("The following "+userstring+" has been added:\n"+
+						alert("The following "+userstatus+" has been added:\n"+
 								"Name: "+name+"\n"+
 								"Email: "+email+"\n"+
 								"Password: "+password);							
@@ -379,6 +379,20 @@ function addUserViaPopup()
  */
 function editUserViaPopup(data){
 
+	var isadmin = data.admin;
+	var willbeadmin = false;
+	var prevuserstatus;
+	var newuserstatus;
+	if(isadmin){
+		prevuserstatus = "admin";
+		willbeadmin = confirm("Should the admin-status of the user '"+data.name+"' be remained?");
+	}else{
+		prevuserstatus = "user";
+		willbeadmin = confirm("Do you want to change the status of the user '"+data.name+"' to admin-status?");
+	}
+	
+	if(willbeadmin){newuserstatus="admin";}else{newuserstatus="user";}
+	
 	var name = prompt("EDIT NAME - If you want to change the name: '"+data.name+"' simply enter the new name. If you don't want to change anything, leave it empty.");
 	
 //	var email = prompt("If you want to change the email: "+data.email+" simply enter the new email. If you don't want to change something, leave it empty.");
@@ -411,16 +425,21 @@ function editUserViaPopup(data){
 					newPassword = password;
 				}
 				
-				var updateUser = new User(newEmail, newPassword, newName);
+				var updateUser = new User(newEmail, newPassword, newName, willbeadmin);
 				//TODO: select right user
 				doTask("ADMIN_USER_UPDATE", updateUser, function(event){
-					var element;
-					element = document.getElementById("infoText");
-					if (element) {
-					    element.innerHTML = "The user (name: "+newName+") has been modified. Bis click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
-					    
-					}
-			//		window.location.reload();		--> text will not be visible --> button or is alert better??
+//					var element;
+//					element = document.getElementById("infoText");
+//					if (element) {
+//					    element.innerHTML = "The user (name: "+newName+") has been modified. Bis click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+//					    
+//					}
+					
+					alert("The following changes were made:"+
+							"\nPrevious name: "+data.name+" - New name: "+newName+
+							"\nPrevious email: "+data.email+" - New email: "+newEmail+
+							"\nPrevious status: "+prevuserstatus+" New status: "+newuserstatus);
+					window.location.reload();
 				});
 			}
 		

@@ -162,6 +162,7 @@ function PublicDisplay(location, identification, token, coordinateX, coordinateY
         this.coordinateY = coordinateY;
 }
 
+
 /**
  * Writes a Cookie - credit to http://stackoverflow.com/questions/2257631/how-create-a-session-using-javascript
  * @param name The name of the cookie (set in isAdmin)
