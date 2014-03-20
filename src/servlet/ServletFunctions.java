@@ -272,22 +272,20 @@ public class ServletFunctions {
                 if (display.getIdentification() == null || display.getIdentification().isEmpty()) {
                     return new Error("IllegalChange", "Identification must not be empty!");
                 }
-                data = moduleManager.handleTask(Task.Display.READ, new PublicDisplay(null, display.getIdentification(), null, 0, 0));
+                data = moduleManager.handleTask(Task.Display.READ, new PublicDisplay(display.getIdentification(), null, null, 0, 0));
                 message = checkDataMessage(data);
-                if (message == null) {
-                    if (data instanceof PublicDisplay) {
-                        PublicDisplay originalDisplay = (PublicDisplay) data;
-                        display.setIdentification(originalDisplay.getIdentification());
-                        if (display.getToken() != null && !display.getToken().isEmpty()) {
-                            display.setToken(BCrypt.hashpw(display.getToken(), BCrypt.gensalt(12)));
-                        } else {
-                            display.setToken(originalDisplay.getToken());
-                        }
-                        return moduleManager.handleTask(Task.Display.UPDATE, display);
-                    } else if (data instanceof DataList) {
-                        // TODO this should be able to be removed once update throws an error if an object doesn't exist
-                        return new Error("IllegalChange", "The display seems not to exist.");
+                if (message == null && data instanceof DataList) {
+                    if (((DataList) data).size()!= 1) {
+                        return new Error("DisplayUpdateError","Display was not found!");
                     }
+                    PublicDisplay originalDisplay = (PublicDisplay) ((DataList) data).get(0);
+                    display.setIdentification(originalDisplay.getIdentification());
+                    if (display.getToken() != null && !display.getToken().isEmpty()) {
+                        display.setToken(BCrypt.hashpw(display.getToken(), BCrypt.gensalt(12)));
+                    } else {
+                        display.setToken(originalDisplay.getToken());
+                    }
+                    return moduleManager.handleTask(Task.Display.UPDATE, display);
                 }
                 return nullMessageCatch(message);
             case DISPLAY_REMOVE:

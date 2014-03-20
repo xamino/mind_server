@@ -11,7 +11,7 @@
 <title>Admin - Administrate Public Displays</title>
 </head>
 
-<body onload="onLoadOfAdminPage()">
+<body onload="onLoadOfAdminPage();loadDisplays();">
 <div id="container">
 <div id="banner">
 <!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
@@ -32,7 +32,11 @@
 	</ul>
 </div>
 <div id="text-content">
-TODO: Some cool stuff
+<input type="submit" value="Add Display" onClick="addDisplayViaPopup()" />
+	 <br>Info - Add Display: You have to add an identification, a location, a x- and a y-coordinate and a password. If you don't enter a password mind will generate one for you. 
+	 <br>Info - Edit Display: You can't edit a display's identification. <br>If you want to change an identification you have to add a new display with the desired identification (and remove the display with the old identification).
+	 <div id="infoText"></div>
+	 <div id="table_space"></div> 
 </div>
 <div id="logout">
        <input type="submit" value="Logout" onClick="logout; window.location='index.jsp'"/>

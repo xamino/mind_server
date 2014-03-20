@@ -22,7 +22,7 @@
         Log in the public display.
     </div>
     <div id="login">
-        <form id="loginForm">
+        <form id="loginDisplayForm">
             <table>
                 <tr>
                     <td>Identification:</td>
