@@ -635,7 +635,7 @@ function removeDisplayViaPopup(data)
 	var r=confirm("Do you want to remove the display '"+data.identification+"' ?");
 	if (r==true)
 	{
-	  var displaytodelete = new User(data.identification,null,null,0,0);
+	  var displaytodelete = new PublicDisplay(data.identification,null,null,0,0);
 	  doTask("DISPLAY_REMOVE", displaytodelete, function(event){
 		  alert("The following user has been deleted:\n"+
 				  "Identification: "+data.identification+
