@@ -33,8 +33,8 @@
 </div>
 <div id="text-content">
 <input type="submit" value="Add Display" onClick="addDisplayViaPopup()" />
-	 <br> Info - Add User: You have to add a name, an email and a password. 
-	 <br>Info - Edit User: You can't edit a user's email. <br>If you want to change an email you have to add a new user with the desired email (and remove the user with the old email).
+	 <br>Info - Add Display: You have to add an identification, a location, a x- and a y-coordinate and a password. If you don't enter a password mind will generate one for you. 
+	 <br>Info - Edit Display: You can't edit a display's identification. <br>If you want to change an identification you have to add a new display with the desired identification (and remove the display with the old identification).
 	 <div id="infoText"></div>
 	 <div id="table_space"></div> 
 </div>

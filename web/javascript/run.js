@@ -469,9 +469,10 @@ function loadDisplays() {
 }
 
 function writeDisplays (data){
-		if(data.object.length == null){
-			var noUserInDatabase = "There are currently no displays in the database.<br> Use the button 'Add Display' to add displays to the system.";
-			document.getElementById("table_space").innerHTML = noUserInDatabase;
+		alert(JSON.stringify(data));
+		if(data.object.length == 0){
+			var noDisplayInDatabase = "There are currently no displays in the database.<br> Use the button 'Add Display' to add displays to the system.";
+			document.getElementById("table_space").innerHTML = noDisplayInDatabase;
 		}
 		else{
 	
@@ -480,8 +481,8 @@ function writeDisplays (data){
 		    tablecontents += "<tr>";
 		    tablecontents += "<td>Display Identification: </td>";
 		    tablecontents += "<td>Display Location: </td>";
-		    tablecontents += "<td>Edit User: </td>";
-		    tablecontents += "<td>Remove User: </td>";
+		    tablecontents += "<td>Edit Display: </td>";
+		    tablecontents += "<td>Remove Display: </td>";
 		    tablecontents += "</tr>";
 		    
 		    for (var i = 0; i < data.object.length; i ++)
@@ -490,7 +491,7 @@ function writeDisplays (data){
 		      tablecontents += "<td>" + data.object[i].identification + "</td>";
 		      tablecontents += "<td>" + data.object[i].location + "</td>";
 		      tablecontents += "<td><input type='submit' value='Edit Display' onClick='editDisplayViaPopup("+JSON.stringify(data.object[i])+")'/></td>";
-		    	  tablecontents += "<td><input type='submit' value='Remove Display' onClick='removeDisplayViaPopup("+JSON.stringify(data.object[i])+")'/></td>";
+		      tablecontents += "<td><input type='submit' value='Remove Display' onClick='removeDisplayViaPopup("+JSON.stringify(data.object[i])+")'/></td>";
 		      tablecontents += "</tr>";												
 		   }
 		   tablecontents += "</table>";
@@ -527,18 +528,22 @@ function addDisplayViaPopup(){
 					if(yCoordinate != null){	// if Cancel Button isn't clicked
 			
 						if (identification != "" && location != "" && xCoordinate != "" && yCoordinate != ""){	//everything is given
-							newDisplay = new User(identification, password, location, xCoordinate, yCoordinate);
-							doTask("ADMIN_USER_ADD", newUser, function(data){
+							newDisplay = new PublicDisplay(identification, password, location, xCoordinate, yCoordinate);
+							doTask("DISPLAY_ADD", newDisplay, function(data){
 							if(password == "" || password==null){
-								alert("The following "+userstring+" has been added:\n"+
-										"Name: "+name+"\n"+
-										"Email: "+email+"\n"+
-										"Generated Password: "+data.object.description);
+								alert("The following display has been added:\n"+
+										"Identification: "+identification+"\n"+
+										"Location: "+location+"\n"+
+										"Generated Password: "+data.object.description+"\n"+
+										"X-Coordinate: "+xCoordinate+"\n"+
+										"Y-Coordinate: "+yCoordinate);
 							}else{
 								alert("The following "+userstring+" has been added:\n"+
-										"Name: "+name+"\n"+
-										"Email: "+email+"\n"+
-										"Password: "+password);							
+										"Identification: "+identification+"\n"+
+										"Location: "+location+"\n"+
+										"Password: "+password+"\n"+
+										"X-Coordinate: "+xCoordinate+"\n"+
+										"Y-Coordinate: "+yCoordinate);						
 							}
 
 								window.location.reload();
