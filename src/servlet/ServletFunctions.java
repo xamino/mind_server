@@ -3,10 +3,15 @@ package servlet;
 import database.Data;
 import database.Information;
 import database.messages.Error;
+import database.messages.Message;
+import database.messages.Success;
 import database.objects.*;
 import logger.Messenger;
 import logic.EventModuleManager;
 import logic.Task;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * @author Tamino Hartmann
@@ -17,10 +22,12 @@ public class ServletFunctions {
     private final String TAG = "ServletFunctions";
     private Messenger log;
     private EventModuleManager moduleManager;
+    private SecureRandom random;
 
     private ServletFunctions() {
         log = Messenger.getInstance();
         moduleManager = EventModuleManager.getInstance();
+        random = new SecureRandom();
     }
 
     public static ServletFunctions getInstance() {
@@ -137,10 +144,21 @@ public class ServletFunctions {
                 tempUser = (User) arrival.getObject();
                 if (tempUser.getEmail() != null && !tempUser.getEmail().isEmpty()) {
                     if (tempUser.getPwdHash() != null && !tempUser.getPwdHash().isEmpty()) {
-                        tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
+                        String newPassword = tempUser.getPwdHash();
+                        tempUser.setPwdHash(BCrypt.hashpw(newPassword, BCrypt.gensalt(12)));
                         return moduleManager.handleTask(Task.User.CREATE, arrival.getObject());
+                    } else {
+                        // This means that we generate a password
+                        String key = new BigInteger(130, random).toString(32);
+                        // hash it
+                        tempUser.setPwdHash(BCrypt.hashpw(key, BCrypt.gensalt(12)));
+                        data = moduleManager.handleTask(Task.User.CREATE, arrival.getObject());
+                        // If the operation was a success, we need to send the generated key back
+                        if (data instanceof Success) {
+                            data = new Message("UserAddSuccessKey", key);
+                        }
+                        return data;
                     }
-                    return new Error("IllegalAdd", "Password must be set!");
                 }
                 return new Error("IllegalAdd", "Email is primary key! May not be empty.");
             case ADMIN_USER_UPDATE:
