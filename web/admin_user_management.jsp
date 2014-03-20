@@ -12,6 +12,7 @@
 </head>
 
 <body onload="onLoadOfAdminPage();loadUsers();">
+<div id="container">
 <div id="banner">
 <!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
 <h2>MIND</h2>
@@ -103,6 +104,7 @@
 
 <div id="footer">
 <!-- TODO: nice Footer -->
+</div>
 </div>
 </body>
 </html>
