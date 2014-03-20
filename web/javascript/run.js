@@ -318,27 +318,41 @@ function writeUsers (data){
 */
 function addUserViaPopup()
 {
-
-	var name = prompt("Please enter the name of the user you want to add:");
+	
+	var isadmin = confirm("Do you want the user to be an admin?");
+	var userstring = "user";
+	if(isadmin){
+		userstring = "admin";
+	}
+	
+	var name = prompt("Please enter the name of the "+userstring+" you want to add:");
 	
 	if(name != null){	// if Cancel Button isn't clicked
 	
-		var email = prompt("Please enter the email of the user you want to add:");
+		var email = prompt("Please enter the email of the "+userstring+" you want to add:");
 		
 		if(email != null){	// if Cancel Button isn't clicked
 		
-			var password = prompt("Please enter the password of the user you want to add:");
+			var password = prompt("Please enter the password of the "+userstring+" you want to add:");
 			
-			if(password != null){	// if Cancel Button isn't clicked
+		//	if(password != null){	// if Cancel Button isn't clicked
 		
-				if (name != "" && email != "" && password != ""){	//everything is given
-					newUser = new User(email, password, name);
-					doTask("ADMIN_USER_ADD", newUser, function(event){
-						alert(event);
-					alert("The following user has been added:\n"+
-							"Name: "+name+"\n"+
-							"Email: "+email+"\n"+
-							"Password: "+password);
+				if (name != "" && email != "" /*&& password != ""*/){	//everything is given
+					newUser = new User(email, password, name, isadmin);
+					doTask("ADMIN_USER_ADD", newUser, function(data){
+					if(password == "" || password==null){
+						alert("The following "+userstring+" has been added:\n"+
+								"Name: "+name+"\n"+
+								"Email: "+email+"\n"+
+								"Generated Password: "+data.object.description);
+					}else{
+						alert("The following "+userstring+" has been added:\n"+
+								"Name: "+name+"\n"+
+								"Email: "+email+"\n"+
+								"Password: "+password);							
+					}
+
+
 //						var element;
 //						element = document.getElementById("infoText");
 //						if (element) {
@@ -347,10 +361,10 @@ function addUserViaPopup()
 //						}
 						window.location.reload();		//--> text will not be visible --> button or is alert better??
 					});
-				}
-				else{
-					alert("You have to specify name, email and password. None of them can be empty!");
-				}
+//				}
+//				else{
+//					alert("You have to specify name, email and password. None of them can be empty!");
+//				}
 			
 			}
 
@@ -427,16 +441,19 @@ function removeUserViaPopup(data)
 	if (r==true)
 	{
 	  var usertodelete = new User(data.email,null,null);
-	  alert("FILTER OBJECT FOR USER DELETE: "+JSON.stringify(usertodelete));
+//	  alert("FILTER OBJECT FOR USER DELETE: "+JSON.stringify(usertodelete));
 	  doTask("ADMIN_USER_DELETE", usertodelete, function(event){
 		  //TODO relaod page
-		var element;
-		element = document.getElementById("infoText");
-		if (element) {
-		    element.innerHTML = "The user (name:"+data.name+") has been removed. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
-		    
-		}
-//		window.location.reload();	//--> text will not be visible --> button or is alert better?? 
+//		var element;
+//		element = document.getElementById("infoText");
+//		if (element) {
+//		    element.innerHTML = "The user (name:"+data.name+") has been removed. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+//		    
+//		}
+		  alert("The following user has been deleted:\n"+
+				  "Name: "+data.name+
+				  "\nEmail: "+data.email);
+		window.location.reload();	//--> text will not be visible --> button or is alert better?? 
 		  
   		});
 	}
