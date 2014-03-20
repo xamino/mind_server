@@ -93,6 +93,7 @@ public class SanitationModule extends Module {
                 if (user != null) {
                     return login(user);
                 }
+                // todo why not return an error?
                 break;
             case LOGOUT:
                 destroySession(arrival.getSessionHash());

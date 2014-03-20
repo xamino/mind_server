@@ -18,6 +18,7 @@ function doUnitTest() {
     areaTest();
     positionTest();
     displayAdminTest();
+    displayUserTest();
 
     cleanDB();
 
@@ -318,6 +319,22 @@ function displayAdminTest() {
 
     cleanDB();
     alert("Display admin test done.")
+}
+
+function displayUserTest() {
+    alert("Beginning display user test.");
+
+    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    // register some displays:
+    unitTest("display_add", new PublicDisplay("Office Prof. Herman", "office_herman", "herman_token", 56, 78), Success, adminSession);
+    unitTest("display_add", new PublicDisplay("Sekretariat", "instituts_sek", "sekretariat", 33, 23), Success, adminSession);
+
+    // login as displays
+    var dispOne = unitTest("login", new PublicDisplay(null, "office_herman", "herman_token"), Success, null).description;
+    unitTest("logout", null, Success, dispOne);
+
+    cleanDB();
+    alert("Display user test done.");
 }
 
 /**
