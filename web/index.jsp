@@ -43,7 +43,9 @@ Click here to run a unit test of the API. WARNING: while the test is running, th
 <br>
 <input type="button" name="positiontest" value="Position Unit Test" onclick="positionTest();">
 <br>
-<input type="button" name="displaytest" value="Public Display Test" onclick="displayAdminTest();">
+<input type="button" name="admindisplaytest" value="PD Admin Test" onclick="displayAdminTest();">
+<br>
+<input type="button" name="displayusertest" value="PD User Test" onclick="displayUserTest();">
 <br>
 <br>
 <input type="button" name="cleandb" value="WARNING: Clean DB" onclick="cleanDB();alert('Done');">
