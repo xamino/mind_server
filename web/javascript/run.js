@@ -89,8 +89,9 @@ function isAdmin(data) {
 		alert("user not user");
 		logout();
 	} else {
-		if (data.object.admin) {		
-			writeCookie("MIND_Admin_C",session);
+		if (data.object.admin) {
+			writeCookie("MIND_Admin_C_session",session);
+			writeCookie("MIND_Admin_C_mail",user.email);
 			window.location.href = "admin_home.jsp?session="+session;
 		} else {
 			//TODO write cookie for user
@@ -268,7 +269,6 @@ function loadUsers() {
 }
 
 function writeUsers (data){
-	
 //		alert(JSON.stringify(data));
 		if(data.object.length == null){
 			var noUserInDatabase = "There are currently no users in the database.<br> Use the button 'Add Users' to add users to the system.";
@@ -283,7 +283,6 @@ function writeUsers (data){
 		    tablecontents += "<tr>";
 		    tablecontents += "<td>User Name: </td>";
 		    tablecontents += "<td>User Email: </td>";
-		    tablecontents += "<td>User Password: </td>";
 		    tablecontents += "<td>Is Admin: </td>";
 		    tablecontents += "<td>Edit User: </td>";
 		    tablecontents += "<td>Remove User: </td>";
@@ -294,13 +293,15 @@ function writeUsers (data){
 		      tablecontents += "<tr>";
 		      tablecontents += "<td>" + data.object[i].name + "</td>";
 		      tablecontents += "<td>" + data.object[i].email + "</td>";
-		      //TODO: Hash back in password
-		      tablecontents += "<td>" + data.object[i].pwdHash + "</td>";
 		      tablecontents += "<td>" + data.object[i].admin + "</td>";
 		      //tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen_editUser(this.id)' id='editUser" +i+ "'/></td>";
 		      //tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen_removeUser(this.id)' id='removeUser" +i+ "'/></td>";
 		      tablecontents += "<td><input type='submit' value='Edit User' onClick='editUserViaPopup("+JSON.stringify(data.object[i])+")'/></td>";
-		      tablecontents += "<td><input type='submit' value='Remove User' onClick='removeUserViaPopup("+JSON.stringify(data.object[i])+")'/></td>";
+		      if(data.object[i].email == readCookie("MIND_Admin_C_mail")){
+		    	  tablecontents += "<td><input type='submit' value='Remove User' disabled='true' onClick='removeUserViaPopup("+JSON.stringify(data.object[i])+")'/></td>";
+		      }else{
+		    	  tablecontents += "<td><input type='submit' value='Remove User' onClick='removeUserViaPopup("+JSON.stringify(data.object[i])+")'/></td>";		    	  
+		      }
 		      tablecontents += "</tr>";												
 		   }
 		   tablecontents += "</table>";
@@ -317,35 +318,53 @@ function writeUsers (data){
 */
 function addUserViaPopup()
 {
-
-	var name = prompt("Please enter the name of the user you want to add:");
+	
+	var isadmin = confirm("Do you want the user to be an admin?");
+	var userstring = "user";
+	if(isadmin){
+		userstring = "admin";
+	}
+	
+	var name = prompt("Please enter the name of the "+userstring+" you want to add:");
 	
 	if(name != null){	// if Cancel Button isn't clicked
 	
-		var email = prompt("Please enter the email of the user you want to add:");
+		var email = prompt("Please enter the email of the "+userstring+" you want to add:");
 		
 		if(email != null){	// if Cancel Button isn't clicked
 		
-			var password = prompt("Please enter the password of the user you want to add:");
+			var password = prompt("Please enter the password of the "+userstring+" you want to add:");
 			
-			if(password != null){	// if Cancel Button isn't clicked
+		//	if(password != null){	// if Cancel Button isn't clicked
 		
-				if (name != "" && email != "" && password != ""){	//everything is given
-					newUser = new User(email, password, name);
-					alert(email+", "+password+", "+name);
-					doTask("ADMIN_USER_ADD", newUser, function(event){
-						var element;
-						element = document.getElementById("infoText");
-						if (element) {
-						    element.innerHTML = "The user (name: "+name+") has been added. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
-						    
-						}
-				//		window.location.reload();		//--> text will not be visible --> button or is alert better??
+				if (name != "" && email != "" /*&& password != ""*/){	//everything is given
+					newUser = new User(email, password, name, isadmin);
+					doTask("ADMIN_USER_ADD", newUser, function(data){
+					if(password == "" || password==null){
+						alert("The following "+userstring+" has been added:\n"+
+								"Name: "+name+"\n"+
+								"Email: "+email+"\n"+
+								"Generated Password: "+data.object.description);
+					}else{
+						alert("The following "+userstring+" has been added:\n"+
+								"Name: "+name+"\n"+
+								"Email: "+email+"\n"+
+								"Password: "+password);							
+					}
+
+
+//						var element;
+//						element = document.getElementById("infoText");
+//						if (element) {
+//						    element.innerHTML = "The user (name: "+name+") has been added. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+//						    
+//						}
+						window.location.reload();		//--> text will not be visible --> button or is alert better??
 					});
-				}
-				else{
-					alert("You have to specify name, email and password. None of them can be empty!");
-				}
+//				}
+//				else{
+//					alert("You have to specify name, email and password. None of them can be empty!");
+//				}
 			
 			}
 
@@ -360,13 +379,13 @@ function addUserViaPopup()
  */
 function editUserViaPopup(data){
 
-	var name = prompt("EDIT NAME - If you want to change the name: "+data.name+" simply enter the new name. If you don't want to change something, leave it empty.");
+	var name = prompt("EDIT NAME - If you want to change the name: '"+data.name+"' simply enter the new name. If you don't want to change anything, leave it empty.");
 	
 //	var email = prompt("If you want to change the email: "+data.email+" simply enter the new email. If you don't want to change something, leave it empty.");
 	
 	if(name != null){	// if Cancel Button isn't clicked
 	
-		var password = prompt("EDIT PASSWORD - If you want to change the password: "+data.password+" simply enter the new password. If you don't want to change something, leave it empty.");
+		var password = prompt("EDIT PASSWORD - If you want a new password, simply enter the new password. If you don't want to change anything, leave it empty.");
 	
 		if(password != null){	// if Cancel Button isn't clicked
 		
@@ -422,16 +441,19 @@ function removeUserViaPopup(data)
 	if (r==true)
 	{
 	  var usertodelete = new User(data.email,null,null);
-	  alert("FILTER OBJECT FOR USER DELETE: "+JSON.stringify(usertodelete));
+//	  alert("FILTER OBJECT FOR USER DELETE: "+JSON.stringify(usertodelete));
 	  doTask("ADMIN_USER_DELETE", usertodelete, function(event){
 		  //TODO relaod page
-		var element;
-		element = document.getElementById("infoText");
-		if (element) {
-		    element.innerHTML = "The user (name:"+data.name+") has been removed. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
-		    
-		}
-//		window.location.reload();	//--> text will not be visible --> button or is alert better?? 
+//		var element;
+//		element = document.getElementById("infoText");
+//		if (element) {
+//		    element.innerHTML = "The user (name:"+data.name+") has been removed. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
+//		    
+//		}
+		  alert("The following user has been deleted:\n"+
+				  "Name: "+data.name+
+				  "\nEmail: "+data.email);
+		window.location.reload();	//--> text will not be visible --> button or is alert better?? 
 		  
   		});
 	}
@@ -446,7 +468,7 @@ function removeUserViaPopup(data)
 function checkSessionFromURL(){
 	var urlSession = getURLParameter("session");
 //	alert("url:"+urlSession);
-	var session = readCookie("MIND_Admin_C");
+	var session = readCookie("MIND_Admin_C_session");
 //	alert("cookie:"+session);
 	if(urlSession != session){
 		alert("You have to be logged in.");
@@ -478,39 +500,5 @@ function onLoadOfAdminPage(){
 	});
 }
 
-/**
- * Writes a Cookie - credit to http://stackoverflow.com/questions/2257631/how-create-a-session-using-javascript
- * @param name The name of the cookie (set in isAdmin)
- * @param value The value (session)
- */
-function writeCookie(name,value) {
-    var date, expires;
-//    if (days) {
-        date = new Date();
-        date.setTime(date.getTime()+(15*60*1000));
-        expires = "; expires=" + date.toGMTString();
-//            }else{
-//        expires = "";
-//    }
-    document.cookie = name + "=" + value + expires + "; path=/";
-}
 
-/**
- * returns a Cookie corresponding to the forwarded parameter 'name'
- * credit to http://stackoverflow.com/questions/2257631/how-create-a-session-using-javascript
- */
-function readCookie(name) {
-    var i, c, ca, nameEQ = name + "=";
-    ca = document.cookie.split(';');
-    for(i=0;i < ca.length;i++) {
-        c = ca[i];
-        while (c.charAt(0)==' ') {
-            c = c.substring(1,c.length);
-        }
-        if (c.indexOf(nameEQ) == 0) {
-            return c.substring(nameEQ.length,c.length);
-        }
-    }
-    return '';
-}
 
