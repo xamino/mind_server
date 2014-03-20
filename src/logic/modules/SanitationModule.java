@@ -3,6 +3,7 @@ package logic.modules;
 import database.Authenticated;
 import database.Data;
 import database.messages.Error;
+import database.messages.Message;
 import database.messages.Success;
 import database.objects.User;
 import logger.Messenger;
@@ -17,6 +18,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 
 //todo: – on a session timeout the session is only removed if it is used for a query again. Need to remove sessions
@@ -215,14 +217,21 @@ public class SanitationModule extends Module {
         if (BCrypt.checkpw(user.readAuthentication(), check.getPwdHash())) {
             // Everything okay, so create a hash:
             String sessionHash = new BigInteger(130, random).toString(32);
+            // Set last access time
+            boolean dateIsNull = (check.getLastAccess() == null);
+            check.setLastAccess(new Date());
             // Create the activeUser object using the correct, database user:
             ActiveUser activeUser = new ActiveUser(check, System.currentTimeMillis(), sessionHash);
             // Save the session:
             sessions.put(sessionHash, activeUser);
             log.log(TAG, "User " + check.readIdentification() + " has logged in.");
-            // Todo return message when lat was null
-            // Return the hash for future references:
-            return new Success("Login", sessionHash);
+            // If the date was null, the user has never logged in before, so we signal that to the client
+            if (dateIsNull) {
+                return new Message("FirstLogin", sessionHash);
+            } else {
+                // Return the hash for future references:
+                return new Success("Login", sessionHash);
+            }
         } else {
             return new Error("LoginFailed", "Wrong user email or wrong password.");
         }
@@ -235,7 +244,10 @@ public class SanitationModule extends Module {
      * @return Return message.
      */
     private Data registration(User user) {
+        // hash pwd
         user.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));
+        // set access time
+        user.setLastAccess(new Date());
         Data msg = EventModuleManager.getInstance().handleTask(Task.User.CREATE, user);
         if (msg instanceof Success) {
             log.log(TAG, "User " + user.readIdentification() + " has been registered.");

@@ -68,6 +68,8 @@ public class ServletFunctions {
                 }
                 // Also make sure you keep your admin status
                 sentUser.setAdmin(user.isAdmin());
+                // keep last access time
+                sentUser.setLastAccess(user.getLastAccess());
                 // We need to catch a password change, as it must be hashed:
                 String password = sentUser.getPwdHash();
                 if (password != null && !password.isEmpty()) {
@@ -174,6 +176,7 @@ public class ServletFunctions {
                 if (message == null && data instanceof User) {
                     User originalUser = (User) data;
                     tempUser.setEmail(originalUser.getEmail());
+                    tempUser.setLastAccess(originalUser.getLastAccess());
                     if (tempUser.getPwdHash() != null && !tempUser.getPwdHash().isEmpty()) {
                         tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
                     } else {

@@ -56,12 +56,12 @@ function adminRightsTest() {
     // update tests
     unitTest("admin_user_update", new User("email", null, "name name"), Success, adminSession);
     unitTest("admin_user_update", new User("lang@email.de", null, null, true), Success, adminSession);
-    // test password remains untouched:
-    unitTest("login", new User("email", "password", null), Success, null);
+    // test password remains untouched (message because first login):
+    unitTest("login", new User("email", "password", null), Message, null);
     unitTest("admin_user_update", new User("email", "new password", null), Success, adminSession);
     unitTest("login", new User("email", "new password", null), Success, null);
     // check if really admin
-    var langSession = unitTest("login", new User("lang@email.de", "password"), Success, null).description;
+    var langSession = unitTest("login", new User("lang@email.de", "password"), Message, null).description;
     unitTest("admin_user_read", new User(null, null, null, true), Array, langSession);
     // remove
     unitTest("admin_user_delete", new User("email", null, null), Success, adminSession);
@@ -76,6 +76,7 @@ function adminRightsTest() {
     // logout
     unitTest("logout", null, Success, adminSession);
     // login
+    // TODO this should be correct –> date is not written on update
     unitTest("login", new User("admin@admin.admin", "admin", null), Success, null);
 
     cleanDB();
@@ -324,7 +325,15 @@ function displayAdminTest() {
  */
 function cleanDB() {
     unitTest("registration", new User("special@admin.eu", "admin", ""), Success, null);
-    var adminSession = unitTest("login", new User("special@admin.eu", "admin", null), Success, null).description;
+    var received = unitTest("login", new User("special@admin.eu", "admin", null), Success, null);
+    if (received == null) {
+        received = unitTest("login", new User("special@admin.eu", "admin", null), Message, null);
+        if (received == null) {
+            alert("Failed clean; could not get valid admin session!");
+            return;
+        }
+    }
+    var adminSession = received.description;
     // Check if we are currently an admin... :P
     var admin = JSON.parse($.ajax({
         data: JSON.stringify(new Arrival("user_read", adminSession)),
@@ -349,7 +358,7 @@ function cleanDB() {
     // Destroy users
     unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
     // Now check with default admin, as admin above was now deleted!
-    var newSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    var newSession = unitTest("login", new User("admin@admin.admin", "admin", null), Message, null).description;
     var list = unitTest("read_all_admin", null, Array, newSession);
     if (list == null || list.length > 1) {
         alert("DB was NOT CLEARED of USERS!");
