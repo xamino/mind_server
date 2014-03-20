@@ -334,6 +334,7 @@ function addUserViaPopup()
 				if (name != "" && email != "" && password != ""){	//everything is given
 					newUser = new User(email, password, name);
 					doTask("ADMIN_USER_ADD", newUser, function(event){
+						alert(event);
 					alert("The following user has been added:\n"+
 							"Name: "+name+"\n"+
 							"Email: "+email+"\n"+
