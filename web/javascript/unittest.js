@@ -14,7 +14,6 @@ function doUnitTest() {
 
     adminRightsTest();
     userUpdateTest();
-    adminUpdateTest();
     userAccessTest();
     areaTest();
     positionTest();
@@ -71,7 +70,12 @@ function adminRightsTest() {
         // 3 because Maria is still there :P
         alert("Too many few users! Should be only 3 here.")
     }
-    // TODO complete
+    // Test user update
+    unitTest("user_update", new User("admin@admin.admin", null, "administrator"), Success, adminSession);
+    // logout
+    unitTest("logout", null, Success, adminSession);
+    // login
+    unitTest("login", new User("admin@admin.admin", "admin", null), Success, null);
 
     cleanDB();
 
@@ -101,25 +105,6 @@ function userUpdateTest() {
     cleanDB();
 
     alert("User update test done.");
-}
-
-// todo move this to the others
-function adminUpdateTest() {
-    alert("Beginning admin update test.");
-
-    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
-    // Test user update
-    unitTest("user_update", new User("admin@admin.admin", null, "administrator"), Success, adminSession);
-
-    // logout
-    unitTest("logout", null, Success, adminSession);
-
-    // login
-    adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
-
-    cleanDB();
-
-    alert("Admin update test done.");
 }
 
 function userAccessTest() {

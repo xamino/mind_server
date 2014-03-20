@@ -18,7 +18,11 @@ MIND test page for checking the API and as an example for later work on web inte
 JS now enabled, open your console!
 <br>
 <br>
-JS Functions currently available: login(email, password), register(email, password, name), logout(), and send(data).
+Server IP address is <span id="ip"></span>.
+<script language="JavaScript">
+    var ip = location.host;
+    document.getElementById("ip").innerHTML = ip;
+</script>
 <br>
 <br>
 The session is saved in var session for your convenience, no need to copy & paste it. Also note that the JS consists of
@@ -32,8 +36,6 @@ Click here to run a unit test of the API. WARNING: while the test is running, th
 <br>
 <br>
 <input type="button" name="admintest" value="Admin Unit Test" onclick="adminRightsTest();">
-<br>
-<input type="button" name="adminupdatetest" value="Admin Update Unit Test" onclick="adminUpdateTest();">
 <br>
 <input type="button" name="usertest" value="User Unit Test" onclick="userAccessTest();">
 <br>
