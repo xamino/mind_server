@@ -101,8 +101,11 @@ public class Servlet extends HttpServlet {
                 answer = new Error("IllegalTask", error);
             }
         } else if (check instanceof PublicDisplay) {
-            // TODO
-            functions.handleDisplayTask(arrival, (PublicDisplay) check);
+            answer = functions.handleDisplayTask(arrival, (PublicDisplay) check);
+            if (answer == null) {
+                log.log(TAG, "Illegal task sent: " + arrival.getTask());
+                answer = new Error("IllegalTask", "Illegal task: " + arrival.getTask() + ".");
+            }
         } else {
             // This means the check failed, so there is a message in check that needs to be sent back
             answer = check;
