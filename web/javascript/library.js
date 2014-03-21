@@ -150,18 +150,12 @@ function Message(name, description) {
 
 function Area(ID, locations, topLeftX, topLeftY, width, height) {
     this.$type = "Area";
-    if (ID != null)
-        this.ID = ID;
-    if (locations != null)
-        this.locations = locations;
-    if (topLeftX != null)
-        this.topLeftX = topLeftX;
-    if (topLeftY != null)
-        this.topLeftY = topLeftY;
-    if (width != null)
-        this.width = width;
-    if (height != null)
-        this.height = height;
+    this.ID = ID;
+    this.locations = locations;
+    this.topLeftX = topLeftX;
+    this.topLeftY = topLeftY;
+    this.width = width;
+    this.height = height;
 }
 
 function Location(coordinateX, coordinateY, wifiMorsels) {
@@ -185,7 +179,7 @@ function WifiMorsel(wifiMac, wifiName, wifiLevel) {
 }
 
 function PublicDisplay(identification, token, location, coordinateX, coordinateY) {
-    this.$type = "Display";
+    this.$type = "PublicDisplay";
     if (identification != null)
         this.identification = identification;
     if (token != null)

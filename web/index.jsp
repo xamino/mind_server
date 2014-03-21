@@ -9,7 +9,9 @@
 </head>
 <body>
 button - only till we know whats on index.jsp <br>
-<input type="button" name="redirect" value="start mind" onclick="document.location.href='login.jsp'">
+<input type="button" name="redirect" value="i am a person" onclick="document.location.href='login.jsp'">
+<br>
+<input type="button" name="redirect" value="i am a public display" onclick="document.location.href='public_display_login.jsp'">
 <br>
 <br>
 MIND test page for checking the API and as an example for later work on web interfaces.

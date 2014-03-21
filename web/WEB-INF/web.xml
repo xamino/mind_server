@@ -6,10 +6,10 @@
 
 	<servlet>
 		<servlet-name>Servlet</servlet-name>
-		<servlet-class>servlet.Servlet</servlet-class>
+		<servlet-class>de.uulm.mi.mind.servlet.Servlet</servlet-class>
 	</servlet>
 
     <listener>
-        <listener-class>database.DatabaseController</listener-class>
+        <listener-class>de.uulm.mi.mind.io.DatabaseController</listener-class>
     </listener>
 </web-app>
