@@ -178,7 +178,7 @@ $(document).on("submit", "#loginDisplayForm", function(event) {
 	identification = $("#identification").val();
 	password = $("#password").val();
 
-	login(identification, password, function(event){
+	loginDisplay(identification, password, function(event){
 		window.location.href = "public_display_start.jsp";	   //?session="+session;
 	});
 //		doTask("ADMIN_USER_READ", potentialAdmin, isAdmin);
