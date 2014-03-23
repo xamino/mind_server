@@ -1,11 +1,13 @@
 package de.uulm.mi.mind.servlet;
 
-import de.uulm.mi.mind.objects.*;
-import de.uulm.mi.mind.objects.messages.*;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Task;
+import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.objects.messages.Information;
+import de.uulm.mi.mind.objects.messages.Message;
+import de.uulm.mi.mind.objects.messages.Success;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -203,7 +205,11 @@ public class ServletFunctions {
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                return moduleManager.handleTask(Task.Location.CREATE, arrival.getObject());
+                Location location = (Location) arrival.getObject();
+                if (location.getWifiMorsels().isEmpty()) {
+                    log.error(TAG, "WARNING: Adding location at " + location.getCoordinateX() + "|" + location.getCoordinateY() + " with EMPTY MORSELS!");
+                }
+                return moduleManager.handleTask(Task.Location.CREATE, location);
             case LOCATION_REMOVE:
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -292,21 +298,9 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.Display.DELETE, arrival.getObject());
             // Special admin stuff ---------------------------------------------------------------
             case READ_ALL_ADMIN:
-                // TODO: can now be drastly improved with new filter, change!
-                data = moduleManager.handleTask(Task.User.READ, null);
-                message = checkDataMessage(data);
-                if (message == null && data instanceof DataList) {
-                    DataList list = (DataList) data;
-                    DataList<User> admins = new DataList<User>();
-                    for (Object us : list) {
-                        if (!(us instanceof User))
-                            continue;
-                        if (((User) us).isAdmin())
-                            admins.add((User) us);
-                    }
-                    return admins;
-                }
-                return nullMessageCatch(message);
+                User filter = new User(null, null);
+                filter.setAdmin(true);
+                return moduleManager.handleTask(Task.User.READ, filter);
             case ADMIN_ANNIHILATE_AREA:
                 log.log(TAG, "Removing all area objects!");
                 return moduleManager.handleTask(Task.Area.ANNIHILATE, null);
