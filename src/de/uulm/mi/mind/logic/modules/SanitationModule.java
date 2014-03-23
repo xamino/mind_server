@@ -1,17 +1,13 @@
 package de.uulm.mi.mind.logic.modules;
 
-import de.uulm.mi.mind.objects.Authenticated;
-import de.uulm.mi.mind.objects.Data;
-import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.messages.Message;
-import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.DataList;
-import de.uulm.mi.mind.objects.PublicDisplay;
-import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.logic.Task;
+import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.objects.messages.Message;
+import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.servlet.BCrypt;
 import de.uulm.mi.mind.servlet.Servlet.Arrival;
 import de.uulm.mi.mind.servlet.ServletFunctions;
@@ -117,7 +113,7 @@ public class SanitationModule extends Module {
                     Data object = readAuthFromDB(activeUser.user);
                     Data msg = ServletFunctions.getInstance().checkDataMessage(object);
                     if (msg != null) {
-                        log.error(TAG, "WARNING: Check failed because no user or error was returned from DB!");
+                        log.error(TAG, "WARNING: Check failed because no user or error was returned from DB for " + activeUser.user.readIdentification() + "!");
                     } else if (object instanceof Authenticated) {
                         // If everything is okay, we return the current user and leave this method
                         Authenticated currentUser = ((Authenticated) object);

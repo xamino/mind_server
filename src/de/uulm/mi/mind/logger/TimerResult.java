@@ -6,15 +6,15 @@ package de.uulm.mi.mind.logger;
  * Class representation for a timer object that contains the label and time
  * spent between push and pop.
  */
-class TimerResult {
+public class TimerResult {
     /**
      * The time from when the timer was pushed to when it was popped.
      */
-    long time;
+    public long time;
     /**
      * The label given on push. Can be used for identification purposes.
      */
-    String label;
+    public String label;
 
     TimerResult(long time, String label) {
         this.time = time;

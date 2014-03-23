@@ -4,15 +4,16 @@
 
 package de.uulm.mi.mind.servlet;
 
-import de.uulm.mi.mind.objects.Data;
-import de.uulm.mi.mind.objects.messages.Information;
-import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.PublicDisplay;
-import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.logger.TimerResult;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Task;
+import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.PublicDisplay;
+import de.uulm.mi.mind.objects.User;
+import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.objects.messages.Information;
+import de.uulm.mi.mind.objects.messages.Success;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -63,6 +64,10 @@ public class Servlet extends HttpServlet {
      */
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response) throws ServletException, IOException {
+        /*
+        // Start timer
+        log.pushTimer(this, "INCOMING");
+        */
         // Get arrival object
         // Watch out, arrival.getData() might be NULL!
         Arrival arrival = getRequest(request);
@@ -113,6 +118,10 @@ public class Servlet extends HttpServlet {
 
         // Encapsulate answer:
         prepareDeparture(response, answer);
+        /*
+        TimerResult timerResult = log.popTimer(this);
+        log.error(TAG, "Request " + arrival.getTask() + " took " + timerResult.time + " ms.");
+        */
     }
 
     /**
@@ -124,6 +133,7 @@ public class Servlet extends HttpServlet {
      * @throws IOException
      */
     // TODO catch "object":null !!!
+    // TODO do i still need to catch that with the new Jsonator?
     private Arrival getRequest(HttpServletRequest request) throws IOException {
         BufferedReader reader = request.getReader();
         String out = "";
