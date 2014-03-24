@@ -306,13 +306,11 @@ $(document).on("submit", "#loginDisplayForm", function(event) {
  */
 function loadUsers() {
     var users = new User(null, null, null);
-//	var users = null;
     doTask("admin_user_read", users, writeUsers);
 }
 
 function writeUsers(data) {
-//		alert(JSON.stringify(data));
-    if (data.object.length == null) {
+    if (data.object.length == 0) {
         var noUserInDatabase = "There are currently no users in the database.<br> Use the button 'Add Users' to add users to the system.";
         document.getElementById("table_space").innerHTML = noUserInDatabase;
     }
@@ -399,12 +397,8 @@ function addUserViaPopup() {
 //						    element.innerHTML = "The user (name: "+name+") has been added. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
 //						    
 //						}
-                    window.location.reload();		//--> text will not be visible --> button or is alert better??
+                    window.location.reload();	
                 });
-//				}
-//				else{
-//					alert("You have to specify name, email and password. None of them can be empty!");
-//				}
 
             }
 
@@ -470,14 +464,7 @@ function editUserViaPopup(data) {
                 }
 
                 var updateUser = new User(newEmail, newPassword, newName, willbeadmin);
-                //TODO: select right user
                 doTask("ADMIN_USER_UPDATE", updateUser, function (event) {
-//					var element;
-//					element = document.getElementById("infoText");
-//					if (element) {
-//					    element.innerHTML = "The user (name: "+newName+") has been modified. Bis click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
-//					    
-//					}
 
                     alert("The following changes were made:" +
                         "\nPrevious name: " + data.name + " - New name: " + newName +
@@ -504,13 +491,6 @@ function removeUserViaPopup(data) {
         var usertodelete = new User(data.email, null, null);
 //	  alert("FILTER OBJECT FOR USER DELETE: "+JSON.stringify(usertodelete));
         doTask("ADMIN_USER_DELETE", usertodelete, function (event) {
-            //TODO relaod page
-//		var element;
-//		element = document.getElementById("infoText");
-//		if (element) {
-//		    element.innerHTML = "The user (name:"+data.name+") has been removed. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
-//		    
-//		}
             alert("The following user has been deleted:\n" +
                 "Name: " + data.name +
                 "\nEmail: " + data.email);
@@ -705,6 +685,143 @@ function removeDisplayViaPopup(data) {
         });
     }
 }
+
+/****************Admin - Area Management****************/
+
+/**
+ * loads all areas on load of page admin_import_map_location.jsp
+ */
+function loadAreas() {
+	//String ID, DataList<Location> locations, int topLeftX, int topLeftY, int width, int height
+    var areas = new Area(null, null, 0, 0, 0, 0);
+    doTask("AREA_READ", areas, writeAreas);
+}
+
+function writeAreas(data) {
+    if (data.object.length == 0) {
+        var noLocationsInDatabase = "There are currently no areas in the database. Add areas in the MIND-application.";
+        document.getElementById("table_space_areas").innerHTML = noLocationsInDatabase;
+    }
+    else {
+
+        var tablecontents = "";
+        tablecontents = "<table border ='1'>";
+        tablecontents += "<tr>";
+        tablecontents += "<td>ID: </td>";
+        //TODO: anzahl der locations
+        tablecontents += "<td>Number of Locations in this Area: </td>";
+        tablecontents += "<td>Top-Left-X-Value: </td>";
+        tablecontents += "<td>Top-Left-Y-Value: </td>";
+        tablecontents += "<td>Width: </td>";
+        tablecontents += "<td>Height: </td>";
+        tablecontents += "</tr>";
+
+        for (var i = 0; i < data.object.length; i++) {
+            tablecontents += "<tr>";
+            tablecontents += "<td>" + data.object[i].ID + "</td>";
+            //TODO: number
+            tablecontents += "<td>" + data.object[i].locations.length + "</td>";
+            tablecontents += "<td>" + data.object[i].topLeftX + "</td>";
+            tablecontents += "<td>" + data.object[i].topLeftY + "</td>"; 
+            tablecontents += "<td>" + data.object[i].width + "</td>";
+            tablecontents += "<td>" + data.object[i].height + "</td>";
+            if(data.object[i].ID == "universe"){
+            	tablecontents += "<td><input type='submit' value='Remove Location' disabled='true' onClick='removeAreaViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";	
+            }else{
+            tablecontents += "<td><input type='submit' value='Remove Location' disabled='false' onClick='removeAreaViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
+            }
+            tablecontents += "</tr>";
+        }
+        tablecontents += "</table>";
+        document.getElementById("table_space_areas").innerHTML = tablecontents;
+
+    }
+
+}
+
+
+
+/**
+ * Creates a popup, enabling the admin to delete the area
+ * @param data
+ * the location data that can be deleted (JSON.stringified)
+ */
+function removeAreaViaPopup(data) {
+    var r = confirm("Do you want to remove the Area (ID: '" + data.id + "')?");
+    if (r == true) {
+        var areatodelete = new Area(data.ID, null, 0, 0, 0, 0);
+        doTask("AREA_REMOVE", areatodelete, function (event) {
+
+            alert("The following Area has been deleted:\n" +
+                "ID: " + data.ID);
+            window.location.reload();
+
+        });
+    }
+}
+
+/****************Admin - Location Management****************/
+
+
+/**
+ * loads all locations on load of page admin_import_map_location.jsp
+ */
+function loadLocations() {
+    var locations = new Location(0, 0, null);
+    doTask("LOCATION_READ", locations, writeLocations);
+}
+
+function writeLocations(data) {
+    if (data.object.length == 0) {
+        var noLocationsInDatabase = "<br><br>There are currently no locations in the database. Add locations in the MIND-application.";
+        document.getElementById("table_space_locations").innerHTML = noLocationsInDatabase;
+    }
+    else {
+
+        var tablecontents = "";
+        tablecontents = "<table border ='1'>";
+        tablecontents += "<tr>";
+        tablecontents += "<td>X-Coordinate: </td>";
+        tablecontents += "<td>Y-Coordinate: </td>";
+        tablecontents += "<td>Remove Location: </td>";
+        tablecontents += "</tr>";
+
+        for (var i = 0; i < data.object.length; i++) {
+            tablecontents += "<tr>";
+            tablecontents += "<td>" + data.object[i].coordinateX + "</td>";
+            tablecontents += "<td>" + data.object[i].coordinateY + "</td>"; 
+            tablecontents += "<td><input type='submit' value='Remove Location' onClick='removeLocationViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
+            tablecontents += "</tr>";
+        }
+        tablecontents += "</table>";
+        document.getElementById("table_space_locations").innerHTML = tablecontents;
+
+    }
+
+}
+
+
+
+/**
+ * Creates a popup, enabling the admin to delete the location
+ * @param data
+ * the location data that can be deleted (JSON.stringified)
+ */
+function removeLocationViaPopup(data) {
+    var r = confirm("Do you want to remove the location (x: '" + data.coordinateX + "',y: '" + data.coordinateY + "')?");
+    if (r == true) {
+        var locationtodelete = new Location(data.coordinateX, data.coordinateY, null);
+        doTask("LOCATION_REMOVE", locationtodelete, function (event) {
+
+            alert("The following location has been deleted:\n" +
+                "X-Coordinate: " + data.coordinateX +
+                "\nY_Coordinate: " + data.coordinateY);
+            window.location.reload();
+
+        });
+    }
+}
+
 
 
 /******************** session/cookie*****************/
