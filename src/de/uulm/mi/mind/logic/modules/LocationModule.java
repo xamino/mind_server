@@ -1,13 +1,12 @@
 package de.uulm.mi.mind.logic.modules;
 
-import de.uulm.mi.mind.objects.Area;
-import de.uulm.mi.mind.objects.Data;
 import de.uulm.mi.mind.io.DatabaseController;
+import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.logic.Module;
+import de.uulm.mi.mind.logic.Task;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.logic.Task;
 
 /**
  * @author Tamino Hartmann
@@ -17,9 +16,12 @@ import de.uulm.mi.mind.logic.Task;
 public class LocationModule extends Module {
 
     private final DatabaseController database;
+    private final Messenger log;
+    private final String TAG = "LocationModule";
 
     public LocationModule() {
         database = DatabaseController.getInstance();
+        log = Messenger.getInstance();
     }
 
     @Override
@@ -41,9 +43,10 @@ public class LocationModule extends Module {
                     return update(location);
                 case DELETE:
                     return delete(location);
+                case SMALLEST_AREA_BY_LOCATION:
+                    return areaByLocation(location);
                 case READ_MORSELS:
                     return readMorsels(location);
-                //TODO READ_BEST_AREA
                 //TODO area add, update -> update locations
             }
         } else if (request instanceof WifiMorsel) {
@@ -54,6 +57,24 @@ public class LocationModule extends Module {
             Task.Area areaTask = (Task.Area) task;
             switch (areaTask) {
                 case CREATE:
+                    if (request == null) {
+                        return new Error("IllegalAddArea", "Area to add was null.");
+                    }
+                    // We need to write all locations into area
+                    Data data = read(new Location(0, 0, null));
+                    if (!(data instanceof DataList)) {
+                        log.error(TAG, "Area create failed due to wrong location read!");
+                        return new Error("AreaCreateFailed", "Failed due to wrong location read!");
+                    }
+                    DataList locList = (DataList) data;
+                    area.setLocations(new DataList());
+                    for (Object obj : locList) {
+                        Location loc = (Location) obj;
+                        log.log(TAG, "Testing "+loc.toString() +" against "+area.toString());
+                        if (area.contains(loc.getCoordinateX(), loc.getCoordinateY())) {
+                            area.addLocation(loc);
+                        }
+                    }
                     return create(area);
                 case READ:
                     return readArea(area);
@@ -71,19 +92,44 @@ public class LocationModule extends Module {
         return new Error("MissingOperation", "The Location Module is unable to perform the Task as it appears not to be implemented.");
     }
 
-    private Data readArea(Area area) {
-        // get all Users
-        if (area == null)
-            return read(new User(null, null));
-        // get filtered Users
-        if (area.getID() == null)
-            return read(area);
+    /**
+     * Method that returns the smallest area that contains the given location.
+     *
+     * @param location
+     * @return
+     */
+    private Area areaByLocation(Location location) {
+        // Get all areas
+        Data dbCall = read(new Area(null, null, 0, 0, 0, 0));
+        if (!(dbCall instanceof DataList)) {
+            log.error(TAG, "All areas: dbCall != Datalist – shouldn't happen, FIX!");
+            log.error(TAG, "dbCall is of type " + dbCall);
+            return null;
+        }
+        DataList all = (DataList) dbCall;
+        dbCall = read(new Area("universe", null, 0, 0, 0, 0));
+        if (!(dbCall instanceof DataList)) {
+            log.error(TAG, "Universe: dbCall != Datalist – shouldn't happen, FIX!");
+            log.error(TAG, "dbCall is of type " + dbCall);
+            return null;
+        }
+        Area finalArea = (Area) ((DataList) dbCall).get(0);
+        for (Object data : all) {
+            Area temp = (Area) data;
+            if (temp.getArea() < finalArea.getArea()
+                    && temp.contains(location.getCoordinateX(), location.getCoordinateY())) {
+                finalArea = temp;
+            }
+        }
+        return finalArea;
+    }
 
-        // from here on single users were requested
-        Data data = read(area);
-        if (data instanceof DataList)
-            return ((DataList<Data>) data).get(0);
-        else return data; // Error
+    private Data readArea(Area area) {
+        // get all Areas
+        if (area == null) {
+            return read(new Area(null, null, 0, 0, 0, 0));
+        }
+        return read(area);
     }
 
     /**

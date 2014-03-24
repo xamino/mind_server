@@ -1,3 +1,10 @@
+/* TODO:
+ - test that *_read with no object returns list of *
+ - *_read should always return array
+ - area_create with area with locations should return an error (adding locations via area_create is not allowed)
+ */
+
+
 /**
  * Function that runs a unit test. WARNING: test is done with synchronous ajax calls, which means the webpage will be
  * unresponsive until the unit test is done!
@@ -164,36 +171,38 @@ function areaTest() {
 
     var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
 
-    // test adding a new area
     var wifis1 = [
         new WifiMorsel("00:19:07:07:64:00", "eduroam", -93),
         new WifiMorsel("00:19:07:07:64:01", "eduroam", -90),
         new WifiMorsel("00:19:07:07:64:02", "welcome", -85)
     ];
-    unitTest("area_add", new Area("Office Prof. Gott", [new Location(34, 57, wifis1)], 34, 56, 3, 4), Success, adminSession);
-    // test universe area
     var wifis2 = [
         new WifiMorsel("00:19:07:00:65:00", "eduroam", -54),
         new WifiMorsel("00:19:07:00:65:01", "welcome", -34),
         new WifiMorsel("00:19:07:00:66:02", "welcome", -12)
     ];
+    // test adding a new area
+    unitTest("area_add", new Area("Office Prof. Gott", null, 34, 56, 3, 4), Success, adminSession);
+    // adding locations via area should result in error
+    unitTest("area_add", new Area("Office Prof. Gott", [new Location(34, 57, wifis1)], 34, 56, 3, 4), Error, adminSession);
+    // test universe area
     unitTest("location_add", new Location(1, 1, wifis2), Success, adminSession);
-    var area = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
-    if (!instanceOf(area, Area)) {
+    var area = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Array, adminSession);
+    if (!instanceOf(area[0], Area)) {
         alert("Reading universe failed - not Area type object!");
     } else {
-        var location = area.locations[0];
+        var location = area[0].locations[0];
         if (location == null && !((location.coordinateX == 1) && (location.coordinateY == 1) )) {
             alert("Writing a location directly to the universal area failed!");
         }
     }
     // Test adding a location to multiple ares
     unitTest("location_add", new Location(35, 58, wifis1), Success, adminSession);
-    var universe = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
-    var office = unitTest("area_read", new Area("Office Prof. Gott", null, 0, 0, 0, 0), Area, adminSession);
+    var universe = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Array, adminSession);
+    var office = unitTest("area_read", new Area("Office Prof. Gott", null, 0, 0, 0, 0), Array, adminSession);
     // should be in both
     var test = false;
-    var locations = universe.locations;
+    var locations = universe[0].locations;
     for (var i = 0; i < locations.length; i++) {
         if (locations[i].coordinateX == 35 && locations[i].coordinateY == 58)
             test = true;
@@ -201,13 +210,21 @@ function areaTest() {
     if (!test) {
         alert("Multiple area location failed! Not in universe.")
     }
-    locations = office.locations;
+    locations = office[0].locations;
     for (var i = 0; i < locations.length; i++) {
         if (locations[i].coordinateX == 35 && locations[i].coordinateY == 58)
             test = true;
     }
     if (!test) {
         alert("Multiple area location failed! Not in office.")
+    }
+    // TODO test adding a new area without locations, should contain corresponding locations after the fact!
+    unitTest("location_add", new Location(111, 111, wifis1), Success, adminSession);
+    unitTest("area_add", new Area("Toilet", null, 100, 100, 20, 20), Success, adminSession);
+    alert(JSON.stringify(unitTest("area_read", new Area(null, null, 0, 0, 0, 0), Array, adminSession)));
+    var toilet = unitTest("area_read", new Area("Toilet", null, 0, 0, 0, 0), Array, adminSession);
+    if (toilet[0].locations == undefined || toilet[0].locations.size != 1) {
+        alert("New area was not correctly populated with previous locations!");
     }
 
     cleanDB();
@@ -272,6 +289,9 @@ function positionTest() {
             }
         }
     }
+
+    // Add another Area
+    unitTest("area_add", new Area("Office Prof. Gott", null, 34, 56, 3, 4), Success, adminSession);
 
     cleanDB();
 

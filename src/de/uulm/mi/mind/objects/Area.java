@@ -31,6 +31,7 @@ public class Area implements Data {
 
     /**
      * Returns area of area.
+     *
      * @return The integer value in m²
      */
     public int getArea() {
@@ -39,9 +40,10 @@ public class Area implements Data {
 
     /**
      * Adds a location to the area.
+     *
      * @param location
      */
-    public void addLocation(Location location){
+    public void addLocation(Location location) {
         locations.add(location);
     }
 
@@ -100,5 +102,16 @@ public class Area implements Data {
                 "ID='" + ID + '\'' +
                 ", locations='" + locations +
                 "'}";
+    }
+
+    /**
+     * Collision function for locations.
+     *
+     * @param X X-coordinate to check.
+     * @param Y Y-coordinate to check.
+     * @return True if the coorindate is within the area.
+     */
+    public boolean contains(final double X, final double Y) {
+        return (X >= topLeftX && X <= topLeftX + width) && (Y >= topLeftY && Y <= topLeftY + height);
     }
 }

@@ -1,16 +1,12 @@
 package de.uulm.mi.mind.logic.modules;
 
-import de.uulm.mi.mind.objects.Data;
-import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.messages.Message;
-import de.uulm.mi.mind.objects.Area;
-import de.uulm.mi.mind.objects.DataList;
-import de.uulm.mi.mind.objects.Location;
-import de.uulm.mi.mind.objects.WifiMorsel;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.logic.Task;
+import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.objects.messages.Message;
 
 import java.util.*;
 
@@ -36,16 +32,19 @@ public class PositionModule extends Module {
             return new Error("WrongObjectType", "PositionModule was called with the wrong object type!");
         }
         // Everything okay from here on out:
-        Location position = calculateLocation((Location) request);
-        if (position == null) {
+        Location location = calculateLocation((Location) request);
+        // TODO save location info per user for displays depend on status
+        // get best area for location to return (if finalMatch is null, universe is returned)
+        Area area = getBestArea(location);
+        if (area == null) {
             return new Message("PositionUnfound", "Your position could not be found.");
         }
-        return position;
+        return area;
     }
 
     private Location calculateLocation(Location request) {
         // Get Area containing all locations from database
-        Area uniArea = (Area)EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe",null,0,0,0,0));
+        Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe", null, 0, 0, 0, 0))).get(0);
 
         // A Map that describes how many matches there are for this location
         HashMap<Location, Integer> locationMatchesMap = new HashMap<>();
@@ -85,7 +84,6 @@ public class PositionModule extends Module {
                 }
             }
         }
-
         return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap);
     }
 
@@ -112,7 +110,6 @@ public class PositionModule extends Module {
                 }
             }
 
-            Set<Location> keySet = locationLevelDifferenceSumMap.keySet(); //TODO used for?
             for (Location loc : sortedLocationCandidateList) {
                 locationLevelDifferenceSumMap.remove(loc);
             }
@@ -137,7 +134,7 @@ public class PositionModule extends Module {
                     int currentsum = Integer.MAX_VALUE; // TODO Something wrong here!
 
                     for (Location point : sortedLocationCandidateList) { //for each point with same diff level
-                        if(locationLevelDifferenceSumMap.get(point)<currentsum){
+                        if (locationLevelDifferenceSumMap.get(point) < currentsum) {
                             //get point with max total level
                             currentsum = locationLevelDifferenceSumMap.get(point);
                             finalMatch = point;
@@ -151,8 +148,7 @@ public class PositionModule extends Module {
                 finalMatch = sortedLocationCandidateList.get(0);
             }
         }
-
-        // finalMatch is null if now matching location was found
+        // finalMatch is null if no matching location was found
         return finalMatch;
     }
 
@@ -180,5 +176,14 @@ public class PositionModule extends Module {
         Collections.reverse(sortedPoints);
 
         return sortedPoints;
+    }
+
+    /**
+     * @param location
+     * @return
+     */
+    private Area getBestArea(Location location) {
+        EventModuleManager eventModuleManager = EventModuleManager.getInstance();
+        return (Area) eventModuleManager.handleTask(Task.Location.SMALLEST_AREA_BY_LOCATION, location);
     }
 }

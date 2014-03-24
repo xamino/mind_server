@@ -124,6 +124,7 @@ public class ServletFunctions {
         Data data, message;
         User tempUser;
         PublicDisplay display;
+        Area area;
         switch (task) {
             // USERS -----------------------------------------------------------------------------
             case ADMIN_USER_READ:
@@ -226,7 +227,12 @@ public class ServletFunctions {
                 if (!(arrival.getObject() instanceof Area)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                return moduleManager.handleTask(Task.Area.CREATE, arrival.getObject());
+                // Adding locations via area_add is not allowed
+                area = (Area) arrival.getObject();
+                if (area.getLocations() != null) {
+                    return new Error("IllegalAreaAdd", "Adding locations via an area is illegal!");
+                }
+                return moduleManager.handleTask(Task.Area.CREATE, area);
             case AREA_UPDATE:
                 if (!(arrival.getObject() instanceof Area)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
