@@ -17,16 +17,16 @@
 <div id="content">
 	<div id="settings">
 		<div id="app_settings">
-		<a href="http://ran.ge/" title="Professional WordPress Development" id="app_settings_img" class="pd_link"></a>
+		<a href="#" id="app_settings_img" onclick="appSettingsClicked()"></a>
 		<p>App Settings</p>
 		</div>
 		<div id="display_settings">
-		<a href="http://ran.ge/" title="Professional WordPress Development" id="display_settings_img" class="pd_link"></a>
+		<a href="#" id="display_settings_img" onclick="displaySettingsClicked()"></a>
 		<p>Display Settings</p>
 		</div>
 	</div>
 	<div id="content_popup">
-	TODO: Here: popups etc.
+	TODO: CSS
 	</div>
 	<div id="login_location">
 		<div id="location">

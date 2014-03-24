@@ -100,6 +100,13 @@ function readCookie(name) {
     return '';
 }
 
+/**
+ * deletes the cookie with the given name
+ */
+function deleteCookie(name) {
+    writeCookie(name,"");
+}
+
 // OBJECT DEFINITIONS HERE –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––-
 
 function Arrival(task, sessionHash, object) {
