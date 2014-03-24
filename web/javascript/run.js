@@ -69,9 +69,9 @@ function loginDisplay(identification, password, callback) {
 	// send the request
 	send(request, function(data) {
 		// callback simply saves the session
-		alert("PD_session: "+session);
 		session = data.object.description;
 		writeCookie("MIND_PD_C",session); //TODO add id/.. of PD to cookie-name
+		alert("PD_session: "+session);
 		callback();
 	});
 
@@ -181,7 +181,7 @@ $(document).on("submit", "#loginDisplayForm", function(event) {
 	password = $("#password").val();
 
 	loginDisplay(identification, password, function(event){
-		window.location.href = "public_display_start.jsp";	   //?session="+session;
+		window.location.href = "public_display_start.jsp?session="+session;	   //?session="+session;
 	});
 
 //		doTask("ADMIN_USER_READ", potentialAdmin, isAdmin);

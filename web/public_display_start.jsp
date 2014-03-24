@@ -17,11 +17,11 @@
 <div id="content">
 	<div id="settings">
 		<div id="app_settings">
-		<a href="http://ran.ge/" title="Professional WordPress Development" id="app_settings_img"></a>
+		<a href="http://ran.ge/" title="Professional WordPress Development" id="app_settings_img" class="pd_link"></a>
 		<p>App Settings</p>
 		</div>
 		<div id="display_settings">
-		<a href="http://ran.ge/" title="Professional WordPress Development" id="display_settings_img"></a>
+		<a href="http://ran.ge/" title="Professional WordPress Development" id="display_settings_img" class="pd_link"></a>
 		<p>Display Settings</p>
 		</div>
 	</div>
@@ -30,15 +30,15 @@
 	</div>
 	<div id="login_location">
 		<div id="location">
-		<a href="http://ran.ge/" title="Professional WordPress Development" id="location_img"></a>
+		<a href="http://ran.ge/" title="Professional WordPress Development" id="location_img" class="pd_link"></a>
 		<p>Location Force</p>
 		</div>
 		<div id="login">
-		<a href="http://ran.ge/" title="Professional WordPress Development" id="login_img"></a>
+		<a href="http://ran.ge/" title="Professional WordPress Development" id="login_img" class="pd_link"></a>
 		<p>Login</p>
 		</div>
 		<div id="privacy">
-		<a href="http://ran.ge/" title="Professional WordPress Development" id="privacy_img"></a>
+		<a href="http://ran.ge/" title="Professional WordPress Development" id="privacy_img" class="pd_link"></a>
 		<p>Privacy Setting</p>
 		</div>
 	</div>
