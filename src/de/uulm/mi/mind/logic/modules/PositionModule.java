@@ -184,6 +184,11 @@ public class PositionModule extends Module {
      */
     private Area getBestArea(Location location) {
         EventModuleManager eventModuleManager = EventModuleManager.getInstance();
-        return (Area) eventModuleManager.handleTask(Task.Location.SMALLEST_AREA_BY_LOCATION, location);
+        Data check = eventModuleManager.handleTask(Task.Location.SMALLEST_AREA_BY_LOCATION, location);
+        if (!(check instanceof Area)) {
+            return null;
+        } else {
+            return (Area) check;
+        }
     }
 }

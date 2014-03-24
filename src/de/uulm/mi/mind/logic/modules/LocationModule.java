@@ -30,7 +30,10 @@ public class LocationModule extends Module {
             return new Error("WrongDataType", "The Location Module requires a Area, WifiMorsel or Location Object.");
         }
 
-        if (request instanceof Location) {
+        if (task instanceof Task.Location) {
+            if (!(request instanceof Location)) {
+                return new Error("IllegalLocationTask", "Location tasks always require a location object!");
+            }
             Location location = (Location) request;
 
             Task.Location locationTask = (Task.Location) task;
@@ -49,9 +52,7 @@ public class LocationModule extends Module {
                     return readMorsels(location);
                 //TODO area add, update -> update locations
             }
-        } else if (request instanceof WifiMorsel) {
-            //TODO are there any other operations directly on these?
-        } else if (request instanceof Area || request == null) {
+        } else if (task instanceof Task.Area) {
             Area area = (Area) request;
 
             Task.Area areaTask = (Task.Area) task;
@@ -68,6 +69,7 @@ public class LocationModule extends Module {
                     return readLocations(area);
                 case ANNIHILATE:
                     return annihilateAreas();
+                //TODO area add, update -> update locations
             }
         }
 
@@ -97,7 +99,7 @@ public class LocationModule extends Module {
      * @param location
      * @return
      */
-    private Area areaByLocation(Location location) {
+    private Area areaByLocation(final Location location) {
         // Get all areas
         Data dbCall = read(new Area(null, null, 0, 0, 0, 0));
         if (!(dbCall instanceof DataList)) {
@@ -115,6 +117,8 @@ public class LocationModule extends Module {
         Area finalArea = (Area) ((DataList) dbCall).get(0);
         for (Object data : all) {
             Area temp = (Area) data;
+            log.log(TAG, "Temp:  " + temp.getID() + " area: " + temp.getArea() + " contanis: " + temp.contains(location.getCoordinateX(), location.getCoordinateY()));
+            log.log(TAG, "Final: " + finalArea.getID() + " area: " + finalArea.getArea());
             if (temp.getArea() < finalArea.getArea()
                     && temp.contains(location.getCoordinateX(), location.getCoordinateY())) {
                 finalArea = temp;

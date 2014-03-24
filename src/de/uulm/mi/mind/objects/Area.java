@@ -30,12 +30,17 @@ public class Area implements Data {
     }
 
     /**
-     * Returns area of area.
+     * Returns area of area. Upper bound is Integer.MAX_VALUE!
      *
      * @return The integer value in m²
      */
-    public int getArea() {
-        return width * height;
+    public long getArea() {
+        long area = (long) width * (long) height;
+        if (area > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        } else {
+            return (int) area;
+        }
     }
 
     /**
