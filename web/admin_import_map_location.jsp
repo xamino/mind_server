@@ -40,6 +40,8 @@
 		<br/>
 		<input type="submit" value="Upload File" />
 	</form>
+	Current Map:
+	<img src="images/map.png" alt="MIND_MAP" > 
 
 
 <!--  
