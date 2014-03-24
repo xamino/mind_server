@@ -189,6 +189,51 @@ $(document).on("submit", "#loginDisplayForm", function(event) {
 
 });
 
+
+/**
+ * on link 'App Settings' clicked in public_display_start.jsp
+ */
+function appSettingsClicked(){
+	var appContents = "";
+	appContents = "<div id='appOne'>";
+	appContents += "Settings of app one.</div>";
+	appContents += "</div><div id='appTwo'>";
+	appContents += "Settings of app two.";
+	appContents += "</div>";
+	appContents += "<button type='button' id='appSettingsBack' onclick='settingsBackButton()'>Back</button>";
+    document.getElementById("content_popup").innerHTML = appContents;
+
+}
+
+
+
+function displaySettingsClicked(){
+	var settingsContents = "";
+	settingsContents = "<div id='settingsBrightness'>";
+	settingsContents += "<h3>Display Brightness</h3><br>TODO: Brightness Stuff.</div>";
+	settingsContents += "</div><div id='settingsRefresh'>";
+	settingsContents += "<hr><br><h3>Refresh Rate</h3><br>TODO: Refresh Stuff.</div>";
+	settingsContents += "</div><a href='#' id='mute_img' onclick='mute()'></a><br>";
+	settingsContents += "<hr><br><button type='button' id='displaySettingsBack' onclick='settingsBackButton()'>Back</button>";
+	settingsContents += "<button type='button' id='displayLogoutButton' onclick='logoutDisplay()'>Logout Display</button>";
+    document.getElementById("content_popup").innerHTML = settingsContents;
+}
+
+function settingsBackButton(){
+	document.getElementById("content_popup").innerHTML = "";
+}
+
+function mute(){
+	alert("TODO: mute");
+}
+
+function logoutDisplay(){
+	logout();
+	deleteCookie("MIND_PD_C");
+	window.location = "public_display_login.jsp";
+}
+
+
 ////////////////old add function --> leave because of the popup example //////////////////
 
 ///**
