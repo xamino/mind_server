@@ -35,6 +35,14 @@
 
 <h3>Map Upload</h3>
 
+	<form action="UploadServlet" method="post" enctype="multipart/form-data">
+		<input type="file" name="file" size="50" />
+		<br/>
+		<input type="submit" value="Upload File" />
+	</form>
+
+
+<!--  
 <script type="text/javascript">
 
 	function fileChange()
@@ -121,14 +129,15 @@ function uploadAbort() {
     <div id="fileType"></div>
     <progress id="progress" style="margin-top:10px"></progress> <span id="prozent"></span>
 </div>
+-->
 
 
-
-<!-- <input id="fileupload" type="file" name="files[]" data-url="images" multiple>
+<!--
+<input id="fileupload" type="file" name="files[]"  multiple>
 <script src="javascript/fileupload/jquery.ui.widget.js"></script>
 <script src="javascript/fileupload/jquery.iframe-transport.js"></script>
 <script src="javascript/fileupload/jquery.fileupload.js"></script>
-<script>
+<script type="text/javascript">
 $(function () {
     $('#fileupload').fileupload({
         dataType: 'json',
@@ -156,7 +165,9 @@ $(function () {
         }
     });
 }); */
-</script>-->
+</script>
+-->
+
 	 <br><hr>
 	 <h3>Areas</h3>
 	 <br>Here you see all Areas which are currently in MIND.
