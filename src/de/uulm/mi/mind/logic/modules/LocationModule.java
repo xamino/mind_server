@@ -57,25 +57,7 @@ public class LocationModule extends Module {
             Task.Area areaTask = (Task.Area) task;
             switch (areaTask) {
                 case CREATE:
-                    if (request == null) {
-                        return new Error("IllegalAddArea", "Area to add was null.");
-                    }
-                    // We need to write all locations into area
-                    Data data = read(new Location(0, 0, null));
-                    if (!(data instanceof DataList)) {
-                        log.error(TAG, "Area create failed due to wrong location read!");
-                        return new Error("AreaCreateFailed", "Failed due to wrong location read!");
-                    }
-                    DataList locList = (DataList) data;
-                    area.setLocations(new DataList());
-                    for (Object obj : locList) {
-                        Location loc = (Location) obj;
-                        log.log(TAG, "Testing "+loc.toString() +" against "+area.toString());
-                        if (area.contains(loc.getCoordinateX(), loc.getCoordinateY())) {
-                            area.addLocation(loc);
-                        }
-                    }
-                    return create(area);
+                    return createArea(area);
                 case READ:
                     return readArea(area);
                 case UPDATE:
@@ -90,6 +72,23 @@ public class LocationModule extends Module {
         }
 
         return new Error("MissingOperation", "The Location Module is unable to perform the Task as it appears not to be implemented.");
+    }
+
+    private Data createArea(Area area) {
+        if (area == null) {
+            return new Error("IllegalAddArea", "Area to add was null.");
+        }
+
+        // We need to write all locations into area
+        DataList<Location> data = database.read(new Location(0, 0, null));
+        area.setLocations(new DataList<Location>());
+        for (Location loc : data) {
+            log.log(TAG, "Testing " + loc.toString() + " against " + area.toString());
+            if (area.contains(loc.getCoordinateX(), loc.getCoordinateY())) {
+                area.addLocation(loc);
+            }
+        }
+        return create(area);
     }
 
     /**
@@ -144,16 +143,19 @@ public class LocationModule extends Module {
         // the location will then be added twice! How do we enforce this better?
 
         // Now read all Areas from DB where the Location coordinates are contained
-        DataList<Location> locations = new DataList<>();
-        locations.add(location);
-        DataList<Area> containedAreas = database.read(new Area(null, locations, 0, 0, 0, 0));
+        DataList<Area> containedAreas = database.getAreasContainingLocation(location);
 
+        boolean success = true;
         for (Area area : containedAreas) {
             area.addLocation(location);
-            database.update(area);
+            success &= database.update(area);
+        }
+        if (success) {
+            return new Success("CreateLocationSuccess", "The Location " + location.toString() + " was stored in the Database.");
+        } else {
+            return new Error("CreateLocationFailure", "The Location " + location.toString() + " could not be stored in the Database.");
         }
 
-        return new Success("CreateLocationSuccess", "The Location " + location.toString() + " was stored in the Database.");
     }
 
     /**

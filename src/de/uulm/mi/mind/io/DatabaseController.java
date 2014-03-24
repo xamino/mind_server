@@ -3,9 +3,10 @@ package de.uulm.mi.mind.io;
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
+import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.query.Predicate;
-import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.servlet.BCrypt;
 
 import javax.servlet.ServletContext;
@@ -61,7 +62,7 @@ public class DatabaseController implements ServletContextListener {
         try {
             con.store(data);
             //con.close();
-            log.log(TAG, data.toString() + " written to DB!");
+            log.log(TAG, "Written to DB: " + data.toString());
 
             return true;
         } catch (Exception e) {
@@ -105,23 +106,14 @@ public class DatabaseController implements ServletContextListener {
 
                 // unique key of the Area object is the ID field.
                 // When this is empty directly use the user Object as filter.
-                if (area.getID() == null && (area.getLocations() == null || area.getLocations().isEmpty())) {
+                if (area.getID() == null) {
                     queryResult = con.queryByExample(area);
                 } else {
                     queryResult = con.query(new Predicate<Area>() {
                         @Override
                         public boolean match(Area match) {
-                            // return all areas that include the single location contained in the requestfilter
-                            if (area.getID() == null && area.getLocations() != null && area.getLocations().size() == 1) {
-                                Location contained = area.getLocations().get(0);
-                                double x = contained.getCoordinateX();
-                                double y = contained.getCoordinateY();
-                                return (x >= match.getTopLeftX())
-                                        && (y >= match.getTopLeftY())
-                                        && (x <= (match.getTopLeftX() + match.getWidth()))
-                                        && (y <= (match.getTopLeftY() + match.getHeight()));
-                            } else /// ID is Areas unique key
-                                return match.getID().equals(area.getID());
+                            // check on unique key
+                            return match.getID().equals(area.getID());
                         }
                     });
                 }
@@ -154,16 +146,37 @@ public class DatabaseController implements ServletContextListener {
 
             // Write query results to DataList
             DataList<T> result = new DataList<>();
-            if (queryResult != null && queryResult.size() > 0) {
+            if (queryResult != null) {
                 for (Object o : queryResult) {
                     result.add((T) o);
                 }
             }
+            //log.log(TAG, "Read from DB: " + result.toString());
             return result;
 
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public DataList<Area> getAreasContainingLocation(final Location contained) {
+        List queryResult = con.query(new Predicate<Area>() {
+            @Override
+            public boolean match(Area match) {
+                // return all areas that include the single location contained in the requestfilter
+                double x = contained.getCoordinateX();
+                double y = contained.getCoordinateY();
+                return match.contains(x, y);
+            }
+        });
+        // Write query results to DataList
+        DataList<Area> result = new DataList<>();
+        if (queryResult != null) {
+            for (Object o : queryResult) {
+                result.add((Area) o);
+            }
+        }
+        return result;
     }
 
     /**
@@ -209,7 +222,7 @@ public class DatabaseController implements ServletContextListener {
             if (result == null)
                 result = new DataList();
 
-            log.log(TAG, result.toString() + " read from DB!");
+            //log.log(TAG, result.toString() + " read from DB!");
             return result;
         } catch (Exception e) {
             return null;
@@ -228,7 +241,7 @@ public class DatabaseController implements ServletContextListener {
 
                 con.store(userToUpdate);
 
-                log.log(TAG, userToUpdate.toString() + " updated in DB!");
+                log.log(TAG, "Updated in DB: " + userToUpdate.toString());
 
                 return true;
             } else if (data instanceof Area) {
@@ -243,7 +256,7 @@ public class DatabaseController implements ServletContextListener {
 
                 con.store(areaToUpdate);
 
-                log.log(TAG, areaToUpdate.toString() + " updated in DB!");
+                log.log(TAG, "Updated in DB: " + areaToUpdate.toString());
                 return true;
             } else if (data instanceof PublicDisplay) {
                 PublicDisplay dataDisplay = (PublicDisplay) data;
@@ -254,10 +267,10 @@ public class DatabaseController implements ServletContextListener {
                 displayUpdate.setLocation(dataDisplay.getLocation());
                 displayUpdate.setToken(dataDisplay.getToken());
                 con.store(displayUpdate);
-                log.log(TAG, displayUpdate.toString() + " updated in DB!");
+                log.log(TAG, "Updated in DB: " + displayUpdate.toString());
                 return true;
             }
-
+            log.error(TAG, "Class update not implemented:" + data.toString());
             return false;
         } catch (Exception e) {
             return false;
@@ -345,7 +358,11 @@ public class DatabaseController implements ServletContextListener {
 
         String filePath = context.getRealPath("WEB-INF/"
                 + config.getDbName());
-        con = Db4oEmbedded.openFile(filePath);
+
+        EmbeddedConfiguration dbconfig = Db4oEmbedded.newConfiguration();
+        dbconfig.common().objectClass(Area.class).cascadeOnUpdate(true);
+        dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);
+        con = Db4oEmbedded.openFile(dbconfig, filePath);
 
         context.log("db4o startup on " + filePath);
 
