@@ -150,18 +150,12 @@ function Message(name, description) {
 
 function Area(ID, locations, topLeftX, topLeftY, width, height) {
     this.$type = "Area";
-    if (ID != null)
-        this.ID = ID;
-    if (locations != null)
-        this.locations = locations;
-    if (topLeftX != null)
-        this.topLeftX = topLeftX;
-    if (topLeftY != null)
-        this.topLeftY = topLeftY;
-    if (width != null)
-        this.width = width;
-    if (height != null)
-        this.height = height;
+    this.ID = ID;
+    this.locations = locations;
+    this.topLeftX = topLeftX;
+    this.topLeftY = topLeftY;
+    this.width = width;
+    this.height = height;
 }
 
 function Location(coordinateX, coordinateY, wifiMorsels) {
@@ -185,7 +179,7 @@ function WifiMorsel(wifiMac, wifiName, wifiLevel) {
 }
 
 function PublicDisplay(identification, token, location, coordinateX, coordinateY) {
-    this.$type = "Display";
+    this.$type = "PublicDisplay";
     if (identification != null)
         this.identification = identification;
     if (token != null)
@@ -197,41 +191,3 @@ function PublicDisplay(identification, token, location, coordinateX, coordinateY
     if (coordinateY != null)
         this.coordinateY = coordinateY;
 }
-
-
-/**
- * Writes a Cookie - credit to http://stackoverflow.com/questions/2257631/how-create-a-session-using-javascript
- * @param name The name of the cookie (set in isAdmin)
- * @param value The value (session)
- */
-function writeCookie(name,value) {
-    var date, expires;
-//    if (days) {
-        date = new Date();
-        date.setTime(date.getTime()+(15*60*1000));
-        expires = "; expires=" + date.toGMTString();
-//            }else{
-//        expires = "";
-//    }
-    document.cookie = name + "=" + value + expires + "; path=/";
-}
-
-/**
- * returns a Cookie corresponding to the forwarded parameter 'name'
- * credit to http://stackoverflow.com/questions/2257631/how-create-a-session-using-javascript
- */
-function readCookie(name) {
-    var i, c, ca, nameEQ = name + "=";
-    ca = document.cookie.split(';');
-    for(i=0;i < ca.length;i++) {
-        c = ca[i];
-        while (c.charAt(0)==' ') {
-            c = c.substring(1,c.length);
-        }
-        if (c.indexOf(nameEQ) == 0) {
-            return c.substring(nameEQ.length,c.length);
-        }
-    }
-    return '';
-}
-

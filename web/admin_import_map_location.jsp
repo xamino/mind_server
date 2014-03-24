@@ -11,7 +11,7 @@
 <title>Admin - Import Map and Location Data</title>
 </head>
 
-<body onload="onLoadOfAdminPage()">
+<body onload="onLoadOfAdminPage();loadLocations(); loadAreas();">
 <div id="container">
 <div id="banner">
 <!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
@@ -33,7 +33,98 @@
 </div>
 <div id="text-content">
 
-<input id="fileupload" type="file" name="files[]" data-url="images" multiple>
+<h3>Map Upload</h3>
+
+<script type="text/javascript">
+
+	function fileChange()
+{
+    //FileList Objekt aus dem Input Element mit der ID "fileA"
+    var fileList = document.getElementById("fileA").files;
+ 
+    //File Objekt (erstes Element der FileList)
+    var file = fileList[0];
+ 
+    //File Objekt nicht vorhanden = keine Datei ausgewählt oder vom Browser nicht unterstützt
+    if(!file)
+        return;
+ 
+    document.getElementById("fileName").innerHTML = 'Dateiname: ' + file.name;
+    document.getElementById("fileSize").innerHTML = 'Dateigröße: ' + file.size + ' B';
+    document.getElementById("fileType").innerHTML = 'Dateitype: ' + file.type;
+    document.getElementById("progress").value = 0;
+    document.getElementById("prozent").innerHTML = "0%";
+}
+
+var client = null;
+ 
+function uploadFile()
+{
+	alert(document.getElementById("fileA").value);
+    //Wieder unser File Objekt
+    var file = document.getElementById("fileA").files[0];
+    //FormData Objekt erzeugen
+    var formData = new FormData();
+    //XMLHttpRequest Objekt erzeugen
+    client = new XMLHttpRequest();
+ 
+    var prog = document.getElementById("progress");
+ 
+    if(!file)
+        return;
+ 
+    prog.value = 0;
+    prog.max = 100;
+ 
+    //Fügt dem formData Objekt unser File Objekt hinzu
+    formData.append("datei", file);
+ 
+    client.onerror = function(e) {
+        alert("onError");
+    };
+ 
+    client.onload = function(e) {
+        document.getElementById("prozent").innerHTML = "100%";
+        prog.value = prog.max;
+    };
+ 
+    client.upload.onprogress = function(e) {
+        var p = Math.round(100 / e.total * e.loaded);
+        document.getElementById("progress").value = p;            
+        document.getElementById("prozent").innerHTML = p + "%";
+    };
+ 
+    client.onabort = function(e) {
+        alert("Upload abgebrochen");
+    };
+ 
+    client.open("POST", "upload.php");
+    client.send(formData);
+} 
+
+function uploadAbort() {
+    if(client instanceof XMLHttpRequest)
+        //Briecht die aktuelle Übertragung ab
+        client.abort();
+}
+ 
+</script>
+ 
+<form action="" method="post" enctype="multipart/form-data">
+    <input name="file" type="file" id="fileA" onchange="fileChange();"/>
+    <input name="upload" value="Upload" type="button" onclick="uploadFile();" />
+    <input name="abort" value="Abbrechen" type="button" onclick="uploadAbort();" />
+</form>
+<div>
+    <div id="fileName"></div>
+    <div id="fileSize"></div>
+    <div id="fileType"></div>
+    <progress id="progress" style="margin-top:10px"></progress> <span id="prozent"></span>
+</div>
+
+
+
+<!-- <input id="fileupload" type="file" name="files[]" data-url="images" multiple>
 <script src="javascript/fileupload/jquery.ui.widget.js"></script>
 <script src="javascript/fileupload/jquery.iframe-transport.js"></script>
 <script src="javascript/fileupload/jquery.fileupload.js"></script>
@@ -65,8 +156,23 @@ $(function () {
         }
     });
 }); */
-</script>
-
+</script>-->
+	 <br><hr>
+	 <h3>Areas</h3>
+	 <br>Here you see all Areas which are currently in MIND.
+	 <br>To Remove one area, simply click 'Remove Location'. The area 'universe' can't be removed.
+	 <br>You can't add or edit an area here. You have to use the MIND-application for this.
+	 <div id="infoText_areas"></div>
+	 <div id="table_space_areas"></div> 
+	 
+	 <br><hr>
+	 <h3>Locations</h3>
+	 <br>Here you see all locations which are currently in MIND.
+	 <br>To Remove one location, simply click 'Remove Location'.
+	 <br>You can't add or edit a location here. You have to use the MIND-application for this.
+	 <div id="infoText_locations"></div>
+	 
+	<div id="table_space_locations"></div> 
 
 </div>
 <div id="logout">
