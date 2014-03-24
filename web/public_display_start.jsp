@@ -10,7 +10,7 @@
 <link href="${pageContext.request.contextPath}/css/public_display.css" rel="stylesheet" type="text/css">
 <title>Public Display</title>
 </head>
-<body>
+<body onload="onLoadOfPdPage()">
 <div id="map">
 
 </div>

@@ -69,9 +69,9 @@ function loginDisplay(identification, password, callback) {
 	// send the request
 	send(request, function(data) {
 		// callback simply saves the session
-		//alert("PD_session: "+session);
-		//session = data.object.description;
-		//writeCookie("MIND_PD_C",session); //TODO add id/.. of PD to cookie-name
+		alert("PD_session: "+session);
+		session = data.object.description;
+		writeCookie("MIND_PD_C",session); //TODO add id/.. of PD to cookie-name
 		callback();
 	});
 }
@@ -731,8 +731,6 @@ function checkSessionFromURL(){
 	}else{
 		return session;		
 	}
-	
-	
 }
 
 /**
@@ -748,6 +746,41 @@ function onLoadOfAdminPage(){
 	var links = document.getElementsByClassName("adminlink");
 	
 	//add sessionid to URLs which are classified as "adminlink"
+	[].forEach.call(links, function(link) {
+	    //add session to link
+		link.setAttribute("href",link+"?session="+session);
+	});
+}
+
+/**
+ * Checks if the session in the url matches the pd session
+ * if false - return to public_display_login.jsp
+ */
+function checkPdSessionFromURL(){
+	var urlSession = getURLParameter("session");
+	var session = readCookie("MIND_PD_C");
+	if(urlSession != session){
+		alert("You have to be logged in.");
+		window.location.href = "public_display_login.jsp";
+		
+	}else{
+		return session;		
+	}
+}
+
+/**
+ * This function is called onLoad of each PD page.
+ * The session will be checked by the checkSessionFromURL function
+ * and the session id will be added to all links classified as "pd_link"
+ */
+function onLoadOfPdPage(){
+	//the current session - if correct - else this session variable is never set -> redirection to login.jsp
+	session = checkPdSessionFromURL();
+	
+	//all links that are classified as "adminlink"
+	var links = document.getElementsByClassName("pd_link");
+	
+	//add sessionid to URLs which are classified as "pd_link"
 	[].forEach.call(links, function(link) {
 	    //add session to link
 		link.setAttribute("href",link+"?session="+session);
