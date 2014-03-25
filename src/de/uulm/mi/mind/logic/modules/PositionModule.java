@@ -18,6 +18,11 @@ import java.util.*;
 public class PositionModule extends Module {
 
     private final int tolerance = 3;  //TODO What value?
+    /**
+     * Timeout after which the position is reset to unknown for a user.
+     */
+    // TODO expose to admin?
+    private final long POSITION_VALID_TIMEOUT = 10 * 60 * 1000;
     private final String TAG = "PositionModule";
     private Messenger log;
 
@@ -57,10 +62,22 @@ public class PositionModule extends Module {
                 DataList sendUsers = new DataList();
                 for (Object obj : users) {
                     User us = ((User) obj);
-                    if (us.getLastPosition() == null)
+                    // TODO filter based on status!
+                    // if lastPosition is null, the user may not be active in the system
+                    if (us.getLastPosition() == null) {
+                        // so ignore
                         continue;
-                    // TODO filter based on time too
-                    sendUsers.add(us);
+                    }
+                    // filter based on time
+                    Long timeDelta = System.currentTimeMillis() - us.getLastAccess().getTime();
+                    if (timeDelta > POSITION_VALID_TIMEOUT) {
+                        // if last update is longer gone, then ignore
+                        continue;
+                    }
+                    // Filter user object to only give name + position
+                    User toSend = new User(us.getEmail(), us.getName());
+                    toSend.setLastPosition(us.getLastPosition());
+                    sendUsers.add(toSend);
                 }
                 return sendUsers;
             default:

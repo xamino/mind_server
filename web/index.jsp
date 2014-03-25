@@ -11,7 +11,8 @@
 button - only till we know whats on index.jsp <br>
 <input type="button" name="redirect" value="i am a person" onclick="document.location.href='login.jsp'">
 <br>
-<input type="button" name="redirect" value="i am a public display" onclick="document.location.href='public_display_login.jsp'">
+<input type="button" name="redirect" value="i am a public display"
+       onclick="document.location.href='public_display_login.jsp'">
 <br>
 <br>
 MIND test page for checking the API and as an example for later work on web interfaces.
@@ -46,6 +47,8 @@ Click here to run a unit test of the API. WARNING: while the test is running, th
 <input type="button" name="areatest" value="Area Unit Test" onclick="areaTest();">
 <br>
 <input type="button" name="positiontest" value="Position Unit Test" onclick="positionTest();">
+<br>
+<input type="button" name="positionreadtest" value="Position Read Unit Test" onclick="testPositionRead();">
 <br>
 <input type="button" name="admindisplaytest" value="PD Admin Test" onclick="displayAdminTest();">
 <br>

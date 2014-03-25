@@ -328,7 +328,7 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.User.ANNIHILATE, null);
             // Read all positions (as publicly seen)
             case READ_ALL_POSITIONS:
-                return moduleManager.handleTask(Task.Display.READ, null);
+                return moduleManager.handleTask(Task.Position.READ, null);
             default:
                 return null;
         }
@@ -345,7 +345,7 @@ public class ServletFunctions {
         Task.API task = Task.API.safeValueOf(arrival.getTask());
         switch (task) {
             case READ_ALL_POSITIONS:
-                return moduleManager.handleTask(Task.Display.READ, null);
+                return moduleManager.handleTask(Task.Position.READ, null);
             default:
                 return null;
         }

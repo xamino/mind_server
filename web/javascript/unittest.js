@@ -24,6 +24,7 @@ function doUnitTest() {
     userAccessTest();
     areaTest();
     positionTest();
+    testPositionRead();
     displayAdminTest();
     displayUserTest();
 
@@ -321,6 +322,62 @@ function positionTest() {
 }
 
 /**
+ * Tests the reading of the positions of all the users in the system, with filtering check!
+ */
+function testPositionRead() {
+    alert("Beginning position read test.");
+    cleanDB();
+    var adminSession = getAdminSession();
+
+    // Prepare testing field:
+    var location1 = new Location(100, 100, [
+        new WifiMorsel("00:19:07:06:64:00", "eduroam", -93),
+        new WifiMorsel("00:19:07:06:64:01", "test", -90),
+        new WifiMorsel("00:19:07:06:64:02", "welcome", -85)
+    ]);
+    var location2 = new Location(200, 200, [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -80),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -70),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -60)
+    ]);
+    var location3 = new Location(150, 150, [
+        new WifiMorsel("A0:19:07:07:64:00", "eduroam", -100),
+        new WifiMorsel("A0:19:07:07:64:01", "eduroam", -50),
+        new WifiMorsel("A0:19:07:07:64:02", "eduroam", -30)
+    ]);
+    unitTest("location_add", location1, Success, adminSession);
+    unitTest("location_add", location2, Success, adminSession);
+    unitTest("location_add", location3, Success, adminSession);
+    unitTest("area_add", new Area("office", null, 145, 145, 10, 10), Success, adminSession);
+    unitTest("area_add", new Area("institute", null, 140, 140, 100, 100), Success, adminSession);
+    unitTest("admin_user_add", new User("shark@ocean.int", "shark", "Haifisch Freund", false), Success, adminSession);
+    unitTest("admin_user_add", new User("dolphin@ocean.int", "thx4fish", "Prof. Turnschwimmer", false), Success, adminSession);
+    var sharkSession = unitTest("login", new User("shark@ocean.int", "shark"), Message, adminSession).description;
+    var dolphinSession = unitTest("login", new User("dolphin@ocean.int", "thx4fish"), Message, adminSession).description;
+
+    // shark gets an update
+    unitTest("position_find", location2, Area, sharkSession);
+    // Should be only one in list here
+    var userLocs = unitTest("read_all_positions", null, Array, adminSession);
+    if (userLocs == null || userLocs.length != 1) {
+        alert("Wrong number of available user locations!");
+    }
+    // dolphin updates
+    unitTest("position_find", location3, Area, dolphinSession);
+    userLocs = unitTest("read_all_positions", null, Array, adminSession);
+    if (userLocs == null || userLocs.length != 2) {
+        alert("Wrong number of available user locations!");
+    }
+    // try illegal access
+    unitTest("read_all_positions", null, Error, sharkSession);
+
+    // TODO test filters
+
+    cleanDB();
+    alert("Finished position read test.")
+}
+
+/**
  * Test all functionality for the public displays.
  */
 function displayAdminTest() {
@@ -433,6 +490,22 @@ function cleanDB() {
         unitTest("check", null, Error, adminSession);
     }
     unitTest("logout", null, Success, newSession);
+}
+
+/**
+ * Small helper function that gets a valid adminSession for when that is not part of the unittest
+ */
+function getAdminSession() {
+    var arrival = new Arrival("login", null, new User("admin@admin.admin", "admin"));
+    var obj = JSON.parse($.ajax({
+        data: JSON.stringify(arrival),
+        async: false
+    }).responseText).object;
+    if (instanceOf(obj, Success) || instanceOf(obj, Message)) {
+        return obj.description;
+    }
+    alert("Failed to get admin session!");
+    return null;
 }
 
 /**
