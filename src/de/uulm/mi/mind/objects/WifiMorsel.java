@@ -2,7 +2,7 @@ package de.uulm.mi.mind.objects;
 
 /**
  * @author Tamino Hartmann
- * Data object for a single wifi data morsel on a location.
+ *         Data object for a single wifi data morsel on a location.
  */
 public class WifiMorsel implements Data, Comparable {
     /**
@@ -76,12 +76,17 @@ public class WifiMorsel implements Data, Comparable {
 
     @Override
     public int compareTo(Object obj) {
-        WifiMorsel temp = (WifiMorsel)obj;
-        if(this.wifiLevel<temp.wifiLevel)
+        WifiMorsel temp = (WifiMorsel) obj;
+        if (this.wifiLevel < temp.wifiLevel)
             return -1;
-        else if(this.wifiLevel>temp.wifiLevel)
+        else if (this.wifiLevel > temp.wifiLevel)
             return 1;
         else
             return 0;
+    }
+
+    @Override
+    public String getKey() {
+        return null;
     }
 }

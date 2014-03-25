@@ -3,9 +3,9 @@ package de.uulm.mi.mind.io;
 
 import de.uulm.mi.mind.logger.Messenger;
 
-import javax.servlet.ServletContext;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -29,15 +29,15 @@ public class Configuration {
         log = Messenger.getInstance();
     }
 
-    public void init(ServletContext context) {
+    public void init(String servletPath) {
 
         Properties config = new Properties();
+        String customConfigPath = servletPath + "WEB-INF/config.properties";
 
-        InputStream customConfig = context.getResourceAsStream(
-                "WEB-INF/config.properties");
-        if (customConfig != null) {
+
+        if (new File(customConfigPath).exists()) {
             try {
-                config.load(customConfig);
+                config.load(new FileInputStream(customConfigPath));
 
                 this.dbName = config.getProperty("DATABASE_NAME");
                 this.adminName = config.getProperty("ADMIN_NAME");
@@ -48,14 +48,12 @@ public class Configuration {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else log.log(CLASS, "Did not find custom config! Loading standard config.");
+        } else log.log(CLASS, "Did not find custom config! Loading standard config.");
 
 
         // load default config
         try {
-            config.load(context.getResourceAsStream(
-                    "WEB-INF/stdconfig.properties"));
+            config.load(new FileInputStream(servletPath + "WEB-INF/stdconfig.properties"));
 
             if (this.dbName == null)
                 this.dbName = config.getProperty("DATABASE_NAME");

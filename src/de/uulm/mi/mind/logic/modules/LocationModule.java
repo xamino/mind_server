@@ -173,7 +173,7 @@ public class LocationModule extends Module {
         deleted &= database.deleteAll(new Location(0, 0, null));
         deleted &= database.deleteAll(new WifiMorsel(null, null, 0));
         if (deleted) {
-            database.init();
+            database.reinit();
             return new Success("AreaAnnihilationSuccess", "All areas were removed from Database.");
         }
         return new Error("AreaAnnihilationFailure", "Removal of areas failed.");

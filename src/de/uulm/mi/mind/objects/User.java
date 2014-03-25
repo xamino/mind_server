@@ -90,4 +90,9 @@ public class User implements Data, Authenticated {
     public String readAuthentication() {
         return pwdHash;
     }
+
+    @Override
+    public String getKey() {
+        return email;
+    }
 }

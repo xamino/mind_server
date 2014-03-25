@@ -119,4 +119,9 @@ public class Area implements Data {
     public boolean contains(final double X, final double Y) {
         return (X >= topLeftX && X <= topLeftX + width) && (Y >= topLeftY && Y <= topLeftY + height);
     }
+
+    @Override
+    public String getKey() {
+        return ID;
+    }
 }

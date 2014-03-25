@@ -1,13 +1,13 @@
 package de.uulm.mi.mind.logic.modules;
 
-import de.uulm.mi.mind.objects.Data;
 import de.uulm.mi.mind.io.DatabaseController;
-import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.DataList;
-import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.logic.Task;
+import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.DataList;
+import de.uulm.mi.mind.objects.User;
+import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.objects.messages.Success;
 
 /**
  */
@@ -70,7 +70,7 @@ public class UserModule extends Module {
     private Data annihilateUsers() {
         Boolean deleted = database.deleteAll(new User(null, null));
         if (deleted) {
-            database.init();
+            database.reinit();
             return new Success("UserAnnihilationSuccess", "All users were removed from Database. Use default admin.");
         }
         return new Error("UserAnnihilationFailure", "Removal of users failed.");

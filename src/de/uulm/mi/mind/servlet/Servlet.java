@@ -5,7 +5,6 @@
 package de.uulm.mi.mind.servlet;
 
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.logger.TimerResult;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Task;
 import de.uulm.mi.mind.objects.Data;
@@ -264,6 +263,11 @@ public class Servlet extends HttpServlet {
         public void setObject(Data object) {
             this.object = object;
         }
+
+        @Override
+        public String getKey() {
+            return null;
+        }
     }
 
     /**
@@ -290,6 +294,11 @@ public class Servlet extends HttpServlet {
 
         public void setObject(Data object) {
             this.object = object;
+        }
+
+        @Override
+        public String getKey() {
+            return null;
         }
     }
 

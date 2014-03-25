@@ -48,4 +48,9 @@ public class Location implements Data {
                 ", coordinateY=" + coordinateY + ", morsels=" + wifiMorsels +
                 '}';
     }
+
+    @Override
+    public String getKey() {
+        return String.valueOf(getCoordinateX()) + "/" + String.valueOf(getCoordinateY());
+    }
 }
