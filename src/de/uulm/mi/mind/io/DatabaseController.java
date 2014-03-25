@@ -81,9 +81,12 @@ public class DatabaseController implements ServletContextListener {
      */
     public <T extends Data> DataList<T> read(final T requestFilter) {
         try {
-            List queryResult = null;
+            List queryResult;
             // When unique key is empty, directly use the filter.
-            if (requestFilter.getKey() == null || requestFilter.getKey().equals("") || requestFilter.getKey().equals("0.0/0.0")) { //TODO better location key
+            if (requestFilter == null
+                    || requestFilter.getKey() == null
+                    || requestFilter.getKey().equals("")
+                    || requestFilter.getKey().equals("0.0/0.0")) { //TODO better location key
                 queryResult = con.queryByExample(requestFilter);
             } else {
                 queryResult = con.query(new Predicate<T>() {
@@ -234,7 +237,7 @@ public class DatabaseController implements ServletContextListener {
      * Deletes an object of type data from database.
      *
      * @param data the object to be deleted.
-     * @return true if deletion was successful, otherwise false
+     * @return true if deletion was successful or the object does not exist, otherwise false
      */
     public boolean delete(Data data) {
         try {
