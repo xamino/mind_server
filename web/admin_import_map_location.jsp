@@ -43,17 +43,16 @@
 	<div id="map_div"></div>
 	
 	<script>
-	function doesFileExist(urlToFile)
-{
-    var xhr = new XMLHttpRequest();
-    xhr.open('HEAD', urlToFile, false);
-    xhr.send();
-    if (xhr.status == "404") {
-        return false;
-    } else {
-        return true;
-    }
-}
+	function doesFileExist(urlToFile){
+	    var xhr = new XMLHttpRequest();
+	    xhr.open('HEAD', urlToFile, false);
+	    xhr.send();
+	    if (xhr.status == "404") {
+	        return false;
+	    } else {
+	        return true;
+	    }
+	}
 	</script>
 	<script>
 	var url_png = doesFileExist("images/map.png");
@@ -65,27 +64,27 @@
  
 	if (url_png == true) { 
 	var input = "";
-	input = "Current Map:";
-	input += "<img id='testimage_png' alt='MIND_MAP' src='/images/map.png' >";
-    document.getElementById("map_div").innerHTML = test;
+	input = "Current Map:<br>";
+	input += "<img id='testimage_png' alt='MIND_MAP'  style='max-width:600px; max-height:350px;' src='images/map.png'>";
+	document.getElementById("map_div").innerHTML = input;
     }else if(url_jpg == true){
     var input = "";
-	input = "Current Map:";
-	input += "<img id='testimage_jpg' alt='MIND_MAP' src='/images/map.jpg' >";
-    document.getElementById("map_div").innerHTML = test;
+	input = "Current Map:<br>";
+	input += "<img id='testimage_jpg' alt='MIND_MAP' style='max-width:600px; max-height:350px;' src='images/map.jpg'>";
+    document.getElementById("map_div").innerHTML = input;
     }else if(url_jpg == true){
     var input = "";
-	input = "Current Map:";
-	input += "<img id='testimage_jpeg' alt='MIND_MAP' src='/images/map.jpeg' >";
-    document.getElementById("map_div").innerHTML = test;
+	input = "Current Map:<br>";
+	input += "<img id='testimage_jpeg' alt='MIND_MAP' style='max-width:600px; max-height:350px;' src='images/map.jpeg'>";
+    document.getElementById("map_div").innerHTML = input;
 	} else {
-    var test = "";
-	test = "Image isn't available";
-	test += "<br> Sorry!";
-    document.getElementById("map_div").innerHTML = test;
+    var input = "";
+	input = "Image isn't available";
+	input += "<br> Sorry!";
+    document.getElementById("map_div").innerHTML = input;
 	}
 	</script>
-	 
+	 <!-- <img id='testimage_jpg' alt='MIND_MAP' src='images/map.jpg'> -->
 	 <br><hr>
 	 <h3>Areas</h3>
 	 <br>Here you see all Areas which are currently in MIND.
