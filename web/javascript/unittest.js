@@ -1,3 +1,10 @@
+/* TODO:
+ - test that *_read with no object returns list of *
+ - *_read should always return array
+ - *_read should be called multiple times (to prevent stuff like with Location from happening again)
+ */
+
+
 /**
  * Function that runs a unit test. WARNING: test is done with synchronous ajax calls, which means the webpage will be
  * unresponsive until the unit test is done!
@@ -77,7 +84,6 @@ function adminRightsTest() {
     // logout
     unitTest("logout", null, Success, adminSession);
     // login
-    // TODO this should be correct –> date is not written on update
     unitTest("login", new User("admin@admin.admin", "admin", null), Success, null);
 
     cleanDB();
@@ -160,40 +166,42 @@ function userAccessTest() {
 }
 
 function areaTest() {
-    alert("Beginning area, location, position.");
+    alert("Beginning area, location.");
 
     var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
 
-    // test adding a new area
     var wifis1 = [
         new WifiMorsel("00:19:07:07:64:00", "eduroam", -93),
         new WifiMorsel("00:19:07:07:64:01", "eduroam", -90),
         new WifiMorsel("00:19:07:07:64:02", "welcome", -85)
     ];
-    unitTest("area_add", new Area("Office Prof. Gott", [new Location(34, 57, wifis1)], 34, 56, 3, 4), Success, adminSession);
-    // test universe area
     var wifis2 = [
         new WifiMorsel("00:19:07:00:65:00", "eduroam", -54),
         new WifiMorsel("00:19:07:00:65:01", "welcome", -34),
         new WifiMorsel("00:19:07:00:66:02", "welcome", -12)
     ];
+    // test adding a new area
+    unitTest("area_add", new Area("Office Prof. Gott", null, 34, 56, 3, 4), Success, adminSession);
+    // adding locations via area should result in error
+    unitTest("area_add", new Area("Office Prof. Gott", [new Location(34, 57, wifis1)], 34, 56, 3, 4), Error, adminSession);
+    // test universe area
     unitTest("location_add", new Location(1, 1, wifis2), Success, adminSession);
-    var area = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
-    if (!instanceOf(area, Area)) {
+    var area = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Array, adminSession);
+    if (!instanceOf(area[0], Area)) {
         alert("Reading universe failed - not Area type object!");
     } else {
-        var location = area.locations[0];
+        var location = area[0].locations[0];
         if (location == null && !((location.coordinateX == 1) && (location.coordinateY == 1) )) {
             alert("Writing a location directly to the universal area failed!");
         }
     }
     // Test adding a location to multiple ares
     unitTest("location_add", new Location(35, 58, wifis1), Success, adminSession);
-    var universe = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Area, adminSession);
-    var office = unitTest("area_read", new Area("Office Prof. Gott", null, 0, 0, 0, 0), Area, adminSession);
+    var universe = unitTest("area_read", new Area("universe", null, 0, 0, 0, 0), Array, adminSession);
+    var office = unitTest("area_read", new Area("Office Prof. Gott", null, 0, 0, 0, 0), Array, adminSession);
     // should be in both
     var test = false;
-    var locations = universe.locations;
+    var locations = universe[0].locations;
     for (var i = 0; i < locations.length; i++) {
         if (locations[i].coordinateX == 35 && locations[i].coordinateY == 58)
             test = true;
@@ -201,7 +209,7 @@ function areaTest() {
     if (!test) {
         alert("Multiple area location failed! Not in universe.")
     }
-    locations = office.locations;
+    locations = office[0].locations;
     for (var i = 0; i < locations.length; i++) {
         if (locations[i].coordinateX == 35 && locations[i].coordinateY == 58)
             test = true;
@@ -209,10 +217,18 @@ function areaTest() {
     if (!test) {
         alert("Multiple area location failed! Not in office.")
     }
+    // test adding a new area without locations, should contain corresponding locations after the fact!
+    unitTest("location_add", new Location(111, 111, wifis1), Success, adminSession);
+    unitTest("area_add", new Area("Toilet", null, 100, 100, 20, 20), Success, adminSession);
+    var toilet = unitTest("area_read", new Area("Toilet", null, 0, 0, 0, 0), Array, adminSession);
+    toilet = toilet[0];
+    if (toilet.locations == undefined || toilet.locations.length != 1) {
+        alert("New area was not correctly populated with previous locations!");
+    }
 
     cleanDB();
 
-    alert("Area, Location, Position done.");
+    alert("Area, Location done.");
 }
 
 function positionTest() {
@@ -221,57 +237,68 @@ function positionTest() {
     var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
 
     var location1 = new Location(100, 100, [
-        new WifiMorsel("00:19:07:07:64:00", "eduroam", -93),
-        new WifiMorsel("00:19:07:07:64:01", "eduroam", -90),
-        new WifiMorsel("00:19:07:07:64:02", "welcome", -85)
+        new WifiMorsel("00:19:07:06:64:00", "eduroam", -93),
+        new WifiMorsel("00:19:07:06:64:01", "test", -90),
+        new WifiMorsel("00:19:07:06:64:02", "welcome", -85)
     ]);
-
     var location2 = new Location(200, 200, [
         new WifiMorsel("00:19:07:07:64:00", "eduroam", -80),
         new WifiMorsel("00:19:07:07:64:01", "eduroam", -70),
         new WifiMorsel("00:19:07:07:64:02", "welcome", -60)
     ]);
-
     var location3 = new Location(150, 150, [
-        new WifiMorsel("00:19:07:07:64:00", "eduroam", -100),
-        new WifiMorsel("00:19:07:07:64:01", "eduroam", -50),
-        new WifiMorsel("00:19:07:07:64:02", "welcome", -30)
+        new WifiMorsel("A0:19:07:07:64:00", "eduroam", -100),
+        new WifiMorsel("A0:19:07:07:64:01", "eduroam", -50),
+        new WifiMorsel("A0:19:07:07:64:02", "eduroam", -30)
     ]);
 
     var locationRequest1 = new Location(0, 0, [
-        new WifiMorsel("00:19:07:07:64:00", "eduroam", -92),
-        new WifiMorsel("00:19:07:07:64:01", "eduroam", -91),
-        new WifiMorsel("00:19:07:07:64:02", "welcome", -84)
+        new WifiMorsel("00:19:07:06:64:00", "eduroam", -92),
+        new WifiMorsel("00:19:07:06:64:01", "test", -91),
+        new WifiMorsel("00:19:07:06:64:02", "welcome", -84)
     ]);
-
-    var locationRequest2 = new Location(1, 1, [
-        new WifiMorsel("00:19:07:07:64:00", "eduroam", -94),
-        new WifiMorsel("00:19:07:07:64:01", "eduroam", -90),
-        new WifiMorsel("00:19:07:07:64:02", "welcome", -83)
+    // note switched order of wifimorsels
+    var locationRequest2 = new Location(42,42, [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -80),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -60),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -70)
+    ]);
+    var locationRequest3 = new Location(1, 1, [
+        new WifiMorsel("A0:19:07:07:64:00", "eduroam", -98),
+        new WifiMorsel("A0:19:07:07:64:01", "eduroam", -49),
+        new WifiMorsel("A0:19:07:07:64:02", "eduroam", -32)
     ]);
 
     unitTest("location_add", location1, Success, adminSession);
     unitTest("location_add", location2, Success, adminSession);
-    unitTest("location_add", location2, Success, adminSession);
+    unitTest("location_add", location3, Success, adminSession);
+    // add area that coverse location3
+    unitTest("area_add", new Area("office", null, 145, 145, 10, 10), Success, adminSession);
+    // area that covers loc3 + 2
+    unitTest("area_add", new Area("institute", null,140, 140, 100, 100), Success, adminSession);
 
-    // Test exact location match
-    {
-        var match = unitTest("position_find", locationRequest1, Location, adminSession);
-        if (instanceOf(match, Location)) {
-            if (match.coordinateX != location1.coordinateX || match.coordinateY != location1.coordinateY) {
-                alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
-            }
+    // Test exact location match to universe (location1)
+    var match = unitTest("position_find", locationRequest1, Area, adminSession);
+    if (instanceOf(match, Area)) {
+        if (match.ID != "universe") {
+            alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
         }
     }
     // Test close location match
-    {
-        var match = unitTest("position_find", locationRequest2, Location, adminSession);
-        if (instanceOf(match, Location)) {
-            if (match.coordinateX != location1.coordinateX || match.coordinateY != location1.coordinateY) {
-                alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
-            }
+    match = unitTest("position_find", locationRequest2, Area, adminSession);
+    if (instanceOf(match, Area)) {
+        if (match.ID != "institute") {
+            alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
         }
     }
+    // test match to office
+    match = unitTest("position_find", locationRequest3, Area, adminSession);
+    if (instanceOf(match, Area)) {
+        if (match.ID != "office") {
+            alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
+        }
+    }
+    // TODO more, especially check for errors!
 
     cleanDB();
 

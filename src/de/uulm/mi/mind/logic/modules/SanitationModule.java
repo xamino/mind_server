@@ -268,7 +268,7 @@ public class SanitationModule extends Module {
         Data tempData;
         if (incomplete instanceof User) {
             // Try reading the user from the database
-            tempData = EventModuleManager.getInstance().handleTask(Task.User.READ, new User(null, incomplete.readIdentification()));
+            tempData = EventModuleManager.getInstance().handleTask(Task.User.READ, new User(incomplete.readIdentification()));
             if (tempData instanceof DataList && ((DataList) tempData).size() == 1) {
                 return (Data) ((DataList) tempData).get(0);
             }

@@ -3,9 +3,10 @@ package de.uulm.mi.mind.io;
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
+import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.query.Predicate;
-import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.servlet.BCrypt;
 
 import javax.servlet.ServletContext;
@@ -52,17 +53,18 @@ public class DatabaseController implements ServletContextListener {
      * @return true if the operation was successful and false otherwise.
      */
     public boolean create(Data data) {
-        // avoid duplicates
+        // Sanitize input on DB, only allow Data objects implementing a unique key
+        if (data == null || data.getKey() == null || data.getKey().equals("")) {
+            return false;
+        }
+        // avoid duplicates by checking if there is already a result in DB
         DataList<Data> readData = read(data);
         if (readData != null && !readData.isEmpty()) {
             return false;
         }
-
         try {
             con.store(data);
-            //con.close();
-            log.log(TAG, data.toString() + " written to DB!");
-
+            log.log(TAG, "Written to DB: " + data.toString());
             return true;
         } catch (Exception e) {
             return false;
@@ -78,92 +80,53 @@ public class DatabaseController implements ServletContextListener {
      * @return A DataList of the specified filter parameter Type or null on error.
      */
     public <T extends Data> DataList<T> read(final T requestFilter) {
-        List queryResult = null;
-
         try {
-            // Differentiate Object types
-            if (requestFilter instanceof User) {
-                final User user = (User) requestFilter;
-
-                // unique key of the User object is the email field.
-                // When this is empty directly use the user Object as filter.
-                if (user.getEmail() == null) {
-                    queryResult = con.queryByExample(user);
-                } else { // When the email key is set, only return the single instance matching the key
-                    queryResult = con.query(new Predicate<User>() {
-                        @Override
-                        public boolean match(User o) {
-                            // email is Users unique key
-                            return o.getEmail().equals(user.getEmail());
-                        }
-                    });
-
-                }
-
-            } else if (requestFilter instanceof Area) {
-                final Area area = (Area) requestFilter;
-
-                // unique key of the Area object is the ID field.
-                // When this is empty directly use the user Object as filter.
-                if (area.getID() == null && (area.getLocations() == null || area.getLocations().isEmpty())) {
-                    queryResult = con.queryByExample(area);
-                } else {
-                    queryResult = con.query(new Predicate<Area>() {
-                        @Override
-                        public boolean match(Area match) {
-                            // return all areas that include the single location contained in the requestfilter
-                            if (area.getID() == null && area.getLocations() != null && area.getLocations().size() == 1) {
-                                Location contained = area.getLocations().get(0);
-                                double x = contained.getCoordinateX();
-                                double y = contained.getCoordinateY();
-                                return (x >= match.getTopLeftX())
-                                        && (y >= match.getTopLeftY())
-                                        && (x <= (match.getTopLeftX() + match.getWidth()))
-                                        && (y <= (match.getTopLeftY() + match.getHeight()));
-                            } else /// ID is Areas unique key
-                                return match.getID().equals(area.getID());
-                        }
-                    });
-                }
-            } else if (requestFilter instanceof Location) {
-                final Location loc = (Location) requestFilter;
-                if (loc.getCoordinateX() == 0 && loc.getCoordinateY() == 0) {
-                    queryResult = con.queryByExample(loc);
-                } else {
-                    queryResult = con.query(new Predicate<Location>() {
-                        @Override
-                        public boolean match(Location o) {
-                            // check on unique key
-                            return loc.getCoordinateY() == o.getCoordinateY() && loc.getCoordinateX() == o.getCoordinateX();
-                        }
-                    });
-                }
-            } else if (requestFilter instanceof PublicDisplay) {
-                final PublicDisplay displayFilter = (PublicDisplay) requestFilter;
-                if (displayFilter.getIdentification() == null) {
-                    queryResult = con.queryByExample(displayFilter);
-                } else {
-                    queryResult = con.query(new Predicate<PublicDisplay>() {
-                        @Override
-                        public boolean match(PublicDisplay publicDisplay) {
-                            return displayFilter.getIdentification().equals(publicDisplay.getIdentification());
-                        }
-                    });
-                }
+            List queryResult = null;
+            // When unique key is empty, directly use the filter.
+            if (requestFilter.getKey() == null || requestFilter.getKey().equals("") || requestFilter.getKey().equals("0.0/0.0")) { //TODO better location key
+                queryResult = con.queryByExample(requestFilter);
+            } else {
+                queryResult = con.query(new Predicate<T>() {
+                    @Override
+                    public boolean match(T o) {
+                        return o.getKey().equals(requestFilter.getKey());
+                    }
+                });
             }
 
             // Write query results to DataList
             DataList<T> result = new DataList<>();
-            if (queryResult != null && queryResult.size() > 0) {
+            if (queryResult != null) {
                 for (Object o : queryResult) {
                     result.add((T) o);
                 }
             }
+            //log.log(TAG, "Read from DB: " + result.toString());
             return result;
 
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public DataList<Area> getAreasContainingLocation(final Location contained) {
+        List queryResult = con.query(new Predicate<Area>() {
+            @Override
+            public boolean match(Area match) {
+                // return all areas that include the single location contained in the requestfilter
+                double x = contained.getCoordinateX();
+                double y = contained.getCoordinateY();
+                return match.contains(x, y);
+            }
+        });
+        // Write query results to DataList
+        DataList<Area> result = new DataList<>();
+        if (queryResult != null) {
+            for (Object o : queryResult) {
+                result.add((Area) o);
+            }
+        }
+        return result;
     }
 
     /**
@@ -209,7 +172,7 @@ public class DatabaseController implements ServletContextListener {
             if (result == null)
                 result = new DataList();
 
-            log.log(TAG, result.toString() + " read from DB!");
+            //log.log(TAG, result.toString() + " read from DB!");
             return result;
         } catch (Exception e) {
             return null;
@@ -217,6 +180,8 @@ public class DatabaseController implements ServletContextListener {
     }
 
     public boolean update(Data data) {
+        if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
+
         try {
             if (data instanceof User) {
                 User dataUser = (User) data;
@@ -228,7 +193,7 @@ public class DatabaseController implements ServletContextListener {
 
                 con.store(userToUpdate);
 
-                log.log(TAG, userToUpdate.toString() + " updated in DB!");
+                log.log(TAG, "Updated in DB: " + userToUpdate.toString());
 
                 return true;
             } else if (data instanceof Area) {
@@ -243,7 +208,7 @@ public class DatabaseController implements ServletContextListener {
 
                 con.store(areaToUpdate);
 
-                log.log(TAG, areaToUpdate.toString() + " updated in DB!");
+                log.log(TAG, "Updated in DB: " + areaToUpdate.toString());
                 return true;
             } else if (data instanceof PublicDisplay) {
                 PublicDisplay dataDisplay = (PublicDisplay) data;
@@ -254,10 +219,10 @@ public class DatabaseController implements ServletContextListener {
                 displayUpdate.setLocation(dataDisplay.getLocation());
                 displayUpdate.setToken(dataDisplay.getToken());
                 con.store(displayUpdate);
-                log.log(TAG, displayUpdate.toString() + " updated in DB!");
+                log.log(TAG, "Updated in DB: " + displayUpdate.toString());
                 return true;
             }
-
+            log.error(TAG, "Class update not implemented:" + data.toString());
             return false;
         } catch (Exception e) {
             return false;
@@ -277,7 +242,7 @@ public class DatabaseController implements ServletContextListener {
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList != null && dataList.isEmpty()) {
                 return true;
-            } else if (dataList != null && !dataList.isEmpty()) {
+            } else if (dataList != null) {
                 Data dataToDelete = dataList.get(0);
                 con.delete(dataToDelete);
                 log.log(TAG, dataToDelete.toString() + " deleted from DB!");
@@ -310,7 +275,30 @@ public class DatabaseController implements ServletContextListener {
         }
     }
 
-    public void init() {
+    public void init(String servletFilePath, boolean reinitialize) {
+        Configuration config = Configuration.getInstance();
+        config.init(servletFilePath); // must be first!!!
+        log = Messenger.getInstance();
+        String dbFilePath = servletFilePath + "WEB-INF/" + config.getDbName();
+
+        EmbeddedConfiguration dbconfig = Db4oEmbedded.newConfiguration();
+        dbconfig.common().objectClass(Area.class).cascadeOnUpdate(true);
+        dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);
+        //dbconfig.common().optimizeNativeQueries(true);
+        //dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
+        //dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
+        con = Db4oEmbedded.openFile(dbconfig, dbFilePath);
+
+        log.log(TAG, "db4o startup on " + dbFilePath);
+
+        if (reinitialize)
+            reinit();
+    }
+
+    /**
+     * Must not be called before the
+     */
+    public void reinit() {
         //
         Configuration config = Configuration.getInstance();
 
@@ -323,14 +311,13 @@ public class DatabaseController implements ServletContextListener {
         }
 
         // Create default admin if no other admin exists
-        User adminProto = new User(null, null);
+        User adminProto = new User(null);
         adminProto.setAdmin(true);
         DataList<User> adminData = read(adminProto);
         // test for existing single admin or list of admins
         if (adminData == null || adminData.isEmpty()) {
             log.log(TAG, "Admin not existing, creating one.");
-            adminProto = new User(config.getAdminName(), config.getAdminEmail());
-            adminProto.setAdmin(true);
+            adminProto = new User(config.getAdminEmail(), config.getAdminName(), true);
             adminProto.setPwdHash(BCrypt.hashpw(config.getAdminPassword(), BCrypt.gensalt(12)));
             create(adminProto);
         }
@@ -339,30 +326,20 @@ public class DatabaseController implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent event) {
         ServletContext context = event.getServletContext();
-        Configuration config = Configuration.getInstance();
-        config.init(context); // must be first!!!
-        log = Messenger.getInstance();
-
-        String filePath = context.getRealPath("WEB-INF/"
-                + config.getDbName());
-        con = Db4oEmbedded.openFile(filePath);
-
-        context.log("db4o startup on " + filePath);
-
-        init();
+        String filePath = context.getRealPath("/");
+        init(filePath, true);
     }
 
 
     @Override
     public void contextDestroyed(ServletContextEvent event) {
-        ServletContext context = event.getServletContext();
-        close(con);
-        context.log("db4o shutdown");
+        close();
     }
 
-    private void close(ObjectContainer container) {
-        if (container != null) {
-            container.close();
+    public void close() {
+        if (con != null) {
+            con.close();
+            log.log(TAG, "db4o shutdown");
         }
     }
 }

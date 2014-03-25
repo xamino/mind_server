@@ -35,38 +35,14 @@
 
 <h3>Map Upload</h3>
 
-<script src="javascript/fileupload/jquery.ui.widget.js"></script>
-<script src="javascript/fileupload/jquery.iframe-transport.js"></script>
-<script src="javascript/fileupload/jquery.fileupload.js"></script>
-<script type="text/javascript"><script>
-$(function () {
-    $('#fileupload').fileupload({
-        dataType: 'json',
-        add: function (e, data) {
-        	
-            data.context = $('<button/>').text('Upload')
-                .appendTo(document.body)
-                .click(function () {
-                    data.context = $('<p/>').text('Uploading...').replaceAll($(this));
-                    data.submit();
-                });
-        },
-        done: function (e, data) {
-            data.context.text('Upload finished.');
-        }
-    });
-});
-/*$(function () {
-    $('#fileupload').fileupload({
-        dataType: 'json',
-        done: function (e, data) {
-            $.each(data.result.files, function (index, file) {
-                $('<p/>').text(file.name).appendTo(document.body);
-            });
-        }
-    });
-}); */
-</script>-->
+	<form action="UploadServlet" method="post" enctype="multipart/form-data">
+		<input type="file" name="file" size="50" />
+		<br/>
+		<input type="submit" value="Upload File" />
+	</form>
+	Current Map:
+	<img src="images/map.png" alt="MIND_MAP" > 
+
 	 <br><hr>
 	 <h3>Areas</h3>
 	 <br>Here you see all Areas which are currently in MIND.

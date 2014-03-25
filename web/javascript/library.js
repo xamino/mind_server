@@ -27,6 +27,9 @@ function send(data, callback) {
  * @param object_b
  */
 function instanceOf(object_a, object_b) {
+    // null returns false
+    if (object_a == undefined || object_b == undefined)
+        return false;
     // If null, might be class (if null, next step will return false)
     if (object_a.$type == undefined) {
         object_a = new object_a();
@@ -104,7 +107,7 @@ function readCookie(name) {
  * deletes the cookie with the given name
  */
 function deleteCookie(name) {
-    writeCookie(name,"");
+    writeCookie(name, "");
 }
 
 // OBJECT DEFINITIONS HERE –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––-

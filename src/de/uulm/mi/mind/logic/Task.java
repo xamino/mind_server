@@ -125,7 +125,12 @@ public interface Task {
     }*/
 
     public enum Location implements Task {
-        CREATE, READ, UPDATE, DELETE, READ_MORSELS
+        CREATE, READ, UPDATE, DELETE,
+        /**
+         * Given a location, returns all areas that contain it.
+         */
+        SMALLEST_AREA_BY_LOCATION,
+        READ_MORSELS
     }
 
     public enum Area implements Task {

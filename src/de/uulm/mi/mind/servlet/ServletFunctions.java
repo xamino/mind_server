@@ -124,6 +124,7 @@ public class ServletFunctions {
         Data data, message;
         User tempUser;
         PublicDisplay display;
+        Area area;
         switch (task) {
             // USERS -----------------------------------------------------------------------------
             case ADMIN_USER_READ:
@@ -170,7 +171,7 @@ public class ServletFunctions {
                 if (tempUser.getEmail() == null || tempUser.getEmail().isEmpty()) {
                     return new Error("IllegalChange", "Email must not be empty!");
                 }
-                data = moduleManager.handleTask(Task.User.READ, new User(null, tempUser.getEmail()));
+                data = moduleManager.handleTask(Task.User.READ, new User(tempUser.getEmail()));
                 message = checkDataMessage(data);
                 if (message == null && data instanceof DataList && ((DataList) data).size() == 1) {
                     User originalUser = (User) ((DataList) data).get(0);
@@ -226,7 +227,12 @@ public class ServletFunctions {
                 if (!(arrival.getObject() instanceof Area)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                return moduleManager.handleTask(Task.Area.CREATE, arrival.getObject());
+                // Adding locations via area_add is not allowed
+                area = (Area) arrival.getObject();
+                if (area.getLocations() != null) {
+                    return new Error("IllegalAreaAdd", "Adding locations via an area is illegal!");
+                }
+                return moduleManager.handleTask(Task.Area.CREATE, area);
             case AREA_UPDATE:
                 if (!(arrival.getObject() instanceof Area)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -298,7 +304,7 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.Display.DELETE, arrival.getObject());
             // Special admin stuff ---------------------------------------------------------------
             case READ_ALL_ADMIN:
-                User filter = new User(null, null);
+                User filter = new User(null);
                 filter.setAdmin(true);
                 return moduleManager.handleTask(Task.User.READ, filter);
             case ADMIN_ANNIHILATE_AREA:

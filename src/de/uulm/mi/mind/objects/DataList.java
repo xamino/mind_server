@@ -29,4 +29,9 @@ public class DataList<T extends Data> extends ArrayList<T> implements Data {
             b.append(", ");
         }
     }
+
+    @Override
+    public String getKey() {
+        return null;
+    }
 }

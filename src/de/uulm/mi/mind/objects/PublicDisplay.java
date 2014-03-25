@@ -84,4 +84,9 @@ public class PublicDisplay implements Data, Authenticated {
                 ", token='" + token + '\'' +
                 '}';
     }
+
+    @Override
+    public String getKey() {
+        return identification;
+    }
 }

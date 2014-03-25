@@ -31,4 +31,9 @@ public abstract class Information implements Data {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    @Override
+    public String getKey() {
+        return null;
+    }
 }

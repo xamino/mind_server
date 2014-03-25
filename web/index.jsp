@@ -39,7 +39,9 @@ Click here to run a unit test of the API. WARNING: while the test is running, th
 <br>
 <input type="button" name="admintest" value="Admin Unit Test" onclick="adminRightsTest();">
 <br>
-<input type="button" name="usertest" value="User Unit Test" onclick="userAccessTest();">
+<input type="button" name="userupdate" value="User Update Unit Test" onclick="userUpdateTest();">
+<br>
+<input type="button" name="useraccess" value="User Access Unit Test" onclick="userAccessTest();">
 <br>
 <input type="button" name="areatest" value="Area Unit Test" onclick="areaTest();">
 <br>

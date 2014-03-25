@@ -20,8 +20,12 @@ public class Area implements Data {
     private int topLeftX, topLeftY;
     private int width, height;
 
-    public Area(String ID, DataList<Location> locations, int topLeftX, int topLeftY, int width, int height) {
+    public Area(String ID) {
         this.ID = ID;
+    }
+
+    public Area(String ID, DataList<Location> locations, int topLeftX, int topLeftY, int width, int height) {
+        this(ID);
         this.locations = locations;
         this.topLeftX = topLeftX;
         this.topLeftY = topLeftY;
@@ -30,18 +34,25 @@ public class Area implements Data {
     }
 
     /**
-     * Returns area of area.
+     * Returns area of area. Upper bound is Integer.MAX_VALUE!
+     *
      * @return The integer value in m²
      */
-    public int getArea() {
-        return width * height;
+    public long getArea() {
+        long area = (long) width * (long) height;
+        if (area > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        } else {
+            return (int) area;
+        }
     }
 
     /**
      * Adds a location to the area.
+     *
      * @param location
      */
-    public void addLocation(Location location){
+    public void addLocation(Location location) {
         locations.add(location);
     }
 
@@ -100,5 +111,21 @@ public class Area implements Data {
                 "ID='" + ID + '\'' +
                 ", locations='" + locations +
                 "'}";
+    }
+
+    /**
+     * Collision function for locations.
+     *
+     * @param X X-coordinate to check.
+     * @param Y Y-coordinate to check.
+     * @return True if the coorindate is within the area.
+     */
+    public boolean contains(final double X, final double Y) {
+        return (X >= topLeftX && X <= topLeftX + width) && (Y >= topLeftY && Y <= topLeftY + height);
+    }
+
+    @Override
+    public String getKey() {
+        return ID;
     }
 }
