@@ -397,7 +397,7 @@ function cleanDB() {
     unitTest("admin_annihilate_area", null, Success, adminSession);
     var arealist = unitTest("area_read", new Area(), Array, adminSession);
     if (arealist == null || arealist.length != 1 || arealist[0].ID != "universe") {
-        alert("DB was NOT CLEARED of AREA!");
+        alert("DB was NOT CLEARED of AREAS!");
     }
     // Destroy displays
     unitTest("display_remove", new PublicDisplay(), Success, adminSession);

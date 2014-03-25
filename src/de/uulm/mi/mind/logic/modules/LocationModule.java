@@ -7,6 +7,7 @@ import de.uulm.mi.mind.logic.Task;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
+import de.uulm.mi.mind.servlet.ServletFunctions;
 
 /**
  * @author Tamino Hartmann
@@ -37,9 +38,10 @@ public class LocationModule extends Module {
             Location location = (Location) request;
 
             Task.Location locationTask = (Task.Location) task;
+            // NOTE: The Area-Location binding is handled solely by the Area functions, so no need to update that here!
             switch (locationTask) {
                 case CREATE:
-                    return createLocation(location);
+                    return create(location);
                 case READ:
                     return read(location);
                 case UPDATE:
@@ -50,7 +52,6 @@ public class LocationModule extends Module {
                     return areaByLocation(location);
                 case READ_MORSELS:
                     return readMorsels(location);
-                //TODO area add, update -> update locations
             }
         } else if (task instanceof Task.Area) {
             Area area = (Area) request;
@@ -58,39 +59,51 @@ public class LocationModule extends Module {
             Task.Area areaTask = (Task.Area) task;
             switch (areaTask) {
                 case CREATE:
-                    return createArea(area);
+                    if (area == null) {
+                        return new Error("IllegalAreaCreate", "Area was null!");
+                    }
+                    area = updateLocations(area);
+                    return create(area);
                 case READ:
-                    return readArea(area);
+                    if (area == null) {
+                        return new Error("IllegalAreaRead", "Filter area was null!");
+                    }
+                    // We might need to update area for new locations:
+                    Data data = read(area);
+                    if (!(data instanceof DataList)) {
+                        return new Error("AreaReadUpdateError", "Failed to start location update upon read!");
+                    }
+                    DataList areas = ((DataList) data);
+                    for (Object obj : areas) {
+                        Area temp = ((Area) obj);
+                        temp = updateLocations(temp);
+                        if (null == ServletFunctions.getInstance().checkDataMessage(update(temp))) {
+                            return new Error("AreaReadUpdateError", "Failed to update " + temp.getID() + " upon read!");
+                        }
+                    }
+                    return areas;
                 case UPDATE:
+                    if (area == null) {
+                        return new Error("IllegalAreaUpdate", "Area was null!");
+                    }
+                    area = updateLocations(area);
                     return update(area);
                 case DELETE:
+                    if (area == null) {
+                        return new Error("IllegalAreaDelete", "Filter area was null!");
+                    }
                     return delete(area);
                 case READ_LOCATIONS:
+                    if (area == null) {
+                        return new Error("IllegalReadLocations", "Area for locations was null!");
+                    }
                     return readLocations(area);
                 case ANNIHILATE:
                     return annihilateAreas();
-                //TODO area add, update -> update locations
             }
         }
 
         return new Error("MissingOperation", "The Location Module is unable to perform the Task as it appears not to be implemented.");
-    }
-
-    private Data createArea(Area area) {
-        if (area == null) {
-            return new Error("IllegalAddArea", "Area to add was null.");
-        }
-
-        // We need to write all locations into area
-        DataList<Location> data = database.read(new Location(0, 0, null));
-        area.setLocations(new DataList<Location>());
-        for (Location loc : data) {
-            log.log(TAG, "Testing " + loc.toString() + " against " + area.toString());
-            if (area.contains(loc.getCoordinateX(), loc.getCoordinateY())) {
-                area.addLocation(loc);
-            }
-        }
-        return create(area);
     }
 
     /**
@@ -127,39 +140,21 @@ public class LocationModule extends Module {
         return finalArea;
     }
 
-    private Data readArea(Area area) {
-        // get all Areas
-        if (area == null) {
-            return read(new Area(null, null, 0, 0, 0, 0));
-        }
-        return read(area);
-    }
-
     /**
-     * Adds a location to all relevant areas in the database.
+     * Method that updates all Locations that are to be associated with an area.
      *
-     * @param location The location to add.
-     * @return A message signifying status.
+     * @param area
+     * @return
      */
-    private Data createLocation(final Location location) {
-        // TODO
-        // Locations must always be in universe! Should always work automatically. Don't forcibly add it in advance,
-        // the location will then be added twice! How do we enforce this better?
-
-        // Now read all Areas from DB where the Location coordinates are contained
-        DataList<Area> containedAreas = database.getAreasContainingLocation(location);
-
-        boolean success = true;
-        for (Area area : containedAreas) {
-            area.addLocation(location);
-            success &= database.update(area);
+    private Area updateLocations(Area area) {
+        DataList<Location> data = database.read(new Location(0, 0, null));
+        area.setLocations(new DataList<Location>());
+        for (Location loc : data) {
+            if (area.contains(loc.getCoordinateX(), loc.getCoordinateY())) {
+                area.addLocation(loc);
+            }
         }
-        if (success) {
-            return new Success("CreateLocationSuccess", "The Location " + location.toString() + " was stored in the Database.");
-        } else {
-            return new Error("CreateLocationFailure", "The Location " + location.toString() + " could not be stored in the Database.");
-        }
-
+        return area;
     }
 
     /**
