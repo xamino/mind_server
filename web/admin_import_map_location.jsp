@@ -40,9 +40,52 @@
 		<br/>
 		<input type="submit" value="Upload File" />
 	</form>
-	Current Map:
-	<img src="images/map.png" alt="MIND_MAP" > 
-
+	<div id="map_div"></div>
+	
+	<script>
+	function doesFileExist(urlToFile)
+{
+    var xhr = new XMLHttpRequest();
+    xhr.open('HEAD', urlToFile, false);
+    xhr.send();
+    if (xhr.status == "404") {
+        return false;
+    } else {
+        return true;
+    }
+}
+	</script>
+	<script>
+	var url_png = doesFileExist("images/map.png");
+	alert("png: "+url_png);
+	var url_jpg = doesFileExist("images/map.jpg");
+	alert("jpg: "+url_jpg);
+ 	var url_jpeg = doesFileExist("images/map.jpeg");
+ 	alert("jpeg: "+url_jpeg);
+ 
+	if (url_png == true) { 
+	var input = "";
+	input = "Current Map:";
+	input += "<img id='testimage_png' alt='MIND_MAP' src='/images/map.png' >";
+    document.getElementById("map_div").innerHTML = test;
+    }else if(url_jpg == true){
+    var input = "";
+	input = "Current Map:";
+	input += "<img id='testimage_jpg' alt='MIND_MAP' src='/images/map.jpg' >";
+    document.getElementById("map_div").innerHTML = test;
+    }else if(url_jpg == true){
+    var input = "";
+	input = "Current Map:";
+	input += "<img id='testimage_jpeg' alt='MIND_MAP' src='/images/map.jpeg' >";
+    document.getElementById("map_div").innerHTML = test;
+	} else {
+    var test = "";
+	test = "Image isn't available";
+	test += "<br> Sorry!";
+    document.getElementById("map_div").innerHTML = test;
+	}
+	</script>
+	 
 	 <br><hr>
 	 <h3>Areas</h3>
 	 <br>Here you see all Areas which are currently in MIND.
