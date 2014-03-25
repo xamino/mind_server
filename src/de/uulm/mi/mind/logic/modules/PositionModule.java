@@ -34,7 +34,6 @@ public class PositionModule extends Module {
         }
         // Everything okay from here on out:
         Location location = calculateLocation((Location) request);
-        // TODO save location info per user for displays depend on status
         // get best area for location to return
         Area area = getBestArea(location);
         if (area == null) {

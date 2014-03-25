@@ -79,6 +79,8 @@ public class User implements Data, Authenticated {
     public User safeClone() {
         User user = new User(this.email, this.name, this.admin);
         user.setPwdHash("");
+        user.setLastPosition(this.lastPosition);
+        user.setLastAccess(this.lastAccess);
         return user;
     }
 

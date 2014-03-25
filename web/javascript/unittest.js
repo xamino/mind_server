@@ -258,7 +258,7 @@ function positionTest() {
         new WifiMorsel("00:19:07:06:64:02", "welcome", -84)
     ]);
     // note switched order of wifimorsels
-    var locationRequest2 = new Location(42,42, [
+    var locationRequest2 = new Location(42, 42, [
         new WifiMorsel("00:19:07:07:64:00", "eduroam", -80),
         new WifiMorsel("00:19:07:07:64:02", "welcome", -60),
         new WifiMorsel("00:19:07:07:64:01", "eduroam", -70)
@@ -275,7 +275,7 @@ function positionTest() {
     // add area that coverse location3
     unitTest("area_add", new Area("office", null, 145, 145, 10, 10), Success, adminSession);
     // area that covers loc3 + 2
-    unitTest("area_add", new Area("institute", null,140, 140, 100, 100), Success, adminSession);
+    unitTest("area_add", new Area("institute", null, 140, 140, 100, 100), Success, adminSession);
 
     // Test exact location match to universe (location1)
     var match = unitTest("position_find", locationRequest1, Area, adminSession);
@@ -284,6 +284,11 @@ function positionTest() {
             alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
         }
     }
+    // Test that admin is now in positioned there:
+    var user = unitTest("user_read", null, User, adminSession);
+    if (user.lastPosition == undefined || user.lastPosition != "universe") {
+        alert("Failed user position read: admin is located at " + user.lastPosition);
+    }
     // Test close location match
     match = unitTest("position_find", locationRequest2, Area, adminSession);
     if (instanceOf(match, Area)) {
@@ -291,12 +296,22 @@ function positionTest() {
             alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
         }
     }
+    // Test that admin is now in positioned there:
+    user = unitTest("user_read", null, User, adminSession);
+    if (user.lastPosition == undefined || user.lastPosition != "institute") {
+        alert("Failed user position read: admin is located at " + user.lastPosition);
+    }
     // test match to office
     match = unitTest("position_find", locationRequest3, Area, adminSession);
     if (instanceOf(match, Area)) {
         if (match.ID != "office") {
             alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
         }
+    }
+    // Test that admin is now in positioned there:
+    user = unitTest("user_read", null, User, adminSession);
+    if (user.lastPosition == undefined || user.lastPosition != "office") {
+        alert("Failed user position read: admin is located at " + user.lastPosition);
     }
     // TODO more, especially check for errors!
 

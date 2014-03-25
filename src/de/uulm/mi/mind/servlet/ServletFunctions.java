@@ -96,8 +96,25 @@ public class ServletFunctions {
                 // Otherwise ignore all else, just delete:
                 return moduleManager.handleTask(Task.User.DELETE, user);
             case POSITION_FIND:
-                // TODO position returns an error, do we even need to check here? Check with Andy!
-                return moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
+                // find the area
+                Data data = moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
+                Data msg = checkDataMessage(data);
+                if (msg != null) {
+                    return msg;
+                }
+                if (!(data instanceof Area)) {
+                    log.error("IllegalPositionFind", "Position find returned something else than an area, shouldn't happen!");
+                    return new Error("IllegalPositionFind", "Position find failed!");
+                }
+                Area area = ((Area) data);
+                // update user for position
+                user.setLastPosition(area.getID());
+                msg = moduleManager.handleTask(Task.User.UPDATE, user);
+                if (!(msg instanceof Success)) {
+                    return msg;
+                }
+                // everything okay, return area
+                return area;
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
                 user.setAdmin(!user.isAdmin());
