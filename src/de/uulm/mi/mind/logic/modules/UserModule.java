@@ -48,13 +48,14 @@ public class UserModule extends Module {
 
         // get all Users
         if (user == null) {
-            return read(new User(null, null));
+            return read(new User(null));
         }
         // get filtered Users
         if (user.getEmail() == null) {
             return read(user);
         }
 
+        //TODO  remove, already covered above
         // from here on single users were requested
         Data data = read(user);
         if (data instanceof DataList) {
@@ -68,7 +69,7 @@ public class UserModule extends Module {
     }
 
     private Data annihilateUsers() {
-        Boolean deleted = database.deleteAll(new User(null, null));
+        Boolean deleted = database.deleteAll(new User(null));
         if (deleted) {
             database.reinit();
             return new Success("UserAnnihilationSuccess", "All users were removed from Database. Use default admin.");

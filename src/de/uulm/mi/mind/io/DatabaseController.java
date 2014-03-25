@@ -309,14 +309,13 @@ public class DatabaseController implements ServletContextListener {
         }
 
         // Create default admin if no other admin exists
-        User adminProto = new User(null, null);
+        User adminProto = new User(null);
         adminProto.setAdmin(true);
         DataList<User> adminData = read(adminProto);
         // test for existing single admin or list of admins
         if (adminData == null || adminData.isEmpty()) {
             log.log(TAG, "Admin not existing, creating one.");
-            adminProto = new User(config.getAdminName(), config.getAdminEmail());
-            adminProto.setAdmin(true);
+            adminProto = new User(config.getAdminEmail(), config.getAdminName(), true);
             adminProto.setPwdHash(BCrypt.hashpw(config.getAdminPassword(), BCrypt.gensalt(12)));
             create(adminProto);
         }

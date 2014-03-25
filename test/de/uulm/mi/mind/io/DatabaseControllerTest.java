@@ -26,24 +26,20 @@ public class DatabaseControllerTest {
 
     @Test
     public void createUsers() {
-        assertTrue(dbc.create(new User("Gummibär", "gummibär@bärendorf.cu")));
-        assertTrue(dbc.create(new User("Honigkuchen", "kuchen@zuckerland.kl")));
-        assertTrue(dbc.create(new User("LilaKuh", "kuh@milka.de")));
-        assertTrue(dbc.create(new User("Batman", "bat@ma.n")));
-        assertTrue(dbc.create(new User("Strolch", "hunde@ausdemzwing.er")));
+        // Test creation with all constructors
+        assertTrue(dbc.create(new User("gummibär@bärendorf.cu")));
+        assertTrue(dbc.create(new User("kuchen@zuckerland.kl", "Honigkuchen")));
+        assertTrue(dbc.create(new User("admin@admin.de", "Admin", true)));
 
-        assertFalse(dbc.create(new User(null, null)));
-        assertFalse(dbc.create(new User(null, "")));
-        assertFalse(dbc.create(new User("", null)));
-        assertFalse(dbc.create(new User("", "")));
-        assertFalse(dbc.create(new User("abc", null)));
-        assertFalse(dbc.create(new User("abc", "")));
+        // Test invalid E-Mail Addresses
+        assertFalse(dbc.create(new User(null)));
+        assertFalse(dbc.create(new User("")));
     }
 
     @Test
     public void createUsersPerformance() {
         for (int i = 0; i < 1000; i++) {
-            assertTrue(dbc.create(new User("Dummy" + i, "dummy" + i + "@dummy.du")));
+            assertTrue(dbc.create(new User("dummy" + i + "@dummy.du")));
         }
     }
 

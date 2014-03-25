@@ -14,9 +14,18 @@ public class User implements Data, Authenticated {
     private boolean admin;
     private Date lastAccess;
 
-    public User(String name, String email) {
-        this.name = name;
+    public User(String email) {
         this.email = email;
+    }
+
+    public User(String email, String name) {
+        this(email);
+        this.name = name;
+    }
+
+    public User(String email, String name, boolean admin) {
+        this(email, name);
+        this.admin = admin;
     }
 
     public String getName() {
@@ -59,8 +68,7 @@ public class User implements Data, Authenticated {
      * @return Copy of this object with empty password string.
      */
     public User safeClone() {
-        User user = new User(this.name, this.email);
-        user.setAdmin(this.admin);
+        User user = new User(this.email, this.name, this.admin);
         user.setPwdHash("");
         return user;
     }

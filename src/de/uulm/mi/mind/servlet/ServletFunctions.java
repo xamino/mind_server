@@ -171,7 +171,7 @@ public class ServletFunctions {
                 if (tempUser.getEmail() == null || tempUser.getEmail().isEmpty()) {
                     return new Error("IllegalChange", "Email must not be empty!");
                 }
-                data = moduleManager.handleTask(Task.User.READ, new User(null, tempUser.getEmail()));
+                data = moduleManager.handleTask(Task.User.READ, new User(tempUser.getEmail()));
                 message = checkDataMessage(data);
                 if (message == null && data instanceof DataList && ((DataList) data).size() == 1) {
                     User originalUser = (User) ((DataList) data).get(0);
@@ -304,7 +304,7 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.Display.DELETE, arrival.getObject());
             // Special admin stuff ---------------------------------------------------------------
             case READ_ALL_ADMIN:
-                User filter = new User(null, null);
+                User filter = new User(null);
                 filter.setAdmin(true);
                 return moduleManager.handleTask(Task.User.READ, filter);
             case ADMIN_ANNIHILATE_AREA:
