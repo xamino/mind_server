@@ -17,6 +17,7 @@ import java.util.*;
 public class PositionModule extends Module {
 
     private final int tolerance = 3;  //TODO What value?
+    private final String TAG = "PositionModule";
     private Messenger log;
 
     public PositionModule() {
@@ -34,9 +35,10 @@ public class PositionModule extends Module {
         // Everything okay from here on out:
         Location location = calculateLocation((Location) request);
         // TODO save location info per user for displays depend on status
-        // get best area for location to return (if finalMatch is null, universe is returned)
+        // get best area for location to return
         Area area = getBestArea(location);
         if (area == null) {
+            log.error(TAG, "NULL area for position_find – shouldn't happen as universe should be returned at least!");
             return new Message("PositionUnfound", "Your position could not be found.");
         }
         return area;
@@ -179,8 +181,10 @@ public class PositionModule extends Module {
     }
 
     /**
-     * @param location
-     * @return
+     * Method that calls and handles finding of the best suited area to return based on the found location.
+     *
+     * @param location The location for which to find an area.
+     * @return Most assuredly at least universe, otherwise null. Usually you'll get a smaller area than universe.
      */
     private Area getBestArea(Location location) {
         EventModuleManager eventModuleManager = EventModuleManager.getInstance();
