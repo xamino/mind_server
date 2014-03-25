@@ -83,6 +83,7 @@
 	input += "<br> Please upload one - MIND needs one to work!";
     document.getElementById("map_div").innerHTML = input;
 	}
+	//TODO: more formats
 	</script>
 	 <!-- <img id='testimage_jpg' alt='MIND_MAP' src='images/map.jpg'> -->
 	 <br><hr>
