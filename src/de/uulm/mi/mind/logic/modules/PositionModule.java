@@ -62,13 +62,16 @@ public class PositionModule extends Module {
                 DataList sendUsers = new DataList();
                 for (Object obj : users) {
                     User us = ((User) obj);
-                    // TODO filter based on status!
                     // if lastPosition is null, the user may not be active in the system
                     if (us.getLastPosition() == null) {
                         // so ignore
                         continue;
                     }
+                    // TODO filter based on status!
+
                     // filter based on time
+                    // todo This is not the last position time – how do i do this better?
+                    // todo Update lastPosition to null?
                     Long timeDelta = System.currentTimeMillis() - us.getLastAccess().getTime();
                     if (timeDelta > POSITION_VALID_TIMEOUT) {
                         // if last update is longer gone, then ignore

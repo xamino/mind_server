@@ -370,6 +370,13 @@ function testPositionRead() {
     }
     // try illegal access
     unitTest("read_all_positions", null, Error, sharkSession);
+    // now try with public display
+    unitTest("display_add", new PublicDisplay("hallway", "hallway", "Public Hallway", 34, 45), Success, adminSession);
+    var pD = unitTest("login", new PublicDisplay("hallway", "hallway"), Success, null).description;
+    userLocs = unitTest("read_all_positions", null, Array, pD);
+    if (userLocs == null || userLocs.length != 2) {
+        alert("Wrong number of available user locations!");
+    }
 
     // TODO test filters
 
