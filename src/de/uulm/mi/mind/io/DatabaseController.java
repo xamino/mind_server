@@ -54,7 +54,7 @@ public class DatabaseController implements ServletContextListener {
      */
     public boolean create(Data data) {
         // Sanitize input on DB, only allow Data objects implementing a unique key
-        if (data.getKey() == null || data.getKey().equals("")) {
+        if (data == null || data.getKey() == null || data.getKey().equals("")) {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
@@ -180,6 +180,8 @@ public class DatabaseController implements ServletContextListener {
     }
 
     public boolean update(Data data) {
+        if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
+
         try {
             if (data instanceof User) {
                 User dataUser = (User) data;

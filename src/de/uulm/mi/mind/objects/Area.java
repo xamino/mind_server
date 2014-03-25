@@ -20,8 +20,12 @@ public class Area implements Data {
     private int topLeftX, topLeftY;
     private int width, height;
 
-    public Area(String ID, DataList<Location> locations, int topLeftX, int topLeftY, int width, int height) {
+    public Area(String ID) {
         this.ID = ID;
+    }
+
+    public Area(String ID, DataList<Location> locations, int topLeftX, int topLeftY, int width, int height) {
+        this(ID);
         this.locations = locations;
         this.topLeftX = topLeftX;
         this.topLeftY = topLeftY;

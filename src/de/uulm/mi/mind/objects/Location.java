@@ -11,9 +11,13 @@ public class Location implements Data {
      */
     private DataList<WifiMorsel> wifiMorsels;
 
-    public Location(double coordinateX, double coordinateY, DataList<WifiMorsel> wifiMorsels) {
+    public Location(double coordinateX, double coordinateY) {
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
+    }
+
+    public Location(double coordinateX, double coordinateY, DataList<WifiMorsel> wifiMorsels) {
+        this(coordinateX, coordinateY);
         this.wifiMorsels = wifiMorsels;
     }
 
