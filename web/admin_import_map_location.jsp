@@ -79,8 +79,8 @@
     document.getElementById("map_div").innerHTML = input;
 	} else {
     var input = "";
-	input = "Image isn't available";
-	input += "<br> Sorry!";
+	input = "There is currently no map available!<br>";
+	input += "<br> Please upload one - MIND needs one to work!";
     document.getElementById("map_div").innerHTML = input;
 	}
 	</script>
