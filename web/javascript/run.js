@@ -62,18 +62,18 @@ function login(email, password, callback) {
  *            With no values!
  */
 function loginDisplay(identification, password, callback) {
-	// We can keep name empty as it is not critical to this operation
-	var loginDisplay = new PublicDisplay(identification, password, null, 0, 0);
-	// sessionHash remains empty, we don't have one yet
-	var request = new Arrival("login", null, loginDisplay);
-	// send the request
-	send(request, function(data) {
-		// callback simply saves the session
-		session = data.object.description;
-		writeCookie("MIND_PD_C",session); //TODO add id/.. of PD to cookie-name
-		alert("PD_session: "+session);
-		callback();
-	});
+    // We can keep name empty as it is not critical to this operation
+    var loginDisplay = new PublicDisplay(identification, password, null, 0, 0);
+    // sessionHash remains empty, we don't have one yet
+    var request = new Arrival("login", null, loginDisplay);
+    // send the request
+    send(request, function (data) {
+        // callback simply saves the session
+        session = data.object.description;
+        writeCookie("MIND_PD_C", session); //TODO add id/.. of PD to cookie-name
+        alert("PD_session: " + session);
+        callback();
+    });
 
 }
 
@@ -174,15 +174,15 @@ $(document).on("submit", "#registerForm", function (event) {
  * on Button click 'Login' in public_display_login.jsp
  * reads the input data
  */
-$(document).on("submit", "#loginDisplayForm", function(event) {
-	event.preventDefault();
-	var identification, password;
-	identification = $("#identification").val();
-	password = $("#password").val();
+$(document).on("submit", "#loginDisplayForm", function (event) {
+    event.preventDefault();
+    var identification, password;
+    identification = $("#identification").val();
+    password = $("#password").val();
 
-	loginDisplay(identification, password, function(event){
-		window.location.href = "public_display_start.jsp?session="+session;	   //?session="+session;
-	});
+    loginDisplay(identification, password, function (event) {
+        window.location.href = "public_display_start.jsp?session=" + session;	   //?session="+session;
+    });
 
 //		doTask("ADMIN_USER_READ", potentialAdmin, isAdmin);
 
@@ -193,44 +193,43 @@ $(document).on("submit", "#loginDisplayForm", function(event) {
 /**
  * on link 'App Settings' clicked in public_display_start.jsp
  */
-function appSettingsClicked(){
-	var appContents = "";
-	appContents = "<div id='appOne'>";
-	appContents += "Settings of app one.</div>";
-	appContents += "</div><div id='appTwo'>";
-	appContents += "Settings of app two.";
-	appContents += "</div>";
-	appContents += "<button type='button' id='appSettingsBack' onclick='settingsBackButton()'>Back</button>";
+function appSettingsClicked() {
+    var appContents = "";
+    appContents = "<div id='appOne'>";
+    appContents += "Settings of app one.</div>";
+    appContents += "</div><div id='appTwo'>";
+    appContents += "Settings of app two.";
+    appContents += "</div>";
+    appContents += "<button type='button' id='appSettingsBack' onclick='settingsBackButton()'>Back</button>";
     document.getElementById("content_popup").innerHTML = appContents;
 
 }
 
 
-
-function displaySettingsClicked(){
-	var settingsContents = "";
-	settingsContents = "<div id='settingsBrightness'>";
-	settingsContents += "<h3>Display Brightness</h3><br>TODO: Brightness Stuff.</div>";
-	settingsContents += "</div><div id='settingsRefresh'>";
-	settingsContents += "<hr><br><h3>Refresh Rate</h3><br>TODO: Refresh Stuff.</div>";
-	settingsContents += "</div><a href='#' id='mute_img' onclick='mute()'></a><br>";
-	settingsContents += "<hr><br><button type='button' id='displaySettingsBack' onclick='settingsBackButton()'>Back</button>";
-	settingsContents += "<button type='button' id='displayLogoutButton' onclick='logoutDisplay()'>Logout Display</button>";
+function displaySettingsClicked() {
+    var settingsContents = "";
+    settingsContents = "<div id='settingsBrightness'>";
+    settingsContents += "<h3>Display Brightness</h3><br>TODO: Brightness Stuff.</div>";
+    settingsContents += "</div><div id='settingsRefresh'>";
+    settingsContents += "<hr><br><h3>Refresh Rate</h3><br>TODO: Refresh Stuff.</div>";
+    settingsContents += "</div><a href='#' id='mute_img' onclick='mute()'></a><br>";
+    settingsContents += "<hr><br><button type='button' id='displaySettingsBack' onclick='settingsBackButton()'>Back</button>";
+    settingsContents += "<button type='button' id='displayLogoutButton' onclick='logoutDisplay()'>Logout Display</button>";
     document.getElementById("content_popup").innerHTML = settingsContents;
 }
 
-function settingsBackButton(){
-	document.getElementById("content_popup").innerHTML = "";
+function settingsBackButton() {
+    document.getElementById("content_popup").innerHTML = "";
 }
 
-function mute(){
-	alert("TODO: mute");
+function mute() {
+    alert("TODO: mute");
 }
 
-function logoutDisplay(){
-	logout();
-	deleteCookie("MIND_PD_C");
-	window.location = "public_display_login.jsp";
+function logoutDisplay() {
+    logout();
+    deleteCookie("MIND_PD_C");
+    window.location = "public_display_login.jsp";
 }
 
 
@@ -369,6 +368,7 @@ function writeUsers(data) {
         tablecontents += "<tr>";
         tablecontents += "<td>User Name: </td>";
         tablecontents += "<td>User Email: </td>";
+        tablecontents += "<td>Last Access Time: </td>";
         tablecontents += "<td>Is Admin: </td>";
         tablecontents += "<td>Edit User: </td>";
         tablecontents += "<td>Remove User: </td>";
@@ -378,6 +378,7 @@ function writeUsers(data) {
             tablecontents += "<tr>";
             tablecontents += "<td>" + data.object[i].name + "</td>";
             tablecontents += "<td>" + data.object[i].email + "</td>";
+            tablecontents += "<td>" + (data.object[i].lastAccess == undefined ? "Never" : data.object[i].lastAccess) + "</td>";
             tablecontents += "<td>" + data.object[i].admin + "</td>";
             //tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen_editUser(this.id)' id='editUser" +i+ "'/></td>";
             //tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen_removeUser(this.id)' id='removeUser" +i+ "'/></td>";
@@ -443,7 +444,7 @@ function addUserViaPopup() {
 //						    element.innerHTML = "The user (name: "+name+") has been added. Please click here to reload the page: <input type='button' name='ok' value='OK' onclick='window.location.reload()'/>";
 //						    
 //						}
-                    window.location.reload();	
+                    window.location.reload();
                 });
 
             }
@@ -738,7 +739,7 @@ function removeDisplayViaPopup(data) {
  * loads all areas on load of page admin_import_map_location.jsp
  */
 function loadAreas() {
-	//String ID, DataList<Location> locations, int topLeftX, int topLeftY, int width, int height
+    //String ID, DataList<Location> locations, int topLeftX, int topLeftY, int width, int height
     var areas = new Area(null, null, 0, 0, 0, 0);
     doTask("AREA_READ", areas, writeAreas);
 }
@@ -768,13 +769,13 @@ function writeAreas(data) {
             //TODO: number
             tablecontents += "<td>" + data.object[i].locations.length + "</td>";
             tablecontents += "<td>" + data.object[i].topLeftX + "</td>";
-            tablecontents += "<td>" + data.object[i].topLeftY + "</td>"; 
+            tablecontents += "<td>" + data.object[i].topLeftY + "</td>";
             tablecontents += "<td>" + data.object[i].width + "</td>";
             tablecontents += "<td>" + data.object[i].height + "</td>";
-            if(data.object[i].ID == "universe"){
-            	tablecontents += "<td><input type='submit' value='Remove Location' disabled='true' onClick='removeAreaViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";	
-            }else{
-            tablecontents += "<td><input type='submit' value='Remove Location' disabled='false' onClick='removeAreaViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
+            if (data.object[i].ID == "universe") {
+                tablecontents += "<td><input type='submit' value='Remove Location' disabled='true' onClick='removeAreaViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
+            } else {
+                tablecontents += "<td><input type='submit' value='Remove Location' disabled='false' onClick='removeAreaViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
             }
             tablecontents += "</tr>";
         }
@@ -784,7 +785,6 @@ function writeAreas(data) {
     }
 
 }
-
 
 
 /**
@@ -835,7 +835,7 @@ function writeLocations(data) {
         for (var i = 0; i < data.object.length; i++) {
             tablecontents += "<tr>";
             tablecontents += "<td>" + data.object[i].coordinateX + "</td>";
-            tablecontents += "<td>" + data.object[i].coordinateY + "</td>"; 
+            tablecontents += "<td>" + data.object[i].coordinateY + "</td>";
             tablecontents += "<td><input type='submit' value='Remove Location' onClick='removeLocationViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
             tablecontents += "</tr>";
         }
@@ -845,7 +845,6 @@ function writeLocations(data) {
     }
 
 }
-
 
 
 /**
@@ -867,7 +866,6 @@ function removeLocationViaPopup(data) {
         });
     }
 }
-
 
 
 /******************** session/cookie*****************/
@@ -914,16 +912,16 @@ function onLoadOfAdminPage() {
  * Checks if the session in the url matches the pd session
  * if false - return to public_display_login.jsp
  */
-function checkPdSessionFromURL(){
-	var urlSession = getURLParameter("session");
-	var session = readCookie("MIND_PD_C");
-	if(urlSession != session){
-		alert("You have to be logged in.");
-		window.location.href = "public_display_login.jsp";
-		
-	}else{
-		return session;		
-	}
+function checkPdSessionFromURL() {
+    var urlSession = getURLParameter("session");
+    var session = readCookie("MIND_PD_C");
+    if (urlSession != session) {
+        alert("You have to be logged in.");
+        window.location.href = "public_display_login.jsp";
+
+    } else {
+        return session;
+    }
 }
 
 /**
@@ -931,18 +929,18 @@ function checkPdSessionFromURL(){
  * The session will be checked by the checkSessionFromURL function
  * and the session id will be added to all links classified as "pd_link"
  */
-function onLoadOfPdPage(){
-	//the current session - if correct - else this session variable is never set -> redirection to login.jsp
-	session = checkPdSessionFromURL();
-	
-	//all links that are classified as "adminlink"
-	var links = document.getElementsByClassName("pd_link");
-	
-	//add sessionid to URLs which are classified as "pd_link"
-	[].forEach.call(links, function(link) {
-	    //add session to link
-		link.setAttribute("href",link+"?session="+session);
-	});
+function onLoadOfPdPage() {
+    //the current session - if correct - else this session variable is never set -> redirection to login.jsp
+    session = checkPdSessionFromURL();
+
+    //all links that are classified as "adminlink"
+    var links = document.getElementsByClassName("pd_link");
+
+    //add sessionid to URLs which are classified as "pd_link"
+    [].forEach.call(links, function (link) {
+        //add session to link
+        link.setAttribute("href", link + "?session=" + session);
+    });
 }
 
 

@@ -114,48 +114,35 @@ function deleteCookie(name) {
 
 function Arrival(task, sessionHash, object) {
     this.$type = "Arrival";
-    if (sessionHash != null)
-        this.sessionHash = sessionHash;
-    if (task != null)
-        this.task = task;
-    if (object != null)
-        this.object = object;
+    this.sessionHash = sessionHash;
+    this.task = task;
+    this.object = object;
 }
 
 function User(email, password, name, admin) {
     this.$type = "User";
-    if (email != null)
-        this.email = email;
-    if (password != null)
-        this.pwdHash = password;
-    if (name != null)
-        this.name = name;
-    if (admin != null)
-        this.admin = admin; // can not be changed by unauthorized clients, don't try :P
+    this.email = email;
+    this.pwdHash = password;
+    this.name = name;
+    this.admin = admin; // can not be changed by unauthorized clients, don't try :P
 }
 
 function Success(name, description) {
     this.$type = "Success";
-    if (name != null)
-        this.name = name;
-    if (description != null)
-        this.description = description;
+    this.name = name;
+    this.description = description;
 }
 
 function Error(name, description) {
     this.$type = "Error";
-    if (name != null)
-        this.name = name;
-    if (description != null)
-        this.description = description;
+    this.name = name;
+    this.description = description;
 }
 
 function Message(name, description) {
     this.$type = "Message";
-    if (name != null)
-        this.name = name;
-    if (description != null)
-        this.description = description;
+    this.name = name;
+    this.description = description;
 }
 
 function Area(ID, locations, topLeftX, topLeftY, width, height) {
@@ -170,34 +157,23 @@ function Area(ID, locations, topLeftX, topLeftY, width, height) {
 
 function Location(coordinateX, coordinateY, wifiMorsels) {
     this.$type = "Location";
-    if (coordinateX != null)
-        this.coordinateX = coordinateX;
-    if (coordinateY != null)
-        this.coordinateY = coordinateY;
-    if (wifiMorsels != null)
-        this.wifiMorsels = wifiMorsels;
+    this.coordinateX = coordinateX;
+    this.coordinateY = coordinateY;
+    this.wifiMorsels = wifiMorsels;
 }
 
 function WifiMorsel(wifiMac, wifiName, wifiLevel) {
     this.$type = "WifiMorsel";
-    if (wifiMac != null)
-        this.wifiMac = wifiMac;
-    if (wifiName != null)
-        this.wifiName = wifiName;
-    if (wifiLevel != null)
-        this.wifiLevel = wifiLevel;
+    this.wifiMac = wifiMac;
+    this.wifiName = wifiName;
+    this.wifiLevel = wifiLevel;
 }
 
 function PublicDisplay(identification, token, location, coordinateX, coordinateY) {
     this.$type = "PublicDisplay";
-    if (identification != null)
-        this.identification = identification;
-    if (token != null)
-        this.token = token;
-    if (location != null)
-        this.location = location;
-    if (coordinateX != null)
-        this.coordinateX = coordinateX;
-    if (coordinateY != null)
-        this.coordinateY = coordinateY;
+    this.identification = identification;
+    this.token = token;
+    this.location = location;
+    this.coordinateX = coordinateX;
+    this.coordinateY = coordinateY;
 }

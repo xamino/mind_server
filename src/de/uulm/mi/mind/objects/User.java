@@ -11,6 +11,7 @@ public class User implements Data, Authenticated {
     private String name;
     private String pwdHash;
     private String email;
+    private String lastPosition;
     private boolean admin;
     private Date lastAccess;
 
@@ -26,6 +27,14 @@ public class User implements Data, Authenticated {
     public User(String email, String name, boolean admin) {
         this(email, name);
         this.admin = admin;
+    }
+
+    public String getLastPosition() {
+        return lastPosition;
+    }
+
+    public void setLastPosition(String lastPosition) {
+        this.lastPosition = lastPosition;
     }
 
     public String getName() {
@@ -81,12 +90,12 @@ public class User implements Data, Authenticated {
         this.admin = admin;
     }
 
-    public void setLastAccess(Date lastAccess) {
-        this.lastAccess = lastAccess;
-    }
-
     public Date getLastAccess() {
         return lastAccess;
+    }
+
+    public void setLastAccess(Date lastAccess) {
+        this.lastAccess = lastAccess;
     }
 
     @Override
