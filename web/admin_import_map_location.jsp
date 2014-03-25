@@ -40,136 +40,52 @@
 		<br/>
 		<input type="submit" value="Upload File" />
 	</form>
-	Current Map:
-	<img src="images/map.png" alt="MIND_MAP" > 
-
-
-<!--  
-<script type="text/javascript">
-
-	function fileChange()
-{
-    //FileList Objekt aus dem Input Element mit der ID "fileA"
-    var fileList = document.getElementById("fileA").files;
+	<div id="map_div"></div>
+	
+	<script>
+	function doesFileExist(urlToFile){
+	    var xhr = new XMLHttpRequest();
+	    xhr.open('HEAD', urlToFile, false);
+	    xhr.send();
+	    if (xhr.status == "404") {
+	        return false;
+	    } else {
+	        return true;
+	    }
+	}
+	</script>
+	<script>
+	var url_png = doesFileExist("images/map.png");
+	alert("png: "+url_png);
+	var url_jpg = doesFileExist("images/map.jpg");
+	alert("jpg: "+url_jpg);
+ 	var url_jpeg = doesFileExist("images/map.jpeg");
+ 	alert("jpeg: "+url_jpeg);
  
-    //File Objekt (erstes Element der FileList)
-    var file = fileList[0];
- 
-    //File Objekt nicht vorhanden = keine Datei ausgewählt oder vom Browser nicht unterstützt
-    if(!file)
-        return;
- 
-    document.getElementById("fileName").innerHTML = 'Dateiname: ' + file.name;
-    document.getElementById("fileSize").innerHTML = 'Dateigröße: ' + file.size + ' B';
-    document.getElementById("fileType").innerHTML = 'Dateitype: ' + file.type;
-    document.getElementById("progress").value = 0;
-    document.getElementById("prozent").innerHTML = "0%";
-}
-
-var client = null;
- 
-function uploadFile()
-{
-	alert(document.getElementById("fileA").value);
-    //Wieder unser File Objekt
-    var file = document.getElementById("fileA").files[0];
-    //FormData Objekt erzeugen
-    var formData = new FormData();
-    //XMLHttpRequest Objekt erzeugen
-    client = new XMLHttpRequest();
- 
-    var prog = document.getElementById("progress");
- 
-    if(!file)
-        return;
- 
-    prog.value = 0;
-    prog.max = 100;
- 
-    //Fügt dem formData Objekt unser File Objekt hinzu
-    formData.append("datei", file);
- 
-    client.onerror = function(e) {
-        alert("onError");
-    };
- 
-    client.onload = function(e) {
-        document.getElementById("prozent").innerHTML = "100%";
-        prog.value = prog.max;
-    };
- 
-    client.upload.onprogress = function(e) {
-        var p = Math.round(100 / e.total * e.loaded);
-        document.getElementById("progress").value = p;            
-        document.getElementById("prozent").innerHTML = p + "%";
-    };
- 
-    client.onabort = function(e) {
-        alert("Upload abgebrochen");
-    };
- 
-    client.open("POST", "upload.php");
-    client.send(formData);
-} 
-
-function uploadAbort() {
-    if(client instanceof XMLHttpRequest)
-        //Briecht die aktuelle Übertragung ab
-        client.abort();
-}
- 
-</script>
- 
-<form action="" method="post" enctype="multipart/form-data">
-    <input name="file" type="file" id="fileA" onchange="fileChange();"/>
-    <input name="upload" value="Upload" type="button" onclick="uploadFile();" />
-    <input name="abort" value="Abbrechen" type="button" onclick="uploadAbort();" />
-</form>
-<div>
-    <div id="fileName"></div>
-    <div id="fileSize"></div>
-    <div id="fileType"></div>
-    <progress id="progress" style="margin-top:10px"></progress> <span id="prozent"></span>
-</div>
--->
-
-
-<!--
-<input id="fileupload" type="file" name="files[]"  multiple>
-<script src="javascript/fileupload/jquery.ui.widget.js"></script>
-<script src="javascript/fileupload/jquery.iframe-transport.js"></script>
-<script src="javascript/fileupload/jquery.fileupload.js"></script>
-<script type="text/javascript">
-$(function () {
-    $('#fileupload').fileupload({
-        dataType: 'json',
-        add: function (e, data) {
-        	
-            data.context = $('<button/>').text('Upload')
-                .appendTo(document.body)
-                .click(function () {
-                    data.context = $('<p/>').text('Uploading...').replaceAll($(this));
-                    data.submit();
-                });
-        },
-        done: function (e, data) {
-            data.context.text('Upload finished.');
-        }
-    });
-});
-/*$(function () {
-    $('#fileupload').fileupload({
-        dataType: 'json',
-        done: function (e, data) {
-            $.each(data.result.files, function (index, file) {
-                $('<p/>').text(file.name).appendTo(document.body);
-            });
-        }
-    });
-}); */
-</script>
--->
-
+	if (url_png == true) { 
+	var input = "";
+	input = "Current Map:<br>";
+	input += "<img id='testimage_png' alt='MIND_MAP'  style='max-width:600px; max-height:350px;' src='images/map.png'>";
+	document.getElementById("map_div").innerHTML = input;
+    }else if(url_jpg == true){
+    var input = "";
+	input = "Current Map:<br>";
+	input += "<img id='testimage_jpg' alt='MIND_MAP' style='max-width:600px; max-height:350px;' src='images/map.jpg'>";
+    document.getElementById("map_div").innerHTML = input;
+    }else if(url_jpg == true){
+    var input = "";
+	input = "Current Map:<br>";
+	input += "<img id='testimage_jpeg' alt='MIND_MAP' style='max-width:600px; max-height:350px;' src='images/map.jpeg'>";
+    document.getElementById("map_div").innerHTML = input;
+	} else {
+    var input = "";
+	input = "There is currently no map available!<br>";
+	input += "<br> Please upload one - MIND needs one to work!";
+    document.getElementById("map_div").innerHTML = input;
+	}
+	//TODO: more formats
+	</script>
+	 <!-- <img id='testimage_jpg' alt='MIND_MAP' src='images/map.jpg'> -->
 	 <br><hr>
 	 <h3>Areas</h3>
 	 <br>Here you see all Areas which are currently in MIND.
