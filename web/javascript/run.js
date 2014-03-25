@@ -369,16 +369,22 @@ function writeUsers(data) {
         tablecontents += "<td>User Name: </td>";
         tablecontents += "<td>User Email: </td>";
         tablecontents += "<td>Last Access Time: </td>";
+        tablecontents += "<td>Position: </td>";
         tablecontents += "<td>Is Admin: </td>";
         tablecontents += "<td>Edit User: </td>";
         tablecontents += "<td>Remove User: </td>";
         tablecontents += "</tr>";
+
+        var lastPosition;
 
         for (var i = 0; i < data.object.length; i++) {
             tablecontents += "<tr>";
             tablecontents += "<td>" + data.object[i].name + "</td>";
             tablecontents += "<td>" + data.object[i].email + "</td>";
             tablecontents += "<td>" + (data.object[i].lastAccess == undefined ? "Never" : data.object[i].lastAccess) + "</td>";
+            lastPosition = data.object[i].lastPosition;
+            lastPosition = (lastPosition == undefined || lastPosition == null) ? "Unknown" : lastPosition;
+            tablecontents += "<td>" + lastPosition + "</td>";
             tablecontents += "<td>" + data.object[i].admin + "</td>";
             //tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen_editUser(this.id)' id='editUser" +i+ "'/></td>";
             //tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen_removeUser(this.id)' id='removeUser" +i+ "'/></td>";
