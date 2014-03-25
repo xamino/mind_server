@@ -111,10 +111,10 @@ public class SanitationModule extends Module {
                     // To do that, we first need to get the new object:
                     ActiveUser activeUser = sessions.get(arrival.getSessionHash());
                     Data object = readAuthFromDB(activeUser.user);
-                    Data msg = ServletFunctions.getInstance().checkDataMessage(object);
+                    Data msg = ServletFunctions.getInstance().checkDataMessage(object, Authenticated.class);
                     if (msg != null) {
                         log.error(TAG, "WARNING: Check failed because no user or error was returned from DB for " + activeUser.user.readIdentification() + "!");
-                    } else if (object instanceof Authenticated) {
+                    } else {
                         // If everything is okay, we return the current user and leave this method
                         Authenticated currentUser = ((Authenticated) object);
                         activeUser = new ActiveUser(currentUser, System.currentTimeMillis(), arrival.getSessionHash());
@@ -197,7 +197,7 @@ public class SanitationModule extends Module {
     private Data login(Authenticated user) {
         Data object = readAuthFromDB(user);
         // Check if message:
-        Data answer = ServletFunctions.getInstance().checkDataMessage(object);
+        Data answer = ServletFunctions.getInstance().checkDataMessage(object, Authenticated.class);
         if (answer != null) {
             // this means 99% of the time that a user wasn't found.
             // To avoid allowing to find usernames with this method, we return the same message as if the login

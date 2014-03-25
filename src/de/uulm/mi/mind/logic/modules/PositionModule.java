@@ -7,6 +7,7 @@ import de.uulm.mi.mind.logic.Task;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Message;
+import de.uulm.mi.mind.servlet.ServletFunctions;
 
 import java.util.*;
 
@@ -29,18 +30,43 @@ public class PositionModule extends Module {
         if (!(task instanceof Task.Position)) {
             return new Error("WrongTaskType", "PositionModule was called with the wrong task type!");
         }
-        if (!(request instanceof Location)) {
-            return new Error("WrongObjectType", "PositionModule was called with the wrong object type!");
+        Task.Position todo = (Task.Position) task;
+        switch (todo) {
+            case FIND:
+                if (!(request instanceof Location)) {
+                    return new Error("WrongObjectType", "PositionModule was called with the wrong object type!");
+                }
+                // Everything okay from here on out:
+                Location location = calculateLocation((Location) request);
+                // get best area for location to return
+                Area area = getBestArea(location);
+                if (area == null) {
+                    log.error(TAG, "NULL area for position_find – shouldn't happen as universe should be returned at least!");
+                    return new Message("PositionUnfound", "Your position could not be found.");
+                }
+                return area;
+            case READ:
+                // read all users
+                Data evtlUserList = read(new User(null));
+                Data msg = ServletFunctions.getInstance().checkDataMessage(evtlUserList, DataList.class);
+                if (msg != null) {
+                    return msg;
+                }
+                DataList users = ((DataList) evtlUserList);
+                // filter the list – apply status and set special cases
+                DataList sendUsers = new DataList();
+                for (Object obj : users) {
+                    User us = ((User) obj);
+                    if (us.getLastPosition() == null)
+                        continue;
+                    // TODO filter based on time too
+                    sendUsers.add(us);
+                }
+                return sendUsers;
+            default:
+                log.error(TAG, "Unknown task #" + todo + "# sent to PositionModule! Shouldn't happen!");
+                return new Error("UnknownTask", "Unknown task sent to PositionModule!");
         }
-        // Everything okay from here on out:
-        Location location = calculateLocation((Location) request);
-        // get best area for location to return
-        Area area = getBestArea(location);
-        if (area == null) {
-            log.error(TAG, "NULL area for position_find – shouldn't happen as universe should be returned at least!");
-            return new Message("PositionUnfound", "Your position could not be found.");
-        }
-        return area;
     }
 
     private Location calculateLocation(Location request) {

@@ -98,13 +98,9 @@ public class ServletFunctions {
             case POSITION_FIND:
                 // find the area
                 Data data = moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
-                Data msg = checkDataMessage(data);
+                Data msg = checkDataMessage(data, Area.class);
                 if (msg != null) {
                     return msg;
-                }
-                if (!(data instanceof Area)) {
-                    log.error("IllegalPositionFind", "Position find returned something else than an area, shouldn't happen!");
-                    return new Error("IllegalPositionFind", "Position find failed!");
                 }
                 Area area = ((Area) data);
                 // update user for position
@@ -149,7 +145,7 @@ public class ServletFunctions {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 data = moduleManager.handleTask(Task.User.READ, arrival.getObject());
-                message = checkDataMessage(data);
+                message = checkDataMessage(data, DataList.class);
                 if (message == null) {
                     // todo how to strip password from all users?
                     // return ((User) data).safeClone();
@@ -189,8 +185,8 @@ public class ServletFunctions {
                     return new Error("IllegalChange", "Email must not be empty!");
                 }
                 data = moduleManager.handleTask(Task.User.READ, new User(tempUser.getEmail()));
-                message = checkDataMessage(data);
-                if (message == null && data instanceof DataList && ((DataList) data).size() == 1) {
+                message = checkDataMessage(data, DataList.class);
+                if (message == null && ((DataList) data).size() == 1) {
                     User originalUser = (User) ((DataList) data).get(0);
                     tempUser.setEmail(originalUser.getEmail());
                     tempUser.setLastAccess(originalUser.getLastAccess());
@@ -299,8 +295,8 @@ public class ServletFunctions {
                     return new Error("IllegalChange", "Identification must not be empty!");
                 }
                 data = moduleManager.handleTask(Task.Display.READ, new PublicDisplay(display.getIdentification(), null, null, 0, 0));
-                message = checkDataMessage(data);
-                if (message == null && data instanceof DataList) {
+                message = checkDataMessage(data, DataList.class);
+                if (message == null) {
                     if (((DataList) data).size() != 1) {
                         return new Error("DisplayUpdateError", "Display was not found!");
                     }
@@ -330,31 +326,48 @@ public class ServletFunctions {
             case ADMIN_ANNIHILATE_USER:
                 log.log(TAG, "Removing all users!");
                 return moduleManager.handleTask(Task.User.ANNIHILATE, null);
+            // Read all positions (as publicly seen)
+            case READ_ALL_POSITIONS:
+                return moduleManager.handleTask(Task.Display.READ, null);
             default:
                 return null;
         }
     }
 
-    // TODO
+    /**
+     * Tasks for PublicDisplays.
+     *
+     * @param arrival The arrival object.
+     * @param display The PublicDisplay user object.
+     * @return Resulting data.
+     */
     public Data handleDisplayTask(Servlet.Arrival arrival, PublicDisplay display) {
-        return new Error("Unimplemented", "No functions for this have been implemented so far!");
+        Task.API task = Task.API.safeValueOf(arrival.getTask());
+        switch (task) {
+            case READ_ALL_POSITIONS:
+                return moduleManager.handleTask(Task.Display.READ, null);
+            default:
+                return null;
+        }
     }
 
     /**
-     * Method that checkes if data returned from the modules is a message, in which case it is returned, or null, in
-     * which case an error message is returned. If the data is anything else, it is considered to be a valid reply and
-     * null is returned.
+     * Method that checks data returned from a module. The method returns null except when: data is an Information
+     * interface type class, data is null, or data is not of type class.
      *
-     * @param data The data to check.
+     * @param data  The data to check.
+     * @param clazz The class type against which to check.
      * @return An Information object if data is such, else null.
      */
-    public Information checkDataMessage(Data data) {
+    public Information checkDataMessage(Data data, Class clazz) {
         if (data == null) {
             return new Error("DATA NULL", "Data requested returned NULL, should NOT HAPPEN!");
         } else if (data instanceof Information) {
             return (Information) data;
+        } else if (data.getClass() != clazz && !clazz.isAssignableFrom(data.getClass())) {
+            return new Error("DATA CAST FAILED", "Returned data failed class test!");
         } else {
-            // This means that answer is manually set.
+            // This means everything was okay
             return null;
         }
     }

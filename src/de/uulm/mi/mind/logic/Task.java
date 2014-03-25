@@ -45,6 +45,10 @@ public interface Task {
          * Given a location, find the position.
          */
         POSITION_FIND,
+        /**
+         * Returns public viewable list of all users for their position data.
+         */
+        READ_ALL_POSITIONS,
         // ADMIN
         READ_ALL_ADMIN,
         ADMIN_USER_READ,
@@ -117,12 +121,8 @@ public interface Task {
     }
 
     public enum Position implements Task {
-        FIND
+        FIND, READ
     }
-
-   /* public enum WifiMorsel implements Task {
-        CREATE, READ, UPDATE, DELETE
-    }*/
 
     public enum Location implements Task {
         CREATE, READ, UPDATE, DELETE,

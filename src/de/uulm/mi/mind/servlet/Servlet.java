@@ -77,7 +77,7 @@ public class Servlet extends HttpServlet {
         // If the task was CHECK we don't need to do anything else
         if (!(check instanceof Information) && Task.Sanitation.safeValueOf(arrival.getTask()) == Task.Sanitation.CHECK) {
             // Avoid sending the user object
-            answer = functions.checkDataMessage(check);
+            answer = functions.checkDataMessage(check, User.class);
             if (answer == null) {
                 answer = new Success("CheckOkay", "Your session is valid!");
             }

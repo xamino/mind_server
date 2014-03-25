@@ -77,7 +77,7 @@ public class LocationModule extends Module {
                     for (Object obj : areas) {
                         Area temp = ((Area) obj);
                         temp = updateLocations(temp);
-                        if (null == ServletFunctions.getInstance().checkDataMessage(update(temp))) {
+                        if (null == ServletFunctions.getInstance().checkDataMessage(update(temp), Success.class)) {
                             return new Error("AreaReadUpdateError", "Failed to update " + temp.getID() + " upon read!");
                         }
                     }
