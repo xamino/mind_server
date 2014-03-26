@@ -49,6 +49,10 @@ public interface Task {
          * Returns public viewable list of all users for their position data.
          */
         READ_ALL_POSITIONS,
+        /**
+         * A read all areas function for the public displays.
+         */
+        READ_ALL_AREAS,
         // ADMIN
         READ_ALL_ADMIN,
         ADMIN_USER_READ,

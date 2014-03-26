@@ -377,8 +377,13 @@ function testPositionRead() {
     if (userLocs == null || userLocs.length != 2) {
         alert("Wrong number of available user locations!");
     }
-
     // TODO test filters
+
+    // test PD read areas
+    var areas = unitTest("read_all_areas", null, Array, pD);
+    if (areas == null || areas.length != 3) {
+        alert("Area read failed!");
+    }
 
     cleanDB();
     alert("Finished position read test.")
