@@ -71,7 +71,7 @@ function loginDisplay(identification, password, callback) {
         // callback simply saves the session
         session = data.object.description;
         writeCookie("MIND_PD_C", session); //TODO add id/.. of PD to cookie-name
-        alert("PD_session: " + session);
+        //alert("PD_session: " + session);
         callback();
     });
 
@@ -949,6 +949,33 @@ function onLoadOfPdPage() {
     });
 }
 
+/**
+ * This function is called when the public display attempts to display
+ * the locations of the users (their icons) on the map
+ */
+function displayUserLocations(){
 
+	//send(new Arrival("read_all_positions", session), handleAllUserPositionData);
+	handleAllUsersPositionData();
+}
+
+function handleAllUsersPositionData(){
+	
+//TESTAREA
+	//User(email, password, name, admin) {
+	var user1 = new User("a@a.a",null,"a",false);
+	user1.lastPosition = 1;
+	user1.iconRef = "crab.png";
+	var user2 = new User("b@b.b",null,"b",false);
+	user2.lastPosition = 2;
+	user2.iconRef = "lion.png";
+	
+	var users = new Array();
+	users[0] = user1;
+	users[1] = user2;
+	
+	handleAllUsersPositionPlacement(users);
+//END TESTAREA
+}
 
 

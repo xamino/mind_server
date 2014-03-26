@@ -7,13 +7,19 @@
 <script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
+<script src="javascript/displayMap.js"></script>
 <link href="${pageContext.request.contextPath}/css/public_display.css" rel="stylesheet" type="text/css">
 <title>Public Display</title>
 </head>
-<body onload="onLoadOfPdPage()">
-<div id="map">
+<body onload="onLoadOfPdPage(),displayUserLocations()">
 
+<div id="mapscroll">
+	<div id="mapWithIcons" style="position: relative; left: 0; top: 0;">
+		<img class="mapcontent" src="images/map.png"/>
+		<!-- <img class="micon" src="images/micons/crab.png"/> -->
+	</div>
 </div>
+
 <div id="content">
 	<div id="settings">
 		<div id="app_settings">
