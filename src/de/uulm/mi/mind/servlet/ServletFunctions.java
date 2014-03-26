@@ -346,6 +346,10 @@ public class ServletFunctions {
         switch (task) {
             case READ_ALL_POSITIONS:
                 return moduleManager.handleTask(Task.Position.READ, null);
+            case READ_ALL_AREAS:
+                Area filter = new Area(null);
+                // todo filter these maybe?
+                return moduleManager.handleTask(Task.Area.READ, filter);
             default:
                 return null;
         }
