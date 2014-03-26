@@ -27,7 +27,7 @@ import java.util.HashMap;
  *         Class that handles the user sessions. Note that this includes the PublicDisplays, but ONLY for CHECK.
  *         Otherwise the public displays must be managed by the admin or users.
  */
-public class SanitationModule extends Module {
+public class SecurityModule extends Module {
 
     /**
      * Session timeout in milliseconds. Cannot be changed during runtime!
@@ -36,7 +36,7 @@ public class SanitationModule extends Module {
     /**
      * TAG for log.
      */
-    private final String TAG = "SanitationModule";
+    private final String TAG = "SecurityModule";
     /**
      * HashMap containing the sessions and their last access time.
      */
@@ -53,7 +53,7 @@ public class SanitationModule extends Module {
     /**
      * Constructor. Creates the hashmap, the secure random instance, and gets an instance of the log.
      */
-    public SanitationModule() {
+    public SecurityModule() {
         sessions = new HashMap<>();
         random = new SecureRandom();
         log = Messenger.getInstance();
@@ -63,7 +63,7 @@ public class SanitationModule extends Module {
      * Main task multiplexing method for sanitation. Handles data validation and calls the correct methods for the given
      * task.
      *
-     * @param task    The @{Task.SanitationModule} to do.
+     * @param task    The @{Task.SecurityModule} to do.
      * @param request The accompanying data. Must be Arrival, otherwise an error will be returned.
      * @return A message containing the status of the request.
      */
@@ -71,11 +71,11 @@ public class SanitationModule extends Module {
     public Data run(Task task, Data request) {
         if (!(task instanceof Task.Sanitation)) {
             // Check that it is one of our tasks...
-            return new Error("WrongTaskType", "SanitationModule was called with the wrong task type!");
+            return new Error("WrongTaskType", "SecurityModule was called with the wrong task type!");
         }
         if (!(request instanceof Arrival)) {
-            // SanitationModule ALWAYS only uses and expects Arrival!
-            return new Error("WrongObjectType", "SanitationModule was called with the wrong object type!");
+            // SecurityModule ALWAYS only uses and expects Arrival!
+            return new Error("WrongObjectType", "SecurityModule was called with the wrong object type!");
         }
         Arrival arrival = (Arrival) request;
         // Pull out authenticated
@@ -130,8 +130,8 @@ public class SanitationModule extends Module {
                 }
                 // break;
             default:
-                log.error(TAG, "Unknown task #" + todo + "# sent to SanitationModule! Shouldn't happen!");
-                return new Error("UnknownTask", "Unknown task sent to SanitationModule!");
+                log.error(TAG, "Unknown task #" + todo + "# sent to SecurityModule! Shouldn't happen!");
+                return new Error("UnknownTask", "Unknown task sent to SecurityModule!");
         }
         return new Error("SanitationTaskError", "A task failed to complete – have you supplied the correct object type?");
     }

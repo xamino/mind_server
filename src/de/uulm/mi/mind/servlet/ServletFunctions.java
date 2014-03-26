@@ -61,30 +61,23 @@ public class ServletFunctions {
                 if (!sentUser.getEmail().equals(user.getEmail())) {
                     return new Error("IllegalChange", "Email can not be changed in an existing user");
                 }
-                // Make sure that you can't set yourself to admin
+                // Make sure that you can't set or unset yourself to admin
                 if (sentUser.isAdmin() && !user.isAdmin()) {
                     return new Error("IllegalChange", "You do not have the rights to modify your permissions!");
                 }
-                // Also make sure you keep your admin status
-                sentUser.setAdmin(user.isAdmin());
-                // keep last access time
-                sentUser.setLastAccess(user.getLastAccess());
-                // We need to catch a password change, as it must be hashed:
-                String password = sentUser.getPwdHash();
-                if (password != null && !password.isEmpty()) {
+                // password
+                if (safeString(sentUser.getPwdHash())) {
                     // hash:
-                    sentUser.setPwdHash(BCrypt.hashpw(password, BCrypt.gensalt(12)));
-                } else {
-                    sentUser.setPwdHash(user.getPwdHash());
+                    user.setPwdHash(BCrypt.hashpw(sentUser.getPwdHash(), BCrypt.gensalt(12)));
                 }
-                // This means that the name isn't to be changed:
-                if (sentUser.getName() == null) {
-                    sentUser.setName(user.getName());
+                // name
+                if (safeString(sentUser.getName())) {
+                    user.setName(sentUser.getName());
                 }
                 // Note that the session user object now needs to be updated. This is done the next time the user
-                // sends a request through SanitationModule; it will always get the up to date object from the
+                // sends a request through SecurityModule; it will always get the up to date object from the
                 // database.
-                return moduleManager.handleTask(Task.User.UPDATE, sentUser);
+                return moduleManager.handleTask(Task.User.UPDATE, user);
             case USER_DELETE:
                 // To catch some errors, we enforce that no object has been passed along:
                 if (arrival.getObject() != null) {
@@ -157,51 +150,71 @@ public class ServletFunctions {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 tempUser = (User) arrival.getObject();
-                if (tempUser.getEmail() != null && !tempUser.getEmail().isEmpty()) {
-                    if (tempUser.getPwdHash() != null && !tempUser.getPwdHash().isEmpty()) {
-                        String newPassword = tempUser.getPwdHash();
-                        tempUser.setPwdHash(BCrypt.hashpw(newPassword, BCrypt.gensalt(12)));
-                        return moduleManager.handleTask(Task.User.CREATE, tempUser);
+                // check email
+                if (!safeString(tempUser.getEmail())) {
+                    return new Error("IllegalAdd", "Email is primary key! May not be empty.");
+                }
+                // for security reasons, log this
+                if (tempUser.isAdmin()) {
+                    log.log(TAG, "Adding user " + tempUser.getEmail() + " as admin!");
+                }
+                // all else we set manually to valid values
+                tempUser.setLastPosition(null);
+                tempUser.setLastAccess(null);
+                // check & handle password (we do this last because we might need to send back the key)
+                if (safeString(tempUser.getPwdHash())) {
+                    // this means a password was provided
+                    tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
+                    // update to DB
+                    return moduleManager.handleTask(Task.User.CREATE, tempUser);
+                } else {
+                    // this means we generate a password
+                    // todo make shorter
+                    String key = new BigInteger(130, random).toString(32);
+                    // hash it
+                    tempUser.setPwdHash(BCrypt.hashpw(key, BCrypt.gensalt(12)));
+                    // update to DB
+                    data = moduleManager.handleTask(Task.User.CREATE, tempUser);
+                    // Only send the key if the update was successful
+                    if (data instanceof Success) {
+                        return new Message("AddUserSuccessKey", key);
                     } else {
-                        // This means that we generate a password
-                        String key = new BigInteger(130, random).toString(32);
-                        // hash it
-                        tempUser.setPwdHash(BCrypt.hashpw(key, BCrypt.gensalt(12)));
-                        data = moduleManager.handleTask(Task.User.CREATE, tempUser);
-                        // If the operation was a success, we need to send the generated key back
-                        if (data instanceof Success) {
-                            data = new Message("UserAddSuccessKey", key);
-                        }
-                        return data;
+                        // send the error
+                        return nullMessageCatch(data);
                     }
                 }
-                return new Error("IllegalAdd", "Email is primary key! May not be empty.");
             case ADMIN_USER_UPDATE:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 tempUser = (User) arrival.getObject();
-                if (tempUser.getEmail() == null || tempUser.getEmail().isEmpty()) {
+                // check email
+                if (!safeString(tempUser.getEmail())) {
                     return new Error("IllegalChange", "Email must not be empty!");
                 }
+                // get original
                 data = moduleManager.handleTask(Task.User.READ, new User(tempUser.getEmail()));
                 message = checkDataMessage(data, DataList.class);
-                if (message == null && ((DataList) data).size() == 1) {
-                    User originalUser = (User) ((DataList) data).get(0);
-                    tempUser.setEmail(originalUser.getEmail());
-                    tempUser.setLastAccess(originalUser.getLastAccess());
-                    if (tempUser.getPwdHash() != null && !tempUser.getPwdHash().isEmpty()) {
-                        tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
-                    } else {
-                        tempUser.setPwdHash(originalUser.getPwdHash());
-                    }
-                    // This means the name isn't to be changed:
-                    if (tempUser.getName() == null) {
-                        tempUser.setName(originalUser.getName());
-                    }
-                    return moduleManager.handleTask(Task.User.UPDATE, tempUser);
+                if (message != null) {
+                    return message;
                 }
-                return nullMessageCatch(message);
+                // make sure we get one back
+                if (((DataList) data).size() != 1) {
+                    return new Error("UserUpdateFailed", "User " + tempUser.getEmail() + " not found!");
+                }
+                User originalUser = (User) ((DataList) data).get(0);
+                // change name
+                if (safeString(tempUser.getName())) {
+                    originalUser.setName(tempUser.getName());
+                }
+                // change password
+                if (safeString(tempUser.getPwdHash())) {
+                    originalUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
+                }
+                // change admin status
+                originalUser.setAdmin(tempUser.isAdmin());
+                // and update
+                return moduleManager.handleTask(Task.User.UPDATE, originalUser);
             case ADMIN_USER_DELETE:
                 log.log("DELETE", arrival.getObject().toString());
                 if (!(arrival.getObject() instanceof User)) {
@@ -389,5 +402,15 @@ public class ServletFunctions {
             return new Error("NullMessage", "Something went wrong in the task but no message was written!");
         }
         return (Information) msg;
+    }
+
+    /**
+     * Small method for checking the validity of input strings.
+     *
+     * @param toCheck The string to check.
+     * @return Boolean value whether legal stuff is happening.
+     */
+    private boolean safeString(String toCheck) {
+        return (toCheck != null && !toCheck.isEmpty());
     }
 }

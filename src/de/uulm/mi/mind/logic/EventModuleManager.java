@@ -12,7 +12,7 @@ public class EventModuleManager {
     private static EventModuleManager INSTANCE;
     private final UserModule userModule;
     private final LocationModule locationModule;
-    private final SanitationModule sanitationModule;
+    private final SecurityModule securityModule;
     private final PositionModule positionModule;
     private final DisplayModule displayModule;
 
@@ -22,7 +22,7 @@ public class EventModuleManager {
         // in their constructors!
         userModule = new UserModule();
         locationModule = new LocationModule();
-        sanitationModule = new SanitationModule();
+        securityModule = new SecurityModule();
         positionModule = new PositionModule();
         displayModule = new DisplayModule();
     }
@@ -45,7 +45,7 @@ public class EventModuleManager {
         else if (operation instanceof Task.Location || operation instanceof Task.Area) {
             return locationModule.run(operation, task);
         } else if (operation instanceof Task.Sanitation) {
-            return sanitationModule.run(operation, task);
+            return securityModule.run(operation, task);
         } else if (operation instanceof Task.Position) {
             return positionModule.run(operation, task);
         } else if (operation instanceof Task.Display) {

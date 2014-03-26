@@ -127,7 +127,7 @@ public class Servlet extends HttpServlet {
      * Takes the HttpServletRequest and returns the correct arrival object filled with JSON goodies.
      *
      * @param request The request to read.
-     * @return The Arrival object filled with the data. NULL if not a valid object, checked in SanitationModule, no need for
+     * @return The Arrival object filled with the data. NULL if not a valid object, checked in SecurityModule, no need for
      * error correction.
      * @throws IOException
      */
@@ -150,7 +150,7 @@ public class Servlet extends HttpServlet {
         if (data instanceof Arrival) {
             return (Arrival) data;
         } else {
-            // No need for error handling, that is done in SanitationModule
+            // No need for error handling, that is done in SecurityModule
             return null;
         }
     }
@@ -166,7 +166,7 @@ public class Servlet extends HttpServlet {
             // This means something went wrong. Badly.
             return new Error("IllegalPOST", "POST does not conform to API! Keys valid? Values set? Object correct?");
         }
-        // Some tasks can be done without login, here are these SanitationModule tasks:
+        // Some tasks can be done without login, here are these SecurityModule tasks:
         Task.Sanitation task = Task.Sanitation.safeValueOf(arrival.getTask());
         // If the task is not an error, than it IS a sanitationModule task:
         if (task != Task.Sanitation.ERROR) {
