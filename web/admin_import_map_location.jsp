@@ -56,11 +56,11 @@
 	</script>
 	<script>
 	var url_png = doesFileExist("images/map.png");
-	alert("png: "+url_png);
+	//alert("png: "+url_png);
 	var url_jpg = doesFileExist("images/map.jpg");
-	alert("jpg: "+url_jpg);
+	//alert("jpg: "+url_jpg);
  	var url_jpeg = doesFileExist("images/map.jpeg");
- 	alert("jpeg: "+url_jpeg);
+ 	//alert("jpeg: "+url_jpeg);
  
 	if (url_png == true) { 
 	var input = "";
