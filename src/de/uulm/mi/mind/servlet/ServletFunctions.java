@@ -167,22 +167,19 @@ public class ServletFunctions {
                     tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
                     // update to DB
                     return moduleManager.handleTask(Task.User.CREATE, tempUser);
-                } else {
-                    // this means we generate a password
-                    // todo make shorter
-                    String key = new BigInteger(130, random).toString(32);
-                    // hash it
-                    tempUser.setPwdHash(BCrypt.hashpw(key, BCrypt.gensalt(12)));
-                    // update to DB
-                    data = moduleManager.handleTask(Task.User.CREATE, tempUser);
-                    // Only send the key if the update was successful
-                    if (data instanceof Success) {
-                        return new Message("AddUserSuccessKey", key);
-                    } else {
-                        // send the error
-                        return nullMessageCatch(data);
-                    }
                 }
+                // this means we generate a password
+                String key = generateKey(6);
+                // hash it
+                tempUser.setPwdHash(BCrypt.hashpw(key, BCrypt.gensalt(12)));
+                // update to DB
+                data = moduleManager.handleTask(Task.User.CREATE, tempUser);
+                // Only send the key if the update was successful
+                if (data instanceof Success) {
+                    return new Message("AddUserSuccessKey", key);
+                }
+                // send the error
+                return nullMessageCatch(data);
             case ADMIN_USER_UPDATE:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -280,49 +277,61 @@ public class ServletFunctions {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
                 display = (PublicDisplay) arrival.getObject();
-                if (display.getIdentification() != null && !display.getIdentification().isEmpty()) {
-                    if (display.getToken() != null && !display.getToken().isEmpty()) {
-                        display.setToken(BCrypt.hashpw(display.getToken(), BCrypt.gensalt(12)));
-                        return moduleManager.handleTask(Task.Display.CREATE, arrival.getObject());
-                    } else {
-                        // This means that we generate a password
-                        String key = new BigInteger(130, random).toString(32);
-                        // hash it
-                        display.setToken(BCrypt.hashpw(key, BCrypt.gensalt(12)));
-                        data = moduleManager.handleTask(Task.Display.CREATE, display);
-                        // If the operation was a success, we need to send the generated key back
-                        if (data instanceof Success) {
-                            data = new Message("DisplayAddSuccessKey", key);
-                        }
-                        return data;
-                    }
+                // check identification
+                if (!safeString(display.getIdentification())) {
+                    return new Error("IllegalAdd", "Identification is primary key! May not be empty.");
                 }
-                return new Error("IllegalAdd", "Identification is primary key! May not be empty.");
+                // check coordinates
+                if (display.getCoordinateX() < 0 || display.getCoordinateY() < 0) {
+                    return new Error("IllegalAdd", "Coordinates must be positive!");
+                }
+                // password
+                if (safeString(display.getToken())) {
+                    display.setToken(BCrypt.hashpw(display.getToken(), BCrypt.gensalt(12)));
+                    return moduleManager.handleTask(Task.Display.CREATE, display);
+                }
+                // otherwise we need to generate a token
+                String token = generateKey(6);
+                // hash it
+                display.setToken(BCrypt.hashpw(token, BCrypt.gensalt(12)));
+                data = moduleManager.handleTask(Task.Display.CREATE, display);
+                // If the operation was a success, we need to send the generated key back
+                if (data instanceof Success) {
+                    data = new Message("DisplayAddSuccessKey", token);
+                }
+                return nullMessageCatch(data);
             case DISPLAY_UPDATE:
                 if (!(arrival.getObject() instanceof PublicDisplay)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
                 }
-                // id and token require special consideration
                 display = (PublicDisplay) arrival.getObject();
-                if (display.getIdentification() == null || display.getIdentification().isEmpty()) {
+                if (!safeString(display.getIdentification())) {
                     return new Error("IllegalChange", "Identification must not be empty!");
                 }
                 data = moduleManager.handleTask(Task.Display.READ, new PublicDisplay(display.getIdentification(), null, null, 0, 0));
                 message = checkDataMessage(data, DataList.class);
-                if (message == null) {
-                    if (((DataList) data).size() != 1) {
-                        return new Error("DisplayUpdateError", "Display was not found!");
-                    }
-                    PublicDisplay originalDisplay = (PublicDisplay) ((DataList) data).get(0);
-                    display.setIdentification(originalDisplay.getIdentification());
-                    if (display.getToken() != null && !display.getToken().isEmpty()) {
-                        display.setToken(BCrypt.hashpw(display.getToken(), BCrypt.gensalt(12)));
-                    } else {
-                        display.setToken(originalDisplay.getToken());
-                    }
-                    return moduleManager.handleTask(Task.Display.UPDATE, display);
+                if (message != null) {
+                    return message;
                 }
-                return nullMessageCatch(message);
+                // make sure we get one back
+                if (((DataList) data).size() != 1) {
+                    return new Error("DisplayUpdateFailed", "Display " + display.getIdentification() + " not found!");
+                }
+                PublicDisplay originalDisplay = (PublicDisplay) ((DataList) data).get(0);
+                // check coordinates
+                if (display.getCoordinateX() < 0 || display.getCoordinateY() < 0) {
+                    return new Error("IllegalUpdate", "Coordinates must be positive!");
+                }
+                // check password
+                if (safeString(display.getToken())) {
+                    originalDisplay.setToken(BCrypt.hashpw(display.getToken(), BCrypt.gensalt(12)));
+                }
+                // check location
+                if (safeString(display.getLocation())) {
+                    originalDisplay.setLocation(display.getLocation());
+                }
+                // update
+                return moduleManager.handleTask(Task.Display.UPDATE, display);
             case DISPLAY_REMOVE:
                 if (!(arrival.getObject() instanceof PublicDisplay)) {
                     return new Error("WrongObject", "You supplied a wrong object for this task!");
@@ -412,5 +421,19 @@ public class ServletFunctions {
      */
     private boolean safeString(String toCheck) {
         return (toCheck != null && !toCheck.isEmpty());
+    }
+
+    /**
+     * Method for generating a pseudo-random hash.
+     *
+     * @param length The maximum length of the hash to return. Can be smaller!
+     * @return The generated hash.
+     */
+    private String generateKey(int length) {
+        String key = new BigInteger(130, random).toString(32);
+        if (key.length() > length) {
+            return key.substring(0, length);
+        }
+        return key;
     }
 }
