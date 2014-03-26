@@ -19,6 +19,10 @@ import java.security.SecureRandom;
 public class ServletFunctions {
     private static ServletFunctions INSTANCE;
     private final String TAG = "ServletFunctions";
+    /**
+     * This controls the length of the generated keys when adding users or displays without a preset password.
+     */
+    private final int GENERATED_KEY_LENGTH = 6;
     private Messenger log;
     private EventModuleManager moduleManager;
     private SecureRandom random;
@@ -169,7 +173,7 @@ public class ServletFunctions {
                     return moduleManager.handleTask(Task.User.CREATE, tempUser);
                 }
                 // this means we generate a password
-                String key = generateKey(6);
+                String key = generateKey();
                 // hash it
                 tempUser.setPwdHash(BCrypt.hashpw(key, BCrypt.gensalt(12)));
                 // update to DB
@@ -291,7 +295,7 @@ public class ServletFunctions {
                     return moduleManager.handleTask(Task.Display.CREATE, display);
                 }
                 // otherwise we need to generate a token
-                String token = generateKey(6);
+                String token = generateKey();
                 // hash it
                 display.setToken(BCrypt.hashpw(token, BCrypt.gensalt(12)));
                 data = moduleManager.handleTask(Task.Display.CREATE, display);
@@ -424,15 +428,15 @@ public class ServletFunctions {
     }
 
     /**
-     * Method for generating a pseudo-random hash.
+     * Method for generating a pseudo-random hash. Note that GENERATED_KEY_LENGTH variable controls how long the key
+     * will be at maximum. The key may be shorter though!
      *
-     * @param length The maximum length of the hash to return. Can be smaller!
      * @return The generated hash.
      */
-    private String generateKey(int length) {
+    private String generateKey() {
         String key = new BigInteger(130, random).toString(32);
-        if (key.length() > length) {
-            return key.substring(0, length);
+        if (key.length() > GENERATED_KEY_LENGTH) {
+            return key.substring(0, GENERATED_KEY_LENGTH);
         }
         return key;
     }
