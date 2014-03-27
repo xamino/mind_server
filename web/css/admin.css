@@ -124,6 +124,12 @@ html, body {
 	padding-left:10px;
 }
 
+/************** nice settings for drawing on map (admin_import_map_location.jsp) ******************/
+
+#testimage_png {
+    cursor: crosshair;
+  }
+
 /************* clear floats *******************/
 .clear{
 	clear:both;

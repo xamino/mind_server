@@ -7,11 +7,8 @@
 <script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
-<script src="javascript/createArea.js"></script>
+<script src="javascript/admin_map.js"></script>
 <link href="${pageContext.request.contextPath}/css/admin.css" rel="stylesheet" type="text/css">
-<style>#map_div {
-    cursor: pointer;
-  }</style>
 <title>Admin - Import Map and Location Data</title>
 </head>
 
@@ -44,75 +41,15 @@
 		<br/>
 		<input type="submit" value="Upload File" />
 	</form>
-	<div id="map_div"></div>
-
-	<script>
-	function doesFileExist(urlToFile){
-	    var xhr = new XMLHttpRequest();
-	    xhr.open('HEAD', urlToFile, false);
-	    xhr.send();
-	    if (xhr.status == "404") {
-	        return false;
-	    } else {
-	        return true;
-	    }
-	}
-	</script>
-	<script>
-	var url_png = doesFileExist("images/map.png");
-	//alert("png: "+url_png);
-	var url_jpg = doesFileExist("images/map.jpg");
-	//alert("jpg: "+url_jpg);
- 	var url_jpeg = doesFileExist("images/map.jpeg");
- 	//alert("jpeg: "+url_jpeg);
-
-	if (url_png == true) {
-	var input = "";
-	input = "Current Map:<br>";
-	input += "<img id='testimage_png' alt='MIND_MAP'  style='max-width:600px; max-height:350px;' src='images/map.png'>";
-	document.getElementById("map_div").innerHTML = input;
-    }/*else if(url_jpg == true){
-    var input = "";
-	input = "Current Map:<br>";
-	input += "<img id='testimage_jpg' alt='MIND_MAP' style='max-width:600px; max-height:350px;' src='images/map.jpg'>";
-    document.getElementById("map_div").innerHTML = input;
-    }else if(url_jpg == true){
-    var input = "";
-	input = "Current Map:<br>";
-	input += "<img id='testimage_jpeg' alt='MIND_MAP' style='max-width:600px; max-height:350px;' src='images/map.jpeg'>";
-    document.getElementById("map_div").innerHTML = input;
-	} */else {
-    var input = "";
-	input = "There is currently no map available!<br>";
-	input += "<br> Please upload one - MIND needs one to work!";
-    document.getElementById("map_div").innerHTML = input;
-	}
-	//TODO: more formats
-	</script>
+	<!-- draw on map -->
+	<!-- <div id="map_div"></div>-->
+	<div onmousedown="return false" id="map_div">
+    	<!-- <div id="selection"></div>-->
+    </div>
+	<div id="status2"></div>
 	 <!-- <img id='testimage_jpg' alt='MIND_MAP' src='images/map.jpg'> -->
 	 Map-Coordinates
 	 <br><div id="testy"></div>
-	<!--<script>
-	//var p = $( "p:last" );
-	//var offset = p.offset();
-	//p.html( "left: " + offset.left + ", top: " + offset.top );
-	$( "*", document.body ).click(function( event ) {
-  	var offset = $( this ).offset();
-  	event.stopPropagation();
-  	alert("left-distance: "+event.clientX - offset.left);
-    alert("top-distance: "+event.clientY - offset.top);
-  	$( "#testy" ).text( this.tagName +
-    " coords ( " + offset.left + ", " + offset.top + " )" );
-	});
-
-	//$(document).ready(function() {
-  	//$('#map_div').click(function(e) {
-    //var offset = $(this).offset();
-    //alert(e.clientX - offset.left);
-    //alert(e.clientY - offset.top);
-  	//});
-	//});
-	</script> -->
 	 <br><hr>
 	 <h3>Areas</h3>
 	 <br>Here you see all Areas which are currently in MIND.
