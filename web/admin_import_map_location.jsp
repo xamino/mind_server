@@ -40,7 +40,11 @@
 		<br/>
 		<input type="submit" value="Upload File" />
 	</form>
-	<div id="map_div"></div>
+	<div class="range-slider" data-slider>
+		<span class="range-slider-handle"></span> 
+		<span class="range-slider-active-segment"></span> 
+		<input type="hidden">
+	</div>
 	
 	<script>
 	function doesFileExist(urlToFile){

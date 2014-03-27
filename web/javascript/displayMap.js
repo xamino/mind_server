@@ -2,23 +2,25 @@ var clicking = false;
 var previousX;
 var previousY;
 
-
+var usersToDisplay;
 
 function handleAllUsersPositionPlacement(allusers){
+	
+	usersToDisplay = allusers;
 	
 	//var iconelements = "";
 	var img;
 	var offset=130;
-	var divToAugment = document.getElementById("mapWithIcons");
-	for ( var i = 0; i < allusers.length; i++) {
+	var divToAugment = document.getElementById("mapscroll");
+	for ( var i = 0; i < usersToDisplay.length; i++) {
 		//iconelements += "<img class='micon' src='images/micons/"+allusers[i].iconRef+"'/>";
 		//var content = document.createTextNode(iconelements);
 //		theDiv.appendChild(content);
 		
 		   img=document.createElement("img");
 		   img.className="micon";
-		   img.src="images/micons/"+allusers[i].iconRef;
-		   img.id="icon_"+allusers[i].email;
+		   img.src="images/micons/"+usersToDisplay[i].iconRef;
+		   img.id="icon_"+usersToDisplay[i].email;
 		   img.style.position ="absolute";
 		   //TODO compute size & placement for icon on screen -> maybe compute prior to this and add as user attribute->user.x
 		   img.style.top="15%";
@@ -68,3 +70,13 @@ $(document).mousemove(function(e) {
 $("#scroll").mouseleave(function(e) {
     clicking = false;
 });
+
+
+//SLIDE BAR STUFF
+var trigger = 1;
+function showVal(value){
+	
+	if(trigger==1){trigger=2;}else{trigger=1;}
+	document.getElementById("slidertext").innerHTML = trigger+"value: "+value;
+
+}
