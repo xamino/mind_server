@@ -882,12 +882,11 @@ function removeLocationViaPopup(data) {
  * and the session id will be added to all links classified as "adminlink"
  */
 function onLoadOfAdminPage() {
-    var session = readCookie("MIND_Admin_C_session");
+    session = readCookie("MIND_Admin_C_session");
     send(new Arrival("check",session),function(data){
     	if (instanceOf(data,Error)) {
     		alert("You have to be logged in.");
     		window.location.href = "login.jsp";
-    		
     	} else {
     		return session;
     	}
