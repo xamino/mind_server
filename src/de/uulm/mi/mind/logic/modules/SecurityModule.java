@@ -90,8 +90,7 @@ public class SecurityModule extends Module {
                 if (user != null) {
                     return login(user);
                 }
-                // todo why not return an error?
-                break;
+                return new Error("LoginError", "Valid user object required!");
             case LOGOUT:
                 destroySession(arrival.getSessionHash());
                 return new Success("LoggedOut", "You have been successfully logged out.");
@@ -154,6 +153,8 @@ public class SecurityModule extends Module {
                 // this means the session has expired
                 // remove, as expired:
                 this.destroySession(sessionHash);
+                // todo laura bug remove when fixed
+                log.error(TAG + "||DEBUG||", "Check failed for session: LA at " + timeDelta + " ms ago.");
                 return false;
             }
             // update time if session is valid, resetting the timeout:
