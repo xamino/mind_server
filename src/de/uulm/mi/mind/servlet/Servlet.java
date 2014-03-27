@@ -129,8 +129,6 @@ public class Servlet extends HttpServlet {
      * error correction.
      * @throws IOException
      */
-    // TODO catch "object":null !!!
-    // TODO do i still need to catch that with the new Jsonator?
     private Arrival getRequest(HttpServletRequest request) throws IOException {
         BufferedReader reader = request.getReader();
         String out = "";
@@ -141,8 +139,14 @@ public class Servlet extends HttpServlet {
             out += value;
         } while (true);
         // Better safe than sorry:
-        if (out.isEmpty())
+        if (out.isEmpty()) {
             return null;
+        }
+        // catch object:null
+        if (out.contains(",\"object\":null")) {
+            out = out.replace(",\"object\":null", "");
+            System.out.println(out);
+        }
         // parse the object out:
         Data data = json.fromJson(out);
         if (data instanceof Arrival) {
