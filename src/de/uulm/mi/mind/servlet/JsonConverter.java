@@ -13,8 +13,6 @@ import de.uulm.mi.mind.objects.messages.Message;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.servlet.Servlet.Arrival;
-import de.uulm.mi.mind.servlet.Servlet.Departure;
 
 /**
  * @author Tamino Hartmann
@@ -115,7 +113,7 @@ public class JsonConverter {
         try {
             return gson.toJson(object);
         } catch (JsonParseException e) {
-            log.error(TAG, "Error parsing data to JSON!");
+            log.error(TAG, "Error parsing data to JSON! Maybe you're sending an array instead of an object?");
             log.error(TAG, "" + object.getClass().getCanonicalName());
             return null;
         }

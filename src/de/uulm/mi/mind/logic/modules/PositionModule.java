@@ -43,12 +43,20 @@ public class PositionModule extends Module {
                 }
                 // Everything okay from here on out:
                 Location location = calculateLocation((Location) request);
+                if (location == null) {
+                    // this means the location could not be found in the DB
+                    return new Message("PositionUnfound", "Your position could not be found.");
+                }
                 // get best area for location to return
                 Area area = getBestArea(location);
                 if (area == null) {
                     log.error(TAG, "NULL area for position_find – shouldn't happen as universe should be returned at least!");
                     return new Message("PositionUnfound", "Your position could not be found.");
                 }
+                // send back the location that the server thinks you're at with the area
+                DataList loca = new DataList();
+                loca.add(location);
+                area.setLocations(loca);
                 return area;
             case READ:
                 // read all users
@@ -89,6 +97,11 @@ public class PositionModule extends Module {
         }
     }
 
+    /**
+     *
+     * @param request
+     * @return Location if found, else null.
+     */
     private Location calculateLocation(Location request) {
         // Get Area containing all locations from database
         Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe", null, 0, 0, 0, 0))).get(0);

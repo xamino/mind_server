@@ -117,7 +117,7 @@ function isAdmin(data) {
         if (user.admin) {
             writeCookie("MIND_Admin_C_session", session);
             writeCookie("MIND_Admin_C_mail", user.email);
-            window.location.href = "admin_home.jsp?session=" + session;
+            window.location.href = "admin_home.jsp";
         } else {
             //TODO write cookie for user
             alert("user not admin");
@@ -181,7 +181,7 @@ $(document).on("submit", "#loginDisplayForm", function (event) {
     password = $("#password").val();
 
     loginDisplay(identification, password, function (event) {
-        window.location.href = "public_display_start.jsp?session=" + session;	   //?session="+session;
+        window.location.href = "public_display_start.jsp";
     });
 
 //		doTask("ADMIN_USER_READ", potentialAdmin, isAdmin);
@@ -876,58 +876,21 @@ function removeLocationViaPopup(data) {
 
 /******************** session/cookie*****************/
 
-
-/**
- * Checks if the session in the url matches the user session
- * if false - return to login.jsp
- */
-function checkSessionFromURL() {
-    var urlSession = getURLParameter("session");
-//	alert("url:"+urlSession);
-    var session = readCookie("MIND_Admin_C_session");
-//	alert("cookie:"+session);
-    if (urlSession != session) {
-        alert("You have to be logged in.");
-        window.location.href = "login.jsp";
-
-    } else {
-        return session;
-    }
-}
-
 /**
  * This function is called onLoad of each admin page.
  * The session will be checked by the checkSessionFromURL function
  * and the session id will be added to all links classified as "adminlink"
  */
 function onLoadOfAdminPage() {
-    //the current session - if correct - else this session variable is never set -> redirection to login.jsp
-    session = checkSessionFromURL();
-
-    //all links that are classified as "adminlink"
-    var links = document.getElementsByClassName("adminlink");
-
-    //add sessionid to URLs which are classified as "adminlink"
-    [].forEach.call(links, function (link) {
-        //add session to link
-        link.setAttribute("href", link + "?session=" + session);
+    session = readCookie("MIND_Admin_C_session");
+    send(new Arrival("check",session),function(data){
+    	if (instanceOf(data,Error)) {
+    		alert("You have to be logged in.");
+    		window.location.href = "login.jsp";
+    	} else {
+    		return session;
+    	}
     });
-}
-
-/**
- * Checks if the session in the url matches the pd session
- * if false - return to public_display_login.jsp
- */
-function checkPdSessionFromURL() {
-    var urlSession = getURLParameter("session");
-    var session = readCookie("MIND_PD_C");
-    if (urlSession != session) {
-        alert("You have to be logged in.");
-        window.location.href = "public_display_login.jsp";
-
-    } else {
-        return session;
-    }
 }
 
 /**
@@ -936,16 +899,15 @@ function checkPdSessionFromURL() {
  * and the session id will be added to all links classified as "pd_link"
  */
 function onLoadOfPdPage() {
-    //the current session - if correct - else this session variable is never set -> redirection to login.jsp
-    session = checkPdSessionFromURL();
-
-    //all links that are classified as "adminlink"
-    var links = document.getElementsByClassName("pd_link");
-
-    //add sessionid to URLs which are classified as "pd_link"
-    [].forEach.call(links, function (link) {
-        //add session to link
-        link.setAttribute("href", link + "?session=" + session);
+    var session = readCookie("MIND_PD_C");
+    send(new Arrival("check",session),function(data){
+    	if (instanceOf(data,Error)) {
+    		alert("You have to be logged in.");
+    		window.location.href = "public_display_login.jsp";
+    		
+    	} else {
+    		return session;
+    	}
     });
 }
 
@@ -955,7 +917,7 @@ function onLoadOfPdPage() {
  */
 function displayUserLocations(){
 
-	//send(new Arrival("read_all_positions", session), handleAllUserPositionData);
+	//send(new Arrival("read_all_positions", session), retriveOriginalMetrics);
 	handleAllUsersPositionData();
 }
 
@@ -966,15 +928,19 @@ function handleAllUsersPositionData(){
 	var user1 = new User("a@a.a",null,"a",false);
 	user1.lastPosition = 1;
 	user1.iconRef = "crab.png";
+	user1.x = 200;
+	user1.y = 300;
 	var user2 = new User("b@b.b",null,"b",false);
 	user2.lastPosition = 2;
 	user2.iconRef = "lion.png";
+	user2.x = 400;
+	user2.y = 400;
 	
 	var users = new Array();
 	users[0] = user1;
 	users[1] = user2;
 	
-	handleAllUsersPositionPlacement(users);
+	retriveOriginalMetrics(users);
 //END TESTAREA
 }
 

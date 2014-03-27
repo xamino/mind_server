@@ -49,21 +49,22 @@
 	<div id="status2"></div>
 	 <!-- <img id='testimage_jpg' alt='MIND_MAP' src='images/map.jpg'> -->
 	 Map-Coordinates
+	 <br><div id="testy"></div>
 	 <br><hr>
 	 <h3>Areas</h3>
 	 <br>Here you see all Areas which are currently in MIND.
 	 <br>To Remove one area, simply click 'Remove Location'. The area 'universe' can't be removed.
 	 <br>You can't add or edit an area here. You have to use the MIND-application for this.
 	 <div id="infoText_areas"></div>
-	 <div id="table_space_areas"></div> 
+	 <div id="table_space_areas"></div>
 	 <br><hr>
 	 <h3>Locations</h3>
 	 <br>Here you see all locations which are currently in MIND.
 	 <br>To Remove one location, simply click 'Remove Location'.
 	 <br>You can't add or edit a location here. You have to use the MIND-application for this.
 	 <div id="infoText_locations"></div>
-	 
-	<div id="table_space_locations"></div> 
+
+	<div id="table_space_locations"></div>
 
 </div>
 <div id="logout">

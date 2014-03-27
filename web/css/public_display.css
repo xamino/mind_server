@@ -89,13 +89,15 @@ html, body {
 	background-size: contain;
 }
 
+/*
 .mapcontent {
-    width: 120%;
+    width: 150%;
     /*
     width:  1200px;
     height: 1200px;
-    */
 }
+    */
+
 
 .micon {
 	/*position: absolute; top: 0px; left: 0px;*/
@@ -104,3 +106,5 @@ html, body {
 }
 
 /* end map scroll stuff */
+
+

@@ -1,5 +1,10 @@
 package de.uulm.mi.mind.servlet;
 
+import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.logic.EventModuleManager;
+import de.uulm.mi.mind.logic.Task;
+import de.uulm.mi.mind.objects.Arrival;
+import de.uulm.mi.mind.objects.Data;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -44,6 +49,17 @@ public class UploadServlet extends HttpServlet {
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, java.io.IOException {
+
+        // check if valid
+        // 2nd cookie contains our session hash that we can check
+        String session = request.getCookies()[1].getValue();
+        Arrival arrival = new Arrival(session, "check", null);
+        Data data = EventModuleManager.getInstance().handleTask(Task.Sanitation.CHECK, arrival);
+        if (data instanceof de.uulm.mi.mind.objects.messages.Error) {
+            Messenger.getInstance().log("UploadServlet","Not valid!");
+            return;
+        }
+        Messenger.getInstance().log("UploadServlet","Valid!");
 
         filePath = request.getSession().getServletContext().getRealPath("/") + "images" + System.getProperty("file.separator");
 

@@ -13,12 +13,20 @@
 </head>
 <body onload="onLoadOfPdPage(),displayUserLocations()">
 
-<div id="mapscroll">
-	<div id="mapWithIcons" style="position: relative; left: 0; top: 0;">
-		<img class="mapcontent" src="images/map.png"/>
+
+<!-- MAP DISPLAY STUFF -->
+<div id="mapscroll" >
+		<img id="mapimg" class="mapcontent" src="images/map.png"/>
 		<!-- <img class="micon" src="images/micons/crab.png"/> -->
-	</div>
 </div>
+<div id="sliderdiv" style="position: absolute; top: 0px; left: 0px">
+	<input id="slider" type="range" name="points" min="1" max="100" onchange="doScale(this.value)"> <!--oninput,onchange-->
+	<p id="slidertext">value</p>
+</div>
+
+
+
+<!-- END MAP DISPLAY STUFF -->
 
 <div id="content">
 	<div id="settings">

@@ -130,8 +130,6 @@ public class LocationModule extends Module {
         Area finalArea = (Area) ((DataList) dbCall).get(0);
         for (Object data : all) {
             Area temp = (Area) data;
-            log.log(TAG, "Temp:  " + temp.getID() + " area: " + temp.getArea() + " contanis: " + temp.contains(location.getCoordinateX(), location.getCoordinateY()));
-            log.log(TAG, "Final: " + finalArea.getID() + " area: " + finalArea.getArea());
             if (temp.getArea() < finalArea.getArea()
                     && temp.contains(location.getCoordinateX(), location.getCoordinateY())) {
                 finalArea = temp;
