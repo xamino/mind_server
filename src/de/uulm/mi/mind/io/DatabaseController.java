@@ -244,7 +244,7 @@ public class DatabaseController implements ServletContextListener {
             DataList<Data> dataList = read(data);
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList != null && dataList.isEmpty()) {
-                return true;
+                return false;
             } else if (dataList != null) {
                 Data dataToDelete = dataList.get(0);
                 con.delete(dataToDelete);
