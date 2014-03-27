@@ -8,6 +8,9 @@
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
 <link href="${pageContext.request.contextPath}/css/admin.css" rel="stylesheet" type="text/css">
+<style>#map_div {
+    cursor: pointer;
+  }</style>
 <title>Admin - Import Map and Location Data</title>
 </head>
 
@@ -86,6 +89,29 @@
 	//TODO: more formats
 	</script>
 	 <!-- <img id='testimage_jpg' alt='MIND_MAP' src='images/map.jpg'> -->
+	 Map-Coordinates
+	 <br><div id="testy"></div>
+	 <script>
+	//var p = $( "p:last" );
+	//var offset = p.offset();
+	//p.html( "left: " + offset.left + ", top: " + offset.top );
+	$( "*", document.body ).click(function( event ) {
+  	var offset = $( this ).offset();
+  	event.stopPropagation();
+  	alert("left-distance: "+event.clientX - offset.left);
+    alert("top-distance: "+event.clientY - offset.top);
+  	$( "#testy" ).text( this.tagName +
+    " coords ( " + offset.left + ", " + offset.top + " )" );
+	});
+	
+	//$(document).ready(function() {
+  	//$('#map_div').click(function(e) {
+    //var offset = $(this).offset();
+    //alert(e.clientX - offset.left);
+    //alert(e.clientY - offset.top);
+  	//});
+	//});
+	</script>
 	 <br><hr>
 	 <h3>Areas</h3>
 	 <br>Here you see all Areas which are currently in MIND.
@@ -93,7 +119,6 @@
 	 <br>You can't add or edit an area here. You have to use the MIND-application for this.
 	 <div id="infoText_areas"></div>
 	 <div id="table_space_areas"></div> 
-	 
 	 <br><hr>
 	 <h3>Locations</h3>
 	 <br>Here you see all locations which are currently in MIND.
