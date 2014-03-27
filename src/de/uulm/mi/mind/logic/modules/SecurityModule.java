@@ -9,7 +9,6 @@ import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Message;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.servlet.BCrypt;
-import de.uulm.mi.mind.servlet.Servlet.Arrival;
 import de.uulm.mi.mind.servlet.ServletFunctions;
 
 import java.math.BigInteger;

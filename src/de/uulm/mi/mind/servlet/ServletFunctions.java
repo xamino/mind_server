@@ -46,7 +46,7 @@ public class ServletFunctions {
      * @param arrival
      * @return
      */
-    public Data handleNormalTask(Servlet.Arrival arrival, User user) {
+    public Data handleNormalTask(Arrival arrival, User user) {
         Task.API task = Task.API.safeValueOf(arrival.getTask());
         switch (task) {
             case ECHO:
@@ -123,7 +123,7 @@ public class ServletFunctions {
      * @param arrival
      * @return
      */
-    public Data handleAdminTask(Servlet.Arrival arrival, User user) {
+    public Data handleAdminTask(Arrival arrival, User user) {
         // Better safe than sorry:
         if (!user.isAdmin()) {
             log.error(TAG, "User " + user.readIdentification() + " almost accessed admin functions!");
@@ -367,7 +367,7 @@ public class ServletFunctions {
      * @param display The PublicDisplay user object.
      * @return Resulting data.
      */
-    public Data handleDisplayTask(Servlet.Arrival arrival, PublicDisplay display) {
+    public Data handleDisplayTask(Arrival arrival, PublicDisplay display) {
         Task.API task = Task.API.safeValueOf(arrival.getTask());
         switch (task) {
             case READ_ALL_POSITIONS:

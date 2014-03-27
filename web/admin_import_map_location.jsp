@@ -45,7 +45,7 @@
 		<input type="submit" value="Upload File" />
 	</form>
 	<div id="map_div"></div>
-	
+
 	<script>
 	function doesFileExist(urlToFile){
 	    var xhr = new XMLHttpRequest();
@@ -65,8 +65,8 @@
 	//alert("jpg: "+url_jpg);
  	var url_jpeg = doesFileExist("images/map.jpeg");
  	//alert("jpeg: "+url_jpeg);
- 
-	if (url_png == true) { 
+
+	if (url_png == true) {
 	var input = "";
 	input = "Current Map:<br>";
 	input += "<img id='testimage_png' alt='MIND_MAP'  style='max-width:600px; max-height:350px;' src='images/map.png'>";
@@ -104,7 +104,7 @@
   	$( "#testy" ).text( this.tagName +
     " coords ( " + offset.left + ", " + offset.top + " )" );
 	});
-	
+
 	//$(document).ready(function() {
   	//$('#map_div').click(function(e) {
     //var offset = $(this).offset();
@@ -119,15 +119,15 @@
 	 <br>To Remove one area, simply click 'Remove Location'. The area 'universe' can't be removed.
 	 <br>You can't add or edit an area here. You have to use the MIND-application for this.
 	 <div id="infoText_areas"></div>
-	 <div id="table_space_areas"></div> 
+	 <div id="table_space_areas"></div>
 	 <br><hr>
 	 <h3>Locations</h3>
 	 <br>Here you see all locations which are currently in MIND.
 	 <br>To Remove one location, simply click 'Remove Location'.
 	 <br>You can't add or edit a location here. You have to use the MIND-application for this.
 	 <div id="infoText_locations"></div>
-	 
-	<div id="table_space_locations"></div> 
+
+	<div id="table_space_locations"></div>
 
 </div>
 <div id="logout">

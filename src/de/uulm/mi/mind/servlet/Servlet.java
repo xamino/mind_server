@@ -7,9 +7,7 @@ package de.uulm.mi.mind.servlet;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Task;
-import de.uulm.mi.mind.objects.Data;
-import de.uulm.mi.mind.objects.PublicDisplay;
-import de.uulm.mi.mind.objects.User;
+import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
@@ -131,8 +129,6 @@ public class Servlet extends HttpServlet {
      * error correction.
      * @throws IOException
      */
-    // TODO catch "object":null !!!
-    // TODO do i still need to catch that with the new Jsonator?
     private Arrival getRequest(HttpServletRequest request) throws IOException {
         BufferedReader reader = request.getReader();
         String out = "";
@@ -143,8 +139,14 @@ public class Servlet extends HttpServlet {
             out += value;
         } while (true);
         // Better safe than sorry:
-        if (out.isEmpty())
+        if (out.isEmpty()) {
             return null;
+        }
+        // catch object:null
+        if (out.contains(",\"object\":null")) {
+            out = out.replace(",\"object\":null", "");
+            System.out.println(out);
+        }
         // parse the object out:
         Data data = json.fromJson(out);
         if (data instanceof Arrival) {
@@ -199,107 +201,4 @@ public class Servlet extends HttpServlet {
         response.getWriter().write(blub);
         response.setContentType("application/json");
     }
-
-    /**
-     * Arrival class – structure of incomming requests must conform to this class.
-     */
-    public class Arrival implements Data {
-        /**
-         * The session hash of the client.
-         */
-        private String sessionHash;
-        /**
-         * The API task to do.
-         */
-        private String task;
-        /**
-         * Voluntary object with which to work with during a task.
-         */
-        private Data object;
-
-        public Arrival(String sessionHash, String task, Data object) {
-            this.sessionHash = sessionHash;
-            this.task = task;
-            this.object = object;
-        }
-
-        public String getSessionHash() {
-            return sessionHash;
-        }
-
-        @Override
-        /**
-         * Automatically generated toString method.
-         */
-        public String toString() {
-            return "Arrival{" +
-                    "sessionHash='" + sessionHash + '\'' +
-                    ", task='" + task + '\'' +
-                    ", object=" + object +
-                    '}';
-        }
-
-        /**
-         * Method that checks if all important values are not null.
-         *
-         * @return True if all values are set, otherwise false.
-         */
-        public boolean isValid() {
-            return task != null;
-        }
-
-        public String getTask() {
-            return task;
-        }
-
-        public void setTask(String task) {
-            this.task = task;
-        }
-
-        public Data getObject() {
-            return object;
-        }
-
-        public void setObject(Data object) {
-            this.object = object;
-        }
-
-        @Override
-        public String getKey() {
-            return null;
-        }
-    }
-
-    /**
-     * Wrapper object class for outgoing answers – required because lists for example can not simply be Jsonated.
-     */
-    public class Departure implements Data {
-        /**
-         * The data object that is sent.
-         */
-        private Data object;
-
-        /**
-         * Constructor.
-         *
-         * @param object The object to send.
-         */
-        public Departure(Data object) {
-            this.object = object;
-        }
-
-        public Data getObject() {
-            return object;
-        }
-
-        public void setObject(Data object) {
-            this.object = object;
-        }
-
-        @Override
-        public String getKey() {
-            return null;
-        }
-    }
-
 }
