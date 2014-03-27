@@ -80,17 +80,13 @@ function getX(raw_x,scale){
 
 /**
  * This method converts the scale value (width or height) for displaying purposes
- * (when ratio is preserved)
+ * given that the ratio is preserved - else width scale
  * @param raw_scale the original scale value
  * @returns the scale value ready for displaying purposes
  */
 function getScale(raw_scale){
 	return Math.round(raw_scale*widthFactor);
 }
-
-var clicking = false;
-var previousX;
-var previousY;
 
 /**
  * This function is practically called on startup of the page,
@@ -211,6 +207,10 @@ function refreshUserData(){
 
 
 //MAP SCALING AND PANNING STUFF
+
+var clicking = false;
+var previousX;
+var previousY;
 
 $(document).on("mousedown", "#mapscroll", function (e) {
 e.preventDefault();
