@@ -7,7 +7,7 @@
 <script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
-<script src="javascript/areaTest.js"></script>
+<script src="javascript/admin_map.js"></script>
 <link href="${pageContext.request.contextPath}/css/admin.css" rel="stylesheet" type="text/css">
 <title>Admin - Import Map and Location Data</title>
 </head>
