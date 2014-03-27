@@ -36,7 +36,7 @@ function doUnitTest() {
 function adminRightsTest() {
     alert("Beginning admin rights test.");
 
-    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Message, null).description;
     // Deactivate admin
     unitTest("toggle_admin", null, Success, adminSession);
 
@@ -128,7 +128,7 @@ function userAccessTest() {
     // try illegal registration
     unitTest("registration", new User("", "admin", ""), Error, null);
     // try login
-    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    var adminSession = getAdminSession();
     var mariaSession = unitTest("login", new User("maria.heilig@gott.de", "maria", null), Success, null).description;
     var egoSession = unitTest("login", new User("ego.trump@haha.com", "ßüöä", null), Success, null).description;
     // double session test
@@ -140,7 +140,7 @@ function userAccessTest() {
     // illegal logout
     unitTest("logout", null, Success, "not_a_hash");
     // Re-login the admin
-    adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    adminSession = getAdminSession();
     // Check
     unitTest("check", null, Success, egoSession);
     unitTest("check", null, Success, egoTwoSession);
@@ -169,7 +169,7 @@ function userAccessTest() {
 function areaTest() {
     alert("Beginning area, location.");
 
-    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    var adminSession = getAdminSession();
 
     var wifis1 = [
         new WifiMorsel("00:19:07:07:64:00", "eduroam", -93),
@@ -235,7 +235,7 @@ function areaTest() {
 function positionTest() {
     alert("Beginning position.");
 
-    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    var adminSession = getAdminSession();
 
     var location1 = new Location(100, 100, [
         new WifiMorsel("00:19:07:06:64:00", "eduroam", -93),
@@ -396,7 +396,7 @@ function displayAdminTest() {
 
     alert("Beginning display admin test.");
 
-    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    var adminSession = getAdminSession();
     // register some displays:
     unitTest("display_add", new PublicDisplay("office_herman", "herman_token", "Office Prof. Herman", 56, 78), Success, adminSession);
     unitTest("display_add", new PublicDisplay("instituts_sek", "sekretariat", "Sekretariat", 33, 23), Success, adminSession);
@@ -438,7 +438,7 @@ function displayAdminTest() {
 function displayUserTest() {
     alert("Beginning display user test.");
 
-    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
+    var adminSession = getAdminSession();
     // register some displays:
     unitTest("display_add", new PublicDisplay("office_herman", "herman_token", "Office Prof. Herman", 56, 78), Success, adminSession);
     unitTest("display_add", new PublicDisplay("instituts_sek", "sekretariat", "Sekretariat", 33, 23), Success, adminSession);
@@ -460,15 +460,15 @@ function displayUserTest() {
  */
 function cleanDB() {
     unitTest("registration", new User("special@admin.eu", "admin", ""), Success, null);
-    var received = unitTest("login", new User("special@admin.eu", "admin", null), Success, null);
-    if (received == null) {
-        received = unitTest("login", new User("special@admin.eu", "admin", null), Message, null);
-        if (received == null) {
-            alert("Failed clean; could not get valid admin session!");
-            return;
-        }
+    var arrival = new Arrival("login", null, new User("special@admin.eu", "admin"));
+    var adminSession = JSON.parse($.ajax({
+        data: JSON.stringify(arrival),
+        async: false
+    }).responseText).object.description;
+    if (adminSession == null) {
+        alert("Failed clean; could not get valid admin session!");
+        return;
     }
-    var adminSession = received.description;
     // Check if we are currently an admin... :P
     var admin = JSON.parse($.ajax({
         data: JSON.stringify(new Arrival("user_read", adminSession)),
@@ -492,16 +492,8 @@ function cleanDB() {
 
     // Destroy users
     unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
-    // Now check with default admin, as admin above was now deleted!
-    var newSession = unitTest("login", new User("admin@admin.admin", "admin", null), Message, null).description;
-    var list = unitTest("read_all_admin", null, Array, newSession);
-    if (list == null || list.length > 1) {
-        alert("DB was NOT CLEARED of USERS!");
-    } else {
-        // i shouldn't exist anymore
-        unitTest("check", null, Error, adminSession);
-    }
-    unitTest("logout", null, Success, newSession);
+    unitTest("check", null, Error, adminSession);
+    unitTest("logout", null, Success, adminSession);
 }
 
 /**
