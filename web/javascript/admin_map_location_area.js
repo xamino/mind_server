@@ -171,16 +171,24 @@ $(document).on("submit", "#addAreaForm", function (event) {
     event.preventDefault();
     var id, xCor, yCor, width, height;
     id = $("#id").val();
+    if (id != null && id != "") {
     xCor = $("#xCor").val();
+//    if (xCor != null && xCor != "") {
     yCor = $("#yCor").val();
+//    if (yCor != null && yCor != "") {
     width = $("#width").val();
+//    if (width != null && width != "") {
     height = $("#height").val();
-
+//    if (height != null && height != "") {
     newArea = new Area(id, null, xCor, yCor, width, height);
 
     doTask("AREA_ADD", newArea, function(){
     	window.location.reload();
     });
+//    }}}}
+    }else{
+    	alert("You have to set an id for your area!");
+    }
 
 });
 
