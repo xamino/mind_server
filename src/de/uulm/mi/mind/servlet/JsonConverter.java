@@ -9,7 +9,6 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import de.uulm.mi.mind.objects.Data;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.messages.Message;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.logger.Messenger;
@@ -53,8 +52,6 @@ public class JsonConverter {
                     return Error.class;
                 } else if (kind.equals("Location")) {
                     return Location.class;
-                } else if (kind.equals("Message")) {
-                    return Message.class;
                 } else if (kind.equals("PublicDisplay")) {
                     return PublicDisplay.class;
                 } else if (kind.equals("Success")) {

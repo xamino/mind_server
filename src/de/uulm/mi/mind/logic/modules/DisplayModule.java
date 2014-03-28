@@ -7,7 +7,7 @@ import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.objects.PublicDisplay;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.logic.Task;
+import de.uulm.mi.mind.objects.enums.Task;
 
 /**
  * Module that handles all tasks related to the public displays.
@@ -38,9 +38,9 @@ public class DisplayModule extends Module {
                 case DELETE:
                     if (((PublicDisplay) request).readIdentification() == null) {
                         if (DatabaseController.getInstance().deleteAll(request))
-                            return new Success("DisplayAllDeleted", "All displays were deleted.");
+                            return new Success("All displays were deleted.");
                         else
-                            return new Error("DisplayAllDeleteFailed", "Failed to delete displays.");
+                            return new Error(Error.Type.DATABASE, "Failed to delete displays.");
                     }
                     return delete((PublicDisplay) request);
                 default:

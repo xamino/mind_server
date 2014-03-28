@@ -3,10 +3,10 @@ package de.uulm.mi.mind.logic.modules;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.logic.Task;
+import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.messages.Message;
+import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.servlet.ServletFunctions;
 
 import java.util.*;
@@ -33,25 +33,25 @@ public class PositionModule extends Module {
     @Override
     public Data run(Task task, Data request) {
         if (!(task instanceof Task.Position)) {
-            return new Error("WrongTaskType", "PositionModule was called with the wrong task type!");
+            return new Error(Error.Type.TASK, "PositionModule was called with the wrong task type!");
         }
         Task.Position todo = (Task.Position) task;
         switch (todo) {
             case FIND:
                 if (!(request instanceof Location)) {
-                    return new Error("WrongObjectType", "PositionModule was called with the wrong object type!");
+                    return new Error(Error.Type.WRONG_OBJECT, "PositionModule was called with the wrong object type!");
                 }
                 // Everything okay from here on out:
                 Location location = calculateLocation((Location) request);
                 if (location == null) {
                     // this means the location could not be found in the DB
-                    return new Message("PositionUnfound", "Your position could not be found.");
+                    return new Success(Success.Type.NOTE, "Your position could not be found.");
                 }
                 // get best area for location to return
                 Area area = getBestArea(location);
                 if (area == null) {
                     log.error(TAG, "NULL area for position_find – shouldn't happen as universe should be returned at least!");
-                    return new Message("PositionUnfound", "Your position could not be found.");
+                    return new Success(Success.Type.NOTE, "Your position could not be found.");
                 }
                 // send back the location that the server thinks you're at with the area
                 DataList loca = new DataList();
@@ -93,7 +93,7 @@ public class PositionModule extends Module {
                 return sendUsers;
             default:
                 log.error(TAG, "Unknown task #" + todo + "# sent to PositionModule! Shouldn't happen!");
-                return new Error("UnknownTask", "Unknown task sent to PositionModule!");
+                return new Error(Error.Type.TASK, "Unknown task sent to PositionModule!");
         }
     }
 

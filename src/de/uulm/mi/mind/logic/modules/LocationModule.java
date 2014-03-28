@@ -3,8 +3,8 @@ package de.uulm.mi.mind.logic.modules;
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.logic.Task;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.servlet.ServletFunctions;
@@ -28,12 +28,12 @@ public class LocationModule extends Module {
     @Override
     public Data run(Task task, Data request) {
         if (!(request instanceof Area || request instanceof WifiMorsel || request instanceof Location) && request != null) {
-            return new Error("WrongDataType", "The Location Module requires a Area, WifiMorsel or Location Object.");
+            return new Error(Error.Type.WRONG_OBJECT, "The Location Module requires a Area, WifiMorsel or Location Object.");
         }
 
         if (task instanceof Task.Location) {
             if (!(request instanceof Location)) {
-                return new Error("IllegalLocationTask", "Location tasks always require a location object!");
+                return new Error(Error.Type.TASK, "Location tasks always require a location object!");
             }
             Location location = (Location) request;
 
@@ -60,42 +60,42 @@ public class LocationModule extends Module {
             switch (areaTask) {
                 case CREATE:
                     if (area == null) {
-                        return new Error("IllegalAreaCreate", "Area was null!");
+                        return new Error(Error.Type.WRONG_OBJECT, "Area was null!");
                     }
                     area = updateLocations(area);
                     return create(area);
                 case READ:
                     if (area == null) {
-                        return new Error("IllegalAreaRead", "Filter area was null!");
+                        return new Error(Error.Type.WRONG_OBJECT, "Filter area was null!");
                     }
                     // We might need to update area for new locations:
                     Data data = read(area);
                     if (!(data instanceof DataList)) {
-                        return new Error("AreaReadUpdateError", "Failed to start location update upon read!");
+                        return new Error(Error.Type.WRONG_OBJECT, "Failed to start location update upon read!");
                     }
                     DataList areas = ((DataList) data);
                     for (Object obj : areas) {
                         Area temp = ((Area) obj);
                         temp = updateLocations(temp);
                         if (null == ServletFunctions.getInstance().checkDataMessage(update(temp), Success.class)) {
-                            return new Error("AreaReadUpdateError", "Failed to update " + temp.getID() + " upon read!");
+                            return new Error(Error.Type.DATABASE, "Failed to update " + temp.getID() + " upon read!");
                         }
                     }
                     return areas;
                 case UPDATE:
                     if (area == null) {
-                        return new Error("IllegalAreaUpdate", "Area was null!");
+                        return new Error(Error.Type.WRONG_OBJECT, "Area was null!");
                     }
                     area = updateLocations(area);
                     return update(area);
                 case DELETE:
                     if (area == null) {
-                        return new Error("IllegalAreaDelete", "Filter area was null!");
+                        return new Error(Error.Type.WRONG_OBJECT, "Filter area was null!");
                     }
                     return delete(area);
                 case READ_LOCATIONS:
                     if (area == null) {
-                        return new Error("IllegalReadLocations", "Area for locations was null!");
+                        return new Error(Error.Type.WRONG_OBJECT, "Area for locations was null!");
                     }
                     return readLocations(area);
                 case ANNIHILATE:
@@ -103,7 +103,7 @@ public class LocationModule extends Module {
             }
         }
 
-        return new Error("MissingOperation", "The Location Module is unable to perform the Task as it appears not to be implemented.");
+        return new Error(Error.Type.TASK, "The Location Module is unable to perform the Task as it appears not to be implemented.");
     }
 
     /**
@@ -167,9 +167,9 @@ public class LocationModule extends Module {
         deleted &= database.deleteAll(new WifiMorsel(null, null, 0));
         if (deleted) {
             database.reinit();
-            return new Success("AreaAnnihilationSuccess", "All areas were removed from Database.");
+            return new Success("All areas were removed from Database.");
         }
-        return new Error("AreaAnnihilationFailure", "Removal of areas failed.");
+        return new Error(Error.Type.DATABASE, "Removal of areas failed.");
     }
 
     private Data readLocations(Area area) {
@@ -177,7 +177,7 @@ public class LocationModule extends Module {
         if (data != null)
             return data;
         else
-            return new Error("AreaLocationReadFailure", "Reading of " + area.toString() + " Locations failed!");
+            return new Error(Error.Type.DATABASE, "Reading of " + area.toString() + " Locations failed!");
     }
 
 
@@ -192,6 +192,6 @@ public class LocationModule extends Module {
         if (data != null)
             return data;
         else
-            return new Error("LocationMorselReadFailure", "Reading of " + loc.toString() + " Morsels failed!");
+            return new Error(Error.Type.DATABASE, "Reading of " + loc.toString() + " Morsels failed!");
     }
 }

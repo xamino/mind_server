@@ -2,7 +2,7 @@ package de.uulm.mi.mind.servlet;
 
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
-import de.uulm.mi.mind.logic.Task;
+import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.Arrival;
 import de.uulm.mi.mind.objects.Data;
 import org.apache.commons.fileupload.FileItem;
@@ -54,7 +54,7 @@ public class UploadServlet extends HttpServlet {
         // 2nd cookie contains our session hash that we can check
         String session = request.getCookies()[1].getValue();
         Arrival arrival = new Arrival(session, "check", null);
-        Data data = EventModuleManager.getInstance().handleTask(Task.Sanitation.CHECK, arrival);
+        Data data = EventModuleManager.getInstance().handleTask(Task.Security.CHECK, arrival);
         if (data instanceof de.uulm.mi.mind.objects.messages.Error) {
             Messenger.getInstance().log("UploadServlet","Not valid!");
             return;

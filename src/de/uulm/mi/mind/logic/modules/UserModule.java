@@ -2,7 +2,7 @@ package de.uulm.mi.mind.logic.modules;
 
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.logic.Task;
+import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.Data;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.User;
@@ -22,7 +22,7 @@ public class UserModule extends Module {
     @Override
     public Data run(Task task, Data request) {
         if (!(request instanceof User) && request != null) {
-            return new Error("WrongDataType", "The User Module requires a User Object.");
+            return new Error(Error.Type.WRONG_OBJECT, "The User Module requires a User Object.");
         }
 
         User user = (User) request;
@@ -41,7 +41,7 @@ public class UserModule extends Module {
                 return annihilateUsers();
         }
 
-        return new Error("UserTaskNotImplemented", "The task " + task.toString() + " is not implemented.");
+        return new Error(Error.Type.TASK, "The task " + task.toString() + " is not implemented.");
     }
 
     private Data readUser(User user) {
@@ -60,7 +60,7 @@ public class UserModule extends Module {
         Data data = read(user);
         if (data instanceof DataList) {
             if (((DataList) data).isEmpty()) {
-                return new Error("UserMissing", "User could not be found!");
+                return new Error(Error.Type.DATABASE, "User could not be found!");
             }
             return data;
         } else {
@@ -72,8 +72,8 @@ public class UserModule extends Module {
         Boolean deleted = database.deleteAll(new User(null));
         if (deleted) {
             database.reinit();
-            return new Success("UserAnnihilationSuccess", "All users were removed from Database. Use default admin.");
+            return new Success("All users were removed from Database. Use default admin.");
         }
-        return new Error("UserAnnihilationFailure", "Removal of users failed.");
+        return new Error(Error.Type.DATABASE, "Removal of users failed.");
     }
 }

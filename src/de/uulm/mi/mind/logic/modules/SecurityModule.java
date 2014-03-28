@@ -3,10 +3,9 @@ package de.uulm.mi.mind.logic.modules;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.logic.Task;
+import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.messages.Message;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.servlet.BCrypt;
 import de.uulm.mi.mind.servlet.ServletFunctions;
@@ -68,13 +67,13 @@ public class SecurityModule extends Module {
      */
     @Override
     public Data run(Task task, Data request) {
-        if (!(task instanceof Task.Sanitation)) {
+        if (!(task instanceof Task.Security)) {
             // Check that it is one of our tasks...
-            return new Error("WrongTaskType", "SecurityModule was called with the wrong task type!");
+            return new Error(Error.Type.TASK, "SecurityModule was called with the wrong task type!");
         }
         if (!(request instanceof Arrival)) {
             // SecurityModule ALWAYS only uses and expects Arrival!
-            return new Error("WrongObjectType", "SecurityModule was called with the wrong object type!");
+            return new Error(Error.Type.WRONG_OBJECT, "SecurityModule was called with the wrong object type!");
         }
         Arrival arrival = (Arrival) request;
         // Pull out authenticated
@@ -83,22 +82,22 @@ public class SecurityModule extends Module {
             user = (Authenticated) arrival.getObject();
         }
         // Correctly cast
-        final Task.Sanitation todo = (Task.Sanitation) task;
+        final Task.Security todo = (Task.Security) task;
         switch (todo) {
             case LOGIN:
                 if (user != null) {
                     return login(user);
                 }
-                return new Error("LoginError", "Valid user object required!");
+                return new Error(Error.Type.WRONG_OBJECT, "Valid user object required!");
             case LOGOUT:
                 destroySession(arrival.getSessionHash());
-                return new Success("LoggedOut", "You have been successfully logged out.");
+                return new Success("You have been successfully logged out.");
             // break;
             case REGISTRATION:
                 // Registration REQUIRES a User object!
                 if (user != null && user instanceof User) {
                     if (user.readIdentification().isEmpty() || user.readAuthentication().isEmpty()) {
-                        return new Error("IllegalRegistrationValues", "Email and password may not be empty!");
+                        return new Error(Error.Type.ILLEGAL_VALUE, "Email and password may not be empty!");
                     }
                     return registration((User) user);
                 }
@@ -111,7 +110,7 @@ public class SecurityModule extends Module {
                     Data object = readAuthFromDB(activeUser.user);
                     Data msg = ServletFunctions.getInstance().checkDataMessage(object, Authenticated.class);
                     if (msg != null) {
-                        log.error(TAG, "WARNING: Check failed because no user or error was returned from DB for " + activeUser.user.readIdentification() + "!");
+                        log.error(TAG, "NOTE: Check failed because no user or error was returned from DB for " + activeUser.user.readIdentification() + "!");
                     } else {
                         // If everything is okay, we return the current user and leave this method
                         Authenticated currentUser = ((Authenticated) object);
@@ -122,16 +121,16 @@ public class SecurityModule extends Module {
                     // If we haven't returned, something went wrong
                     // destroy session to be safe
                     destroySession(arrival.getSessionHash());
-                    return new Error("SessionCheckError", "User couldn't be found in DB! You have been logged out.");
+                    return new Error(Error.Type.DATABASE, "User couldn't be found in DB! You have been logged out.");
                 } else {
-                    return new Error("SessionInvalid", "The session is NOT valid!");
+                    return new Error(Error.Type.SECURITY, "The session is NOT valid!");
                 }
                 // break;
             default:
                 log.error(TAG, "Unknown task #" + todo + "# sent to SecurityModule! Shouldn't happen!");
-                return new Error("UnknownTask", "Unknown task sent to SecurityModule!");
+                return new Error(Error.Type.TASK, "Unknown task sent to SecurityModule!");
         }
-        return new Error("SanitationTaskError", "A task failed to complete – have you supplied the correct object type?");
+        return new Error(Error.Type.TASK, "A task failed to complete – have you supplied the correct object type?");
     }
 
     /**
@@ -203,7 +202,7 @@ public class SecurityModule extends Module {
             // To avoid allowing to find usernames with this method, we return the same message as if the login
             // simply used the wrong information.
             log.log(TAG, "Unregistered user tried login!");
-            return new Error("LoginFailed", "Wrong user email or wrong password.");
+            return new Error(Error.Type.SECURITY, "Wrong user email or wrong password.");
         }
         // This means we have a valid user object:
         Authenticated auth = (Authenticated) object;
@@ -227,13 +226,13 @@ public class SecurityModule extends Module {
             log.log(TAG, "User " + auth.readIdentification() + " has logged in.");
             // If the date was null, the user has never logged in before, so we signal that to the client
             if (dateIsNull) {
-                return new Message("FirstLogin", sessionHash);
+                return new Success(Success.Type.NOTE, sessionHash);
             } else {
                 // Return the hash for future references:
-                return new Success("Login", sessionHash);
+                return new Success(sessionHash);
             }
         } else {
-            return new Error("LoginFailed", "Wrong user email or wrong password.");
+            return new Error(Error.Type.SECURITY, "Wrong user email or wrong password.");
         }
     }
 
@@ -251,7 +250,7 @@ public class SecurityModule extends Module {
         Data msg = EventModuleManager.getInstance().handleTask(Task.User.CREATE, user);
         if (msg instanceof Success) {
             log.log(TAG, "User " + user.readIdentification() + " has been registered.");
-            return new Success("Registered", "Registered to '" + user.getEmail() + "'.");
+            return new Success("Registered to '" + user.getEmail() + "'.");
         } else {
             log.error(TAG, "Error creating a user!");
             return msg;
@@ -279,7 +278,7 @@ public class SecurityModule extends Module {
             }
         }
         // If we reach this, we've found an error
-        return new Error("UnknownAuthenticatedType", "Unknown user object tried login!");
+        return new Error(Error.Type.SECURITY, "Unknown user object tried login!");
     }
 
     /**

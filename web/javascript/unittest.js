@@ -6,12 +6,12 @@
 
 
 /**
- * Function that runs a unit test. WARNING: test is done with synchronous ajax calls, which means the webpage will be
+ * Function that runs a unit test. NOTE: test is done with synchronous ajax calls, which means the webpage will be
  * unresponsive until the unit test is done!
  */
 function doUnitTest() {
 
-    if (!confirm("WARNING: This will clear the DB! Do you really want to continue?")) {
+    if (!confirm("NOTE: This will clear the DB! Do you really want to continue?")) {
         return;
     }
 
@@ -36,7 +36,7 @@ function doUnitTest() {
 function adminRightsTest() {
     alert("Beginning admin rights test.");
 
-    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Message, null).description;
+    var adminSession = unitTest("login", new User("admin@admin.admin", "admin", null), Success, null).description;
     // Deactivate admin
     unitTest("toggle_admin", null, Success, adminSession);
 
@@ -61,16 +61,16 @@ function adminRightsTest() {
     unitTest("admin_user_add", new User("", "", null), Error, adminSession);
     unitTest("admin_user_add", new User("", "legal", null), Error, adminSession);
     // this should return a key
-    unitTest("admin_user_add", new User("legal", "", null), Message, adminSession);
+    unitTest("admin_user_add", new User("legal", "", null), Success, adminSession);
     // update tests
     unitTest("admin_user_update", new User("email", null, "name name"), Success, adminSession);
     unitTest("admin_user_update", new User("lang@email.de", null, null, true), Success, adminSession);
-    // test password remains untouched (message because first login):
-    unitTest("login", new User("email", "password", null), Message, null);
+    // test password remains untouched
+    unitTest("login", new User("email", "password", null), Success, null);
     unitTest("admin_user_update", new User("email", "new password", null), Success, adminSession);
     unitTest("login", new User("email", "new password", null), Success, null);
     // check if really admin
-    var langSession = unitTest("login", new User("lang@email.de", "password"), Message, null).description;
+    var langSession = unitTest("login", new User("lang@email.de", "password"), Success, null).description;
     unitTest("admin_user_read", new User(null, null, null, true), Array, langSession);
     // remove
     unitTest("admin_user_delete", new User("email", null, null), Success, adminSession);
@@ -352,8 +352,8 @@ function testPositionRead() {
     unitTest("area_add", new Area("institute", null, 140, 140, 100, 100), Success, adminSession);
     unitTest("admin_user_add", new User("shark@ocean.int", "shark", "Haifisch Freund", false), Success, adminSession);
     unitTest("admin_user_add", new User("dolphin@ocean.int", "thx4fish", "Prof. Turnschwimmer", false), Success, adminSession);
-    var sharkSession = unitTest("login", new User("shark@ocean.int", "shark"), Message, adminSession).description;
-    var dolphinSession = unitTest("login", new User("dolphin@ocean.int", "thx4fish"), Message, adminSession).description;
+    var sharkSession = unitTest("login", new User("shark@ocean.int", "shark"), Success, adminSession).description;
+    var dolphinSession = unitTest("login", new User("dolphin@ocean.int", "thx4fish"), Success, adminSession).description;
 
     // shark gets an update
     unitTest("position_find", location2, Area, sharkSession);
@@ -403,7 +403,7 @@ function displayAdminTest() {
     // should fail
     unitTest("display_add", new PublicDisplay("instituts_sek", "___", "___", 343, 234), Error, adminSession);
     // key test
-    unitTest("display_add", new PublicDisplay("terra", null, "Earth", 3435, 34534), Message, adminSession);
+    unitTest("display_add", new PublicDisplay("terra", null, "Earth", 3435, 34534), Success, adminSession);
     unitTest("display_remove", new PublicDisplay("terra", null, null, 0, 0), Success, adminSession);
     // should not be allowed as normal user
     unitTest("registration", new User("ego.trump@haha.com", "ßüöä", "Ego Trump"), Success, null);
@@ -424,7 +424,7 @@ function displayAdminTest() {
     // legal remove:
     unitTest("display_remove", new PublicDisplay("instituts_sek", null, null, null, null), Success, adminSession);
     // illegal remove:
-    unitTest("display_remove", new PublicDisplay("i don't exist!", null, null, null, null), Success, adminSession);
+    unitTest("display_remove", new PublicDisplay("i don't exist!", null, null, null, null), Error, adminSession);
     // test, should be only one remaining now
     test = unitTest("display_read", new PublicDisplay(null, null, null, null, null), Array, adminSession);
     if (test.length != 1) {
@@ -505,7 +505,7 @@ function getAdminSession() {
         data: JSON.stringify(arrival),
         async: false
     }).responseText).object;
-    if (instanceOf(obj, Success) || instanceOf(obj, Message)) {
+    if (instanceOf(obj, Success)) {
         return obj.description;
     }
     alert("Failed to get admin session!");
