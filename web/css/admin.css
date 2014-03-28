@@ -126,7 +126,7 @@ html, body {
 
 /************** nice settings for drawing on map (admin_import_map_location.jsp) ******************/
 
-#testimage_png {
+#map_png_div {
     cursor: crosshair;
   }
 

@@ -7,7 +7,7 @@
 <script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
-<script src="javascript/admin_map.js"></script>
+<script src="javascript/admin_map_location_area.js"></script>
 <link href="${pageContext.request.contextPath}/css/admin.css" rel="stylesheet" type="text/css">
 <title>Admin - Import Map and Location Data</title>
 </head>
@@ -43,12 +43,12 @@
 	</form>
 	<!-- draw on map -->
 	<!-- <div id="map_div"></div>-->
-	<div onmousedown="return false" id="map_div">
+	<div id="map_container_div" onmousedown="return false">
     	<!-- <div id="selection"></div>-->
     </div>
-	<div id="status2"></div>
+    Map-Coordinates
+	<form id="addAreaForm"></form>
 	 <!-- <img id='testimage_jpg' alt='MIND_MAP' src='images/map.jpg'> -->
-	 Map-Coordinates
 	 <br><div id="testy"></div>
 	 <br><hr>
 	 <h3>Areas</h3>
