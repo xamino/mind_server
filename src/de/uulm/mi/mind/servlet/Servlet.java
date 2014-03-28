@@ -6,8 +6,8 @@ package de.uulm.mi.mind.servlet;
 
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
-import de.uulm.mi.mind.logic.Task;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
@@ -73,11 +73,11 @@ public class Servlet extends HttpServlet {
         // Write whatever you want sent back to this object:
         Data answer = null;
         // If the task was CHECK we don't need to do anything else
-        if (!(check instanceof Information) && Task.Sanitation.safeValueOf(arrival.getTask()) == Task.Sanitation.CHECK) {
+        if (!(check instanceof Information) && Task.Security.safeValueOf(arrival.getTask()) == Task.Security.CHECK) {
             // Avoid sending the user object
             answer = functions.checkDataMessage(check, User.class);
             if (answer == null) {
-                answer = new Success("CheckOkay", "Your session is valid!");
+                answer = new Success("Your session is valid!");
             }
             // answer shouldn't be null here!
         }
@@ -100,13 +100,13 @@ public class Servlet extends HttpServlet {
                 if (!currentUser.isAdmin()) {
                     error += ". You may not have the necessary rights!";
                 }
-                answer = new Error("IllegalTask", error);
+                answer = new Error(Error.Type.TASK, error);
             }
         } else if (check instanceof PublicDisplay) {
             answer = functions.handleDisplayTask(arrival, (PublicDisplay) check);
             if (answer == null) {
                 log.log(TAG, "Illegal task sent: " + arrival.getTask());
-                answer = new Error("IllegalTask", "Illegal task: " + arrival.getTask() + ".");
+                answer = new Error(Error.Type.TASK, "Illegal task: " + arrival.getTask() + ".");
             }
         } else {
             // This means the check failed, so there is a message in check that needs to be sent back
@@ -166,18 +166,18 @@ public class Servlet extends HttpServlet {
     public Data checkArrival(Arrival arrival) {
         if (arrival == null || !arrival.isValid()) {
             // This means something went wrong. Badly.
-            return new Error("IllegalPOST", "POST does not conform to API! Keys valid? Values set? Object correct?");
+            return new Error(Error.Type.SECURITY, "POST does not conform to API! Keys valid? Values set? Object correct?");
         }
         // Some tasks can be done without login, here are these SecurityModule tasks:
-        Task.Sanitation task = Task.Sanitation.safeValueOf(arrival.getTask());
+        Task.Security task = Task.Security.safeValueOf(arrival.getTask());
         // If the task is not an error, than it IS a sanitationModule task:
-        if (task != Task.Sanitation.ERROR) {
+        if (task != Task.Security.ERROR) {
             return moduleManager.handleTask(task, arrival);
         }
         // Otherwise handle it normally:
         else {
             // Everything from here on out MUST be validated via login, so check the session:
-            return moduleManager.handleTask(Task.Sanitation.CHECK, arrival);
+            return moduleManager.handleTask(Task.Security.CHECK, arrival);
         }
     }
 
@@ -194,7 +194,7 @@ public class Servlet extends HttpServlet {
         // If this happens, send back a standard error message.
         if (answer == null) {
             log.error(TAG, "Empty ANSWER! Should never happen!");
-            answer = new Error("Empty ANSWER", "Answer does not contain an object! Make sure your request is valid!");
+            answer = new Error(Error.Type.WRONG_OBJECT, "Answer does not contain an object! Make sure your request is valid!");
         }
         Departure dep = new Departure(answer);
         String blub = json.toJson(dep);

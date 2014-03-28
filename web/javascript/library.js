@@ -127,21 +127,15 @@ function User(email, password, name, admin) {
     this.admin = admin; // can not be changed by unauthorized clients, don't try :P
 }
 
-function Success(name, description) {
+function Success(type, description) {
     this.$type = "Success";
-    this.name = name;
+    this.type = type;
     this.description = description;
 }
 
-function Error(name, description) {
+function Error(type, description) {
     this.$type = "Error";
-    this.name = name;
-    this.description = description;
-}
-
-function Message(name, description) {
-    this.$type = "Message";
-    this.name = name;
+    this.type = type;
     this.description = description;
 }
 

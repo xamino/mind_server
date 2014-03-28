@@ -1,6 +1,7 @@
 package de.uulm.mi.mind.logic;
 
 import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.logic.modules.*;
 
@@ -44,14 +45,14 @@ public class EventModuleManager {
             return userModule.run(operation, task);
         else if (operation instanceof Task.Location || operation instanceof Task.Area) {
             return locationModule.run(operation, task);
-        } else if (operation instanceof Task.Sanitation) {
+        } else if (operation instanceof Task.Security) {
             return securityModule.run(operation, task);
         } else if (operation instanceof Task.Position) {
             return positionModule.run(operation, task);
         } else if (operation instanceof Task.Display) {
             return displayModule.run(operation, task);
         } else {
-            return new Error("ModuleNotFound", operation.toString());
+            return new Error(Error.Type.NULL, operation.toString());
         }
     }
 }

@@ -1,9 +1,9 @@
-var originalWidth=1; //the native width of the map-image in pixels
-var originalHeight=1; //the native height of the map-image in pixels
-var originalIconSize=1; //the native size of the icon in pixels
+var originalWidth; //the native width of the map-image in pixels
+var originalHeight; //the native height of the map-image in pixels
+var originalIconSize; //the native size of the icon in pixels
 var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
 var heigthFactor=1; //the factor by which the height of the displayed image deviates from the original image height
-var zoomValue = 10; //holds the width value for each zoom-step in pixels
+var zoomValue = 30; //holds the width value for each zoom-step in pixels
 
 var users; //the current (to be) displayed users;
 
@@ -39,7 +39,8 @@ function retriveOriginalIconMetrics(){
 	imgLoad.attr("src", "images/micons/crab.png");
 	imgLoad.unbind("load");
 	imgLoad.bind("load", function () {
-		originalIconSize = this.width;
+//		originalIconSize = this.width;
+		originalIconSize = 110;
 		initUsersPlacement();
 	});
 }
@@ -97,7 +98,9 @@ function initUsersPlacement(){
 	for ( var i = 0; i < users.length; i++) {
 		addUserIcon(users[i]);		
 	}
-	//TODO area -> x,y
+	
+	//set individual user icon coordinates considering area
+	setUserIconCoordsByArea();
 	//display all currently tracked users
 	updateUserIconPlacement();
 }
@@ -137,6 +140,109 @@ function placeUserIcon(user){
 }
 
 /**
+ * This function sets the x,y coordinates of each user
+ * according to the area as lastPosition.
+ * Keep in mind: the x and y values are intended to for the center of the icon
+ */
+function setUserIconCoordsByArea(){
+	users.sort(compareByArea); //sort users by area
+
+//	var areastring = "";
+//	for ( var i = 0; i < users.length; i++) {
+//		areastring += users[i].lastPosition+",";
+//	}
+//	alert("sorted"+areastring);
+	var area=null;
+	var currentx = 0;
+	var currenty = 0;
+	var firstinrow = true;
+	//vars for y-value placement (if modification necessary);
+	var iconsinarea = 0;
+	var iconsperrow = 0;
+	for ( var i = 0; i < users.length+1; ) {
+		if(area==null || users[i]==null || area.ID != users[i].lastPosition){//if new area to solve
+			if(iconsinarea>1){
+				checkHeight(area,iconsinarea,iconsperrow,(i-iconsinarea));
+				if(i==users.length){break;} //if last user finished
+			}
+			if(users[i]==null){break;}
+			area = getAreaById(users[i].lastPosition);
+			currentx = area.topLeftX+Math.round(originalIconSize/2);
+			currenty = area.topLeftY+Math.round(originalIconSize/2);
+			firstinrow = true;
+			iconsinarea = 0;
+		}
+		if(firstinrow){ //if first in this row - always draw -> move currentx
+			users[i].x = currentx;
+			users[i].y = currenty;
+			currentx += originalIconSize;
+			firstinrow = false;
+			iconsinarea++;
+			i++;
+		}else{
+			if( (currentx+(originalIconSize/2)) > (area.topLeftX+area.width) ){ //current icon would exceed the row
+				firstinrow = true;
+				currentx = area.topLeftX+Math.round(originalIconSize/2);
+				currenty += originalIconSize;
+				if(iconsperrow<1){
+					iconsperrow = iconsinarea;					
+				}
+			}else{ //current icon still fits in this row
+				users[i].x = currentx;
+				users[i].y = currenty;
+				currentx += originalIconSize;
+				iconsinarea++;
+				i++;
+			}
+		}
+		
+//		users[i].x = area.topLeftX+Math.round(originalIconSize/2);
+//		users[i].y = area.topLeftY+Math.round(originalIconSize/2);
+	}
+}
+
+/**
+ * This function checks if icons reach out of the area
+ * and if so, moves them upwards
+ * @param area the area
+ * @param iconsinarea the amount of icons in the area
+ * @param iconsperrow the max count of icons in a row
+ * @param i check users from index i <= i+iconsinarea-1
+ */
+function checkHeight(area,iconsInArea,iconsPerRow,i){
+	
+	var outstand = ((users[i+iconsInArea-1].y+Math.round(originalIconSize/2)) - (area.topLeftY+area.height));
+//	alert("outstandy "+outstand);
+	//if (one of the) lowest icons stands out of the area
+	if(outstand > 0){
+		var rows = Math.ceil(iconsInArea/iconsPerRow);
+		var perRowCounter = 0;
+		var yoffsetPerRow = outstand/(rows-1);
+		var currentOffset = yoffsetPerRow;
+		
+		for ( var j=i+iconsPerRow; j < i+iconsInArea; ) { //for each icon - starting from the second row
+			if(perRowCounter >= iconsPerRow){//init next row
+				currentOffset += yoffsetPerRow;
+				perRowCounter = 0;
+			}else{//still in this row
+				perRowCounter++;
+				users[j].y -= currentOffset;
+				j++;
+			}
+		}
+	}
+}
+
+function compareByArea(user1,user2) {
+	  if (user1.lastPosition < user2.lastPosition)
+	     return -1;
+	  if (user1.lastPosition > user2.lastPosition)
+	    return 1;
+	  return 0;
+}
+
+
+/**
  * This function sets the proper size and placement of the user icons
  * -> places all the icons correctly by referencing the x,y coordinates of
  * the user objects
@@ -152,11 +258,11 @@ function updateUserIconPlacement(){
  * updated user data
  */
 function updateUserListOnReceive(updatedUsers){
-	
 	var index;
+
 	//update or remove old user
-	for (var i=users.length; i >= 0; i--) { //for each old user
-		index = userExists(users[i],updatedUsers); //the index of updatedUsers in which current (old) user exists
+	for (var i=users.length-1; i >= 0; i--) { //for each old user
+		index = userExistsInUserarray(users[i],updatedUsers); //the index of updatedUsers in which current (old) user exists
 		if(index >= 0){ //current user exists in new user array - update user position
 			if(users[i].lastPosition != updatedUsers[index].lastPosition){ //user's position has changed
 				users[i].lastPosition  = updatedUsers[index].lastPosition;
@@ -165,15 +271,19 @@ function updateUserListOnReceive(updatedUsers){
 			}
 			updatedUsers.splice(index,1); //remove new user since already handled
 		}else{ //current user is no longer tracked - remove user from list
+			var element = document.getElementById("icon_"+users[i].email);
+			element.parentNode.removeChild(element);
 			users.splice(i,1);
 		}
 	}
 
 	//add completely new users (who weren't tracked in the previous request/response)
 	for ( var i = 0; i < updatedUsers.length; i++) {
+		users.push(updatedUsers[i]);
 		addUserIcon(updatedUsers[i]);
 	}
-	//TODO area -> x,y
+	//set individual user icon coordinates considering area
+	setUserIconCoordsByArea();
 	//display all currently tracked users
 	updateUserIconPlacement();
 }
@@ -187,6 +297,7 @@ function updateUserListOnReceive(updatedUsers){
  */
 function userExistsInUserarray(user,userarray){
 	for ( var i = 0; i < userarray.length; i++) {
+//		alert(user.email+" "+userarray[i].email);
 		if(userarray[i].email === user.email){
 			return i;
 		}
@@ -194,14 +305,84 @@ function userExistsInUserarray(user,userarray){
 	return -1;
 }
 
-
-
 /**
  * This function should be called periodically to refresh the users location visually
  */
 function refreshUserData(){
 	send(new Arrival("read_all_positions", session), updateUserListOnReceive);
 }
+
+
+//TEST STUFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+
+function loadTestUser(){
+	var user1 = new User("a@a.a",null,"a",false);
+	user1.lastPosition = 333;
+	user1.iconRef = "crab.png";
+//	user1.x = 400;
+//	user1.y = 300;
+	var user2 = new User("c@c.c",null,"c",false);
+	user2.lastPosition = 333;
+	user2.iconRef = "cow.png";
+//	user2.x = 450;
+//	user2.y = 400;
+	var user3 = new User("d@d.d",null,"d",false);
+	user3.lastPosition = 333;
+	user3.iconRef = "rabbit.png";
+//	user3.x = 450;
+//	user3.y = 600;
+	var user4 = new User("e@e.e",null,"e",false);
+	user4.lastPosition = 333;
+	user4.iconRef = "sheep.png";
+	var user5 = new User("f@f.f",null,"f",false);
+	user5.lastPosition = 333;
+	user5.iconRef = "deer.png";
+	var user6 = new User("g@g.g",null,"g",false);
+	user6.lastPosition = 333;
+	user6.iconRef = "crab.png";
+	
+	var testusers = new Array();
+	testusers[0] = user1;
+	testusers[1] = user2;
+	testusers[2] = user3;
+	testusers[3] = user4;
+	testusers[4] = user5;
+	testusers[5] = user6;
+	updateUserListOnReceive(testusers);
+}
+
+function getAreaById(id){
+	var area = null;
+	switch (id) {
+	case 3304:
+		area = new Area(3304, null, 0, 0, 223, 297);
+		break;
+	case 3305:
+		area = new Area(3305, null, 233, 0, 223, 297);
+		break;
+	case 336:
+		area = new Area(336, null, 465, 0, 223, 297);
+		break;
+	case 3303:
+		area = new Area(3303, null, 0, 462, 301, 299);
+		break;
+	case 3301:
+		area = new Area(3301, null, 311, 462, 147, 299);
+		break;
+	case 3302:
+		area = new Area(3302, null, 0, 770, 458, 219);
+		break;
+	case 333:
+		area = new Area(333, null, 465, 462, 220, 529);
+		break;
+	}
+	return area;
+}
+
+
+
+//END TEST STUFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+
 
 
 
@@ -264,7 +445,7 @@ function doScale(value){
 	
 	//update the scale factors
 	computeFactors();
-	document.getElementById("slidertext").innerHTML = "facty w:"+widthFactor+" h:"+heigthFactor;
+	document.getElementById("slidertext").innerHTML = "fact w:"+widthFactor+" h:"+heigthFactor;
 	//update user icons
 	updateUserIconPlacement();
 	

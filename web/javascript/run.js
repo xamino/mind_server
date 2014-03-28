@@ -216,6 +216,8 @@ function displaySettingsClicked() {
     settingsContents += "<hr><br><button type='button' id='displaySettingsBack' onclick='settingsBackButton()'>Back</button>";
     settingsContents += "<button type='button' id='displayLogoutButton' onclick='logoutDisplay()'>Logout Display</button>";
     document.getElementById("content_popup").innerHTML = settingsContents;
+    
+    loadTestUser();
 }
 
 function settingsBackButton() {
@@ -792,15 +794,11 @@ function handleAllUsersPositionData(){
 //TESTAREA
 	//User(email, password, name, admin) {
 	var user1 = new User("a@a.a",null,"a",false);
-	user1.lastPosition = 1;
+	user1.lastPosition = 3304;
 	user1.iconRef = "crab.png";
-	user1.x = 200;
-	user1.y = 300;
 	var user2 = new User("b@b.b",null,"b",false);
-	user2.lastPosition = 2;
+	user2.lastPosition = 336;
 	user2.iconRef = "lion.png";
-	user2.x = 400;
-	user2.y = 400;
 	
 	var users = new Array();
 	users[0] = user1;
