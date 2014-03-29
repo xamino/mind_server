@@ -19,9 +19,6 @@ if (url_png == true) {
 		input = "Current Map:<br>";
 		input += "<div id='map_png_div' style='overflow:auto; margin-top:0px; width:"+imgWidth+"px; height:"+imgHeight+"px; background-size:auto; background-image:url(images/map.png); background-repeat:no-repeat;'><div id='draw_rect_div'></div></div>";
 		document.getElementById("map_container_div").innerHTML = input;
-//		var test =$("div");
-//		<div id='draw_rect_div'></div>
-//		document.getElementById("map_png_div").appendChild(test);
 	});
 } else {
 	var input = "";
@@ -60,7 +57,9 @@ alert("top-distance: "+(event.clientY - offset.top));
 /****************************** draw in map ******************************/
 
 /**
- * thanks to: http://marco-difeo.de/2011/06/13/jquery-rectangle-selection/
+ * thanks to: http://marco-difeo.de/2011/06/13/jquery-rectangle-selection/ and math voodoo *sigh*
+ * draws on mouse down on map in map --> corrects if an existing area is touched
+ * coordinates x1,y1 (start point); x2,y2 (end point)
  */
 // Click coordinates
 var x1, x2, y1, y2;
@@ -101,6 +100,12 @@ $(document).on("mousedown","#map_png_div", function(e) {
 		
 });
 
+var TOP;
+var LEFT;
+var WIDTH;
+var HEIGHT;
+var drawrect;
+
 // If selection is true (mousedown on selection frame) the mousemove 
 // event will draw the selection div
 $(document).on("mousemove","#map_png_div", function(e) {
@@ -115,14 +120,35 @@ $(document).on("mousemove","#map_png_div", function(e) {
         // If the mouse is inside your frame resize the selection div
         if (selection) {
             // Calculate the div selection rectancle for positive and negative values
-            var TOP = (y1 < y2) ? y1 : y2;
-            var LEFT = (x1 < x2) ? x1 : x2;
-            var WIDTH = (x1 < x2) ? x2 - x1 : x1 - x2;
-            var HEIGHT = (y1 < y2) ? y2 - y1 : y1 - y2;
+            TOP = (y1 < y2) ? y1 : y2;
+            LEFT = (x1 < x2) ? x1 : x2;
+            WIDTH = (x1 < x2) ? x2 - x1 : x1 - x2;
+            HEIGHT = (y1 < y2) ? y2 - y1 : y1 - y2;
+            
+                       
+        	for(var i = 0; i<allAreas.length; i++){	//all existing areas
+	       	 var id = allAreas[i].ID;
+	       	 if(id != "universe"){	//not in universe
+	       		 if(x2 >= allAreas[i].topLeftX && x2 <= (allAreas[i].topLeftX+ allAreas[i].width)){	    	//in x-values of existing area
+	       			 if(y2 >= allAreas[i].topLeftY && y2 <= (allAreas[i].topLeftY+ allAreas[i].height)){ 	//in y-values of existing area
+	       				 selection = false; //x2,y2 in area
+	       			 }
+	       			 else if(y1 >= allAreas[i].topLeftY && y1 <= (allAreas[i].topLeftY+ allAreas[i].height)){
+	       				 selection = false; //x2,y1 in area
+	       			 }
+	       		 }
+	       		 else if(y2 >= allAreas[i].topLeftY && y2 <= (allAreas[i].topLeftY+ allAreas[i].height)){
+	       			 if(x1 >= allAreas[i].topLeftX && x1 <= (allAreas[i].topLeftX+ allAreas[i].width)){
+	       				 selection = false; //x1,y2 in area
+	       			 }
+	       		 }
+	       	 }
+        	}
 
+        	if(selection){
             
             // Use CSS to place your selection div
-            var drawrect = document.getElementById("draw_rect_div");
+            drawrect = document.getElementById("draw_rect_div");
             
 //            	drawrect.style.border="1px solid blue";
             	drawrect.style.background="#1B94E0";
@@ -131,7 +157,7 @@ $(document).on("mousemove","#map_png_div", function(e) {
             	drawrect.style.margin="0px";
             	drawrect.style.padding="0px";
             	drawrect.style.position = 'absolute';
-//                drawrect.style.zIndex = "5000";
+                drawrect.style.zIndex = "5000";
             	drawrect.style.marginLeft = LEFT+"px";
             	drawrect.style.marginTop = TOP+"px";
             	drawrect.style.width = WIDTH+"px";
@@ -143,23 +169,119 @@ $(document).on("mousemove","#map_png_div", function(e) {
             
 
             //output to simply add area
-//            $('#addAreaForm').html('( x1 : ' + x1 + ' )  ( x2 : ' + x2 + ' )  ( y1 : ' + y1 + '  )  ( y2 : ' + y2 + ' ) ');
-            $('#addAreaForm').html('<table border="0" cellpadding="3" cellspacing="0">'+
+//            $('#areaForm').html('( x1 : ' + x1 + ' )  ( x2 : ' + x2 + ' )  ( y1 : ' + y1 + '  )  ( y2 : ' + y2 + ' ) ');
+            $('#areaForm').html('<table border="0" cellpadding="3" cellspacing="0">'+
             		'<tr><td>Id (name, i.e. Room 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
-            		'<tr><td>X-Coordinate:</td><td><input type="text" id="xCor" name="xCor" value="'+x1+'"></td></tr>'+
-            		'<tr><td>Y-Coordinate:</td><td><input type="text" id="yCor" name="yCor" value="'+y1+'"></td></tr>'+
-            		'<tr><td>Width:</td><td><input type="text" id="width" name="width" value="'+WIDTH+'"></td></tr>'+
-            		'<tr><td>Height:</td><td><input type="text" id="height" name="height" value="'+HEIGHT+'"></td></tr>'+
+            		//a user has the possibility to modify the values --> error detection!
+//            		'<tr><td>X-Coordinate:</td><td id="update_tdX"><input type="text" id="xCor" name="xCor" value="'+x1+'"></td></tr>'+
+//            		'<tr><td>Y-Coordinate:</td><td id="update_tdY"><input type="text" id="yCor" name="yCor" value="'+y1+'"></td></tr>'+
+//            		'<tr><td>Width:</td><td id="update_tdWidth"><input type="text" id="width" name="width" value="'+WIDTH+'"></td></tr>'+
+//            		'<tr><td>Height:</td><td id="update_tdHeight"><input type="text" id="height" name="height" value="'+HEIGHT+'"></td></tr>'+
+//            		'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
+            		//so the user can't change the values --> no overlapping with over areas possible
+            		'<tr><td>X-Coordinate:</td><td id="update_tdX">'+x1+'</td></tr>'+
+            		'<tr><td>Y-Coordinate:</td><td id="update_tdY">'+y1+'</td></tr>'+
+            		'<tr><td>Width:</td><td id="update_tdWidth">'+WIDTH+'</td></tr>'+
+            		'<tr><td>Height:</td><td id="update_tdHeight">'+HEIGHT+'</td></tr>'+
             		'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-        }
+        }}
     }
 });
 // Selection complete, hide the selection div (or fade it out)
 $(document).on("mouseup","#map_png_div", function(e) {
 //$('#map_div').mouseup(function() {
-    selection = false;
+	
+	// all table rows are white
+    var trs = document.getElementsByTagName("tr");
+    for(var i = 0, len = trs.length; i < len; i++) {
+        trs[i].style.backgroundColor="white";
+    }
+	
+	   selection = false;
+	for(var i = 0; i<allAreas.length; i++){	//all existing areas
+	       	 var id = allAreas[i].ID;
+//	       	 break;
+	       	 if(id != "universe"){	//not in universe
+//	       		alert("id: "+id+";y1: "+y1+";y2: "+y2+";topLeftY: "+allAreas[i].topLeftY+";height: "+allAreas[i].height+";topLeftY+height: "+(allAreas[i].topLeftY + allAreas[i].height));
+	       		 //drawing from right to left && TopLeftX and TopLeftY are in the drawed rect 
+		 		 if(x2 < allAreas[i].topLeftX && x1 > allAreas[i].topLeftX){
+		 			 if(y2 > allAreas[i].topLeftY && y1 < allAreas[i].topLeftY){
+		            	drawrect.style.height = (HEIGHT-(y2-allAreas[i].topLeftY))+"px";
+		            	var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-(y2-allAreas[i].topLeftY))+'">';
+		   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
+		   			 }
+		   		 }
+		 		//TopLeftX and TopLeftY are in the drawed rect
+		   		if(x1 < allAreas[i].topLeftX && x2 > allAreas[i].topLeftX){
+		   			//drawing from left to right || drawing from top to bottom 
+		   			if(y2 > allAreas[i].topLeftY && y1 < allAreas[i].topLeftY){
+		   				if(x2 > (allAreas[i].topLeftX+ allAreas[i].width)){
+		   					drawrect.style.height = (HEIGHT-(y2-allAreas[i].topLeftY))+"px";
+		   					var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-(y2-allAreas[i].topLeftY))+'">';
+			   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
+		   				}else{
+		   					drawrect.style.width = (WIDTH-(x2-allAreas[i].topLeftX))+"px";
+		   					var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-(x2-allAreas[i].topLeftX))+'">';
+			   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
+		   				}
+		   			 }
+		   			//drawing from bottom to top
+		   			else if(y1 > allAreas[i].topLeftY && y2 < allAreas[i].topLeftY){
+		   				drawrect.style.width = (WIDTH-(x2-allAreas[i].topLeftX))+"px";
+		   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-(x2-allAreas[i].topLeftX))+'">';
+		   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
+		   			}
+		   		 }
+	       		//(TopLeftX+width) and TopLeftY are in the drawed rect
+		    	if(x2 < (allAreas[i].topLeftX +allAreas[i].width) && x1 > (allAreas[i].topLeftX + allAreas[i].width)){	    	//in x-values of existing area
+		    		//draw from top to bottom 
+		    		if(y2 > allAreas[i].topLeftY && y1 < allAreas[i].topLeftY){ 
+						drawrect.style.width = (WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+"px";
+						drawrect.style.marginLeft = (LEFT+((allAreas[i].topLeftX+allAreas[i].width)-x2))+"px";
+		   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
+		   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
+		   				var updateTopLeftX = '<input type="text" id="xCor" name="xCor" value="'+(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
+		   				document.getElementById("update_tdX").innerHTML = updateTopLeftX;
+					 }
+		    		//draw from bottom to top 
+		    		else if(y1 > allAreas[i].topLeftY && y2 < allAreas[i].topLeftY){
+		    			drawrect.style.width = (WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+"px";
+						drawrect.style.marginLeft = (LEFT+((allAreas[i].topLeftX+allAreas[i].width)-x2))+"px";
+		   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
+		   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
+		   				var updateTopLeftX = '<input type="text" id="xCor" name="xCor" value="'+(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
+		   				document.getElementById("update_tdX").innerHTML = updateTopLeftX;
+		    		}
+		    	}
+		 		//TopLeftX and (TopLeftY+height) are in the drawed rect
+		 		 
+		   		 if(y1 > (allAreas[i].topLeftY + allAreas[i].height) && y2 < (allAreas[i].topLeftY + allAreas[i].height)){
+		   			 //from left to right
+		   			 if(x1 < allAreas[i].topLeftX && x2 > allAreas[i].topLeftX){
+		   				drawrect.style.height = (HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+"px";
+						drawrect.style.marginTop = (TOP+((allAreas[i].topLeftY+allAreas[i].height)-y2))+"px";
+		   				var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
+		   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
+		   				var updateTopLeftY = '<input type="text" id="yCor" name="yCor" value="'+(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
+		   				document.getElementById("update_tdY").innerHTML = updateTopLeftY;
+		   			 }
+		   			 //from right to left
+		   			 else if(x1 > allAreas[i].topLeftX && x2 < allAreas[i].topLeftX){
+		   				drawrect.style.height = (HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+"px";
+						drawrect.style.marginTop = (TOP+((allAreas[i].topLeftY+allAreas[i].height)-y2))+"px";
+		   				var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
+		   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
+		   				var updateTopLeftY = '<input type="text" id="yCor" name="yCor" value="'+(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
+		   				document.getElementById("update_tdY").innerHTML = updateTopLeftY;
+		   			 }
+		   		 }
+  	       		 
+	       		}}
+	
+ 
 //    $("#selection").hide();
 });
+
 // Usability fix. If mouse leaves the selection and enters the selection frame again with mousedown
 $(document).on("mouseenter","#map_png_div", function(e) {
 //$("#map_div").mouseenter(function() {
@@ -176,150 +298,7 @@ $(document).on("mouseleave","#map_png_div", function(e) {
     selection = false;
 });
 
-
-////////////// doesn't work =( ///////////////
-$(document).on("mousedown","#331", function(e) { 
-	selection = false;
-	});
-
-
-/**
- * on Button click 'Add Area' in admin_import_map_location.jsp
- * ads an area with the given id and values
- */
-$(document).on("submit", "#addAreaForm", function (event) {
-    event.preventDefault();
-    var id, xCor, yCor, width, height;
-    id = $("#id").val();
-    if (id != null && id != "") {
-    xCor = $("#xCor").val();
-//    if (xCor != null && xCor != "") {
-    yCor = $("#yCor").val();
-//    if (yCor != null && yCor != "") {
-    width = $("#width").val();
-//    if (width != null && width != "") {
-    height = $("#height").val();
-//    if (height != null && height != "") {
-    newArea = new Area(id, null, xCor, yCor, width, height);
-
-    doTask("AREA_ADD", newArea, function(){
-    	window.location.reload();
-    });
-//    }}}}
-    }else{
-    	alert("You have to set an id for your area!");
-    }
-
-});
-
-/************** draw existing areas on map *************/
-
-var allAreas;
-
-function drawAreas(){
-	var areas = new Area(null, null, 0, 0, 0, 0);
-    doTask("AREA_READ", areas, function(data){
-    	allAreas = data.object;
-    	if (data.object.length == 1) {
-    		
-    	}
-    	else{
-    		for (var i = 0; i < data.object.length; i++) {
-    			var id = data.object[i].ID;
-    			if(id == "universe"){
-    				// don't do anything --> universe isn't been drawn
-    			}
-    			else{
-                var x = data.object[i].topLeftX;
-                var y = data.object[i].topLeftY;
-                var width = data.object[i].width;
-                var height = data.object[i].height;
-                
-                var div = document.getElementById( "map_png_div" );
-                var testytest = "";
-                testytest += '<div id="'+id+'" onClick="clickOnArea('+id+')" style=" cursor:pointer; background-color: #C2DFFF; border: 2px solid black; opacity: .5; filter: alpha(opacity=50); position:absolute; margin-top:'+(y+2)+'px; margin-left: '+(x+2)+'px; width: '+(width-4)+'px; height: '+(height-4)+'px;"></div>'; 
-                div.innerHTML = div.innerHTML + testytest;
-                
-             //If mouse leaves the selection
-//                var idAsString = '"#'+id+'"';
-//                $(document).on("mouseenter",idAsString, function(e) {
-//                	e.stopPropagation();      
-//                	selection = false;
-//                    });
-                
-
-//    			$(document).on("mousedown",idAsString, function(e) {
-//    				e.stopPropagation(); 
-//    				selection = false;
-//    				});
-                
-                
-                
-    			}}	//else and for
-
-    	}
-
-    });
-    
-}
-
-
-function getAreaById (id){
-	for ( var i = 0; i < allAreas.length; i++) {
-		if(allAreas[i].ID == id){
-			return allAreas[i];
-		}
-	}
-}
-
-
-function clickOnArea(id){
-	
-	var areaOfId = getAreaById(id);
-	
-	
-	var id = areaOfId.ID;
-    var x = areaOfId.topLeftX;
-    var y = areaOfId.topLeftY;
-    var width = areaOfId.width;
-    var height = areaOfId.height;
-//        alert("id: "+id+"x: "+x+"y: "+y);
-
-	var cklickOnArea = document.getElementById(id);
-//
-    cklickOnArea.style.cursor = 'pointer';
-        $('#addAreaForm').html('Edit room with the id '+id+':<br><table border="0" cellpadding="3" cellspacing="0">'+
-//        		'<tr><td>Id:</td><td><input type="text" id="id" name="id" value="'+id+'"></td></tr>'+
-        		'<tr><td>X-Coordinate:</td><td><input type="text" id="xCor" name="xCor" value="'+x+'"></td></tr>'+
-        		'<tr><td>Y-Coordinate:</td><td><input type="text" id="yCor" name="yCor" value="'+y+'"></td></tr>'+
-        		'<tr><td>Width:</td><td><input type="text" id="width" name="width" value="'+width+'"></td></tr>'+
-        		'<tr><td>Height:</td><td><input type="text" id="height" name="height" value="'+height+'"></td></tr>'+
-        		'<tr><td><input type="button" value="Edit Area" onClick="editArea('+id+')"></td><td></td></tr></table>');
-	
-}
-
-function editArea(id){
-
-	alert(id);
-//	var readArea = new Area(id, null, 0, 0, 0, 0);
-//	doTask("AREA_READ", readArea, function(){
-//		window.location.reload();
-	
-	
-	
-		var xCor, yCor, width, height;
-	    xCor = $("#xCor").val();
-	    yCor = $("#yCor").val();
-	    width = $("#width").val();
-	    height = $("#height").val();
-		
-		var editArea = new Area(id, null, xCor, yCor, width, height);
-		doTask("AREA_UPDATE", editArea, function(){
-			window.location.reload();
-		});
-	
-//	});
-}
+/*************** end of drawing on map *****************/
 
 
 /****************Admin - Area Management****************/
@@ -353,7 +332,7 @@ function writeAreas(data) {
         tablecontents += "</tr>";
 
         for (var i = 0; i < data.object.length; i++) {
-            tablecontents += "<tr>";
+            tablecontents += "<tr id='room_"+data.object[i].ID+"'>";	//id to highlight clicked area
             tablecontents += "<td>" + data.object[i].ID + "</td>";
             tablecontents += "<td>" + data.object[i].locations.length + "</td>";
             tablecontents += "<td>" + data.object[i].topLeftX + "</td>";
@@ -394,6 +373,140 @@ function removeAreaViaPopup(data) {
         });
     }
 }
+
+/**
+ * on Button click 'Add Area' in admin_import_map_location.jsp
+ * adds an area with the given id
+ */
+$(document).on("submit", "#areaForm", function (event) {
+    event.preventDefault();
+    if(checkInp()){	//id is valid
+	    var id, xCor, yCor, width, height;
+	    id = $("#id").val();
+	    if (id != null && id != "") {
+	    xCor = $("#xCor").val();
+	    yCor = $("#yCor").val();
+	    width = $("#width").val();
+	    height = $("#height").val();
+	    newArea = new Area(id, null, xCor, yCor, width, height);
+	
+	    doTask("AREA_ADD", newArea, function(){
+	    	window.location.reload();
+	    });
+	    }else{
+	    	alert("You have to set an id for your area!");
+	    }
+    }else{
+    	alert("The id may only contain:A-Z, a-z, 0-9, - and _");
+    }
+
+});
+
+/************** draw existing areas on map *************/
+
+var allAreas;
+
+/**
+ * draw all areas on the given map in admin_import_map_location.jsp
+ * areas are clickable
+ */
+function drawAreas(){
+	var areas = new Area(null, null, 0, 0, 0, 0);
+    doTask("AREA_READ", areas, function(data){
+    	allAreas = data.object;
+    	if (data.object.length == 1) {
+    		
+    	}
+    	else{
+    		for (var i = 0; i < data.object.length; i++) {
+    			var id = data.object[i].ID;
+    			if(id == "universe"){
+    				// don't do anything --> universe isn't been drawn
+    			}
+    			else{
+                var x = data.object[i].topLeftX;
+                var y = data.object[i].topLeftY;
+                var width = data.object[i].width;
+                var height = data.object[i].height;
+                
+                var div = document.getElementById( "map_png_div" );
+                var clickedArea = "";
+                clickedArea += '<div id="'+id+'" onClick="clickOnArea('+id+')" style=" cursor:pointer; background-color: #C2DFFF; border: 2px solid black; opacity: .5; filter: alpha(opacity=50); position:absolute; margin-top:'+(y+2)+'px; margin-left: '+(x+2)+'px; width: '+(width-4)+'px; height: '+(height-4)+'px;"></div>'; 
+                div.innerHTML = div.innerHTML + clickedArea;
+
+    		}
+    	}
+
+    	}
+
+    });
+    
+}
+
+/**
+ * detects which area is cklicked and shows the user information about this area
+ */
+function clickOnArea(id){
+	
+	var areaOfId = getAreaById(id);
+	
+	
+	var id = areaOfId.ID;
+    var x = areaOfId.topLeftX;
+    var y = areaOfId.topLeftY;
+    var width = areaOfId.width;
+    var height = areaOfId.height;
+
+    // all table rows are white
+    var trs = document.getElementsByTagName("tr");
+    for(var i = 0, len = trs.length; i < len; i++) {
+        trs[i].style.backgroundColor="white";
+    }
+    //highlight clicked area in table
+	var idToHightlight = 'room_'+id;
+	var highlightRow = document.getElementById(idToHightlight);
+	highlightRow.style.backgroundColor="lightblue";
+
+	
+	var cklickOnArea = document.getElementById(id);
+    cklickOnArea.style.cursor = 'pointer';
+//        $('#areaForm').html('Edit room with the id '+id+':<br><table border="0" cellpadding="3" cellspacing="0">'+
+////        		'<tr><td>Id:</td><td><input type="text" id="id" name="id" value="'+id+'"></td></tr>'+
+//        		'<tr><td>X-Coordinate:</td><td><input type="text" id="xCor" name="xCor" value="'+x+'"></td></tr>'+
+//        		'<tr><td>Y-Coordinate:</td><td><input type="text" id="yCor" name="yCor" value="'+y+'"></td></tr>'+
+//        		'<tr><td>Width:</td><td><input type="text" id="width" name="width" value="'+width+'"></td></tr>'+
+//        		'<tr><td>Height:</td><td><input type="text" id="height" name="height" value="'+height+'"></td></tr>'+
+//        		'<tr><td><input type="button" value="Edit Area" onClick="editArea('+id+')"></td><td></td></tr></table>');
+    $('#areaForm').html('Information to room with id '+id+':<br><table border="0" cellpadding="3" cellspacing="0">'+
+    		'<tr><td>X-Coordinate:</td><td>'+x+'</td></tr>'+
+    		'<tr><td>Y-Coordinate:</td><td>'+y+'</td></tr>'+
+    		'<tr><td>Width:</td><td>'+width+'</td></tr>'+
+    		'<tr><td>Height:</td><td>'+height+'</td></tr>'+
+    		'</table>');
+	
+}
+
+/**
+ * currently NOT IN USE
+ * the user can edit the clicked area 
+ */
+function editArea(id){
+
+		var xCor, yCor, width, height;
+	    xCor = $("#xCor").val();
+	    yCor = $("#yCor").val();
+	    width = $("#width").val();
+	    height = $("#height").val();
+		
+		var editArea = new Area(id, null, xCor, yCor, width, height);
+		doTask("AREA_UPDATE", editArea, function(){
+			window.location.reload();
+		});
+
+}
+
+
+
 
 /****************Admin - Location Management****************/
 
@@ -454,4 +567,35 @@ function removeLocationViaPopup(data) {
 
         });
     }
+}
+
+/****************** input check ********************/
+
+/**
+ * check wether id only contains A-Z, a-z, 0-9, - and _
+ * returns true if input is ok
+ */
+function checkInp()
+{
+    var x=document.getElementById("id").value;
+    //var regex=^[0-9]+$/;
+    if (x.match(/^[a-zA-Z0-9\-_]+$/))
+    {
+        return true;
+    }
+}
+
+/****************** get data of area ********************/
+
+/**
+ * returns the data of an area
+ * @param id
+ * 	id of the area to return
+ */
+function getAreaById (id){
+	for ( var i = 0; i < allAreas.length; i++) {
+		if(allAreas[i].ID == id){
+			return allAreas[i];
+		}
+	}
 }

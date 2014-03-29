@@ -46,15 +46,10 @@
 	<div id="map_container_div" onmousedown="return false">
     	<!-- <div id="selection"></div>-->
     </div>
-    Wird von mir (Laura) noch gemacht:
-    TODO: id only with numbers, letters and _
-    TODO: highlight clicked area in table
-    TODO: commit everything
-    TODO: draw rect not in existing area<br>
     <br>
-	<form id="addAreaForm"></form>
+	<form id="areaForm"></form>
 	 <!-- <img id='testimage_jpg' alt='MIND_MAP' src='images/map.jpg'> -->
-	 <br><div id="testy"></div>
+	 <br><!-- <div id="testy"></div>-->
 	 <br><hr>
 	 <h3>Areas</h3>
 	 <br>Here you see all Areas which are currently in MIND.
