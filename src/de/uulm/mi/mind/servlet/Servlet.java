@@ -102,12 +102,24 @@ public class Servlet extends HttpServlet {
                 }
                 answer = new Error(Error.Type.TASK, error);
             }
+            // finally we need to ensure that the activeUser is updated in the session list
+            Data msg = updateActiveUser(((ActiveUser) check));
+            if (msg instanceof Error) {
+                answer = msg;
+            }
+            // otherwise answer is valid
         } else if (check instanceof ActiveUser && ((ActiveUser) check).getAuthenticated() instanceof PublicDisplay) {
             answer = functions.handleDisplayTask(arrival, (ActiveUser) check);
             if (answer == null) {
                 log.log(TAG, "Illegal task sent: " + arrival.getTask());
                 answer = new Error(Error.Type.TASK, "Illegal task: " + arrival.getTask() + ".");
             }
+            // finally we need to ensure that the activeUser is updated in the session list
+            Data msg = updateActiveUser(((ActiveUser) check));
+            if (msg instanceof Error) {
+                answer = msg;
+            }
+            // otherwise answer is valid
         } else {
             // This means the check failed, so there is a message in check that needs to be sent back
             answer = check;
@@ -119,6 +131,16 @@ public class Servlet extends HttpServlet {
         TimerResult timerResult = log.popTimer(this);
         log.error(TAG, "Request " + arrival.getTask() + " took " + timerResult.time + " ms.");
         */
+    }
+
+    /**
+     * Small helper function. For now it will only update lastPosition!
+     *
+     * @param activeUser
+     * @return
+     */
+    private Information updateActiveUser(ActiveUser activeUser) {
+        return (Information) moduleManager.handleTask(Task.Security.UPDATE, activeUser);
     }
 
     /**
@@ -172,12 +194,13 @@ public class Servlet extends HttpServlet {
         Task.Security task = Task.Security.safeValueOf(arrival.getTask());
         // If the task is not an error, than it IS a sanitationModule task:
         if (task != Task.Security.ERROR) {
-            return moduleManager.handleTask(task, arrival);
+            ActiveUser temp = new ActiveUser(((Authenticated) arrival.getObject()), 0, arrival.getSessionHash());
+            return moduleManager.handleTask(task, temp);
         }
         // Otherwise handle it normally:
         else {
             // Everything from here on out MUST be validated via login, so check the session:
-            return moduleManager.handleTask(Task.Security.CHECK, arrival);
+            return moduleManager.handleTask(Task.Security.CHECK, new ActiveUser(null, 0, arrival.getSessionHash()));
         }
     }
 

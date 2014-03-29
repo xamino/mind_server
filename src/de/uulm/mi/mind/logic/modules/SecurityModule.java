@@ -71,16 +71,13 @@ public class SecurityModule extends Module {
             // Check that it is one of our tasks...
             return new Error(Error.Type.TASK, "SecurityModule was called with the wrong task type!");
         }
-        if (!(request instanceof Arrival)) {
-            // SecurityModule ALWAYS only uses and expects Arrival!
+        if (!(request instanceof ActiveUser)) {
+            // SecurityModule ALWAYS only uses and expects ActiveUser!
             return new Error(Error.Type.WRONG_OBJECT, "SecurityModule was called with the wrong object type!");
         }
-        Arrival arrival = (Arrival) request;
-        // Pull out authenticated
-        Authenticated user = null;
-        if (arrival.getObject() instanceof Authenticated) {
-            user = (Authenticated) arrival.getObject();
-        }
+        ActiveUser outsideUser = ((ActiveUser) request);
+        // Pull out authenticated (can be null!)
+        Authenticated user = outsideUser.getAuthenticated();
         // Correctly cast
         final Task.Security todo = (Task.Security) task;
         switch (todo) {
@@ -90,7 +87,7 @@ public class SecurityModule extends Module {
                 }
                 return new Error(Error.Type.WRONG_OBJECT, "Valid user object required!");
             case LOGOUT:
-                destroySession(arrival.getSessionHash());
+                destroySession(outsideUser.getSessionHash());
                 return new Success("You have been successfully logged out.");
             // break;
             case REGISTRATION:
@@ -103,10 +100,10 @@ public class SecurityModule extends Module {
                 }
                 break;
             case CHECK:
-                if (checkSession(arrival.getSessionHash())) {
+                if (checkSession(outsideUser.getSessionHash())) {
                     // If valid, return the corresponding user object. Fresh from the DB to keep in sync with updates
                     // To do that, we first need to get the new object:
-                    ActiveUser activeUser = sessions.get(arrival.getSessionHash());
+                    ActiveUser activeUser = sessions.get(outsideUser.getSessionHash());
                     Data object = readAuthFromDB(activeUser.getAuthenticated());
                     Data msg = ServletFunctions.getInstance().checkDataMessage(object, Authenticated.class);
                     if (msg != null) {
@@ -115,20 +112,37 @@ public class SecurityModule extends Module {
                     } else {
                         // If everything is okay, we return the current user and leave this method
                         Authenticated currentUser = ((Authenticated) object);
-                        activeUser = new ActiveUser(currentUser, System.currentTimeMillis(), arrival.getSessionHash());
-                        sessions.put(arrival.getSessionHash(), activeUser);
-                        return (Data) activeUser;
+                        // update activeUser
+                        // user to ensure it is DB secure
+                        activeUser.setAuthenticated(currentUser);
+                        // time because we need that
+                        activeUser.setSessionTimestamp(System.currentTimeMillis());
+                        sessions.put(outsideUser.getSessionHash(), activeUser);
+                        return activeUser;
                     }
                     // If we haven't returned, something went wrong
                     // destroy session to be safe
-                    destroySession(arrival.getSessionHash());
+                    destroySession(outsideUser.getSessionHash());
                     return new Error(Error.Type.DATABASE, "User couldn't be found in DB! You have been logged out.");
                 } else {
                     return new Error(Error.Type.SECURITY, "The session is NOT valid!");
                 }
                 // break;
+            case UPDATE:
+                // check if valid
+                if (!checkSession(outsideUser.getSessionHash())) {
+                    return new Error(Error.Type.SECURITY, "You are not authenticated!");
+                }
+                // we can only update specific things, so just do those:
+                ActiveUser tsts = sessions.get(outsideUser.getSessionHash());
+                // update last position
+                tsts.setLastPosition(outsideUser.getLastPosition());
+                // leave the rest untouched!
+                sessions.put(outsideUser.getSessionHash(), tsts);
+                // return success
+                return new Success("Updated ActiveUser object.");
             default:
-                log.error(TAG, "Unknown task #" + todo + "# sent to SecurityModule! Shouldn't happen!");
+                log.error(TAG, "Unknown task " + todo + " sent to SecurityModule! Shouldn't happen!");
                 return new Error(Error.Type.TASK, "Unknown task sent to SecurityModule!");
         }
         return new Error(Error.Type.TASK, "A task failed to complete – have you supplied the correct object type?");

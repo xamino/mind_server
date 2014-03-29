@@ -106,14 +106,24 @@ public class ServletFunctions {
                     return msg;
                 }
                 Area area = ((Area) data);
-                // update user for position
-                user.setLastPosition(area.getID());
+                // this implements server-side fuzziness to avoid fluttering of position_find
+                if (activeUser.getLastPosition() == null) {
+                    // this means it is the first time in this session, so we don't apply fuzziness
+                    activeUser.setLastPosition(area);
+                    user.setPosition(area);
+                } else if (activeUser.getLastPosition().getID().equals(area.getID())) {
+                    // update user for position, but only if last was already the same
+                    user.setPosition(area);
+                } else {
+                    // this means the area is different than the one before, so change lastPosition but not User:
+                    activeUser.setLastPosition(area);
+                }
                 msg = moduleManager.handleTask(Task.User.UPDATE, user);
                 if (!(msg instanceof Success)) {
                     return msg;
                 }
-                // everything okay, return area
-                return area;
+                // everything okay, return last position area
+                return user.getPosition();
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
                 user.setAdmin(!user.isAdmin());
@@ -175,7 +185,7 @@ public class ServletFunctions {
                     log.log(TAG, "Adding user " + tempUser.getEmail() + " as admin!");
                 }
                 // all else we set manually to valid values
-                tempUser.setLastPosition(null);
+                tempUser.setPosition(null);
                 tempUser.setLastAccess(null);
                 // check & handle password (we do this last because we might need to send back the key)
                 if (safeString(tempUser.getPwdHash())) {

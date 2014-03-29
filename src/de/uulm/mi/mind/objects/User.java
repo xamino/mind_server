@@ -11,7 +11,7 @@ public class User implements Data, Authenticated {
     private String name;
     private String pwdHash;
     private String email;
-    private String lastPosition;
+    private Area position;
     private boolean admin;
     private Date lastAccess;
 
@@ -29,12 +29,12 @@ public class User implements Data, Authenticated {
         this.admin = admin;
     }
 
-    public String getLastPosition() {
-        return lastPosition;
+    public Area getPosition() {
+        return position;
     }
 
-    public void setLastPosition(String lastPosition) {
-        this.lastPosition = lastPosition;
+    public void setPosition(Area position) {
+        this.position = position;
     }
 
     public String getName() {
@@ -79,7 +79,7 @@ public class User implements Data, Authenticated {
     public User safeClone() {
         User user = new User(this.email, this.name, this.admin);
         user.setPwdHash("");
-        user.setLastPosition(this.lastPosition);
+        user.setPosition(this.position);
         user.setLastAccess(this.lastAccess);
         return user;
     }

@@ -3,8 +3,8 @@ package de.uulm.mi.mind.logic.modules;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.servlet.ServletFunctions;
@@ -71,7 +71,7 @@ public class PositionModule extends Module {
                 for (Object obj : users) {
                     User us = ((User) obj);
                     // if lastPosition is null, the user may not be active in the system
-                    if (us.getLastPosition() == null) {
+                    if (us.getPosition() == null) {
                         // so ignore
                         continue;
                     }
@@ -87,7 +87,7 @@ public class PositionModule extends Module {
                     }
                     // Filter user object to only give name + position
                     User toSend = new User(us.getEmail(), us.getName());
-                    toSend.setLastPosition(us.getLastPosition());
+                    toSend.setPosition(us.getPosition());
                     sendUsers.add(toSend);
                 }
                 return sendUsers;
@@ -98,7 +98,6 @@ public class PositionModule extends Module {
     }
 
     /**
-     *
      * @param request
      * @return Location if found, else null.
      */

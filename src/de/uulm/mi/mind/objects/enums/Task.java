@@ -30,7 +30,7 @@ public interface Task {
          * Check if a session is valid.
          */
         CHECK,
-        ERROR;
+        ERROR, UPDATE;
 
         /**
          * Use as a safe valueOf. Instead of throwing the error, incorrect values are returned as ERROR enum type. The

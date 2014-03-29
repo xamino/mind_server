@@ -368,6 +368,15 @@ function testPositionRead() {
     if (userLocs == null || userLocs.length != 2) {
         alert("Wrong number of available user locations!");
     }
+    // test that only upon 2 consecutive new position_find the area is updated:
+    var area = unitTest("position_find", location1, Area, dolphinSession);
+    if (instanceOf(area, Area) && area.ID != "office") {
+        alert("P1: Failed correct server side area fuzziness! Expected office, received " + area.ID + "!");
+    }
+    area = unitTest("position_find", location1, Area, dolphinSession);
+    if (instanceOf(area, Area) && area.ID != "universe") {
+        alert("P2: Failed correct server side area fuzziness! Expected universe, received " + area.ID + "!");
+    }
     // try illegal access
     unitTest("read_all_positions", null, Error, sharkSession);
     // now try with public display
