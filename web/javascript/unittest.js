@@ -273,24 +273,28 @@ function positionTest() {
     unitTest("location_add", location1, Success, adminSession);
     unitTest("location_add", location2, Success, adminSession);
     unitTest("location_add", location3, Success, adminSession);
-    // add area that coverse location3
+    // add area that covers location3
     unitTest("area_add", new Area("office", null, 145, 145, 10, 10), Success, adminSession);
     // area that covers loc3 + 2
     unitTest("area_add", new Area("institute", null, 140, 140, 100, 100), Success, adminSession);
 
     // Test exact location match to universe (location1)
+    // note: becuase of first time, area is correct on first call
     var match = unitTest("position_find", locationRequest1, Area, adminSession);
     if (instanceOf(match, Area)) {
         if (match.ID != "universe") {
             alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
         }
     }
-    // Test that admin is now in positioned there:
+    // Test that admin is now positioned there:
+    // note: becuase of server fuzziness, we need to call it twice now for the change to work
+    unitTest("position_find", locationRequest1, Area, adminSession);
     var user = unitTest("user_read", null, User, adminSession);
-    if (user.lastPosition == undefined || user.lastPosition != "universe") {
-        alert("Failed user position read: admin is located at " + user.lastPosition);
+    if (user.position.ID == undefined || user.position.ID != "universe") {
+        alert("Failed user position read: admin is located at " + user.position.ID);
     }
     // Test close location match
+    unitTest("position_find", locationRequest2, Area, adminSession);
     match = unitTest("position_find", locationRequest2, Area, adminSession);
     if (instanceOf(match, Area)) {
         if (match.ID != "institute") {
@@ -299,10 +303,11 @@ function positionTest() {
     }
     // Test that admin is now in positioned there:
     user = unitTest("user_read", null, User, adminSession);
-    if (user.lastPosition == undefined || user.lastPosition != "institute") {
-        alert("Failed user position read: admin is located at " + user.lastPosition);
+    if (user.position.ID == undefined || user.position.ID != "institute") {
+        alert("Failed user position read: admin is located at " + user.position.ID);
     }
     // test match to office
+    unitTest("position_find", locationRequest3, Area, adminSession);
     match = unitTest("position_find", locationRequest3, Area, adminSession);
     if (instanceOf(match, Area)) {
         if (match.ID != "office") {
@@ -311,8 +316,8 @@ function positionTest() {
     }
     // Test that admin is now in positioned there:
     user = unitTest("user_read", null, User, adminSession);
-    if (user.lastPosition == undefined || user.lastPosition != "office") {
-        alert("Failed user position read: admin is located at " + user.lastPosition);
+    if (user.position.ID == undefined || user.position.ID != "office") {
+        alert("Failed user position read: admin is located at " + user.position.ID);
     }
     // TODO more, especially check for errors!
 
@@ -371,7 +376,7 @@ function testPositionRead() {
     // test that only upon 2 consecutive new position_find the area is updated:
     var area = unitTest("position_find", location1, Area, dolphinSession);
     if (instanceOf(area, Area) && area.ID != "office") {
-        alert("P1: Failed correct server side area fuzziness! Expected office, received " + area.ID + "!");
+        alert("P1: Failed correct server side area fuzziness! Should still be office, received " + area.ID + "!");
     }
     area = unitTest("position_find", location1, Area, dolphinSession);
     if (instanceOf(area, Area) && area.ID != "universe") {
