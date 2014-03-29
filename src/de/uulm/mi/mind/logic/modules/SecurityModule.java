@@ -3,8 +3,8 @@ package de.uulm.mi.mind.logic.modules;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.servlet.BCrypt;
@@ -107,10 +107,11 @@ public class SecurityModule extends Module {
                     // If valid, return the corresponding user object. Fresh from the DB to keep in sync with updates
                     // To do that, we first need to get the new object:
                     ActiveUser activeUser = sessions.get(arrival.getSessionHash());
-                    Data object = readAuthFromDB(activeUser.user);
+                    Data object = readAuthFromDB(activeUser.getAuthenticated());
                     Data msg = ServletFunctions.getInstance().checkDataMessage(object, Authenticated.class);
                     if (msg != null) {
-                        log.error(TAG, "NOTE: Check failed because no user or error was returned from DB for " + activeUser.user.readIdentification() + "!");
+                        log.error(TAG, "NOTE: Check failed because no user or error was returned from DB for "
+                                + activeUser.getAuthenticated().readIdentification() + "!");
                     } else {
                         // If everything is okay, we return the current user and leave this method
                         Authenticated currentUser = ((Authenticated) object);
@@ -146,7 +147,7 @@ public class SecurityModule extends Module {
             // get ActiveUser object
             ActiveUser user = sessions.get(sessionHash);
             // check for timeout
-            long timeDelta = System.currentTimeMillis() - user.timestamp;
+            long timeDelta = System.currentTimeMillis() - user.getSessionTimestamp();
             if (timeDelta > TIMEOUT) {
                 // this means the session has expired
                 // remove, as expired:
@@ -156,7 +157,7 @@ public class SecurityModule extends Module {
                 return false;
             }
             // update time if session is valid, resetting the timeout:
-            user.timestamp = System.currentTimeMillis();
+            user.setSessionTimestamp(System.currentTimeMillis());
             sessions.put(sessionHash, user);
             return true;
         }
@@ -177,14 +178,14 @@ public class SecurityModule extends Module {
             Collection<ActiveUser> values = sessions.values();
             ArrayList<String> hashes = new ArrayList<>();
             for (ActiveUser check : values) {
-                if (check.user.readIdentification().equals(activeUser.user.readIdentification())) {
-                    hashes.add(check.hash);
+                if (check.getAuthenticated().readIdentification().equals(activeUser.getAuthenticated().readIdentification())) {
+                    hashes.add(check.getSessionHash());
                 }
             }
             for (String hash : hashes) {
                 sessions.remove(hash);
             }
-            log.log(TAG, "User " + activeUser.user.readIdentification() + " has logged out.");
+            log.log(TAG, "User " + activeUser.getAuthenticated().readIdentification() + " has logged out.");
         }
     }
 
@@ -279,20 +280,5 @@ public class SecurityModule extends Module {
         }
         // If we reach this, we've found an error
         return new Error(Error.Type.SECURITY, "Unknown user object tried login!");
-    }
-
-    /**
-     * Small data class for storing active users with the corresponding hash and timestamp of their last action.
-     */
-    private class ActiveUser {
-        Authenticated user;
-        long timestamp;
-        String hash;
-
-        ActiveUser(Authenticated user, long timestamp, String hash) {
-            this.user = user;
-            this.timestamp = timestamp;
-            this.hash = hash;
-        }
     }
 }
