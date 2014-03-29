@@ -75,23 +75,23 @@ public class Servlet extends HttpServlet {
         // If the task was CHECK we don't need to do anything else
         if (!(check instanceof Information) && Task.Security.safeValueOf(arrival.getTask()) == Task.Security.CHECK) {
             // Avoid sending the user object
-            answer = functions.checkDataMessage(check, User.class);
+            answer = functions.checkDataMessage(check, ActiveUser.class);
             if (answer == null) {
                 answer = new Success("Your session is valid!");
             }
             // answer shouldn't be null here!
         }
-        // If the arrival is valid, checkArrival returns the database user object
-        else if (check instanceof User) {
+        // If the arrival is valid, checkArrival returns the ActiveUser object
+        else if (check instanceof ActiveUser && ((ActiveUser) check).getAuthenticated() instanceof User) {
             // This means valid session and arrival!
             // Read user, should be used to read rights etc.
-            User currentUser = (User) check;
+            User currentUser = (User) ((ActiveUser) check).getAuthenticated();
             // First check whether it is a normal task:
-            answer = functions.handleNormalTask(arrival, currentUser);
+            answer = functions.handleNormalTask(arrival, (ActiveUser) check);
             // If null, it wasn't a normal task – so check if admin rights are set
             if (answer == null && currentUser.isAdmin()) {
                 // If yes, handle admin stuff:
-                answer = functions.handleAdminTask(arrival, currentUser);
+                answer = functions.handleAdminTask(arrival, (ActiveUser) check);
             }
             // If answer is still null, the task wasn't found (or the rights weren't set):
             if (answer == null) {
@@ -102,8 +102,8 @@ public class Servlet extends HttpServlet {
                 }
                 answer = new Error(Error.Type.TASK, error);
             }
-        } else if (check instanceof PublicDisplay) {
-            answer = functions.handleDisplayTask(arrival, (PublicDisplay) check);
+        } else if (check instanceof ActiveUser && ((ActiveUser) check).getAuthenticated() instanceof PublicDisplay) {
+            answer = functions.handleDisplayTask(arrival, (ActiveUser) check);
             if (answer == null) {
                 log.log(TAG, "Illegal task sent: " + arrival.getTask());
                 answer = new Error(Error.Type.TASK, "Illegal task: " + arrival.getTask() + ".");

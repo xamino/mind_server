@@ -46,7 +46,13 @@ public class ServletFunctions {
      * @param arrival
      * @return
      */
-    public Data handleNormalTask(Arrival arrival, User user) {
+    public Data handleNormalTask(Arrival arrival, ActiveUser activeUser) {
+        // better be safe
+        if (!(activeUser.getAuthenticated() instanceof User)) {
+            log.error(TAG, "Normal task was handed the wrong type of Authenticated!");
+            return new Error(Error.Type.WRONG_OBJECT, "Normal task was handed the wrong type of Authenticated!");
+        }
+        User user = (User) activeUser.getAuthenticated();
         API task = API.safeValueOf(arrival.getTask());
         switch (task) {
             case ECHO:
@@ -123,7 +129,13 @@ public class ServletFunctions {
      * @param arrival
      * @return
      */
-    public Data handleAdminTask(Arrival arrival, User user) {
+    public Data handleAdminTask(Arrival arrival, ActiveUser activeUser) {
+        // better be safe
+        if (!(activeUser.getAuthenticated() instanceof User)) {
+            log.error(TAG, "Administrative task was handed the wrong type of Authenticated!");
+            return new Error(Error.Type.WRONG_OBJECT, "Administrative task was handed the wrong type of Authenticated!");
+        }
+        User user = (User) activeUser.getAuthenticated();
         // Better safe than sorry:
         if (!user.isAdmin()) {
             log.error(TAG, "User " + user.readIdentification() + " almost accessed admin functions!");
@@ -364,10 +376,15 @@ public class ServletFunctions {
      * Tasks for PublicDisplays.
      *
      * @param arrival The arrival object.
-     * @param display The PublicDisplay user object.
      * @return Resulting data.
      */
-    public Data handleDisplayTask(Arrival arrival, PublicDisplay display) {
+    public Data handleDisplayTask(Arrival arrival, ActiveUser activeUser) {
+        // better be safe
+        if (!(activeUser.getAuthenticated() instanceof PublicDisplay)) {
+            log.error(TAG, "Display task was handed the wrong type of Authenticated!");
+            return new Error(Error.Type.WRONG_OBJECT, "Display task was handed the wrong type of Authenticated!");
+        }
+        PublicDisplay display = ((PublicDisplay) activeUser.getAuthenticated());
         API task = API.safeValueOf(arrival.getTask());
         switch (task) {
             case READ_ALL_POSITIONS:

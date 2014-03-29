@@ -117,7 +117,7 @@ public class SecurityModule extends Module {
                         Authenticated currentUser = ((Authenticated) object);
                         activeUser = new ActiveUser(currentUser, System.currentTimeMillis(), arrival.getSessionHash());
                         sessions.put(arrival.getSessionHash(), activeUser);
-                        return (Data) currentUser;
+                        return (Data) activeUser;
                     }
                     // If we haven't returned, something went wrong
                     // destroy session to be safe
