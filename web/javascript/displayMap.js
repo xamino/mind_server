@@ -115,8 +115,14 @@ function addUserIcon(user){
 	icon.className="micon";
 	icon.src="images/micons/"+user.iconRef;
 	icon.id="icon_"+user.email;
+	//icon.onclick=displayUserInfo(user.email);
+	icon.onclick=function () {
+	    displayUserInfo(user.email);
+	};
+
 	//style
 	icon.style.position ="absolute";
+	icon.style.cursor="pointer";
    
    divToAugment.appendChild(icon);
    icon = null;
@@ -380,11 +386,30 @@ function getAreaById(id){
 }
 
 
-
 //END TEST STUFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
+/**
+ * This functio returns the user object of the email
+ * @param email the user's email
+ */
+function getUserByEmail(email){
+	for ( var i = 0; i < users.length; i++) {
+		if(users[i].email==email){
+			return users[i];
+		}
+	}
+}
 
-
+/**
+ * This function displays the user's info when clicked on her/his icon
+ * @param email the email of the user that was clicked on
+ */
+function displayUserInfo(email){
+	var user = getUserByEmail(email);
+	if(user!=null){
+		alert("email:"+user.email+" ; name:"+user.name);		
+	}
+}
 
 
 //MAP SCALING AND PANNING STUFF
