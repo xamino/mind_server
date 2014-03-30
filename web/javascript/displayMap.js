@@ -115,11 +115,9 @@ function addUserIcon(user){
 	icon.className="micon";
 	icon.src="images/micons/"+user.iconRef;
 	icon.id="icon_"+user.email;
-	//icon.onclick=displayUserInfo(user.email);
 	icon.onclick=function () {
 	    displayUserInfo(user.email);
 	};
-
 	//style
 	icon.style.position ="absolute";
 	icon.style.cursor="pointer";
