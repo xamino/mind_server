@@ -2,6 +2,8 @@ package de.uulm.mi.mind.objects;
 
 import de.uulm.mi.mind.security.Authenticated;
 
+import java.util.Date;
+
 /**
  * Public display user object.
  */
@@ -18,6 +20,7 @@ public class PublicDisplay implements Data, Authenticated {
     private String token;
     private int coordinateX;
     private int coordinateY;
+    private Date lastAccess;
 
     public PublicDisplay(String identification, String token, String location, int coordinateX, int coordinateY) {
         this.location = location;
@@ -68,6 +71,16 @@ public class PublicDisplay implements Data, Authenticated {
     @Override
     public String readAuthentication() {
         return token;
+    }
+
+    @Override
+    public Date getAccessDate() {
+        return this.lastAccess;
+    }
+
+    @Override
+    public void setAccessDate(Date accessDate) {
+        this.lastAccess = accessDate;
     }
 
     public String getToken() {

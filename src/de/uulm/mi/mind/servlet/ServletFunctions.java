@@ -73,7 +73,7 @@ public class ServletFunctions {
             case LOGOUT:
                 activeUser = Security.begin(null, arrival.getSessionHash());
                 if (activeUser == null) {
-                    return new Success(Success.Type.NOTE, "Session is not valid!");
+                    return new Success(Success.Type.NOTE, "Session is already not valid!");
                 }
                 activeUser.invalidate();
                 Security.finish(activeUser);
@@ -96,7 +96,7 @@ public class ServletFunctions {
                 // hash pwd
                 user.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));
                 // set access time
-                user.setLastAccess(new Date());
+                user.setAccessDate(new Date());
                 // create user
                 Data msg = EventModuleManager.getInstance().handleTask(Task.User.CREATE, user);
                 // check database reply
@@ -177,8 +177,8 @@ public class ServletFunctions {
                     return msg;
                 }
                 Area area = ((Area) data);
+                // todo user should not save area again, could overwrite!!!
                 // this implements server-side fuzziness to avoid fluttering of position_find
-                // todo remove all position info from user
                 if (!(activeUser.readData(LAST_POSITION) instanceof Area)) {
                     // this means it is the first time in this session, so we don't apply fuzziness
                     activeUser.writeData(LAST_POSITION, area);
@@ -195,7 +195,7 @@ public class ServletFunctions {
                     return msg;
                 }
                 // everything okay, return last position area
-                return user.getPosition();
+                return area;
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
                 user.setAdmin(!user.isAdmin());
@@ -258,7 +258,7 @@ public class ServletFunctions {
                 }
                 // all else we set manually to valid values
                 tempUser.setPosition(null);
-                tempUser.setLastAccess(null);
+                tempUser.setAccessDate(null);
                 // check & handle password (we do this last because we might need to send back the key)
                 if (safeString(tempUser.getPwdHash())) {
                     // this means a password was provided

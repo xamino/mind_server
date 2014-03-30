@@ -82,7 +82,7 @@ public class User implements Data, Authenticated {
         User user = new User(this.email, this.name, this.admin);
         user.setPwdHash("");
         user.setPosition(this.position);
-        user.setLastAccess(this.lastAccess);
+        user.setAccessDate(this.lastAccess);
         return user;
     }
 
@@ -94,14 +94,6 @@ public class User implements Data, Authenticated {
         this.admin = admin;
     }
 
-    public Date getLastAccess() {
-        return lastAccess;
-    }
-
-    public void setLastAccess(Date lastAccess) {
-        this.lastAccess = lastAccess;
-    }
-
     @Override
     public String readIdentification() {
         return email;
@@ -110,6 +102,16 @@ public class User implements Data, Authenticated {
     @Override
     public String readAuthentication() {
         return pwdHash;
+    }
+
+    @Override
+    public Date getAccessDate() {
+        return this.lastAccess;
+    }
+
+    @Override
+    public void setAccessDate(Date accessDate) {
+        this.lastAccess = accessDate;
     }
 
     @Override

@@ -192,7 +192,7 @@ public class DatabaseController implements ServletContextListener {
                 userToUpdate.setName(dataUser.getName());
                 userToUpdate.setPwdHash(dataUser.getPwdHash());
                 userToUpdate.setAdmin(dataUser.isAdmin());
-                userToUpdate.setLastAccess(dataUser.getLastAccess());
+                userToUpdate.setAccessDate(dataUser.getAccessDate());
 
                 con.store(userToUpdate);
 

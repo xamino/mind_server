@@ -357,21 +357,22 @@ function testPositionRead() {
     unitTest("area_add", new Area("institute", null, 140, 140, 100, 100), Success, adminSession);
     unitTest("admin_user_add", new User("shark@ocean.int", "shark", "Haifisch Freund", false), Success, adminSession);
     unitTest("admin_user_add", new User("dolphin@ocean.int", "thx4fish", "Prof. Turnschwimmer", false), Success, adminSession);
+    // Note that adminSession is on purpose; Security should ignore it in favor of login in a new user
     var sharkSession = unitTest("login", new User("shark@ocean.int", "shark"), Success, adminSession).description;
-    var dolphinSession = unitTest("login", new User("dolphin@ocean.int", "thx4fish"), Success, adminSession).description;
+    var dolphinSession = unitTest("login", new User("dolphin@ocean.int", "thx4fish"), Success, null).description;
 
     // shark gets an update
     unitTest("position_find", location2, Area, sharkSession);
     // Should be only one in list here
     var userLocs = unitTest("read_all_positions", null, Array, adminSession);
     if (userLocs == null || userLocs.length != 1) {
-        alert("Wrong number of available user locations!");
+        alert("Wrong number of available user locations (not 1)!\n\n" + JSON.stringify(userLocs));
     }
     // dolphin updates
     unitTest("position_find", location3, Area, dolphinSession);
     userLocs = unitTest("read_all_positions", null, Array, adminSession);
     if (userLocs == null || userLocs.length != 2) {
-        alert("Wrong number of available user locations!");
+        alert("Wrong number of available user locations (not 2)!\n\n" + JSON.stringify(userLocs));
     }
     // test that only upon 2 consecutive new position_find the area is updated:
     var area = unitTest("position_find", location1, Area, dolphinSession);
@@ -389,14 +390,14 @@ function testPositionRead() {
     var pD = unitTest("login", new PublicDisplay("hallway", "hallway"), Success, null).description;
     userLocs = unitTest("read_all_positions", null, Array, pD);
     if (userLocs == null || userLocs.length != 2) {
-        alert("Wrong number of available user locations!");
+        alert("Wrong number of available user locations for PD!\n\n" + JSON.stringify(userLocs));
     }
     // TODO test filters
 
     // test PD read areas
     var areas = unitTest("read_all_areas", null, Array, pD);
     if (areas == null || areas.length != 3) {
-        alert("Area read failed!");
+        alert("Area read failed!\n\n" + JSON.stringify(areas));
     }
 
     cleanDB();

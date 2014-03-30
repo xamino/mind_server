@@ -80,9 +80,11 @@ public class PositionModule extends Module {
                     // filter based on time
                     // todo This is not the last position time – how do i do this better?
                     // todo Update lastPosition to null?
-                    Date lastAccess = us.getLastAccess();
-                    // todo why can this happen?
+                    Date lastAccess = us.getAccessDate();
+                    // if the user object has a position, it should have an access, so we warn for this as it could be
+                    // a bug
                     if (lastAccess == null) {
+                        log.error(TAG, "Read positions: user " + us.readIdentification() + " has position but no access! Probably a bug...");
                         continue;
                     }
                     Long timeDelta = System.currentTimeMillis() - lastAccess.getTime();

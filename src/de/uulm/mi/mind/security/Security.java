@@ -10,6 +10,7 @@ import de.uulm.mi.mind.objects.User;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,11 +79,11 @@ public class Security {
         if (authenticated == null && session == null) {
             // this means something is wrong, so obviously not secure --> return null
             return null;
-        } else if (session != null) {
-            // If we're given a session, we don't care about authenticated, just check
+        } else if (session != null && authenticated == null) {
+            // check a session
             return getInstance().check(session);
         } else {
-            // This means we have an authenticated and require a new login
+            // This means we have an authenticated and require a new login (which means we ignore the session)
             return getInstance().login(authenticated);
         }
     }
@@ -146,6 +147,12 @@ public class Security {
         // check using BCrypt
         if (!(BCrypt.checkpw(authenticated.readAuthentication(), databaseSafe.readAuthentication()))) {
             log.log(TAG, "Login failed for " + authenticated.readIdentification() + " due to wrong password!");
+            return null;
+        }
+        // try to update last access time
+        databaseSafe.setAccessDate(new Date());
+        if (!(database.update((Data) databaseSafe))) {
+            log.error(TAG, "Login failed for " + authenticated.readIdentification() + " due to error updating access time!");
             return null;
         }
         // generate the session
