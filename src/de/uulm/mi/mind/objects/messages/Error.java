@@ -50,11 +50,6 @@ public class Error extends Information {
         }
     }
 
-    @Override
-    public String getKey() {
-        return null;
-    }
-
     public enum Type {
         /**
          * For mobile client.

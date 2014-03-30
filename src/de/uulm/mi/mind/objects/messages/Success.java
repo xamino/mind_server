@@ -34,12 +34,6 @@ public class Success extends Information {
         this.type = type;
     }
 
-    @Override
-    public String getKey() {
-        return null;
-
-    }
-
     public enum Type {
         /**
          * For when everything is really okay.
