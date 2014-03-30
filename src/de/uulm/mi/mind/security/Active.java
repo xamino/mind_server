@@ -23,6 +23,10 @@ public class Active {
      */
     private boolean invalidated = false;
     /**
+     * This flag is true if the user object has never been accessed before upon begin (for example upon first login).
+     */
+    private boolean unused = false;
+    /**
      * HashMap for session persistant data attached to the Active object.
      */
     private HashMap<String, Object> sessionData;
@@ -30,6 +34,14 @@ public class Active {
     protected Active(String session) {
         this.SESSION = session;
         this.sessionData = new HashMap<>();
+    }
+
+    public boolean wasUnused() {
+        return unused;
+    }
+
+    protected void setUnused(boolean unused) {
+        this.unused = unused;
     }
 
     public boolean isInvalidate() {

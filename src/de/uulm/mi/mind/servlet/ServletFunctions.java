@@ -63,14 +63,18 @@ public class ServletFunctions {
                     return new Error(Error.Type.WRONG_OBJECT, "Login requires a User or PublicDisplay object!");
                 }
                 // try login
-                activeUser = Security.begin((Authenticated) arrival.getObject(), arrival.getSessionHash());
+                activeUser = Security.begin((Authenticated) arrival.getObject(), null);
                 // check if okay
                 if (activeUser == null) {
                     return new Error(Error.Type.LOGIN, "Login failed. Check password and or identification!");
                 }
                 // otherwise we finish again directly by returning the session
                 Security.finish(activeUser);
-                return new Success(activeUser.getSESSION());
+                // If it was the first login, we send a note instead of just a simple ok so the client can know
+                if (activeUser.wasUnused()) {
+                    return new Success(Success.Type.NOTE, activeUser.getSESSION());
+                }
+                return new Success(Success.Type.OK, activeUser.getSESSION());
             case LOGOUT:
                 activeUser = Security.begin(null, arrival.getSessionHash());
                 if (activeUser == null) {

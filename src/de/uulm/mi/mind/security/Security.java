@@ -149,6 +149,11 @@ public class Security {
             log.log(TAG, "Login failed for " + authenticated.readIdentification() + " due to wrong password!");
             return null;
         }
+        // check whether first time login
+        boolean firstFlag = false;
+        if (databaseSafe.getAccessDate() == null) {
+            firstFlag = true;
+        }
         // try to update last access time
         databaseSafe.setAccessDate(new Date());
         if (!(database.update((Data) databaseSafe))) {
@@ -162,6 +167,7 @@ public class Security {
         // set the important values
         active.setAuthenticated(databaseSafe);
         active.setTimestamp(System.currentTimeMillis());
+        active.setUnused(firstFlag);
         // add to list
         actives.put(session, active);
         log.log(TAG, "Login of " + authenticated.readIdentification() + ".");
