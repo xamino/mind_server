@@ -11,6 +11,22 @@ public enum API implements Task {
      * Simply returns the object sent to the server. Can be used for various parsing tests.
      */
     ECHO,
+    /**
+     * Tries to log a user into the system.
+     */
+    LOGIN,
+    /**
+     * Registers a new user.
+     */
+    REGISTRATION,
+    /**
+     * If applicable logs a user out.
+     */
+    LOGOUT,
+    /**
+     * Check if a session is valid.
+     */
+    CHECK,
     // USER
     USER_READ,
     USER_UPDATE,

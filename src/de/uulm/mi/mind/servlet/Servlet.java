@@ -7,10 +7,10 @@ package de.uulm.mi.mind.servlet;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.objects.*;
-import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
-import de.uulm.mi.mind.objects.messages.Success;
+import de.uulm.mi.mind.security.Active;
+import de.uulm.mi.mind.security.Security;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -68,61 +68,12 @@ public class Servlet extends HttpServlet {
         // Get arrival object
         // Watch out, arrival.getData() might be NULL!
         Arrival arrival = getRequest(request);
-        // Check if valid:
-        Data check = checkArrival(arrival);
-        // Write whatever you want sent back to this object:
-        Data answer = null;
-        // If the task was CHECK we don't need to do anything else
-        if (!(check instanceof Information) && Task.Security.safeValueOf(arrival.getTask()) == Task.Security.CHECK) {
-            // Avoid sending the user object
-            answer = functions.checkDataMessage(check, ActiveUser.class);
-            if (answer == null) {
-                answer = new Success("Your session is valid!");
-            }
-            // answer shouldn't be null here!
-        }
-        // If the arrival is valid, checkArrival returns the ActiveUser object
-        else if (check instanceof ActiveUser && ((ActiveUser) check).getAuthenticated() instanceof User) {
-            // This means valid session and arrival!
-            // Read user, should be used to read rights etc.
-            User currentUser = (User) ((ActiveUser) check).getAuthenticated();
-            // First check whether it is a normal task:
-            answer = functions.handleNormalTask(arrival, (ActiveUser) check);
-            // If null, it wasn't a normal task – so check if admin rights are set
-            if (answer == null && currentUser.isAdmin()) {
-                // If yes, handle admin stuff:
-                answer = functions.handleAdminTask(arrival, (ActiveUser) check);
-            }
-            // If answer is still null, the task wasn't found (or the rights weren't set):
-            if (answer == null) {
-                log.log(TAG, "Illegal task sent: " + arrival.getTask());
-                String error = "Illegal task: " + arrival.getTask();
-                if (!currentUser.isAdmin()) {
-                    error += ". You may not have the necessary rights!";
-                }
-                answer = new Error(Error.Type.TASK, error);
-            }
-            // finally we need to ensure that the activeUser is updated in the session list
-            Data msg = updateActiveUser(((ActiveUser) check));
-            if (msg instanceof Error) {
-                answer = msg;
-            }
-            // otherwise answer is valid
-        } else if (check instanceof ActiveUser && ((ActiveUser) check).getAuthenticated() instanceof PublicDisplay) {
-            answer = functions.handleDisplayTask(arrival, (ActiveUser) check);
-            if (answer == null) {
-                log.log(TAG, "Illegal task sent: " + arrival.getTask());
-                answer = new Error(Error.Type.TASK, "Illegal task: " + arrival.getTask() + ".");
-            }
-            // finally we need to ensure that the activeUser is updated in the session list
-            Data msg = updateActiveUser(((ActiveUser) check));
-            if (msg instanceof Error) {
-                answer = msg;
-            }
-            // otherwise answer is valid
+
+        Data answer;
+        if (arrival == null) {
+            answer = new Error(Error.Type.CAST, "Failed to read Arrival!");
         } else {
-            // This means the check failed, so there is a message in check that needs to be sent back
-            answer = check;
+            answer = runLogic(arrival);
         }
 
         // Encapsulate answer:
@@ -133,14 +84,54 @@ public class Servlet extends HttpServlet {
         */
     }
 
-    /**
-     * Small helper function. For now it will only update lastPosition!
-     *
-     * @param activeUser
-     * @return
-     */
-    private Information updateActiveUser(ActiveUser activeUser) {
-        return (Information) moduleManager.handleTask(Task.Security.UPDATE, activeUser);
+    private Data runLogic(Arrival arrival) {
+        // check public tasks
+        Information inf = functions.handlePublicTask(arrival);
+        if (inf != null) {
+            // If a message is in there, we're done, so return
+            return inf;
+        }
+        // From here on out, all tasks are secured!
+        Active activeUser = Security.begin(null, arrival.getSessionHash());
+        if (activeUser == null) {
+            return new Error(Error.Type.SECURITY, "Invalid access tried!");
+        }
+        // Store reply (no return because we need to encapsulate all the following within Security)
+        Data answer;
+        // handle user tasks
+        if (activeUser.getAuthenticated() instanceof User) {
+            // Read user to differentiate admin rights
+            User currentUser = (User) activeUser.getAuthenticated();
+            // First check whether it is a normal task:
+            answer = functions.handleNormalTask(arrival, activeUser);
+            if (answer == null && currentUser.isAdmin()) {
+                // If yes, handle admin stuff:
+                answer = functions.handleAdminTask(arrival, activeUser);
+            }
+            // If answer is still null, the task wasn't found (or the rights weren't set):
+            if (answer == null) {
+                log.log(TAG, "Illegal task sent: " + arrival.getTask());
+                String error = "Illegal task: " + arrival.getTask();
+                if (!currentUser.isAdmin()) {
+                    error += ". You may not have the necessary rights!";
+                }
+                answer = new Error(Error.Type.TASK, error);
+            }
+            // otherwise answer is valid
+        } else if (activeUser.getAuthenticated() instanceof PublicDisplay) {
+            answer = functions.handleDisplayTask(arrival, activeUser);
+            if (answer == null) {
+                log.log(TAG, "Illegal task sent: " + arrival.getTask());
+                answer = new Error(Error.Type.TASK, "Illegal task: " + arrival.getTask() + ".");
+            }
+            // otherwise answer is valid
+        } else {
+            answer = new Error(Error.Type.WRONG_OBJECT, "No tasks have been implemented for this Authenticated!");
+        }
+        // Once we're here, finish the secure session
+        Security.finish(activeUser);
+        // and return the answer
+        return answer;
     }
 
     /**
@@ -174,33 +165,7 @@ public class Servlet extends HttpServlet {
         if (data instanceof Arrival) {
             return (Arrival) data;
         } else {
-            // No need for error handling, that is done in SecurityModule
             return null;
-        }
-    }
-
-    /**
-     * Method that checks whether an arrival is valid and not null, then handles login if applicable and checks the session.
-     *
-     * @param arrival The Arrival object to check.
-     * @return Either an Error or a Message if something is wrong; if everything checks out, then the user object.
-     */
-    public Data checkArrival(Arrival arrival) {
-        if (arrival == null || !arrival.isValid()) {
-            // This means something went wrong. Badly.
-            return new Error(Error.Type.SECURITY, "POST does not conform to API! Keys valid? Values set? Object correct?");
-        }
-        // Some tasks can be done without login, here are these SecurityModule tasks:
-        Task.Security task = Task.Security.safeValueOf(arrival.getTask());
-        // If the task is not an error, than it IS a sanitationModule task:
-        if (task != Task.Security.ERROR) {
-            ActiveUser temp = new ActiveUser(((Authenticated) arrival.getObject()), 0, arrival.getSessionHash());
-            return moduleManager.handleTask(task, temp);
-        }
-        // Otherwise handle it normally:
-        else {
-            // Everything from here on out MUST be validated via login, so check the session:
-            return moduleManager.handleTask(Task.Security.CHECK, new ActiveUser(null, 0, arrival.getSessionHash()));
         }
     }
 

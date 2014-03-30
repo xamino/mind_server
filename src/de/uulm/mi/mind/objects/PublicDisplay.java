@@ -1,5 +1,7 @@
 package de.uulm.mi.mind.objects;
 
+import de.uulm.mi.mind.security.Authenticated;
+
 /**
  * Public display user object.
  */

@@ -7,7 +7,7 @@ import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.query.Predicate;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
-import de.uulm.mi.mind.servlet.BCrypt;
+import de.uulm.mi.mind.security.BCrypt;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -15,7 +15,7 @@ import javax.servlet.ServletContextListener;
 import java.util.List;
 
 /**
- * @author Tamino Hartmann
+ * @author Andreas Köll, Tamino Hartmann
  */
 public class DatabaseController implements ServletContextListener {
     /**
