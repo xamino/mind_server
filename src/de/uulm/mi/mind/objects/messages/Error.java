@@ -1,15 +1,18 @@
 package de.uulm.mi.mind.objects.messages;
 
-import de.uulm.mi.mind.objects.enums.MsgEnum;
-
 /**
  * @author Tamino Hartmann
  *         Standard error class used to send an error to connected clients.
  */
 public class Error extends Information {
 
+    private String description;
+    private Type type;
+
     public Error(Type type, String description) {
-        super(type, description);
+        this.type = type;
+
+        this.description = description;
     }
 
     /**
@@ -18,10 +21,27 @@ public class Error extends Information {
      * @param type
      */
     public Error(Type type) {
-        super(type, defaultMsg(type));
+        this.type = type;
+        this.description = defaultMsg(type);
     }
 
-    private static String defaultMsg(Type type) {
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    private String defaultMsg(Type type) {
         switch (type) {
             case WRONG_OBJECT:
                 return "You supplied a wrong object for this task!";
@@ -30,7 +50,12 @@ public class Error extends Information {
         }
     }
 
-    public enum Type implements MsgEnum {
+    @Override
+    public String getKey() {
+        return null;
+    }
+
+    public enum Type {
         /**
          * For mobile client.
          */

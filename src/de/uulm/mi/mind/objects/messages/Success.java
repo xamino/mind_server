@@ -1,21 +1,46 @@
 package de.uulm.mi.mind.objects.messages;
 
-import de.uulm.mi.mind.objects.enums.MsgEnum;
-
 /**
  * @author Tamino Hartmann
  */
 public class Success extends Information {
 
+    private String description;
+    private Type type;
+
     public Success(String description) {
-        super(Type.OK, description);
+        this.type = Type.OK;
+        this.description = description;
     }
 
     public Success(Type type, String description) {
-        super(type, description);
+        this.type = type;
+        this.description = description;
     }
 
-    public enum Type implements MsgEnum {
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    @Override
+    public String getKey() {
+        return null;
+
+    }
+
+    public enum Type {
         /**
          * For when everything is really okay.
          */
