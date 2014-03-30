@@ -45,6 +45,6 @@ public class Error extends Information {
         TASK,
         CAST,
         SECURITY,
-        NULL
+        LOGIN, NULL
     }
 }

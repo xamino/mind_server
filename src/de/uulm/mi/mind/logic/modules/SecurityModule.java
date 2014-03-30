@@ -217,7 +217,7 @@ public class SecurityModule extends Module {
             // To avoid allowing to find usernames with this method, we return the same message as if the login
             // simply used the wrong information.
             log.log(TAG, "Unregistered user tried login!");
-            return new Error(Error.Type.SECURITY, "Wrong user email or wrong password.");
+            return new Error(Error.Type.LOGIN, "Wrong user email or wrong password.");
         }
         // This means we have a valid user object:
         Authenticated auth = (Authenticated) object;
@@ -247,7 +247,7 @@ public class SecurityModule extends Module {
                 return new Success(sessionHash);
             }
         } else {
-            return new Error(Error.Type.SECURITY, "Wrong user email or wrong password.");
+            return new Error(Error.Type.LOGIN, "Wrong user email or wrong password.");
         }
     }
 
