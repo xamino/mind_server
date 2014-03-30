@@ -13,7 +13,7 @@ public class User implements Data, Authenticated {
     private String name;
     private String pwdHash;
     private String email;
-    private Area position;
+    private String position;
     private boolean admin;
     private Date lastAccess;
 
@@ -31,11 +31,11 @@ public class User implements Data, Authenticated {
         this.admin = admin;
     }
 
-    public Area getPosition() {
+    public String getPosition() {
         return position;
     }
 
-    public void setPosition(Area position) {
+    public void setPosition(String position) {
         this.position = position;
     }
 

@@ -290,8 +290,8 @@ function positionTest() {
     // note: becuase of server fuzziness, we need to call it twice now for the change to work
     unitTest("position_find", locationRequest1, Area, adminSession);
     var user = unitTest("user_read", null, User, adminSession);
-    if (user.position.ID == undefined || user.position.ID != "universe") {
-        alert("Failed user position read: admin is located at " + user.position.ID);
+    if (user.position == undefined || user.position != "universe") {
+        alert("Failed user position read: admin is located at " + user.position);
     }
     // Test close location match
     unitTest("position_find", locationRequest2, Area, adminSession);
@@ -303,8 +303,8 @@ function positionTest() {
     }
     // Test that admin is now in positioned there:
     user = unitTest("user_read", null, User, adminSession);
-    if (user.position.ID == undefined || user.position.ID != "institute") {
-        alert("Failed user position read: admin is located at " + user.position.ID);
+    if (user.position == undefined || user.position != "institute") {
+        alert("Failed user position read: admin is located at " + user.position);
     }
     // test match to office
     unitTest("position_find", locationRequest3, Area, adminSession);
@@ -316,8 +316,8 @@ function positionTest() {
     }
     // Test that admin is now in positioned there:
     user = unitTest("user_read", null, User, adminSession);
-    if (user.position.ID == undefined || user.position.ID != "office") {
-        alert("Failed user position read: admin is located at " + user.position.ID);
+    if (user.position == undefined || user.position != "office") {
+        alert("Failed user position read: admin is located at " + user.position);
     }
     // TODO more, especially check for errors!
 
@@ -377,11 +377,11 @@ function testPositionRead() {
     // test that only upon 2 consecutive new position_find the area is updated:
     var area = unitTest("position_find", location1, Area, dolphinSession);
     if (instanceOf(area, Area) && area.ID != "office") {
-        alert("P1: Failed correct server side area fuzziness! Should still be office, received " + area.ID + "!");
+        alert("P1: Failed correct server side area fuzziness! Should still be office, received " + area.ID + "!\n\n"+JSON.stringify(area));
     }
     area = unitTest("position_find", location1, Area, dolphinSession);
     if (instanceOf(area, Area) && area.ID != "universe") {
-        alert("P2: Failed correct server side area fuzziness! Expected universe, received " + area.ID + "!");
+        alert("P2: Failed correct server side area fuzziness! Expected universe, received " + area.ID + "!\n\n"+JSON.stringify(area));
     }
     // try illegal access
     unitTest("read_all_positions", null, Error, sharkSession);

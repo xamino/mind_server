@@ -29,6 +29,7 @@ public class ServletFunctions {
      */
     private final int GENERATED_KEY_LENGTH = 6;
     private final String LAST_POSITION = "lastPosition";
+    private final String REAL_POSITION = "realPosition";
     private Messenger log;
     private EventModuleManager moduleManager;
     private SecureRandom random;
@@ -182,10 +183,12 @@ public class ServletFunctions {
                 if (!(activeUser.readData(LAST_POSITION) instanceof Area)) {
                     // this means it is the first time in this session, so we don't apply fuzziness
                     activeUser.writeData(LAST_POSITION, area);
-                    user.setPosition(area);
+                    activeUser.writeData(REAL_POSITION, area);
+                    user.setPosition(area.getID());
                 } else if (((Area) activeUser.readData(LAST_POSITION)).getID().equals(area.getID())) {
                     // update user for position, but only if last was already the same
-                    user.setPosition(area);
+                    activeUser.writeData(REAL_POSITION, area);
+                    user.setPosition(area.getID());
                 } else {
                     // this means the area is different than the one before, so change lastPosition but not User:
                     activeUser.writeData(LAST_POSITION, area);
@@ -194,8 +197,8 @@ public class ServletFunctions {
                 if (!(msg instanceof Success)) {
                     return msg;
                 }
-                // everything okay, return last position area
-                return area;
+                // everything okay, return real position area
+                return (Data) activeUser.readData(REAL_POSITION);
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
                 user.setAdmin(!user.isAdmin());
