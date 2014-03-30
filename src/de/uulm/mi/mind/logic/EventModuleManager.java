@@ -1,9 +1,12 @@
 package de.uulm.mi.mind.logic;
 
+import de.uulm.mi.mind.logic.modules.DisplayModule;
+import de.uulm.mi.mind.logic.modules.LocationModule;
+import de.uulm.mi.mind.logic.modules.PositionModule;
+import de.uulm.mi.mind.logic.modules.UserModule;
 import de.uulm.mi.mind.objects.Data;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.logic.modules.*;
 
 /**
  * @author Tamino Hartmann
@@ -13,7 +16,6 @@ public class EventModuleManager {
     private static EventModuleManager INSTANCE;
     private final UserModule userModule;
     private final LocationModule locationModule;
-    private final SecurityModule securityModule;
     private final PositionModule positionModule;
     private final DisplayModule displayModule;
 
@@ -23,7 +25,6 @@ public class EventModuleManager {
         // in their constructors!
         userModule = new UserModule();
         locationModule = new LocationModule();
-        securityModule = new SecurityModule();
         positionModule = new PositionModule();
         displayModule = new DisplayModule();
     }
@@ -45,8 +46,6 @@ public class EventModuleManager {
             return userModule.run(operation, task);
         else if (operation instanceof Task.Location || operation instanceof Task.Area) {
             return locationModule.run(operation, task);
-        } else if (operation instanceof Task.Security) {
-            return securityModule.run(operation, task);
         } else if (operation instanceof Task.Position) {
             return positionModule.run(operation, task);
         } else if (operation instanceof Task.Display) {

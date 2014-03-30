@@ -1,4 +1,4 @@
-package de.uulm.mi.mind.objects;
+package de.uulm.mi.mind.security;
 
 /**
  * Interface that all objects must implement that can be used to log in to the system.

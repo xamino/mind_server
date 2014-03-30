@@ -8,9 +8,14 @@ import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
+import de.uulm.mi.mind.security.Active;
+import de.uulm.mi.mind.security.Authenticated;
+import de.uulm.mi.mind.security.BCrypt;
+import de.uulm.mi.mind.security.Security;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Date;
 
 /**
  * @author Tamino Hartmann
@@ -23,6 +28,7 @@ public class ServletFunctions {
      * This controls the length of the generated keys when adding users or displays without a preset password.
      */
     private final int GENERATED_KEY_LENGTH = 6;
+    private final String LAST_POSITION = "lastPosition";
     private Messenger log;
     private EventModuleManager moduleManager;
     private SecureRandom random;
@@ -41,12 +47,77 @@ public class ServletFunctions {
     }
 
     /**
+     * Handles most public tasks, most importantly security functions.
+     *
+     * @param arrival
+     * @return Null if no task here was done, otherwise the message to send back.
+     */
+    public Information handlePublicTask(Arrival arrival) {
+        Active activeUser;
+        API task = API.safeValueOf(arrival.getTask());
+        switch (task) {
+            case LOGIN:
+                // make sure we have the right object
+                if (!(arrival.getObject() instanceof Authenticated)) {
+                    return new Error(Error.Type.WRONG_OBJECT, "Login requires a User or PublicDisplay object!");
+                }
+                // try login
+                activeUser = Security.begin((Authenticated) arrival.getObject(), arrival.getSessionHash());
+                // check if okay
+                if (activeUser == null) {
+                    return new Error(Error.Type.LOGIN, "Login failed. Check password and or identification!");
+                }
+                // otherwise we finish again directly by returning the session
+                Security.finish(activeUser);
+                return new Success(activeUser.getSESSION());
+            case LOGOUT:
+                activeUser = Security.begin(null, arrival.getSessionHash());
+                if (activeUser == null) {
+                    return new Success(Success.Type.NOTE, "Session is not valid!");
+                }
+                activeUser.invalidate();
+                Security.finish(activeUser);
+                return new Success("Logout successful.");
+            case CHECK:
+                activeUser = Security.begin(null, arrival.getSessionHash());
+                if (activeUser == null) {
+                    return new Error(Error.Type.SECURITY, "Session invalid!");
+                }
+                Security.finish(activeUser);
+                return new Success("Session is valid.");
+            case REGISTRATION:
+                if (!(arrival.getObject() instanceof User)) {
+                    return new Error(Error.Type.WRONG_OBJECT, "Registration is only possible with User objects!");
+                }
+                User user = ((User) arrival.getObject());
+                if (user.readIdentification().isEmpty() || user.readAuthentication().isEmpty()) {
+                    return new Error(Error.Type.ILLEGAL_VALUE, "Email and password may not be empty!");
+                }
+                // hash pwd
+                user.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));
+                // set access time
+                user.setLastAccess(new Date());
+                // create user
+                Data msg = EventModuleManager.getInstance().handleTask(Task.User.CREATE, user);
+                // check database reply
+                if (msg instanceof Success) {
+                    log.log(TAG, "User " + user.readIdentification() + " has been registered.");
+                    return new Success("Registered to '" + user.getEmail() + "'.");
+                }
+                log.error(TAG, "Error creating a user!");
+                return (Information) msg;
+            default:
+                return null;
+        }
+    }
+
+    /**
      * Handles all generally accessible tasks that only require a valid user.
      *
      * @param arrival
      * @return
      */
-    public Data handleNormalTask(Arrival arrival, ActiveUser activeUser) {
+    public Data handleNormalTask(Arrival arrival, Active activeUser) {
         // better be safe
         if (!(activeUser.getAuthenticated() instanceof User)) {
             log.error(TAG, "Normal task was handed the wrong type of Authenticated!");
@@ -94,8 +165,8 @@ public class ServletFunctions {
                     // If null...
                     return new Error(Error.Type.WRONG_OBJECT, "To delete your user, you must not pass any object along.");
                 }
-                // Remove session
-                moduleManager.handleTask(Task.Security.LOGOUT, user);
+                // Remove session when done
+                activeUser.invalidate();
                 // Otherwise ignore all else, just delete:
                 return moduleManager.handleTask(Task.User.DELETE, user);
             case POSITION_FIND:
@@ -107,16 +178,17 @@ public class ServletFunctions {
                 }
                 Area area = ((Area) data);
                 // this implements server-side fuzziness to avoid fluttering of position_find
-                if (activeUser.getLastPosition() == null) {
+                // todo remove all position info from user
+                if (!(activeUser.readData(LAST_POSITION) instanceof Area)) {
                     // this means it is the first time in this session, so we don't apply fuzziness
-                    activeUser.setLastPosition(area);
+                    activeUser.writeData(LAST_POSITION, area);
                     user.setPosition(area);
-                } else if (activeUser.getLastPosition().getID().equals(area.getID())) {
+                } else if (((Area) activeUser.readData(LAST_POSITION)).getID().equals(area.getID())) {
                     // update user for position, but only if last was already the same
                     user.setPosition(area);
                 } else {
                     // this means the area is different than the one before, so change lastPosition but not User:
-                    activeUser.setLastPosition(area);
+                    activeUser.writeData(LAST_POSITION, area);
                 }
                 msg = moduleManager.handleTask(Task.User.UPDATE, user);
                 if (!(msg instanceof Success)) {
@@ -139,7 +211,7 @@ public class ServletFunctions {
      * @param arrival
      * @return
      */
-    public Data handleAdminTask(Arrival arrival, ActiveUser activeUser) {
+    public Data handleAdminTask(Arrival arrival, Active activeUser) {
         // better be safe
         if (!(activeUser.getAuthenticated() instanceof User)) {
             log.error(TAG, "Administrative task was handed the wrong type of Authenticated!");
@@ -388,7 +460,7 @@ public class ServletFunctions {
      * @param arrival The arrival object.
      * @return Resulting data.
      */
-    public Data handleDisplayTask(Arrival arrival, ActiveUser activeUser) {
+    public Data handleDisplayTask(Arrival arrival, Active activeUser) {
         // better be safe
         if (!(activeUser.getAuthenticated() instanceof PublicDisplay)) {
             log.error(TAG, "Display task was handed the wrong type of Authenticated!");

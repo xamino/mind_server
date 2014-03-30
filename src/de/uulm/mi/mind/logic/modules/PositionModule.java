@@ -80,7 +80,12 @@ public class PositionModule extends Module {
                     // filter based on time
                     // todo This is not the last position time – how do i do this better?
                     // todo Update lastPosition to null?
-                    Long timeDelta = System.currentTimeMillis() - us.getLastAccess().getTime();
+                    Date lastAccess = us.getLastAccess();
+                    // todo why can this happen?
+                    if (lastAccess == null) {
+                        continue;
+                    }
+                    Long timeDelta = System.currentTimeMillis() - lastAccess.getTime();
                     if (timeDelta > POSITION_VALID_TIMEOUT) {
                         // if last update is longer gone, then ignore
                         continue;
