@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>MIND | Test Page</title>
-    <script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
+    <script language="JavaScript" src="javascript/jquery-2.1.0.min.js"></script>
     <script language="JavaScript" type="text/javascript" src="javascript/library.js"></script>
     <script language="JavaScript" type="text/javascript" src="javascript/run.js"></script>
     <script language="JavaScript" type="text/javascript" src="javascript/unittest.js"></script>
