@@ -111,7 +111,7 @@ function isAdmin(data) {
 
     var user = data.object[0];
     if (!(instanceOf(user, User))) {
-        alert("user not user");
+//        alert("user not user");
         logout();
     } else {
         if (user.admin) {
@@ -752,7 +752,7 @@ function removeDisplayViaPopup(data) {
 function onLoadOfAdminPage() {
     session = readCookie("MIND_Admin_C_session");
     send(new Arrival("check",session),function(data){
-    	if (instanceOf(data,Error)) {
+    	if (instanceOf(data.object,Error)) {
     		alert("You have to be logged in.");
     		window.location.href = "login.jsp";
     	} else {
@@ -769,7 +769,9 @@ function onLoadOfAdminPage() {
 function onLoadOfPdPage() {
     var session = readCookie("MIND_PD_C");
     send(new Arrival("check",session),function(data){
-    	if (instanceOf(data,Error)) {
+//    	alert(JSON.stringify(data));
+//    	alert(data.object.description.$type);
+    	if (instanceOf(data.object,Error)) {
     		alert("You have to be logged in.");
     		window.location.href = "public_display_login.jsp";
     		
