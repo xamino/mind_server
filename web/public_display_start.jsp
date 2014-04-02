@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    <script language="JavaScript" src="javascript/jquery-2.1.0.min.js"></script>
+<script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
 <script src="javascript/displayMap.js"></script>
@@ -21,7 +21,7 @@
 </div>
 <div id="sliderdiv" style="position: absolute; top: 0px; left: 0px">
 	<input id="slider" type="range" name="points" min="1" max="100" onchange="doScale(this.value)"> <!--oninput,onchange-->
-	<p id="slidertext">value</p>
+	<!-- <p id="slidertext">value</p> -->
 </div>
 
 

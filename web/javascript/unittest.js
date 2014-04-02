@@ -194,6 +194,9 @@ function areaTest() {
         new WifiMorsel("00:19:07:00:65:01", "welcome", -34),
         new WifiMorsel("00:19:07:00:66:02", "welcome", -12)
     ];
+    var wifiUpdate = [
+        new WifiMorsel("00:01:02:03:04:05", "mind", -45)
+    ];
     // test adding a new area
     unitTest("area_add", new Area("Office Prof. Gott", null, 34, 56, 3, 4), Success, adminSession);
     // adding locations via area should result in error
@@ -238,6 +241,12 @@ function areaTest() {
     toilet = toilet[0];
     if (toilet.locations == undefined || toilet.locations.length != 1) {
         alert("New area was not correctly populated with previous locations!");
+    }
+    // test double location_add
+    unitTest("location_add", new Location(111, 111, wifiUpdate), Success, adminSession);
+    var locs = unitTest("location_read", new Location(111, 111, null), Array, adminSession);
+    if (locs.length != 1 || locs[0].wifiMorsels.length != 4) {
+        alert("Failed to update new Wifimorsels to existing location via location_add!\n\n" + JSON.stringify(locs));
     }
 
     cleanDB();

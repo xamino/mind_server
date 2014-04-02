@@ -125,7 +125,14 @@ public class Servlet extends HttpServlet {
                 answer = new Error(Error.Type.TASK, "Illegal task: " + arrival.getTask() + ".");
             }
             // otherwise answer is valid
-        } else {
+        } else if (activeUser.getAuthenticated() instanceof WifiSensor) {
+            answer = functions.handleWifiSensorTask(arrival, activeUser);
+            if (answer == null) {
+                log.log(TAG, "Illegal task sent: " + arrival.getTask());
+                answer = new Error(Error.Type.TASK, "Illegal task: " + arrival.getTask() + ".");
+            }
+        }
+        else {
             answer = new Error(Error.Type.WRONG_OBJECT, "No tasks have been implemented for this Authenticated!");
         }
         // Once we're here, finish the secure session

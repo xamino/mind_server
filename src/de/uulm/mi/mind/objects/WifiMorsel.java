@@ -76,10 +76,11 @@ public class WifiMorsel implements Data, Comparable {
 
     @Override
     public int compareTo(Object obj) {
+    	//LAST CHANGE - REVERSE
         WifiMorsel temp = (WifiMorsel) obj;
-        if (this.wifiLevel < temp.wifiLevel)
+        if (this.wifiLevel > temp.wifiLevel)
             return -1;
-        else if (this.wifiLevel > temp.wifiLevel)
+        else if (this.wifiLevel < temp.wifiLevel)
             return 1;
         else
             return 0;

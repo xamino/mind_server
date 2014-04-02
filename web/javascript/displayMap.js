@@ -39,8 +39,8 @@ function retriveOriginalIconMetrics(){
 	imgLoad.attr("src", "images/micons/crab.png");
 	imgLoad.unbind("load");
 	imgLoad.bind("load", function () {
-//		originalIconSize = this.width;
-		originalIconSize = 110;
+		originalIconSize = this.width;
+//		originalIconSize = 110;
 		initUsersPlacement();
 	});
 }
@@ -321,7 +321,7 @@ function refreshUserData(){
 
 function loadTestUser(){
 	var user1 = new User("a@a.a",null,"a",false);
-	user1.lastPosition = 333;
+	user1.lastPosition = 336;
 	user1.iconRef = "crab.png";
 //	user1.x = 400;
 //	user1.y = 300;
@@ -339,7 +339,7 @@ function loadTestUser(){
 	user4.lastPosition = 333;
 	user4.iconRef = "sheep.png";
 	var user5 = new User("f@f.f",null,"f",false);
-	user5.lastPosition = 333;
+	user5.lastPosition = 3304;
 	user5.iconRef = "deer.png";
 	var user6 = new User("g@g.g",null,"g",false);
 	user6.lastPosition = 333;
@@ -468,7 +468,7 @@ function doScale(value){
 	
 	//update the scale factors
 	computeFactors();
-	document.getElementById("slidertext").innerHTML = "fact w:"+widthFactor+" h:"+heigthFactor;
+//	document.getElementById("slidertext").innerHTML = "fact w:"+widthFactor+" h:"+heigthFactor;
 	//update user icons
 	updateUserIconPlacement();
 	

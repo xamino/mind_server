@@ -60,7 +60,7 @@ public class ServletFunctions {
             case LOGIN:
                 // make sure we have the right object
                 if (!(arrival.getObject() instanceof Authenticated)) {
-                    return new Error(Error.Type.WRONG_OBJECT, "Login requires a User or PublicDisplay object!");
+                    return new Error(Error.Type.WRONG_OBJECT, "Login requires a User, PublicDisplay, or WifiSensor object!");
                 }
                 // try login
                 activeUser = Security.begin((Authenticated) arrival.getObject(), null);
@@ -91,6 +91,7 @@ public class ServletFunctions {
                 Security.finish(activeUser);
                 return new Success("Session is valid.");
             case REGISTRATION:
+                // Public registration is only available to normal users!
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error(Error.Type.WRONG_OBJECT, "Registration is only possible with User objects!");
                 }
@@ -482,6 +483,31 @@ public class ServletFunctions {
                 Area filter = new Area(null);
                 // todo filter these maybe?
                 return moduleManager.handleTask(Task.Area.READ, filter);
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Tasks for the WifiSensors.
+     * @param arrival
+     * @param activeUser
+     * @return
+     */
+    public Data handleWifiSensorTask(Arrival arrival, Active activeUser) {
+        // better be safe
+        if (!(activeUser.getAuthenticated() instanceof WifiSensor)) {
+            log.error(TAG, "WifiSensor task was handed the wrong type of Authenticated!");
+            return new Error(Error.Type.WRONG_OBJECT, "WifiSensor task was handed the wrong type of Authenticated!");
+        }
+        WifiSensor sensor = ((WifiSensor) activeUser.getAuthenticated());
+        API task = API.safeValueOf(arrival.getTask());
+        switch (task) {
+            case WIFI_SENSOR_UPDATE:
+                // todo: better would be to add a task for position module to accept this data
+                // that way, the information is exactly where we want it during runtime
+                // (+ position find wouldn't need to wait for a sensor; it would just use what was available)
+                return new Success(Success.Type.NOTE, "Nothing implemented yet!");
             default:
                 return null;
         }
