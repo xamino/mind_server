@@ -17,7 +17,7 @@ import java.util.*;
  */
 public class PositionModule extends Module {
 
-    private final int tolerance = 3;  //TODO What value?
+    private final int tolerance = 3;
     /**
      * Timeout after which the position is reset to unknown for a user.
      */
@@ -169,7 +169,7 @@ public class PositionModule extends Module {
             // Convert the HashMap to a List. It is sorted by the number of matches. Most matches are listed first.
             sortedLocationCandidateList = locationMapToSortedList(locationMatchesMap);
 
-            //Trim list so it only contains non-best candidates TODO better way?
+            //Trim list so it only contains non-best candidates
             for (int i = 0; i < sortedLocationCandidateList.size() - 1; i++) {
                 if (locationMatchesMap.get(sortedLocationCandidateList.get(i)) > locationMatchesMap.get(sortedLocationCandidateList.get(i + 1))) {
                     sortedLocationCandidateList = sortedLocationCandidateList.subList(i + 1, sortedLocationCandidateList.size());
@@ -188,7 +188,7 @@ public class PositionModule extends Module {
                 sortedLocationCandidateList = locationMapToSortedList(locationLevelDifferenceSumMap);
                 Collections.reverse(sortedLocationCandidateList); //reverse -> smallest to biggest
 
-                //Trim list so it only contains best candidates (smallest levelDifferenceSum) TODO better way?
+                //Trim list so it only contains best candidates (smallest levelDifferenceSum)
                 for (int i = 0; i < sortedLocationCandidateList.size() - 1; i++) {
                     if (locationLevelDifferenceSumMap.get(sortedLocationCandidateList.get(i)) < locationLevelDifferenceSumMap.get(sortedLocationCandidateList.get(i + 1))) {
                         sortedLocationCandidateList = sortedLocationCandidateList.subList(0, i + 1);
@@ -196,11 +196,13 @@ public class PositionModule extends Module {
                 }
 
                 // Now there are only those locations left, that have the same amount of matches AND the same levelDifferenceSum
+                //e.g. -50 is a stronger dBm value (better signal) than -90
                 if (sortedLocationCandidateList.size() > 1) {
-                    int currentsum = Integer.MAX_VALUE; // TODO Something wrong here!
+                	//LAST CHANGE - MAX_VALUE TO MIN_VALUE & < TO >
+                    int currentsum = Integer.MIN_VALUE;
 
                     for (Location point : sortedLocationCandidateList) { //for each point with same diff level
-                        if (locationLevelDifferenceSumMap.get(point) < currentsum) {
+                        if (locationLevelDifferenceSumMap.get(point) > currentsum) {
                             //get point with max total level
                             currentsum = locationLevelDifferenceSumMap.get(point);
                             finalMatch = point;
