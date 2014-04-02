@@ -7,11 +7,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
-import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.*;
-import de.uulm.mi.mind.logger.Messenger;
 
 /**
  * @author Tamino Hartmann
@@ -40,28 +39,31 @@ public class JsonConverter {
             @Override
             public Class<? extends Data> getClassForElement(JsonElement readElement) {
                 String kind = readElement.getAsJsonObject().get("$type").getAsString();
-                if (kind.equals("Area")) {
-                    return Area.class;
-                } else if (kind.equals("Arrival")) {
-                    return Arrival.class;
-                } else if (kind.equals("Departure")) {
-                    return Departure.class;
-                } else if (kind.equals("DataList")) {
-                    return DataList.class;
-                } else if (kind.equals("Error")) {
-                    return Error.class;
-                } else if (kind.equals("Location")) {
-                    return Location.class;
-                } else if (kind.equals("PublicDisplay")) {
-                    return PublicDisplay.class;
-                } else if (kind.equals("Success")) {
-                    return Success.class;
-                } else if (kind.equals("User")) {
-                    return User.class;
-                } else if (kind.equals("WifiMorsel")) {
-                    return WifiMorsel.class;
-                } else {
-                    return null;
+                switch (kind) {
+                    case "Area":
+                        return Area.class;
+                    case "Arrival":
+                        return Arrival.class;
+                    case "Departure":
+                        return Departure.class;
+                    case "DataList":
+                        return DataList.class;
+                    case "Error":
+                        return Error.class;
+                    case "Location":
+                        return Location.class;
+                    case "PublicDisplay":
+                        return PublicDisplay.class;
+                    case "Success":
+                        return Success.class;
+                    case "User":
+                        return User.class;
+                    case "WifiMorsel":
+                        return WifiMorsel.class;
+                    case "WifiSensor":
+                        return WifiSensor.class;
+                    default:
+                        return null;
                 }
             }
         });
@@ -105,7 +107,6 @@ public class JsonConverter {
      * @param object The object to write to JSON.
      * @return The string with the JSON representation.
      */
-    // TODO objects in lists are missing the $type descriptor!
     public String toJson(Data object) {
         try {
             return gson.toJson(object);
