@@ -41,7 +41,21 @@ public class LocationModule extends Module {
             // NOTE: The Area-Location binding is handled solely by the Area functions, so no need to update that here!
             switch (locationTask) {
                 case CREATE:
-                    return create(location);
+                    // If a location already exists we simply update it
+                    Data read = read(new Location(location.getCoordinateX(), location.getCoordinateY()));
+                    if (!(read instanceof DataList)) {
+                        // This means something went wrong
+                        log.error(TAG, "Failed create: database read returned an error!");
+                        return new Error(Error.Type.DATABASE, "Failed create because database read failed!");
+                    } else if (((DataList) read).isEmpty()) {
+                        // this probably means that no location was found for the given location
+                        return create(location);
+                    } else {
+                        // If a location already exists, we simply add the wifimorsels of the given one
+                        Location exist = (Location) ((DataList) read).get(0);
+                        exist.getWifiMorsels().addAll(location.getWifiMorsels());
+                        return update(exist);
+                    }
                 case READ:
                     return read(location);
                 case UPDATE:

@@ -224,6 +224,13 @@ public class DatabaseController implements ServletContextListener {
                 con.store(displayUpdate);
                 log.log(TAG, "Updated in DB: " + displayUpdate.toString());
                 return true;
+            } else if (data instanceof Location) {
+                Location update = ((Location) data);
+                Location original = ((Location) read(update).get(0)); // TODO Empty/NullCheck
+                original.setWifiMorsels(update.getWifiMorsels());
+                con.store(original);
+                log.log(TAG, "Updated in DB: " + original.toString());
+                return true;
             }
             log.error(TAG, "Class update not implemented:" + data.toString());
             return false;
