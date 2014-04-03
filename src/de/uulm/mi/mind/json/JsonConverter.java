@@ -1,4 +1,4 @@
-package de.uulm.mi.mind.servlet;
+package de.uulm.mi.mind.json;
 
 import com.github.julman99.gsonfire.GsonFireBuilder;
 import com.github.julman99.gsonfire.PostProcessor;
@@ -8,9 +8,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.*;
-import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.messages.Success;
+import de.uulm.mi.mind.objects.Data;
+
+import java.util.HashMap;
 
 /**
  * @author Tamino Hartmann
@@ -26,45 +26,29 @@ public class JsonConverter {
     private final String TAG = "JsonConverter";
     private Gson gson;
     private Messenger log;
+    /**
+     * Hashmap of the registered types that the converter will convert with $type.
+     */
+    private HashMap<String, Class<? extends Data>> objects;
 
     /**
-     * Private constructor. Use getInstance() to get an instance of this class. Note that all subtypes that extend
-     * Data that are to be JSONated MUST be registered here!
+     * Private constructor. Use getInstance() to get an instance of this class.
      */
     private JsonConverter() {
         log = Messenger.getInstance();
         GsonFireBuilder builder = new GsonFireBuilder();
+        objects = new HashMap<>();
         // register in switch
         builder.registerTypeSelector(Data.class, new TypeSelector<Data>() {
             @Override
             public Class<? extends Data> getClassForElement(JsonElement readElement) {
                 String kind = readElement.getAsJsonObject().get("$type").getAsString();
-                switch (kind) {
-                    case "Area":
-                        return Area.class;
-                    case "Arrival":
-                        return Arrival.class;
-                    case "Departure":
-                        return Departure.class;
-                    case "DataList":
-                        return DataList.class;
-                    case "Error":
-                        return Error.class;
-                    case "Location":
-                        return Location.class;
-                    case "PublicDisplay":
-                        return PublicDisplay.class;
-                    case "Success":
-                        return Success.class;
-                    case "User":
-                        return User.class;
-                    case "WifiMorsel":
-                        return WifiMorsel.class;
-                    case "WifiSensor":
-                        return WifiSensor.class;
-                    default:
-                        return null;
+                if (objects.containsKey(kind)) {
+                    // log.log(TAG, "Found $type:" + kind + "!");
+                    return objects.get(kind);
                 }
+                log.error(TAG, "Unknown object found! $type:" + kind);
+                return null;
             }
         });
         // add out switch
@@ -82,6 +66,11 @@ public class JsonConverter {
                 // if it is an object, write $type to it
                 String name = data.getClass().getCanonicalName();
                 name = name.substring(name.lastIndexOf('.') + 1, name.length());
+                // if it wasn't registered, don't do anything
+                if (!objects.containsKey(name)) {
+                    log.error(TAG, "Object " + name + " isn't registered, so not adding $type information!");
+                    return;
+                }
                 jsonElement.getAsJsonObject().add("$type", new JsonPrimitive(name));
             }
         });
@@ -98,6 +87,19 @@ public class JsonConverter {
         if (INSTANCE == null)
             INSTANCE = new JsonConverter();
         return INSTANCE;
+    }
+
+    /**
+     * Method that registers an object for JSONating with $type field.
+     *
+     * @param clazz The class which to register. Note that the name of the class is used WITHOUT the package name. This
+     *              means that these should be unique!
+     */
+    public void registerType(Class<? extends Data> clazz) {
+        String name = clazz.getCanonicalName();
+        name = name.substring(name.lastIndexOf('.') + 1, name.length());
+        objects.put(name, clazz);
+        log.log(TAG, "Registered $type:" + name + ".");
     }
 
     /**

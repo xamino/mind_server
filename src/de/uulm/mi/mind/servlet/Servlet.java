@@ -4,11 +4,13 @@
 
 package de.uulm.mi.mind.servlet;
 
+import de.uulm.mi.mind.json.JsonConverter;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
+import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.Security;
 
@@ -44,11 +46,24 @@ public class Servlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+        // init all
         super.init();
         log = Messenger.getInstance();
         moduleManager = EventModuleManager.getInstance();
         json = JsonConverter.getInstance();
         functions = ServletFunctions.getInstance();
+        // register JSONator types
+        json.registerType(Area.class);
+        json.registerType(Arrival.class);
+        json.registerType(Departure.class);
+        json.registerType(DataList.class);
+        json.registerType(Error.class);
+        json.registerType(Location.class);
+        json.registerType(PublicDisplay.class);
+        json.registerType(Success.class);
+        json.registerType(User.class);
+        json.registerType(WifiMorsel.class);
+        json.registerType(WifiSensor.class);
     }
 
     /**
@@ -131,8 +146,7 @@ public class Servlet extends HttpServlet {
                 log.log(TAG, "Illegal task sent: " + arrival.getTask());
                 answer = new Error(Error.Type.TASK, "Illegal task: " + arrival.getTask() + ".");
             }
-        }
-        else {
+        } else {
             answer = new Error(Error.Type.WRONG_OBJECT, "No tasks have been implemented for this Authenticated!");
         }
         // Once we're here, finish the secure session
