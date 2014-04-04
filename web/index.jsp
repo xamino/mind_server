@@ -54,6 +54,8 @@ Click here to run a unit test of the API. WARNING: while the test is running, th
 <br>
 <input type="button" name="displayusertest" value="PD User Test" onclick="displayUserTest();">
 <br>
+<input type="button" name="sensortest" value="WifiSensor Test" onclick="wifiSensorAPITest();">
+<br>
 <br>
 <input type="button" name="cleandb" value="WARNING: Clean DB" onclick="cleanDB();alert('Done');">
 </body>

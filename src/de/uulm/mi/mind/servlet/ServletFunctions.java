@@ -232,10 +232,12 @@ public class ServletFunctions {
             return new Error(Error.Type.SECURITY, "You do not have permission for this task.");
         }
         API task = API.safeValueOf(arrival.getTask());
-        // Because we'll need these two rather often:
+        // Because we'll need these rather often:
         Data data, message;
         User tempUser;
         PublicDisplay display;
+        WifiSensor sensor;
+        String token;
         Area area;
         switch (task) {
             // USERS -----------------------------------------------------------------------------
@@ -397,7 +399,7 @@ public class ServletFunctions {
                     return moduleManager.handleTask(Task.Display.CREATE, display);
                 }
                 // otherwise we need to generate a token
-                String token = generateKey();
+                token = generateKey();
                 // hash it
                 display.setToken(BCrypt.hashpw(token, BCrypt.gensalt(12)));
                 data = moduleManager.handleTask(Task.Display.CREATE, display);
@@ -443,6 +445,65 @@ public class ServletFunctions {
                     return new Error(Error.Type.WRONG_OBJECT);
                 }
                 return moduleManager.handleTask(Task.Display.DELETE, arrival.getObject());
+            // SENSORS -----------------------------------------------------------------------------------------
+            case SENSOR_READ:
+                if (!(arrival.getObject() instanceof WifiSensor)) {
+                    return new Error(Error.Type.WRONG_OBJECT);
+                }
+                return moduleManager.handleTask(Task.Sensor.READ, arrival.getObject());
+            case SENSOR_ADD:
+                if (!(arrival.getObject() instanceof WifiSensor)) {
+                    return new Error(Error.Type.WRONG_OBJECT);
+                }
+                sensor = (WifiSensor) arrival.getObject();
+                // check identification
+                if (!safeString(sensor.readIdentification())) {
+                    return new Error(Error.Type.ILLEGAL_VALUE, "Identification is primary key! May not be empty.");
+                }
+                // password
+                if (safeString(sensor.getTokenHash())) {
+                    sensor.setTokenHash(BCrypt.hashpw(sensor.getTokenHash(), BCrypt.gensalt(12)));
+                    return moduleManager.handleTask(Task.Sensor.CREATE, sensor);
+                }
+                // otherwise we need to generate a token
+                token = generateKey();
+                // hash it
+                sensor.setTokenHash(BCrypt.hashpw(token, BCrypt.gensalt(12)));
+                data = moduleManager.handleTask(Task.Sensor.CREATE, sensor);
+                // If the operation was a success, we need to send the generated key back
+                if (data instanceof Success) {
+                    data = new Success(Success.Type.NOTE, token);
+                }
+                return nullMessageCatch(data);
+            case SENSOR_UPDATE:
+                if (!(arrival.getObject() instanceof WifiSensor)) {
+                    return new Error(Error.Type.WRONG_OBJECT);
+                }
+                sensor = (WifiSensor) arrival.getObject();
+                if (!safeString(sensor.readIdentification())) {
+                    return new Error(Error.Type.ILLEGAL_VALUE, "Identification must not be empty!");
+                }
+                data = moduleManager.handleTask(Task.Sensor.READ, new WifiSensor(sensor.readIdentification(), null));
+                message = checkDataMessage(data, DataList.class);
+                if (message != null) {
+                    return message;
+                }
+                // make sure we get one back
+                if (((DataList) data).size() != 1) {
+                    return new Error(Error.Type.DATABASE, "WifiSensor " + sensor.readIdentification() + " not found!");
+                }
+                WifiSensor originalSensor = (WifiSensor) ((DataList) data).get(0);
+                // check password
+                if (safeString(sensor.getTokenHash())) {
+                    originalSensor.setTokenHash(BCrypt.hashpw(sensor.getTokenHash(), BCrypt.gensalt(12)));
+                }
+                // update
+                return moduleManager.handleTask(Task.Sensor.UPDATE, originalSensor);
+            case SENSOR_REMOVE:
+                if (!(arrival.getObject() instanceof WifiSensor)) {
+                    return new Error(Error.Type.WRONG_OBJECT);
+                }
+                return moduleManager.handleTask(Task.Sensor.DELETE, arrival.getObject());
             // Special admin stuff ---------------------------------------------------------------
             case READ_ALL_ADMIN:
                 User filter = new User(null);
@@ -490,6 +551,7 @@ public class ServletFunctions {
 
     /**
      * Tasks for the WifiSensors.
+     *
      * @param arrival
      * @param activeUser
      * @return

@@ -41,10 +41,16 @@ public enum API implements Task {
     AREA_ADD,
     AREA_UPDATE,
     AREA_REMOVE,
+    // Display
     DISPLAY_READ,
     DISPLAY_ADD,
     DISPLAY_UPDATE,
     DISPLAY_REMOVE,
+    // Sensor
+    SENSOR_READ,
+    SENSOR_ADD,
+    SENSOR_UPDATE,
+    SENSOR_REMOVE,
     /**
      * Given a location, find the position.
      */

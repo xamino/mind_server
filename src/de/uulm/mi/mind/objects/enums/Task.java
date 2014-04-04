@@ -47,6 +47,17 @@ public interface Task {
         UPDATE,
         DELETE
     }
+
+    public enum Sensor implements Task {
+        CREATE,
+        READ,
+        UPDATE,
+        DELETE,
+        /**
+         * Task for logging the information received from a sensor.
+         */
+        LOG_SENSOR
+    }
 }
 
 

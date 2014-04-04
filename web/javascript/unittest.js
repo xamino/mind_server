@@ -4,7 +4,6 @@
  - *_read should be called multiple times (to prevent stuff like with Location from happening again)
  */
 
-
 /**
  * Function that runs a unit test. NOTE: test is done with synchronous ajax calls, which means the webpage will be
  * unresponsive until the unit test is done!
@@ -27,6 +26,7 @@ function doUnitTest() {
     testPositionRead();
     displayAdminTest();
     displayUserTest();
+    wifiSensorAPITest();
 
     cleanDB();
 
@@ -492,6 +492,40 @@ function displayUserTest() {
     alert("Display user test done.");
 }
 
+function wifiSensorAPITest() {
+    alert("Beginning WifiSensor API test!");
+    cleanDB();
+
+    var adminSession = getAdminSession();
+    var sensorOne = new WifiSensor("hallway", "don't remember this, write it down!");
+    var sensorTwo = new WifiSensor("my_office", null);
+    // test adding new ones
+    unitTest("sensor_add", sensorOne, Success, adminSession);
+    var check = unitTest("sensor_add", sensorTwo, Success, adminSession);
+    if (check.type != "NOTE") {
+        alert("Failed to get back key!\n\n" + JSON.stringify(check));
+    }
+    sensorTwo.tokenHash = check.description;
+    // test login for both
+    unitTest("login", sensorOne, Success, null);
+    var sessionTwo = unitTest("login", sensorTwo, Success, null).description;
+    // try changing pwd for two
+    sensorTwo.tokenHash = "new";
+    unitTest("sensor_update", sensorTwo, Success, adminSession);
+    // log 2 out
+    unitTest("logout", null, Success, sessionTwo);
+    // try new login
+    unitTest("login", sensorTwo, Success, null);
+    // admin remove
+    unitTest("sensor_remove", sensorTwo, Success, adminSession);
+    // test
+    unitTest("check", null, Error, sessionTwo);
+    // todo add test for sensing capabilities
+
+    cleanDB();
+    alert("Finished WifiSensor API test.")
+}
+
 /**
  * Use this method to clean the DB.
  */
@@ -525,6 +559,12 @@ function cleanDB() {
     var displayList = unitTest("display_read", new PublicDisplay(), Array, adminSession);
     if (displayList == null || displayList.length != 0) {
         alert("DB was NOT CLEARED of PUBLIC DISPLAYS!");
+    }
+    // Destroy sensors
+    unitTest("sensor_remove", new WifiSensor(), Success, adminSession);
+    var sensorList = unitTest("sensor_read", new WifiSensor(), Array, adminSession);
+    if (sensorList == null || sensorList.length != 0) {
+        alert("DB was NOT CLEARED of WIFI SENSORS!");
     }
 
     // Destroy users

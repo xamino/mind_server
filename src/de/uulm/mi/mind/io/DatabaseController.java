@@ -231,6 +231,14 @@ public class DatabaseController implements ServletContextListener {
                 con.store(original);
                 log.log(TAG, "Updated in DB: " + original.toString());
                 return true;
+            } else if (data instanceof WifiSensor) {
+                WifiSensor update = ((WifiSensor) data);
+                WifiSensor original = ((WifiSensor) read(update).get(0)); // TODO Empty/NullCheck
+                original.setTokenHash(update.getTokenHash());
+                original.setAccessDate(update.getAccessDate());
+                con.store(original);
+                log.log(TAG, "Updated in DB: "+original.toString());
+                return true;
             }
             log.error(TAG, "Class update not implemented:" + data.toString());
             return false;

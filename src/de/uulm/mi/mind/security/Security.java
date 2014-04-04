@@ -2,10 +2,7 @@ package de.uulm.mi.mind.security;
 
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.Data;
-import de.uulm.mi.mind.objects.DataList;
-import de.uulm.mi.mind.objects.PublicDisplay;
-import de.uulm.mi.mind.objects.User;
+import de.uulm.mi.mind.objects.*;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -240,6 +237,8 @@ public class Security {
             data = database.read(new User(authenticated.readIdentification()));
         } else if (authenticated instanceof PublicDisplay) {
             data = database.read(new PublicDisplay(authenticated.readIdentification(), null, null, 0, 0));
+        } else if (authenticated instanceof WifiSensor) {
+            data = database.read(new WifiSensor(authenticated.readIdentification(), null));
         } else {
             log.error(TAG, "Read from DB failed because of wrong object given!");
             return null;

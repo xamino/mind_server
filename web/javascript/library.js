@@ -178,3 +178,9 @@ function PublicDisplay(identification, token, location, coordinateX, coordinateY
     this.coordinateX = coordinateX;
     this.coordinateY = coordinateY;
 }
+
+function WifiSensor(position, tokenHash) {
+    this.$type = "WifiSensor";
+    this.position = position;
+    this.tokenHash = tokenHash;
+}

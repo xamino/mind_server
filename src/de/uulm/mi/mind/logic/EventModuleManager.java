@@ -1,9 +1,6 @@
 package de.uulm.mi.mind.logic;
 
-import de.uulm.mi.mind.logic.modules.DisplayModule;
-import de.uulm.mi.mind.logic.modules.LocationModule;
-import de.uulm.mi.mind.logic.modules.PositionModule;
-import de.uulm.mi.mind.logic.modules.UserModule;
+import de.uulm.mi.mind.logic.modules.*;
 import de.uulm.mi.mind.objects.Data;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
@@ -18,6 +15,7 @@ public class EventModuleManager {
     private final LocationModule locationModule;
     private final PositionModule positionModule;
     private final DisplayModule displayModule;
+    private final SensorModule sensorModule;
 
     private EventModuleManager() {
 
@@ -27,6 +25,7 @@ public class EventModuleManager {
         locationModule = new LocationModule();
         positionModule = new PositionModule();
         displayModule = new DisplayModule();
+        sensorModule = new SensorModule();
     }
 
     /**
@@ -50,8 +49,10 @@ public class EventModuleManager {
             return positionModule.run(operation, task);
         } else if (operation instanceof Task.Display) {
             return displayModule.run(operation, task);
+        } else if (operation instanceof Task.Sensor) {
+            return sensorModule.run(operation, task);
         } else {
-            return new Error(Error.Type.NULL, operation.toString());
+            return new Error(Error.Type.NULL, operation.toString() + " found no matching module! Has it been registered?");
         }
     }
 }
