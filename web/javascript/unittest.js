@@ -174,6 +174,9 @@ function userAccessTest() {
     // Illegal delete
     unitTest("user_delete", null, Error, "illegal_hash");
 
+    // try login with wrong type
+    unitTest("login", new WifiSensor("admin@admin.admin","admin"), Error, null);
+
     cleanDB();
 
     alert("Registration, login, logout done.");

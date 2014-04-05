@@ -53,6 +53,7 @@ public class Security {
         this.database = DatabaseController.getInstance();
         this.random = new SecureRandom();
         this.actives = new HashMap<>();
+        log.log(TAG, "Created.");
     }
 
     /**
@@ -93,7 +94,9 @@ public class Security {
         getInstance().update(active);
     }
 
+    //
     // -------------------------- Actual instanced code here ----------------------------
+    //
 
     /**
      * Returns an Active object if the session is valid, otherwise null.
@@ -139,6 +142,11 @@ public class Security {
         Authenticated databaseSafe = readDB(authenticated);
         if (databaseSafe == null) {
             log.log(TAG, "Login failed for " + authenticated.readIdentification() + " due to no found legal authenticated!");
+            return null;
+        }
+        // check that they are of the same type
+        if (authenticated.getClass() != databaseSafe.getClass()) {
+            log.log(TAG, "Login failed for " + authenticated.readIdentification() + " due to wrong user type!");
             return null;
         }
         // check using BCrypt
@@ -201,7 +209,6 @@ public class Security {
             }
             return;
         }
-        // todo write lastAccess time where...?
         // otherwise update value
         actives.put(active.getSESSION(), active);
     }

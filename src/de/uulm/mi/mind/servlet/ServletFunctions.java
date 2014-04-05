@@ -66,7 +66,7 @@ public class ServletFunctions {
                 activeUser = Security.begin((Authenticated) arrival.getObject(), null);
                 // check if okay
                 if (activeUser == null) {
-                    return new Error(Error.Type.LOGIN, "Login failed. Check password and or identification!");
+                    return new Error(Error.Type.LOGIN, "Login failed. Check identification, authentication, and user type!");
                 }
                 // otherwise we finish again directly by returning the session
                 Security.finish(activeUser);

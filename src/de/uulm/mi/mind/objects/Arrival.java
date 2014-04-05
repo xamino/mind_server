@@ -17,11 +17,23 @@ public class Arrival implements Data {
      * Voluntary object with which to work with during a task.
      */
     private Data object;
+    /**
+     * Stores the IP address of the client for this access.
+     */
+    private String ipAddress;
 
     public Arrival(String sessionHash, String task, Data object) {
         this.sessionHash = sessionHash;
         this.task = task;
         this.object = object;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 
     public String getSessionHash() {

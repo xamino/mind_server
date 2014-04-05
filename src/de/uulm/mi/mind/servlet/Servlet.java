@@ -64,6 +64,7 @@ public class Servlet extends HttpServlet {
         json.registerType(User.class);
         json.registerType(WifiMorsel.class);
         json.registerType(WifiSensor.class);
+        log.log(TAG, "Created.");
     }
 
     /**
@@ -88,6 +89,9 @@ public class Servlet extends HttpServlet {
         if (arrival == null) {
             answer = new Error(Error.Type.CAST, "Failed to read Arrival!");
         } else {
+            // set IP address in case we need it (warning: can be IPv4 OR IPv6!!!)
+            arrival.setIpAddress(request.getRemoteAddr());
+            // get the answer from the logic
             answer = runLogic(arrival);
         }
 
@@ -99,6 +103,12 @@ public class Servlet extends HttpServlet {
         */
     }
 
+    /**
+     * Function for easier handling of running the user access logic.
+     *
+     * @param arrival The arrival with which to work.
+     * @return The data returned.
+     */
     private Data runLogic(Arrival arrival) {
         // check public tasks
         Information inf = functions.handlePublicTask(arrival);
