@@ -110,6 +110,7 @@ public class PositionModule extends Module {
      */
     private Location calculateLocation(Location request) {
         // Get Area containing all locations from database
+        log.error(TAG, "HERE IS THE ERROR");
         Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe", null, 0, 0, 0, 0))).get(0);
 
         // A Map that describes how many matches there are for this location
@@ -198,7 +199,7 @@ public class PositionModule extends Module {
                 // Now there are only those locations left, that have the same amount of matches AND the same levelDifferenceSum
                 //e.g. -50 is a stronger dBm value (better signal) than -90
                 if (sortedLocationCandidateList.size() > 1) {
-                	//LAST CHANGE - MAX_VALUE TO MIN_VALUE & < TO >
+                    //LAST CHANGE - MAX_VALUE TO MIN_VALUE & < TO >
                     int currentsum = Integer.MIN_VALUE;
 
                     for (Location point : sortedLocationCandidateList) { //for each point with same diff level

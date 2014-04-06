@@ -7,7 +7,6 @@ import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.servlet.ServletFunctions;
 
 /**
  * @author Tamino Hartmann
@@ -38,7 +37,7 @@ public class LocationModule extends Module {
             Location location = (Location) request;
 
             Task.Location locationTask = (Task.Location) task;
-            // NOTE: The Area-Location binding is handled solely by the Area functions, so no need to update that here!
+            Data retData;
             switch (locationTask) {
                 case CREATE:
                     // If a location already exists we simply update it
@@ -49,25 +48,38 @@ public class LocationModule extends Module {
                         return new Error(Error.Type.DATABASE, "Failed create because database read failed!");
                     } else if (((DataList) read).isEmpty()) {
                         // this probably means that no location was found for the given location
-                        return create(location);
+                        retData = create(location);
+                        // area has changed, so redo mapping
+                        updateMapping();
+                        return retData;
                     } else {
                         // If a location already exists, we simply add the wifimorsels of the given one
                         Location exist = (Location) ((DataList) read).get(0);
                         exist.getWifiMorsels().addAll(location.getWifiMorsels());
-                        return update(exist);
+                        retData = update(exist);
+                        // area has changed, so redo mapping
+                        updateMapping();
+                        return retData;
                     }
                 case READ:
                     return read(location);
                 case UPDATE:
-                    return update(location);
+                    retData = update(location);
+                    // area has changed, so redo mapping
+                    updateMapping();
+                    return retData;
                 case DELETE:
-                    return delete(location);
+                    retData = delete(location);
+                    // area has changed, so redo mapping
+                    updateMapping();
+                    return retData;
                 case SMALLEST_AREA_BY_LOCATION:
                     return areaByLocation(location);
                 case READ_MORSELS:
                     return readMorsels(location);
             }
         } else if (task instanceof Task.Area) {
+            // No check because we don't always need it
             Area area = (Area) request;
 
             Task.Area areaTask = (Task.Area) task;
@@ -76,41 +88,36 @@ public class LocationModule extends Module {
                     if (area == null) {
                         return new Error(Error.Type.WRONG_OBJECT, "Area was null!");
                     }
-                    area = updateLocations(area);
-                    return create(area);
+                    Data returnArea = create(area);
+                    // area has changed, so redo mapping
+                    updateMapping();
+                    return returnArea;
                 case READ:
                     if (area == null) {
                         return new Error(Error.Type.WRONG_OBJECT, "Filter area was null!");
                     }
-                    // We might need to update area for new locations:
-                    Data data = read(area);
-                    if (!(data instanceof DataList)) {
-                        return new Error(Error.Type.WRONG_OBJECT, "Failed to start location update upon read!");
-                    }
-                    DataList areas = ((DataList) data);
-                    for (Object obj : areas) {
-                        Area temp = ((Area) obj);
-                        temp = updateLocations(temp);
-                        if (null == ServletFunctions.getInstance().checkDataMessage(update(temp), Success.class)) {
-                            return new Error(Error.Type.DATABASE, "Failed to update " + temp.getID() + " upon read!");
-                        }
-                    }
-                    return areas;
+                    return read(area);
                 case UPDATE:
                     if (area == null) {
                         return new Error(Error.Type.WRONG_OBJECT, "Area was null!");
                     }
-                    area = updateLocations(area);
-                    return update(area);
+                    Data ret2Area = update(area);
+                    // area has changed, so redo mapping
+                    updateMapping();
+                    return ret2Area;
                 case DELETE:
                     if (area == null) {
                         return new Error(Error.Type.WRONG_OBJECT, "Filter area was null!");
                     }
-                    return delete(area);
+                    Data ret3Area = delete(area);
+                    // area has changed, so redo mapping
+                    updateMapping();
+                    return ret3Area;
                 case READ_LOCATIONS:
                     if (area == null) {
                         return new Error(Error.Type.WRONG_OBJECT, "Area for locations was null!");
                     }
+                    // todo why not read(area).getLocations() ?
                     return readLocations(area);
                 case ANNIHILATE:
                     return annihilateAreas();
@@ -153,20 +160,26 @@ public class LocationModule extends Module {
     }
 
     /**
-     * Method that updates all Locations that are to be associated with an area.
-     *
-     * @param area
-     * @return
+     * Method that updates the Location <--> Area mapping.
      */
-    private Area updateLocations(Area area) {
-        DataList<Location> data = database.read(new Location(0, 0, null));
-        area.setLocations(new DataList<Location>());
-        for (Location loc : data) {
-            if (area.contains(loc.getCoordinateX(), loc.getCoordinateY())) {
-                area.addLocation(loc);
+    private void updateMapping() {
+        DataList<Location> locations = database.read(new Location(0, 0, null));
+        DataList<Area> areas = database.read(new Area(null));
+        // log.log(TAG, "Updating mapping with " + areas.size() + " areas and " + locations.size() + " locations.");
+        log.pushTimer(this, "");
+        for (Area area : areas) {
+            area.setLocations(new DataList<Location>());
+            for (Location location : locations) {
+                if (area.contains(location.getCoordinateX(), location.getCoordinateY())) {
+                    area.addLocation(location);
+                }
+            }
+            // must write data back to DB
+            if (!database.update(area)) {
+                log.error(TAG, "Failed to update mapping in DB for " + area.getID() + "!");
             }
         }
-        return area;
+        log.log(TAG, "Updated Location <--> Area mapping. Took " + log.popTimer(this).time + "ms.");
     }
 
     /**

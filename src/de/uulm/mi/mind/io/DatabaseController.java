@@ -104,7 +104,7 @@ public class DatabaseController implements ServletContextListener {
                     result.add((T) o);
                 }
             }
-            //log.log(TAG, "Read from DB: " + result.toString());
+            log.error(TAG, "Read from DB: " + result.toString());
             return result;
 
         } catch (Exception e) {
