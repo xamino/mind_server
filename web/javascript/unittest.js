@@ -175,7 +175,7 @@ function userAccessTest() {
     unitTest("user_delete", null, Error, "illegal_hash");
 
     // try login with wrong type
-    unitTest("login", new WifiSensor("admin@admin.admin","admin"), Error, null);
+    unitTest("login", new WifiSensor("admin@admin.admin", "admin"), Error, null);
 
     cleanDB();
 
@@ -284,7 +284,7 @@ function positionTest() {
         new WifiMorsel("00:19:07:06:64:02", "welcome", -84)
     ]);
     // note switched order of wifimorsels
-    var locationRequest2 = new Location(42, 42, [
+    var locationRequest2 = new Location(345, 212, [
         new WifiMorsel("00:19:07:07:64:00", "eduroam", -80),
         new WifiMorsel("00:19:07:07:64:02", "welcome", -60),
         new WifiMorsel("00:19:07:07:64:01", "eduroam", -70)
@@ -303,17 +303,15 @@ function positionTest() {
     // area that covers loc3 + 2
     unitTest("area_add", new Area("institute", null, 140, 140, 100, 100), Success, adminSession);
 
+    unitTest("area_read", new Area(), Array, adminSession);
+
     // Test exact location match to universe (location1)
-    // note: becuase of first time, area is correct on first call
+    // note: because of first time, area is correct on first call
     var match = unitTest("position_find", locationRequest1, Area, adminSession);
-    if (instanceOf(match, Area)) {
-        if (match.ID != "universe") {
-            alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
-        }
+    if (!instanceOf(match, Area) || match.ID != "universe") {
+        alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (universe).");
     }
     // Test that admin is now positioned there:
-    // note: becuase of server fuzziness, we need to call it twice now for the change to work
-    unitTest("position_find", locationRequest1, Area, adminSession);
     var user = unitTest("user_read", null, User, adminSession);
     if (user.position == undefined || user.position != "universe") {
         alert("Failed user position read: admin is located at " + user.position);
@@ -321,10 +319,8 @@ function positionTest() {
     // Test close location match
     unitTest("position_find", locationRequest2, Area, adminSession);
     match = unitTest("position_find", locationRequest2, Area, adminSession);
-    if (instanceOf(match, Area)) {
-        if (match.ID != "institute") {
-            alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
-        }
+    if (!instanceOf(match, Area) || match.ID != "institute") {
+        alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (institute).");
     }
     // Test that admin is now in positioned there:
     user = unitTest("user_read", null, User, adminSession);
@@ -334,10 +330,8 @@ function positionTest() {
     // test match to office
     unitTest("position_find", locationRequest3, Area, adminSession);
     match = unitTest("position_find", locationRequest3, Area, adminSession);
-    if (instanceOf(match, Area)) {
-        if (match.ID != "office") {
-            alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one.");
-        }
+    if (!instanceOf(match, Area) || match.ID != "office") {
+        alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (office).");
     }
     // Test that admin is now in positioned there:
     user = unitTest("user_read", null, User, adminSession);

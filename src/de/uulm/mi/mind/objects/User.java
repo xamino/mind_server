@@ -70,6 +70,7 @@ public class User implements Data, Authenticated {
                 // ", pwdHash='" + pwdHash + '\'' +
                 ", email='" + email + '\'' +
                 ", admin=" + admin +
+                ", position=\'" + position + "'" +
                 '}';
     }
 
