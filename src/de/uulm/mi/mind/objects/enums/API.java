@@ -77,6 +77,10 @@ public enum API implements Task {
      * Removes all users from the database and restores the default admin
      */
     ADMIN_ANNIHILATE_USER,
+    /**
+     * Returns a list of all Active objects currently within the system.
+     */
+    ADMIN_READ_SESSIONS,
     TOGGLE_ADMIN,
     /**
      * Updates the list of devices for a given WifiSensor.

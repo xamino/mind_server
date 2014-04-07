@@ -189,7 +189,6 @@ public class Servlet extends HttpServlet {
         // catch object:null
         if (out.contains(",\"object\":null")) {
             out = out.replace(",\"object\":null", "");
-            System.out.println(out);
         }
         // parse the object out:
         Data data = json.fromJson(out);
