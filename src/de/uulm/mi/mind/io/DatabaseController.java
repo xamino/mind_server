@@ -2,9 +2,9 @@ package de.uulm.mi.mind.io;
 
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
-import com.db4o.ObjectSet;
 import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.query.Predicate;
+import com.db4o.query.Query;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.security.BCrypt;
@@ -64,6 +64,7 @@ public class DatabaseController implements ServletContextListener {
         }
         try {
             con.store(data);
+            con.commit();
             log.log(TAG, "Written to DB: " + data.toString());
             return true;
         } catch (Exception e) {
@@ -89,12 +90,29 @@ public class DatabaseController implements ServletContextListener {
                     || requestFilter.getKey().equals("0.0/0.0")) { //TODO better location key
                 queryResult = con.queryByExample(requestFilter);
             } else {
-                queryResult = con.query(new Predicate<T>() {
-                    @Override
-                    public boolean match(T o) {
-                        return o.getKey().equals(requestFilter.getKey());
-                    }
-                });
+                Query query = con.query();
+                query.constrain(requestFilter.getClass());
+                if (requestFilter instanceof User) {
+                    query.descend("email").constrain(requestFilter.getKey());
+                    queryResult = query.execute();
+                } else if (requestFilter instanceof Area) {
+                    query.descend("ID").constrain(requestFilter.getKey());
+                    queryResult = query.execute();
+                } else if (requestFilter instanceof PublicDisplay) {
+                    query.descend("identification").constrain(requestFilter.getKey());
+                    queryResult = query.execute();
+                } else if (requestFilter instanceof WifiSensor) {
+                    query.descend("position").constrain(requestFilter.getKey());
+                    queryResult = query.execute();
+                } else {
+                    log.log(TAG, "Object Type " + requestFilter.getClass().getSimpleName() + " reading could be optimized.");
+                    queryResult = con.query(new Predicate<T>() {
+                        @Override
+                        public boolean match(T o) {
+                            return o.getKey().equals(requestFilter.getKey());
+                        }
+                    });
+                }
             }
 
             // Write query results to DataList
@@ -184,63 +202,15 @@ public class DatabaseController implements ServletContextListener {
 
     public boolean update(Data data) {
         if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
-
         try {
-            if (data instanceof User) {
-                User dataUser = (User) data;
-                User userToUpdate = read(dataUser).get(0); // TODO Empty/NullCheck
-                userToUpdate.setName(dataUser.getName());
-                userToUpdate.setPwdHash(dataUser.getPwdHash());
-                userToUpdate.setAdmin(dataUser.isAdmin());
-                userToUpdate.setAccessDate(dataUser.getAccessDate());
-
-                con.store(userToUpdate);
-
-                log.log(TAG, "Updated in DB: " + userToUpdate.toString());
-
-                return true;
-            } else if (data instanceof Area) {
-                Area dataArea = (Area) data;
-                Area areaToUpdate = read(dataArea).get(0); // TODO Empty/NullCheck
-                areaToUpdate.setID(dataArea.getID());
-                areaToUpdate.setLocations(dataArea.getLocations());
-                areaToUpdate.setHeight(dataArea.getHeight());
-                areaToUpdate.setWidth(dataArea.getWidth());
-                areaToUpdate.setTopLeftX(dataArea.getTopLeftX());
-                areaToUpdate.setTopLeftY(dataArea.getTopLeftY());
-
-                con.store(areaToUpdate);
-
-                log.log(TAG, "Updated in DB: " + areaToUpdate.toString());
-                return true;
-            } else if (data instanceof PublicDisplay) {
-                PublicDisplay dataDisplay = (PublicDisplay) data;
-                PublicDisplay displayUpdate = read(dataDisplay).get(0); // TODO Empty/NullCheck
-                displayUpdate.setCoordinateX(dataDisplay.getCoordinateX());
-                displayUpdate.setCoordinateY(dataDisplay.getCoordinateY());
-                displayUpdate.setIdentification(dataDisplay.getIdentification());
-                displayUpdate.setLocation(dataDisplay.getLocation());
-                displayUpdate.setToken(dataDisplay.getToken());
-                con.store(displayUpdate);
-                log.log(TAG, "Updated in DB: " + displayUpdate.toString());
-                return true;
-            } else if (data instanceof Location) {
-                Location update = ((Location) data);
-                Location original = ((Location) read(update).get(0)); // TODO Empty/NullCheck
-                original.setWifiMorsels(update.getWifiMorsels());
-                con.store(original);
-                log.log(TAG, "Updated in DB: " + original.toString());
-                return true;
-            } else if (data instanceof WifiSensor) {
-                WifiSensor update = ((WifiSensor) data);
-                WifiSensor original = ((WifiSensor) read(update).get(0)); // TODO Empty/NullCheck
-                original.setTokenHash(update.getTokenHash());
-                original.setAccessDate(update.getAccessDate());
-                con.store(original);
-                log.log(TAG, "Updated in DB: "+original.toString());
+            DataList<Data> dataList;
+            if (!(dataList = read(data)).isEmpty()) {
+                delete(dataList.get(0));
+                con.store(data);
+                con.commit();
+                log.log(TAG, "Updated in DB: " + data.toString());
                 return true;
             }
-            log.error(TAG, "Class update not implemented:" + data.toString());
             return false;
         } catch (Exception e) {
             return false;
@@ -257,37 +227,22 @@ public class DatabaseController implements ServletContextListener {
     public boolean delete(Data data) {
         try {
             DataList<Data> dataList = read(data);
+
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
-            if (dataList != null && dataList.isEmpty()) {
+            if (dataList == null) {
                 return false;
-            } else if (dataList != null) {
-                Data dataToDelete = dataList.get(0);
-                con.delete(dataToDelete);
-                log.log(TAG, dataToDelete.toString() + " deleted from DB!");
+            } else if (data != null && (data.getKey() == null || data.getKey().equals("0.0/0.0")) && dataList.isEmpty()) { // removal of multiple
                 return true;
-            } else {
+            } else if (data != null && data.getKey() != null && dataList.isEmpty()) { // removal of specific instance
                 return false;
+            } else {
+                for (Data d : dataList) {
+                    con.delete(d);
+                }
+                con.commit();
+                log.log(TAG, "Deleted from DB: " + dataList.toString());
+                return true;
             }
-
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    /**
-     * Deletes an object of type data from database.
-     *
-     * @param data the object to be deleted.
-     * @return true if deletion was successful, otherwise false
-     */
-    public boolean deleteAll(Data data) {
-        try {
-            ObjectSet objects = con.query(data.getClass());
-            while (objects.hasNext()) {
-                con.delete(objects.next());
-            }
-            log.log(TAG, data.toString() + " deleted from DB!");
-            return true;
         } catch (Exception e) {
             return false;
         }
@@ -300,11 +255,14 @@ public class DatabaseController implements ServletContextListener {
         String dbFilePath = servletFilePath + "WEB-INF/" + config.getDbName();
 
         EmbeddedConfiguration dbconfig = Db4oEmbedded.newConfiguration();
+        //dbconfig.common().diagnostic().addListener(new DiagnosticToConsole());
         dbconfig.common().objectClass(Area.class).cascadeOnUpdate(true);
         dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);
         //dbconfig.common().optimizeNativeQueries(true);
-        //dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
-        //dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
+        dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
+        dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
+        dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
+        dbconfig.common().objectClass(WifiSensor.class).objectField("position").indexed(true);
         con = Db4oEmbedded.openFile(dbconfig, dbFilePath);
 
         log.log(TAG, "db4o startup on " + dbFilePath);

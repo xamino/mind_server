@@ -1,8 +1,6 @@
 package de.uulm.mi.mind.io;
 
-import de.uulm.mi.mind.objects.Area;
 import de.uulm.mi.mind.objects.DataList;
-import de.uulm.mi.mind.objects.Location;
 import de.uulm.mi.mind.objects.User;
 import org.junit.*;
 
@@ -11,9 +9,10 @@ import java.io.File;
 import static org.junit.Assert.*;
 
 /**
- * Created by Cassio on 07.03.14.
+ * This class runs test cases on database operations.
+ * Not the object modifications are tested, but the correct execution of operations only.
  */
-public class DatabaseControllerTest {
+public class DatabaseControllerOperationsTest {
 
     private static DatabaseController dbc;
 
@@ -33,29 +32,30 @@ public class DatabaseControllerTest {
     }
 
     @Test
-    public void create() {
+    public void createOp() {
         assertFalse(dbc.create(null));
     }
 
     @Test
-    public void read() {
+    public void readOp() {
         DataList data = dbc.read(null);
         assertNotNull("Must return a DataList", data);
         assertFalse("List must contain objects", data.isEmpty());
     }
 
     @Test
-    public void update() {
+    public void updateOp() {
         assertFalse(dbc.update(null));
     }
 
     @Test
-    public void delete() {
-        assertFalse(dbc.delete(null)); //TODO delete all?
+    public void deleteOp() {
+        assertTrue(dbc.delete(null));
+        assertTrue(dbc.read(null).isEmpty());
     }
 
     @Test
-    public void createUsers() {
+    public void createUsersOp() {
         // Test creation with all constructors
         assertTrue(dbc.create(new User("gummibär@bärendorf.cu")));
         assertTrue(dbc.create(new User("kuchen@zuckerland.kl", "Honigkuchen")));
@@ -67,11 +67,10 @@ public class DatabaseControllerTest {
     }
 
     @Test
-    public void updateUsers() {
+    public void updateUsersOp() {
         // Update Values
-        dbc.create(new User("gummibär@bärendorf.cu"));
-        assertTrue(dbc.update(new User("gummibär@bärendorf.cu", "Gummibär")));
-        assertTrue(dbc.update(new User("gummibär@bärendorf.cu", "GroßerGummibär", false)));
+        assertTrue(dbc.update(new User("admin@mail.de", "Gummibär")));
+        assertTrue(dbc.update(new User("admin@mail.de", "GroßerGummibär", false)));
 
         // Test update invalid users
         assertFalse(dbc.update(new User(null)));
@@ -80,30 +79,28 @@ public class DatabaseControllerTest {
     }
 
     @Test
-    public void deleteUsers() {
+    public void deleteUsersOp() {
         // Delete user
         dbc.create(new User("gummibär@bärendorf.cu"));
         assertTrue(dbc.delete(new User("gummibär@bärendorf.cu")));
-        // try once again to delete him
-        assertTrue(dbc.delete(new User("gummibär@bärendorf.cu"))); //TODO is still deleted
+        // try once again to delete him, should not work
+        assertFalse(dbc.delete(new User("gummibär@bärendorf.cu")));
 
         // delete using different user but same key
         dbc.create(new User("gummibär@bärendorf.cu"));
         assertTrue(dbc.delete(new User("gummibär@bärendorf.cu", "name")));
 
 
-        assertTrue("Deletion of all Users failed.", dbc.delete(new User(null)));
+        assertTrue(dbc.delete(new User(null)));
 
-        // Test delete invalid users
-        assertTrue(dbc.delete(new User(""))); //TODO never existed, deleted is true
+        // Test delete invalid, non existing user
+        assertFalse("Non existing user was deleted.", dbc.delete(new User("")));
     }
 
     @After
     public void testCleanup() {
         System.out.println("---Cleanup---");
-        dbc.deleteAll(new User(null));
-        dbc.deleteAll(new Area(null));
-        dbc.deleteAll(new Location(0, 0));
+        dbc.delete(null);
     }
 
     // Run after all tests here

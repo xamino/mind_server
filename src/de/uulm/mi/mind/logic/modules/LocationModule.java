@@ -195,10 +195,10 @@ public class LocationModule extends Module {
      * @return Success or Error depending on DB action.
      */
     private Data annihilateAreas() {
-        Boolean deleted = database.deleteAll(new Area(null, null, 0, 0, 0, 0));
+        Boolean deleted = database.delete(new Area(null));
         // Delete these to be sure...
-        deleted &= database.deleteAll(new Location(0, 0, null));
-        deleted &= database.deleteAll(new WifiMorsel(null, null, 0));
+        deleted &= database.delete(new Location(0, 0, null));
+        deleted &= database.delete(new WifiMorsel(null, null, 0));
         if (deleted) {
             database.reinit();
             return new Success("All areas were removed from Database.");
