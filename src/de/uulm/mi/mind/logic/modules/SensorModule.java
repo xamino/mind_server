@@ -38,7 +38,7 @@ public class SensorModule extends Module {
                     return update(request);
                 case DELETE:
                     if (((WifiSensor) request).readIdentification() == null) {
-                        if (DatabaseController.getInstance().deleteAll(request))
+                        if (DatabaseController.getInstance().delete(request))
                             return new Success("All WifiSensors were deleted.");
                         else
                             return new de.uulm.mi.mind.objects.messages.Error(Error.Type.DATABASE, "Failed to delete wifi sensors!");

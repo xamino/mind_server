@@ -1,13 +1,13 @@
 package de.uulm.mi.mind.logic.modules;
 
-import de.uulm.mi.mind.objects.Data;
 import de.uulm.mi.mind.io.DatabaseController;
-import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.PublicDisplay;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
+import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.PublicDisplay;
 import de.uulm.mi.mind.objects.enums.Task;
+import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.objects.messages.Success;
 
 /**
  * Module that handles all tasks related to the public displays.
@@ -30,19 +30,19 @@ public class DisplayModule extends Module {
             Task.Display todo = (Task.Display) task;
             switch (todo) {
                 case CREATE:
-                    return create((PublicDisplay) request);
+                    return create(request);
                 case READ:
-                    return read((PublicDisplay) request);
+                    return read(request);
                 case UPDATE:
-                    return update((PublicDisplay) request);
+                    return update(request);
                 case DELETE:
                     if (((PublicDisplay) request).readIdentification() == null) {
-                        if (DatabaseController.getInstance().deleteAll(request))
+                        if (DatabaseController.getInstance().delete(request))
                             return new Success("All displays were deleted.");
                         else
                             return new Error(Error.Type.DATABASE, "Failed to delete displays.");
                     }
-                    return delete((PublicDisplay) request);
+                    return delete(request);
                 default:
                     break;
             }
