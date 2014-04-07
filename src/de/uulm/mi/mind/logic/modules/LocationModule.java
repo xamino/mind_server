@@ -173,7 +173,6 @@ public class LocationModule extends Module {
     private void updateMapping() {
         DataList<Location> locations = database.read(new Location(0, 0, null));
         DataList<Area> areas = database.read(new Area(null));
-        // log.log(TAG, "Updating mapping with " + areas.size() + " areas and " + locations.size() + " locations.");
         log.pushTimer(this, "");
         for (Area area : areas) {
             area.setLocations(new DataList<Location>());
@@ -193,7 +192,7 @@ public class LocationModule extends Module {
     /**
      * Removes all location specific information from the database then restores the default area.
      *
-     * @return
+     * @return Success or Error depending on DB action.
      */
     private Data annihilateAreas() {
         Boolean deleted = database.delete(new Area(null));
