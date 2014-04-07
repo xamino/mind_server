@@ -156,7 +156,15 @@ public class LocationModule extends Module {
                 finalArea = temp;
             }
         }
-        return finalArea;
+        //TODO clone for bug fix WTF
+        Area f = new Area(finalArea.getID());
+        f.setHeight(finalArea.getHeight());
+        f.setWidth(finalArea.getWidth());
+        f.setTopLeftX(finalArea.getTopLeftX());
+        f.setTopLeftY(finalArea.getTopLeftY());
+        f.setLocations(finalArea.getLocations());
+
+        return f;
     }
 
     /**

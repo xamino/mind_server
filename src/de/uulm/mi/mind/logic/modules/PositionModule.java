@@ -56,7 +56,7 @@ public class PositionModule extends Module {
                 // send back the location that the server thinks you're at with the area
                 DataList loca = new DataList();
                 loca.add(location);
-                area.setLocations(loca);
+                area.setLocations(loca); // TODO This causes the bug, but why?!
                 return area;
             case READ:
                 // read all users
