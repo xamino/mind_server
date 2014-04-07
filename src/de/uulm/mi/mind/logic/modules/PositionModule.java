@@ -110,7 +110,6 @@ public class PositionModule extends Module {
      */
     private Location calculateLocation(Location request) {
         // Get Area containing all locations from database
-        log.error(TAG, "HERE IS THE ERROR");
         Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe", null, 0, 0, 0, 0))).get(0);
 
         // A Map that describes how many matches there are for this location
