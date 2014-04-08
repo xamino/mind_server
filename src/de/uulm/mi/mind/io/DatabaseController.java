@@ -130,6 +130,7 @@ public class DatabaseController implements ServletContextListener {
         }
     }
 
+    // todo look if we can use this
     public DataList<Area> getAreasContainingLocation(final Location contained) {
         List queryResult = con.query(new Predicate<Area>() {
             @Override

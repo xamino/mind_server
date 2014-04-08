@@ -328,6 +328,7 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.User.DELETE, arrival.getObject());
             // LOCATION --------------------------------------------------------------------------
             // TODO sanitize and make sane!
+            // todo filter for eduroam and welcome
             case LOCATION_READ:
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error(Error.Type.WRONG_OBJECT);
