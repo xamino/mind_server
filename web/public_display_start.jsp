@@ -16,7 +16,7 @@
 
 <!-- MAP DISPLAY STUFF -->
 <div id="mapscroll" >
-		<img id="mapimg" class="mapcontent" src="images/map.png"/>
+		<!-- <img id="mapimg" class="mapcontent" src="images/map.png"/>-->
 		<!-- <img class="micon" src="images/micons/crab.png"/> -->
 </div>
 <!-- Slider not in use -->
