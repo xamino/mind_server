@@ -806,7 +806,7 @@ function handleAllUsersPositionData(){
 	users[0] = user1;
 	users[1] = user2;
 	
-	retriveOriginalMetrics(users);
+	retriveOriginalIconMetrics(users);
 //END TESTAREA
 }
 

@@ -17,7 +17,7 @@ function retriveOriginalMetrics(allusers){
 	//get initial slider value;
 	/* NOT IN USE
 	slider = document.getElementById("slider");
-	previousScaleValue = slider.value; */
+	previousScaleValue = slider.value; 
 	
 	users = allusers;
 	var imgLoad = $("<img />");
@@ -26,16 +26,20 @@ function retriveOriginalMetrics(allusers){
 	imgLoad.bind("load", function () {
 		/*originalWidth = this.width;
 		originalHeight = this.height;
-		computeFactors();*/
+		computeFactors();
 		retriveOriginalIconMetrics();
 	});
+	*/
 }
 
 /**
  * This function retrives the original metrics (width & height) of one icon image
  * @param allusers
  */
-function retriveOriginalIconMetrics(){	
+function retriveOriginalIconMetrics(allusers){
+	
+	users = allusers;
+	
 	var imgLoad = $("<img />");
 	imgLoad.attr("src", "images/micons/crab.png");
 	imgLoad.unbind("load");
