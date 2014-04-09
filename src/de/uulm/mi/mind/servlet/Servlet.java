@@ -61,6 +61,7 @@ public class Servlet extends HttpServlet {
         json.registerType(Location.class);
         json.registerType(PublicDisplay.class);
         json.registerType(Success.class);
+        json.registerType(SensedDevice.class);
         json.registerType(User.class);
         json.registerType(WifiMorsel.class);
         json.registerType(WifiSensor.class);
