@@ -67,7 +67,7 @@ public class WifiSensor implements Authenticated, Data {
     public String toString() {
         return "WifiSensor{" +
                 "position='" + position + '\'' +
-                ", tokenHash='" + tokenHash + '\'' +
+                // ", tokenHash='" + tokenHash + '\'' +
                 ", lastAccess=" + lastAccess +
                 '}';
     }

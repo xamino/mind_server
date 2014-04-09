@@ -28,6 +28,25 @@ Server IP address is <span id="ip"></span>.
 </script>
 <br>
 <br>
+Currently there are <b><span id="sessions">?</span></b> sessions active (without this script).
+<input type="button" value="Update" onclick="updateSessions();">
+<span id="lastSessionUpdate">Never</span>
+<script language="JavaScript">
+    var alsdkjf = "";
+    function updateSessions() {
+        if (alsdkjf == "") {
+            alsdkjf = getAdminSession();
+        }
+        send(new Arrival("admin_read_sessions", alsdkjf, null), function (data) {
+            var number = data.object.length - 1;
+            document.getElementById("sessions").innerHTML = number;
+            var date = new Date();
+            document.getElementById("lastSessionUpdate").innerHTML = date.getHours() + ":" + date.getMinutes();
+        });
+    }
+</script>
+<br>
+<br>
 The session is saved in var session for your convenience, no need to copy & paste it. Also note that the JS consists of
 three parts: the JQuery library (don't touch!), the library.js (only touch if you're Tamino :P ), and run.js, where all
 the functional code should go.

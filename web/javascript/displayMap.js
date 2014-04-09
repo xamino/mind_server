@@ -6,8 +6,8 @@ var heigthFactor=1; //the factor by which the height of the displayed image devi
 var zoomValue = 30; //holds the width value for each zoom-step in pixels
 
 var users; //the current (to be) displayed users;
-
-var slider; //the slider element
+/*NOT IN USE
+var slider; //the slider element */
 /**
  * This function retrives the original metrics (width & height) of the map image (map.png)
  * @param allusers
@@ -15,26 +15,31 @@ var slider; //the slider element
 function retriveOriginalMetrics(allusers){
 	
 	//get initial slider value;
+	/* NOT IN USE
 	slider = document.getElementById("slider");
-	previousScaleValue = slider.value;
+	previousScaleValue = slider.value; 
 	
 	users = allusers;
 	var imgLoad = $("<img />");
 	imgLoad.attr("src", "images/map.png");
 	imgLoad.unbind("load");
 	imgLoad.bind("load", function () {
-		originalWidth = this.width;
+		/*originalWidth = this.width;
 		originalHeight = this.height;
 		computeFactors();
 		retriveOriginalIconMetrics();
 	});
+	*/
 }
 
 /**
  * This function retrives the original metrics (width & height) of one icon image
  * @param allusers
  */
-function retriveOriginalIconMetrics(){	
+function retriveOriginalIconMetrics(allusers){
+	
+	users = allusers;
+	
 	var imgLoad = $("<img />");
 	imgLoad.attr("src", "images/micons/crab.png");
 	imgLoad.unbind("load");
@@ -45,10 +50,12 @@ function retriveOriginalIconMetrics(){
 	});
 }
 
+
 /**
  * This function computes the scale factor of the image
  * and should be called on startup as well as after/when scaling
  */
+/* NOT IN USE
 function computeFactors(){
 	var mapimg = document.getElementById("mapimg");
 	if(originalHeight!=null&&originalHeight!=0){
@@ -57,7 +64,7 @@ function computeFactors(){
 	if(originalWidth!=null&&originalWidth!=0){
 		widthFactor = mapimg.clientWidth/originalWidth;
 	}
-}
+}*/
 
 /**
  * This method converts the x value for displaying purposes (subtracting half the width)
@@ -410,8 +417,8 @@ function displayUserInfo(email){
 }
 
 
-//MAP SCALING AND PANNING STUFF
-
+//MAP SCALING AND PANNING STUFF - NOT IN USE
+/*
 var clicking = false;
 var previousX;
 var previousY;
@@ -474,4 +481,4 @@ function doScale(value){
 	
 	previousScaleValue = value;
 	
-}
+}*/

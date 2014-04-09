@@ -94,6 +94,19 @@ public class Security {
         getInstance().update(active);
     }
 
+    /**
+     * Method that returns all currently logged in users.
+     *
+     * @return Datalist containing all users.
+     */
+    public static Data readActives() {
+        DataList list = new DataList();
+        for (Active active : Security.getInstance().actives.values()) {
+            list.add(active.getAuthenticated());
+        }
+        return list;
+    }
+
     //
     // -------------------------- Actual instanced code here ----------------------------
     //

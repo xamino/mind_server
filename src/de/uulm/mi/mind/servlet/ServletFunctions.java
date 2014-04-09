@@ -328,6 +328,7 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.User.DELETE, arrival.getObject());
             // LOCATION --------------------------------------------------------------------------
             // TODO sanitize and make sane!
+            // todo filter for eduroam and welcome
             case LOCATION_READ:
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error(Error.Type.WRONG_OBJECT);
@@ -518,6 +519,8 @@ public class ServletFunctions {
             // Read all positions (as publicly seen)
             case READ_ALL_POSITIONS:
                 return moduleManager.handleTask(Task.Position.READ, null);
+            case ADMIN_READ_SESSIONS:
+                return Security.readActives();
             default:
                 return null;
         }
