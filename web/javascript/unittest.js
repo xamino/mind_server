@@ -523,6 +523,152 @@ function wifiSensorAPITest() {
     alert("Finished WifiSensor API test.")
 }
 
+function statusTest() {
+    alert("Beginning Status Test!");
+    cleanDB();
+
+    var adminSession = getAdminSession();
+
+    //prepare test environment
+    var wifis1 = [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -93),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -90),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -85)
+    ];
+    var wifis2 = [
+        new WifiMorsel("00:19:07:00:65:00", "eduroam", -54),
+        new WifiMorsel("00:19:07:00:65:01", "welcome", -34),
+        new WifiMorsel("00:19:07:00:66:02", "welcome", -12)
+    ];
+    var wifiRequestOutside = [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -95),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -91),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -83)
+    ];
+    var wifiRequestInside = [
+        new WifiMorsel("00:19:07:00:65:00", "eduroam", -55),
+        new WifiMorsel("00:19:07:00:65:01", "welcome", -33),
+        new WifiMorsel("00:19:07:00:66:02", "welcome", -11)
+    ];
+    unitTest("area_add", new Area("Institute", null, 10, 10, 30, 30), Success, adminSession);
+    unitTest("location_add", new Location(1, 1, wifis1), Success, adminSession);
+    unitTest("location_add", new Location(15, 15, wifis2), Success, adminSession);
+    unitTest("display_add", new PublicDisplay("some_place", "some_token", "Some Place", 11, 11), Success, adminSession);
+
+    var displaySession = unitTest("login", new PublicDisplay("some_place", "some_token"), Success, null).description;
+
+    //create user
+    unitTest("registration", new User("testUser@mail.de", "test", "Test Testy"), Success, null);
+
+    //registered user must not be on pd
+    var userLocs = unitTest("read_all_positions", null, Array, displaySession);
+    if (userLocs == null || userLocs.length != 0) {
+        alert("Wrong number of available user locations (not 0)! testUser@mail.de must not be listed!\n\n" + JSON.stringify(userLocs));
+    }
+
+    // user login
+    var testSession = unitTest("login", new User("testUser@mail.de", "test", null), Success, null).description;
+
+    // logged in user that has not sent a position request is also not in the system
+    userLocs = unitTest("read_all_positions", null, Array, displaySession);
+    if (userLocs == null || userLocs.length != 0) {
+        alert("Wrong number of available user locations (not 0)! testUser@mail.de must not be listed!\n\n" + JSON.stringify(userLocs));
+    }
+
+    // user is tracked out of institute
+    var match = unitTest("position_find", wifiRequestOutside, Area, testSession);
+    if (!instanceOf(match, Area) || match.ID != "universe") {
+        alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (universe).");
+    }
+
+    // user shows now up as away == in universe
+    userLocs = unitTest("read_all_positions", null, Array, displaySession);
+    if (userLocs == null || userLocs.length != 1 || userLocs[0].location != null) {
+        alert("Wrong number of available user locations (not 1)! testUser@mail.de must be untracked!\n\n" + JSON.stringify(userLocs));
+    }
+
+    // user is tracked inside of institute
+    match = unitTest("position_find", wifiRequestInside, Area, testSession);
+    if (!instanceOf(match, Area) || match.ID != "Institute") {
+        alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (Institute).");
+    }
+
+    // user shows now up as available == in institute
+    userLocs = unitTest("read_all_positions", null, Array, displaySession);
+    if (userLocs == null || userLocs.length != 1 || userLocs[0].location != "Institute") {
+        alert("Wrong number of available user locations (not 1)! testUser@mail.de must be in Institute!\n\n" + JSON.stringify(userLocs));
+    }
+
+    //user changes status to invisible
+    var testUser = new User("testUser@mail.de");
+    testUser.status = "invisible";
+    unitTest("user_update", testUser, Success, testSession);
+
+    // user is tracked out of institute
+    match = unitTest("position_find", wifiRequestOutside, Area, testSession);
+    if (!instanceOf(match, Area) || match.ID != "universe") {
+        alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (universe).");
+    }
+
+    // user shows now up as away == in universe
+    userLocs = unitTest("read_all_positions", null, Array, displaySession);
+    if (userLocs == null || userLocs.length != 0) {
+        alert("Wrong number of available user locations (not 0)! testUser@mail.de is invisible and must not be listed!\n\n" + JSON.stringify(userLocs));
+    }
+
+    // user is tracked inside of institute
+    match = unitTest("position_find", wifiRequestInside, Area, testSession);
+    if (!instanceOf(match, Area) || match.ID != "Institute") {
+        alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (Institute).");
+    }
+
+    // user shows now up as available == in institute
+    userLocs = unitTest("read_all_positions", null, Array, displaySession);
+    if (userLocs == null || userLocs.length != 0) {
+        alert("Wrong number of available user locations (not 0)! testUser@mail.de is invisible and must not be listed!\n\n" + JSON.stringify(userLocs));
+    }
+
+    // user changes status to visible
+    testUser.status = "available";
+    unitTest("user_update", testUser, Success, testSession);
+
+    // user is tracked out of institute
+    match = unitTest("position_find", wifiRequestOutside, Area, testSession);
+    if (!instanceOf(match, Area) || match.ID != "universe") {
+        alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (universe).");
+    }
+
+    // user shows now up as away == in universe
+    userLocs = unitTest("read_all_positions", null, Array, displaySession);
+    if (userLocs == null || userLocs.length != 1 || userLocs[0].location != null) {
+        alert("Wrong number of available user locations (not 1)!\n\n" + JSON.stringify(userLocs));
+    }
+
+    // user is tracked inside of institute
+    match = unitTest("position_find", wifiRequestInside, Area, testSession);
+    if (!instanceOf(match, Area) || match.ID != "Institute") {
+        alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (Institute).");
+    }
+
+    // user shows now up as available == in institute
+    userLocs = unitTest("read_all_positions", null, Array, displaySession);
+    if (userLocs == null || userLocs.length != 1 || userLocs[0].location != "Institute") {
+        alert("Wrong number of available user locations (not 1)!\n\n" + JSON.stringify(userLocs));
+    }
+
+    // user logs out
+    unitTest("logout", null, Array, testSession);
+
+    //logged out user must not be on pd
+    userLocs = unitTest("read_all_positions", null, Array, displaySession);
+    if (userLocs == null || userLocs.length != 0) {
+        alert("Wrong number of available user locations (not 0)!\n\n" + JSON.stringify(userLocs));
+    }
+
+    cleanDB();
+    alert("Finished Status test.")
+}
+
 /**
  * Use this method to clean the DB.
  */
