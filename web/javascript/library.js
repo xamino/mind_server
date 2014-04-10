@@ -126,12 +126,13 @@ function Arrival(task, sessionHash, object) {
     this.object = object;
 }
 
-function User(email, password, name, admin) {
+function User(email, password, name, admin, status) {
     this.$type = "User";
     this.email = email;
     this.pwdHash = password;
     this.name = name;
     this.admin = admin; // can not be changed by unauthorized clients, don't try :P
+    this.status = status;
 }
 
 function Success(type, description) {

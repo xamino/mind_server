@@ -374,8 +374,8 @@ function testPositionRead() {
     unitTest("location_add", location3, Success, adminSession);
     unitTest("area_add", new Area("office", null, 145, 145, 10, 10), Success, adminSession);
     unitTest("area_add", new Area("institute", null, 140, 140, 100, 100), Success, adminSession);
-    unitTest("admin_user_add", new User("shark@ocean.int", "shark", "Haifisch Freund", false), Success, adminSession);
-    unitTest("admin_user_add", new User("dolphin@ocean.int", "thx4fish", "Prof. Turnschwimmer", false), Success, adminSession);
+    unitTest("admin_user_add", new User("shark@ocean.int", "shark", "Haifisch Freund", false, "AVAILABLE"), Success, adminSession);
+    unitTest("admin_user_add", new User("dolphin@ocean.int", "thx4fish", "Prof. Turnschwimmer", false, "AVAILABLE"), Success, adminSession);
     // Note that adminSession is on purpose; Security should ignore it in favor of login in a new user
     var sharkSession = unitTest("login", new User("shark@ocean.int", "shark"), Success, adminSession).description;
     var dolphinSession = unitTest("login", new User("dolphin@ocean.int", "thx4fish"), Success, null).description;
