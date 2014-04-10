@@ -4,9 +4,11 @@ import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.enums.Status;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
+import de.uulm.mi.mind.security.Security;
 import de.uulm.mi.mind.servlet.ServletFunctions;
 
 import java.util.*;
@@ -54,7 +56,7 @@ public class PositionModule extends Module {
                     return new Success(Success.Type.NOTE, "Your position could not be found.");
                 }
                 // send back the location that the server thinks you're at with the area
-                DataList loca = new DataList();
+                DataList<Location> loca = new DataList<>();
                 loca.add(location);
                 area.setLocations(loca); // TODO This causes the bug, but why?!
                 return area;
@@ -67,15 +69,23 @@ public class PositionModule extends Module {
                 }
                 DataList users = ((DataList) evtlUserList);
                 // filter the list – apply status and set special cases
-                DataList sendUsers = new DataList();
+                DataList<User> sendUsers = new DataList<>();
                 for (Object obj : users) {
                     User us = ((User) obj);
+                    String position = us.getPosition();
                     // if lastPosition is null, the user may not be active in the system
-                    if (us.getPosition() == null) {
+                    if (position == null || !Security.readActives().contains(us)) { //TODO update user when logged out or keep position?
                         // so ignore
                         continue;
+                    } else if (position.equals("universe")) {
+                        position = null;
                     }
-                    // TODO filter based on status!
+                    // filter by status, don't return invisible users
+                    if (us.getStatus() == null || us.getStatus() == Status.INVISIBLE) {
+                        continue;
+                    } else if (us.getStatus() == Status.AWAY) { // TODO prob not needed as null should be mapped to away by client already.
+                        position = null;
+                    }
 
                     // filter based on time
                     // todo This is not the last position time – how do i do this better?
@@ -94,7 +104,7 @@ public class PositionModule extends Module {
                     }
                     // Filter user object to only give name + position
                     User toSend = new User(us.getEmail(), us.getName());
-                    toSend.setPosition(us.getPosition());
+                    toSend.setPosition(position);
                     sendUsers.add(toSend);
                 }
                 return sendUsers;

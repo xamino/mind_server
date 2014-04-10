@@ -9,26 +9,21 @@ import java.util.ArrayList;
  */
 public class DataList<T extends Data> extends ArrayList<T> implements Data {
 
-    public String toString() {
-
-        Data[] a = this.toArray(new Data[0]);
-
-        if (a == null)
-            return "null";
-
-        int iMax = a.length - 1;
-        if (iMax == -1)
-            return "[]";
-
-        StringBuilder b = new StringBuilder();
-        b.append('[');
-        for (int i = 0; ; i++) {
-            b.append(String.valueOf(a[i]));
-            if (i == iMax)
-                return b.append(']').toString();
-            b.append(", ");
+    // Override to allow contains() to work with Data keys.
+    @Override
+    public int indexOf(Object o) {
+        if (o == null) {
+            super.indexOf(o);
+        } else if (o instanceof Data) {
+            Data d = (Data) o;
+            if (d.getKey() == null) return super.indexOf(o);
+            for (int i = 0; i < size(); i++)
+                if (d.getKey().equals(get(i).getKey()))
+                    return i;
         }
+        return -1;
     }
+
 
     @Override
     public String getKey() {

@@ -97,11 +97,11 @@ public class Security {
     /**
      * Method that returns all currently logged in users.
      *
-     * @return Datalist containing all users.
+     * @return ArrayList containing all authenticated user types.
      */
-    public static Data readActives() {
-        DataList list = new DataList();
-        for (Active active : Security.getInstance().actives.values()) {
+    public static DataList<Authenticated> readActives() {
+        DataList<Authenticated> list = new DataList<>();
+        for (Active active : getInstance().actives.values()) {
             list.add(active.getAuthenticated());
         }
         return list;
@@ -253,7 +253,7 @@ public class Security {
      * @return The Authenticated freshly read if available, else null.
      */
     private Authenticated readDB(Authenticated authenticated) {
-        Data data;
+        DataList data;
         if (authenticated instanceof User) {
             data = database.read(new User(authenticated.readIdentification()));
         } else if (authenticated instanceof PublicDisplay) {
@@ -264,10 +264,10 @@ public class Security {
             log.error(TAG, "Read from DB failed because of wrong object given!");
             return null;
         }
-        if (!(data != null && ((DataList) data).size() == 1)) {
+        if (!(data != null && data.size() == 1)) {
             // log.error(TAG, "Read from DB failed because read object is either missing or ambiguous!");
             return null;
         }
-        return (Authenticated) ((DataList) data).get(0);
+        return (Authenticated) data.get(0);
     }
 }

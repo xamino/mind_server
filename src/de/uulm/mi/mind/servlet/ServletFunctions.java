@@ -161,6 +161,9 @@ public class ServletFunctions {
                 if (safeString(sentUser.getName())) {
                     user.setName(sentUser.getName());
                 }
+                // status TODO remove log when working
+                log.log(TAG, "User update status set to: " + sentUser.getStatus());
+                user.setStatus(sentUser.getStatus());
                 // Note that the session user object now needs to be updated. This is done the next time the user
                 // sends a request through SecurityModule; it will always get the up to date object from the
                 // database.
@@ -183,6 +186,7 @@ public class ServletFunctions {
                     return msg;
                 }
                 Area area = ((Area) data);
+                boolean areaChanged = false;
                 // todo user should not save area again, could overwrite!!!
                 // this implements server-side fuzziness to avoid fluttering of position_find
                 if (!(activeUser.readData(LAST_POSITION) instanceof Area)) {
@@ -190,17 +194,22 @@ public class ServletFunctions {
                     activeUser.writeData(LAST_POSITION, area);
                     activeUser.writeData(REAL_POSITION, area);
                     user.setPosition(area.getID());
+                    areaChanged = true;
                 } else if (((Area) activeUser.readData(LAST_POSITION)).getID().equals(area.getID())) {
                     // update user for position, but only if last was already the same
                     activeUser.writeData(REAL_POSITION, area);
                     user.setPosition(area.getID());
+                    areaChanged = true;
                 } else {
                     // this means the area is different than the one before, so change lastPosition but not User:
                     activeUser.writeData(LAST_POSITION, area);
                 }
-                msg = moduleManager.handleTask(Task.User.UPDATE, user);
-                if (!(msg instanceof Success)) {
-                    return msg;
+                // Only update user if location has actually changed.
+                if (areaChanged) {
+                    msg = moduleManager.handleTask(Task.User.UPDATE, user);
+                    if (!(msg instanceof Success)) {
+                        return msg;
+                    }
                 }
                 // everything okay, return real position area
                 return (Data) activeUser.readData(REAL_POSITION);
@@ -316,6 +325,8 @@ public class ServletFunctions {
                 if (safeString(tempUser.getPwdHash())) {
                     originalUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
                 }
+                // change status
+                originalUser.setStatus(tempUser.getStatus());
                 // change admin status
                 originalUser.setAdmin(tempUser.isAdmin());
                 // and update

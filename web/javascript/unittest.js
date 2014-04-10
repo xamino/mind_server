@@ -560,7 +560,7 @@ function statusTest() {
     //create user
     unitTest("registration", new User("testUser@mail.de", "test", "Test Testy"), Success, null);
 
-    //registered user must not be on pd
+    //newly registered user must not be on pd
     var userLocs = unitTest("read_all_positions", null, Array, displaySession);
     if (userLocs == null || userLocs.length != 0) {
         alert("Wrong number of available user locations (not 0)! testUser@mail.de must not be listed!\n\n" + JSON.stringify(userLocs));
@@ -575,41 +575,56 @@ function statusTest() {
         alert("Wrong number of available user locations (not 0)! testUser@mail.de must not be listed!\n\n" + JSON.stringify(userLocs));
     }
 
+    // make user status not null (not invisible)
+    var testUser = new User("testUser@mail.de");
+    testUser.status = "AVAILABLE";
+    unitTest("user_update", testUser, Success, testSession);
+
+    // logged in user that is visible but that has not sent a position request is also not in the system
+    userLocs = unitTest("read_all_positions", null, Array, displaySession);
+    if (userLocs == null || userLocs.length != 0) {
+        alert("Wrong number of available user locations (not 0)! testUser@mail.de must not be listed!\n\n" + JSON.stringify(userLocs));
+    }
+
+    // reset to null status as if first logged in without a status set
+    testUser.status = null;
+    unitTest("user_update", testUser, Success, testSession);
+
+    // Start with some tracking
     // user is tracked out of institute
-    var match = unitTest("position_find", wifiRequestOutside, Area, testSession);
+    var match = unitTest("position_find", new Location(0, 0, wifiRequestOutside), Area, testSession);
+    match = unitTest("position_find", new Location(0, 0, wifiRequestOutside), Area, testSession);
     if (!instanceOf(match, Area) || match.ID != "universe") {
         alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (universe).");
     }
-
     // user shows now up as away == in universe
     userLocs = unitTest("read_all_positions", null, Array, displaySession);
-    if (userLocs == null || userLocs.length != 1 || userLocs[0].location != null) {
-        alert("Wrong number of available user locations (not 1)! testUser@mail.de must be untracked!\n\n" + JSON.stringify(userLocs));
+    if (userLocs == null || userLocs.length != 0) {
+        alert("Wrong number of available user locations (not 0)! testUser@mail.de has never set status and thus is invisible!\n\n" + JSON.stringify(userLocs));
     }
 
     // user is tracked inside of institute
-    match = unitTest("position_find", wifiRequestInside, Area, testSession);
+    match = unitTest("position_find", new Location(0, 0, wifiRequestInside), Area, testSession);
+    match = unitTest("position_find", new Location(0, 0, wifiRequestInside), Area, testSession);
     if (!instanceOf(match, Area) || match.ID != "Institute") {
         alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (Institute).");
     }
-
     // user shows now up as available == in institute
     userLocs = unitTest("read_all_positions", null, Array, displaySession);
-    if (userLocs == null || userLocs.length != 1 || userLocs[0].location != "Institute") {
-        alert("Wrong number of available user locations (not 1)! testUser@mail.de must be in Institute!\n\n" + JSON.stringify(userLocs));
+    if (userLocs == null || userLocs.length != 0) {
+        alert("Wrong number of available user locations (not 0)! testUser@mail.de has never set status and thus is invisible!\n\n" + JSON.stringify(userLocs));
     }
 
-    //user changes status to invisible
-    var testUser = new User("testUser@mail.de");
-    testUser.status = "invisible";
+    //user changes status to invisible which should result in equal results as null
+    testUser.status = "INVISIBLE";
     unitTest("user_update", testUser, Success, testSession);
 
     // user is tracked out of institute
-    match = unitTest("position_find", wifiRequestOutside, Area, testSession);
+    match = unitTest("position_find", new Location(0, 0, wifiRequestOutside), Area, testSession);
+    match = unitTest("position_find", new Location(0, 0, wifiRequestOutside), Area, testSession);
     if (!instanceOf(match, Area) || match.ID != "universe") {
         alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (universe).");
     }
-
     // user shows now up as away == in universe
     userLocs = unitTest("read_all_positions", null, Array, displaySession);
     if (userLocs == null || userLocs.length != 0) {
@@ -617,11 +632,11 @@ function statusTest() {
     }
 
     // user is tracked inside of institute
-    match = unitTest("position_find", wifiRequestInside, Area, testSession);
+    match = unitTest("position_find", new Location(0, 0, wifiRequestInside), Area, testSession);
+    match = unitTest("position_find", new Location(0, 0, wifiRequestInside), Area, testSession);
     if (!instanceOf(match, Area) || match.ID != "Institute") {
         alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (Institute).");
     }
-
     // user shows now up as available == in institute
     userLocs = unitTest("read_all_positions", null, Array, displaySession);
     if (userLocs == null || userLocs.length != 0) {
@@ -629,40 +644,41 @@ function statusTest() {
     }
 
     // user changes status to visible
-    testUser.status = "available";
+    testUser.status = "AVAILABLE";
     unitTest("user_update", testUser, Success, testSession);
 
+    // From here on actual results should be listed
     // user is tracked out of institute
-    match = unitTest("position_find", wifiRequestOutside, Area, testSession);
+    match = unitTest("position_find", new Location(0, 0, wifiRequestOutside), Area, testSession);
+    match = unitTest("position_find", new Location(0, 0, wifiRequestOutside), Area, testSession);
     if (!instanceOf(match, Area) || match.ID != "universe") {
         alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (universe).");
     }
-
     // user shows now up as away == in universe
     userLocs = unitTest("read_all_positions", null, Array, displaySession);
-    if (userLocs == null || userLocs.length != 1 || userLocs[0].location != null) {
-        alert("Wrong number of available user locations (not 1)!\n\n" + JSON.stringify(userLocs));
+    if (userLocs == null || userLocs.length != 1 || userLocs[0].position != null) {
+        alert("Wrong number of available user locations (not 1)! testUser@mail.de is tracked in universe, location should be null!\n\n" + JSON.stringify(userLocs));
     }
 
     // user is tracked inside of institute
-    match = unitTest("position_find", wifiRequestInside, Area, testSession);
+    match = unitTest("position_find", new Location(0, 0, wifiRequestInside), Area, testSession);
+    match = unitTest("position_find", new Location(0, 0, wifiRequestInside), Area, testSession);
     if (!instanceOf(match, Area) || match.ID != "Institute") {
         alert("Failed 'position_find'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (Institute).");
     }
-
     // user shows now up as available == in institute
     userLocs = unitTest("read_all_positions", null, Array, displaySession);
-    if (userLocs == null || userLocs.length != 1 || userLocs[0].location != "Institute") {
-        alert("Wrong number of available user locations (not 1)!\n\n" + JSON.stringify(userLocs));
+    if (userLocs == null || userLocs.length != 1 || userLocs[0].position != "Institute") {
+        alert("Wrong number of available user locations (not 1)! testUser@mail.de is tracked in Institute, location should be set!\n\n" + JSON.stringify(userLocs));
     }
 
     // user logs out
-    unitTest("logout", null, Array, testSession);
+    unitTest("logout", null, Success, testSession);
 
     //logged out user must not be on pd
     userLocs = unitTest("read_all_positions", null, Array, displaySession);
     if (userLocs == null || userLocs.length != 0) {
-        alert("Wrong number of available user locations (not 0)!\n\n" + JSON.stringify(userLocs));
+        alert("Wrong number of available user locations (not 0)! testUser@mail.de is logged out, he must not be shown!\n\n" + JSON.stringify(userLocs));
     }
 
     cleanDB();

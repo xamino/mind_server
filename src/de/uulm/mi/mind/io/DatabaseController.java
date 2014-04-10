@@ -206,7 +206,7 @@ public class DatabaseController implements ServletContextListener {
         try {
             DataList<Data> dataList;
             if (!(dataList = read(data)).isEmpty()) {
-                delete(dataList.get(0));
+                con.delete(dataList.get(0));
                 con.store(data);
                 con.commit();
                 log.log(TAG, "Updated in DB: " + data.toString());
