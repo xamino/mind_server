@@ -108,6 +108,14 @@ public class PositionModule extends Module {
                     sendUsers.add(toSend);
                 }
                 return sendUsers;
+            case SENSOR_WRITE:
+                // todo implement once wifisensor works
+                log.error(TAG, "SensorWrite has not been implemented yet!");
+                // We'll need to get the sensor list, then check every entry against the list already saved here. If
+                // an entry with a higher value is found, we ignore it. Otherwise we replace the entry with ours (or
+                // if no entry was in the list yet). We'll need a list containing IP, Level, and Room (might have to
+                // update the WifiSensor object for that)
+                return new Error(Error.Type.TASK, "Unimplemented!");
             default:
                 log.error(TAG, "Unknown task #" + todo + "# sent to PositionModule! Shouldn't happen!");
                 return new Error(Error.Type.TASK, "Unknown task sent to PositionModule!");

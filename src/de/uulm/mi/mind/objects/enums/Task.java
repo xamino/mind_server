@@ -14,7 +14,7 @@ public interface Task {
     }
 
     public enum Position implements Task {
-        FIND, READ
+        FIND, READ, SENSOR_WRITE
     }
 
     public enum Location implements Task {

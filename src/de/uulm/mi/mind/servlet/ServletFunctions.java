@@ -580,10 +580,8 @@ public class ServletFunctions {
         API task = API.safeValueOf(arrival.getTask());
         switch (task) {
             case WIFI_SENSOR_UPDATE:
-                // todo: better would be to add a task for position module to accept this data
-                // that way, the information is exactly where we want it during runtime
-                // (+ position find wouldn't need to wait for a sensor; it would just use what was available)
-                return new Success(Success.Type.NOTE, "Nothing implemented yet!");
+                // todo check arrival object for input errors
+                return moduleManager.handleTask(Task.Position.SENSOR_WRITE, arrival.getObject());
             default:
                 return null;
         }
