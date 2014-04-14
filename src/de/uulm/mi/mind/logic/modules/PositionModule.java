@@ -27,9 +27,11 @@ public class PositionModule extends Module {
     private final long POSITION_VALID_TIMEOUT = 10 * 60 * 1000;
     private final String TAG = "PositionModule";
     private Messenger log;
+    private HashMap<String, SensedDevice> sensedDevices;
 
     public PositionModule() {
         log = Messenger.getInstance();
+        sensedDevices = new HashMap<>();
     }
 
     @Override
@@ -55,6 +57,7 @@ public class PositionModule extends Module {
                     log.error(TAG, "NULL area for position_find – shouldn't happen as universe should be returned at least!");
                     return new Success(Success.Type.NOTE, "Your position could not be found.");
                 }
+                // todo add wifisensor functions
                 // send back the location that the server thinks you're at with the area
                 DataList<Location> loca = new DataList<>();
                 loca.add(location);
@@ -109,13 +112,28 @@ public class PositionModule extends Module {
                 }
                 return sendUsers;
             case SENSOR_WRITE:
-                // todo implement once wifisensor works
-                log.error(TAG, "SensorWrite has not been implemented yet!");
-                // We'll need to get the sensor list, then check every entry against the list already saved here. If
-                // an entry with a higher value is found, we ignore it. Otherwise we replace the entry with ours (or
-                // if no entry was in the list yet). We'll need a list containing IP, Level, and Room (might have to
-                // update the WifiSensor object for that)
-                return new Error(Error.Type.TASK, "Unimplemented!");
+                if (!(request instanceof DataList)) {
+                    return new Error(Error.Type.WRONG_OBJECT, "SensorWrite was called with the wrong object type!");
+                }
+                // todo this always adds devices, when do we remove them from the sensedDevices HashMap? Timeout?
+                DataList<SensedDevice> receivedDevices = (DataList<SensedDevice>) request;
+                for (SensedDevice device : receivedDevices) {
+                    if (!sensedDevices.containsKey(device.getIpAddress())) {
+                        // not sensed before, so just add it and continue
+                        log.log(TAG, "Found new device to track: " + device.getIpAddress());
+                        sensedDevices.put(device.getIpAddress(), device);
+                        continue;
+                    }
+                    // already in list, so check if to update if level is higher
+                    // todo: we should also check for update of location with a threshold
+                    // so that lvl40 but new room is taken over lvl41 old room
+                    int oldLevel = sensedDevices.get(device.getIpAddress()).getLevelValue();
+                    if (oldLevel <= device.getLevelValue()) {
+                        log.log(TAG, "Updated location of " + device.getIpAddress() + " to " + device.getSensor() + ".");
+                        sensedDevices.put(device.getIpAddress(), device);
+                    }
+                }
+                return new Success("Updated lists.");
             default:
                 log.error(TAG, "Unknown task #" + todo + "# sent to PositionModule! Shouldn't happen!");
                 return new Error(Error.Type.TASK, "Unknown task sent to PositionModule!");

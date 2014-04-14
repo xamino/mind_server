@@ -504,7 +504,7 @@ function wifiSensorAPITest() {
     }
     sensorTwo.tokenHash = check.description;
     // test login for both
-    unitTest("login", sensorOne, Success, null);
+    var sessionOne = unitTest("login", sensorOne, Success, null).description;
     var sessionTwo = unitTest("login", sensorTwo, Success, null).description;
     // try changing pwd for two
     sensorTwo.tokenHash = "new";
@@ -517,7 +517,22 @@ function wifiSensorAPITest() {
     unitTest("sensor_remove", sensorTwo, Success, adminSession);
     // test
     unitTest("check", null, Error, sessionTwo);
+
     // todo add test for sensing capabilities
+    /*
+    var inDevices = [
+        new SensedDevice("hallway", "192.168.178.1", "-40"),
+        new SensedDevice("hallway", "192.168.178.2", "-50")
+    ];
+    // todo server can't receive lists in arrival.object!!!
+    // illegal stuff
+    unitTest("wifi_sensor_update", new User("blub", "test"), Error, sessionOne);
+    unitTest("wifi_sensor_update", [new User("blub", "test")], Error, sessionOne);
+    unitTest("wifi_sensor_update", [new SensedDevice("my_office", "255.255.255.255", "-56")], Error, sessionOne);
+    // legal stuff
+    unitTest("wifi_sensor_update", [], Success, sessionOne);
+    unitTest("wifi_sensor_update", inDevices, Success, sessionOne);
+    */
 
     cleanDB();
     alert("Finished WifiSensor API test.")

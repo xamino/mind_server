@@ -185,3 +185,10 @@ function WifiSensor(position, tokenHash) {
     this.position = position;
     this.tokenHash = tokenHash;
 }
+
+function SensedDevice(sensor, ipAddress, levelValue) {
+    this.$type = "SensedDevice";
+    this.sensor = sensor;
+    this.ipAddress = ipAddress;
+    this.levelValue = levelValue;
+}

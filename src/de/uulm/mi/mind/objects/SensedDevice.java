@@ -5,11 +5,23 @@ package de.uulm.mi.mind.objects;
  */
 public class SensedDevice implements Data {
 
-    private String ipAddress;
+    private String sensor;
 
-    public SensedDevice(String ipAddress, int levelValue) {
+    private String ipAddress;
+    private int levelValue;
+
+    public SensedDevice(String sensor, String ipAddress, int levelValue) {
+        this.sensor = sensor;
         this.ipAddress = ipAddress;
         this.levelValue = levelValue;
+    }
+
+    public String getSensor() {
+        return sensor;
+    }
+
+    public void setSensor(String sensor) {
+        this.sensor = sensor;
     }
 
     public int getLevelValue() {
@@ -28,8 +40,6 @@ public class SensedDevice implements Data {
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
     }
-
-    private int levelValue;
 
     @Override
     public String getKey() {
