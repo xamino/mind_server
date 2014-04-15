@@ -13,7 +13,10 @@ import java.util.Map;
 
 /**
  * @author Tamino Hartmann
+ *
+ * Class provides secure session based on hash or login information.
  */
+// todo Limit max number of sessions per user!
 public class Security {
 
     /**
