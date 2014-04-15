@@ -262,37 +262,29 @@ function positionTest() {
 
     var adminSession = getAdminSession();
 
+    // begin setup
+    /*
+     ------------------
+     |..x1............. Universe
+     |.......__________
+     |......|x2|....... Office
+     |......|.......... Institute
+     |......|......x3..
+     */
     var location1 = new Location(100, 100, [
         new WifiMorsel("00:19:07:06:64:00", "eduroam", -93),
         new WifiMorsel("00:19:07:06:64:01", "test", -90),
         new WifiMorsel("00:19:07:06:64:02", "welcome", -85)
     ]);
-    var location2 = new Location(200, 200, [
+    var location2 = new Location(150, 150, [
         new WifiMorsel("00:19:07:07:64:00", "eduroam", -80),
         new WifiMorsel("00:19:07:07:64:01", "eduroam", -70),
         new WifiMorsel("00:19:07:07:64:02", "welcome", -60)
     ]);
-    var location3 = new Location(150, 150, [
+    var location3 = new Location(200, 200, [
         new WifiMorsel("A0:19:07:07:64:00", "eduroam", -100),
-        new WifiMorsel("A0:19:07:07:64:01", "eduroam", -50),
+        new WifiMorsel("A0:19:07:07:64:01", "eduroam", -40),
         new WifiMorsel("A0:19:07:07:64:02", "eduroam", -30)
-    ]);
-
-    var locationRequest1 = new Location(0, 0, [
-        new WifiMorsel("00:19:07:06:64:00", "eduroam", -92),
-        new WifiMorsel("00:19:07:06:64:01", "test", -91),
-        new WifiMorsel("00:19:07:06:64:02", "welcome", -84)
-    ]);
-    // note switched order of wifimorsels
-    var locationRequest2 = new Location(345, 212, [
-        new WifiMorsel("00:19:07:07:64:00", "eduroam", -80),
-        new WifiMorsel("00:19:07:07:64:02", "welcome", -60),
-        new WifiMorsel("00:19:07:07:64:01", "eduroam", -70)
-    ]);
-    var locationRequest3 = new Location(1, 1, [
-        new WifiMorsel("A0:19:07:07:64:00", "eduroam", -98),
-        new WifiMorsel("A0:19:07:07:64:01", "eduroam", -49),
-        new WifiMorsel("A0:19:07:07:64:02", "eduroam", -32)
     ]);
 
     unitTest("location_add", location1, Success, adminSession);
@@ -300,45 +292,113 @@ function positionTest() {
     unitTest("location_add", location3, Success, adminSession);
     // add area that covers location3
     unitTest("area_add", new Area("office", null, 145, 145, 10, 10), Success, adminSession);
-    // area that covers loc3 + 2
+    // area that covers loc2 + 3
     unitTest("area_add", new Area("institute", null, 140, 140, 100, 100), Success, adminSession);
 
     unitTest("area_read", new Area(), Array, adminSession);
 
+    // end setup
+    var exactOfficeLocationRequest = new Location(0, 0, [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -80),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -70),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -60)
+    ]);
+    var closeOfficeLocationRequest = new Location(345, 212, [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -81),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -69),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -62)
+    ]);
+    var exactInstituteLocationRequest = new Location(1, 1, [
+        new WifiMorsel("A0:19:07:07:64:00", "eduroam", -100),
+        new WifiMorsel("A0:19:07:07:64:01", "eduroam", -40),
+        new WifiMorsel("A0:19:07:07:64:02", "eduroam", -30)
+    ]);
+    var newLocationRequest = new Location(1, 1, [
+        new WifiMorsel("A0:19:07:07:64:ad", "eduroam", -88),
+        new WifiMorsel("A0:19:07:07:64:ac", "eduroam", -77),
+        new WifiMorsel("A0:19:07:07:64:ae", "welcome", -66)
+    ]);
+
+
     // Test exact location match to universe (location1)
     // note: because of first time, area is correct on first call
-    var match = unitTest("position_find", locationRequest1, Area, adminSession);
-    if (!instanceOf(match, Area) || match.ID != "universe") {
-        alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (universe).");
-    }
-    // Test that admin is now positioned there:
-    var user = unitTest("user_read", null, User, adminSession);
-    if (user.position == undefined || user.position != "universe") {
-        alert("Failed user position read: admin is located at " + user.position);
-    }
-    // Test close location match
-    unitTest("position_find", locationRequest2, Area, adminSession);
-    match = unitTest("position_find", locationRequest2, Area, adminSession);
-    if (!instanceOf(match, Area) || match.ID != "institute") {
-        alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (institute).");
-    }
-    // Test that admin is now in positioned there:
-    user = unitTest("user_read", null, User, adminSession);
-    if (user.position == undefined || user.position != "institute") {
-        alert("Failed user position read: admin is located at " + user.position);
-    }
-    // test match to office
-    unitTest("position_find", locationRequest3, Area, adminSession);
-    match = unitTest("position_find", locationRequest3, Area, adminSession);
+    var match = unitTest("position_find", exactOfficeLocationRequest, Area, adminSession);
+    unitTest("position_find", exactOfficeLocationRequest, Area, adminSession);
     if (!instanceOf(match, Area) || match.ID != "office") {
-        alert("Failed 'find_position'\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (office).");
+        alert("Failed 'find_position' 1\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (office).");
     }
-    // Test that admin is now in positioned there:
-    user = unitTest("user_read", null, User, adminSession);
-    if (user.position == undefined || user.position != "office") {
-        alert("Failed user position read: admin is located at " + user.position);
+
+    // Test close location match
+    unitTest("position_find", closeOfficeLocationRequest, Area, adminSession);
+    match = unitTest("position_find", closeOfficeLocationRequest, Area, adminSession);
+    if (!instanceOf(match, Area) || match.ID != "office") {
+        alert("Failed 'find_position' 2\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (office).");
     }
-    // TODO more, especially check for errors!
+
+    // Test off location match
+    unitTest("position_find", exactInstituteLocationRequest, Area, adminSession);
+    match = unitTest("position_find", exactInstituteLocationRequest, Area, adminSession);
+    if (!instanceOf(match, Area) || match.ID != "institute") {
+        alert("Failed 'find_position' 3\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (institute).");
+    }
+
+    // Test off location match
+    unitTest("position_find", newLocationRequest, Success, adminSession);
+    match = unitTest("position_find", newLocationRequest, Success, adminSession);
+    if (!instanceOf(match, Success)) { //TODO return universe instead?!
+        alert("Failed 'find_position' 4\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (unknown).");
+    }
+
+    //now add more morsels and repeat the requests
+    location1 = new Location(100, 100, [
+        new WifiMorsel("00:19:07:06:64:00", "eduroam", -91),
+        new WifiMorsel("00:19:07:06:64:01", "test", -88),
+        new WifiMorsel("00:19:07:06:64:02", "welcome", -84),
+        new WifiMorsel("00:19:07:06:64:00", "eduroam", -92),
+        new WifiMorsel("00:19:07:06:64:01", "test", -91),
+        new WifiMorsel("00:19:07:06:64:02", "welcome", -86)
+    ]);
+    location2 = new Location(150, 150, [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -79),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -68),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -57),
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -81),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -71),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -62)
+    ]);
+    location3 = new Location(200, 200, [
+        new WifiMorsel("A0:19:07:07:64:00", "eduroam", -100),
+        new WifiMorsel("A0:19:07:07:64:01", "eduroam", -40),
+        new WifiMorsel("A0:19:07:07:64:02", "eduroam", -30),
+        new WifiMorsel("A0:19:07:07:64:00", "eduroam", -100),
+        new WifiMorsel("A0:19:07:07:64:01", "eduroam", -40),
+        new WifiMorsel("A0:19:07:07:64:02", "eduroam", -30)
+    ]);
+
+    unitTest("location_add", location1, Success, adminSession);
+    unitTest("location_add", location2, Success, adminSession);
+    unitTest("location_add", location3, Success, adminSession);
+
+    unitTest("position_find", exactOfficeLocationRequest, Area, adminSession);
+    match = unitTest("position_find", exactOfficeLocationRequest, Area, adminSession);
+    if (!instanceOf(match, Area) || match.ID != "office") {
+        alert("Failed 'find_position' 5\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (office).");
+    }
+
+    // Test close location match
+    unitTest("position_find", closeOfficeLocationRequest, Area, adminSession);
+    match = unitTest("position_find", closeOfficeLocationRequest, Area, adminSession);
+    if (!instanceOf(match, Area) || match.ID != "office") {
+        alert("Failed 'find_position' 6\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (office).");
+    }
+
+    // Test otherExact location match
+    unitTest("position_find", exactInstituteLocationRequest, Area, adminSession);
+    match = unitTest("position_find", exactInstituteLocationRequest, Area, adminSession);
+    if (!instanceOf(match, Area) || match.ID != "institute") {
+        alert("Failed 'find_position' 7\n\n" + JSON.stringify(match) + "\n\nPosition does not match the correct one (institute).");
+    }
+
 
     cleanDB();
 
@@ -520,19 +580,19 @@ function wifiSensorAPITest() {
 
     // todo add test for sensing capabilities
     /*
-    var inDevices = [
-        new SensedDevice("hallway", "192.168.178.1", "-40"),
-        new SensedDevice("hallway", "192.168.178.2", "-50")
-    ];
-    // todo server can't receive lists in arrival.object!!!
-    // illegal stuff
-    unitTest("wifi_sensor_update", new User("blub", "test"), Error, sessionOne);
-    unitTest("wifi_sensor_update", [new User("blub", "test")], Error, sessionOne);
-    unitTest("wifi_sensor_update", [new SensedDevice("my_office", "255.255.255.255", "-56")], Error, sessionOne);
-    // legal stuff
-    unitTest("wifi_sensor_update", [], Success, sessionOne);
-    unitTest("wifi_sensor_update", inDevices, Success, sessionOne);
-    */
+     var inDevices = [
+     new SensedDevice("hallway", "192.168.178.1", "-40"),
+     new SensedDevice("hallway", "192.168.178.2", "-50")
+     ];
+     // todo server can't receive lists in arrival.object!!!
+     // illegal stuff
+     unitTest("wifi_sensor_update", new User("blub", "test"), Error, sessionOne);
+     unitTest("wifi_sensor_update", [new User("blub", "test")], Error, sessionOne);
+     unitTest("wifi_sensor_update", [new SensedDevice("my_office", "255.255.255.255", "-56")], Error, sessionOne);
+     // legal stuff
+     unitTest("wifi_sensor_update", [], Success, sessionOne);
+     unitTest("wifi_sensor_update", inDevices, Success, sessionOne);
+     */
 
     cleanDB();
     alert("Finished WifiSensor API test.")

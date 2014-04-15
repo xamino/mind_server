@@ -145,8 +145,40 @@ public class PositionModule extends Module {
      * @return Location if found, else null.
      */
     private Location calculateLocation(Location request) {
-        // Get Area containing all locations from database
-        Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe", null, 0, 0, 0, 0))).get(0);
+        // Morsels from the current request which are to be compared to the database values
+        DataList<WifiMorsel> requestWifiMorsels = request.getWifiMorsels();
+
+        // Get universe Area containing all locations from database
+        Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe"))).get(0);
+        DataList<Location> dataBaseLocations = uniArea.getLocations();
+        DataList<Location> averagedDatabaseLocations = new DataList<>(); //TODO another DB overwrite Bug fix
+
+        // Modify database List to contain the average Morsel signal strengths for each location
+        for (Location databaseLocation : dataBaseLocations) {
+            DataList<WifiMorsel> averageMorsels = new DataList<>();
+            for (WifiMorsel morsel : databaseLocation.getWifiMorsels()) {
+                if (averageMorsels.contains(morsel)) {
+                    continue;
+                }
+                // this is the first occurrence of this morsel
+                // find all similar ones and average them out
+                int summedLevel = 0;
+                int counter = 0;
+                for (WifiMorsel specific : databaseLocation.getWifiMorsels()) {
+                    if (specific.equals(morsel)) {
+                        // found a hit for averaging
+                        summedLevel += specific.getWifiLevel();
+                        counter++;
+                    }
+                }
+                int average = summedLevel / counter;
+                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average));
+            }
+            averagedDatabaseLocations.add(new Location(databaseLocation.getCoordinateX(), databaseLocation.getCoordinateY(), averageMorsels));
+        }
+
+        // TODO For testing the DB bug
+        // Area uniArea1 = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe"))).get(0);
 
         // A Map that describes how many matches there are for this location
         HashMap<Location, Integer> locationMatchesMap = new HashMap<>();
@@ -154,14 +186,11 @@ public class PositionModule extends Module {
         //Map of the sum of all wifi levels under the tolerance for a location.
         HashMap<Location, Integer> locationLevelDifferenceSumMap = new HashMap<>();
 
-        DataList<Location> dataBaseLocations = uniArea.getLocations();
-
-        DataList<WifiMorsel> requestWifiMorsels = request.getWifiMorsels();
 
         // For each request morsel, check if a morsel with the same mac address exists in a database location.
         // Then check how far wifi levels are apart. If it is below a tolerance value increase the goodness of that location.
         for (WifiMorsel currentRequestMorsel : requestWifiMorsels) {
-            for (Location dataBaseLocation : dataBaseLocations) {
+            for (Location dataBaseLocation : averagedDatabaseLocations) {
 
                 DataList<WifiMorsel> dataBaseLocationMorsels = dataBaseLocation.getWifiMorsels();
 
