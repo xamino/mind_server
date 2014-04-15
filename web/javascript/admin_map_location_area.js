@@ -467,10 +467,10 @@ $(document).on("submit", "#areaForm", function (event) {
 //	    yCor = $("#yCor").val();
 //	    width = $("#width").val();
 //	    height = $("#height").val();
-	    xCor = document.getElementById("xCor").innerText -2;	//--> because of border
-	    yCor = document.getElementById("yCor").innerText -2;	//--> because of border
-	    width = document.getElementById("width").innerText;
-	    height = document.getElementById("height").innerText;
+            xCor = document.getElementById("xCor").innerHTML - 2;	//--> because of border
+            yCor = document.getElementById("yCor").innerHTML - 2;	//--> because of border
+            width = document.getElementById("width").innerHTML;
+            height = document.getElementById("height").innerHTML;
 	    newArea = new Area(id, null, xCor, yCor, width, height);
 	
 	    doTask("AREA_ADD", newArea, function(){

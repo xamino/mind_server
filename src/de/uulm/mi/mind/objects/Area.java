@@ -109,8 +109,12 @@ public class Area implements Data {
     public String toString() {
         return "Area{" +
                 "ID='" + ID + '\'' +
-                ", locations='" + locations +
-                "'}";
+                ", topLeftX=" + topLeftX +
+                ", topLeftY=" + topLeftY +
+                ", width=" + width +
+                ", height=" + height +
+                ", locations=" + locations +
+                '}';
     }
 
     /**
