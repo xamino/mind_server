@@ -580,23 +580,17 @@ public class ServletFunctions {
         API task = API.safeValueOf(arrival.getTask());
         switch (task) {
             case WIFI_SENSOR_UPDATE:
-                if (!(arrival.getObject() instanceof DataList)) {
+                if (!(arrival.getObject() instanceof SensedDevice)) {
                     return new Error(Error.Type.WRONG_OBJECT);
                 }
-                DataList<SensedDevice> devices = ((DataList) arrival.getObject());
-                // no need to continue if empty
-                if (devices.isEmpty()) {
-                    return new Success(Success.Type.NOTE, "Operation okay, but empty device list!");
-                }
+                SensedDevice device = ((SensedDevice) arrival.getObject());
                 // security check
-                for (SensedDevice device : devices) {
-                    if (!device.getSensor().equals(sensor.readIdentification())) {
-                        // make sure a sensor only updates the devices for its own location
-                        return new Error(Error.Type.ILLEGAL_VALUE, "Sensor device injection is illegal!");
-                    }
+                if (!device.getSensor().equals(sensor.readIdentification())) {
+                    // make sure a sensor only updates the devices for its own location
+                    return new Error(Error.Type.ILLEGAL_VALUE, "Sensor device injection is illegal!");
                 }
                 // pass tasks down
-                return moduleManager.handleTask(Task.Position.SENSOR_WRITE, arrival.getObject());
+                return moduleManager.handleTask(Task.Position.SENSOR_WRITE, device);
             default:
                 return null;
         }

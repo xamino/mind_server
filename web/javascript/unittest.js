@@ -579,20 +579,15 @@ function wifiSensorAPITest() {
     unitTest("check", null, Error, sessionTwo);
 
     // todo add test for sensing capabilities
-    /*
-     var inDevices = [
-     new SensedDevice("hallway", "192.168.178.1", "-40"),
-     new SensedDevice("hallway", "192.168.178.2", "-50")
-     ];
-     // todo server can't receive lists in arrival.object!!!
-     // illegal stuff
-     unitTest("wifi_sensor_update", new User("blub", "test"), Error, sessionOne);
-     unitTest("wifi_sensor_update", [new User("blub", "test")], Error, sessionOne);
-     unitTest("wifi_sensor_update", [new SensedDevice("my_office", "255.255.255.255", "-56")], Error, sessionOne);
-     // legal stuff
-     unitTest("wifi_sensor_update", [], Success, sessionOne);
-     unitTest("wifi_sensor_update", inDevices, Success, sessionOne);
-     */
+    var inOne = new SensedDevice("hallway", "192.168.178.1", "-40");
+    var inTwo = new SensedDevice("hallway", "192.168.178.2", "-50");
+    // illegal stuff
+    unitTest("wifi_sensor_update", new User("blub", "test"), Error, sessionOne);
+    unitTest("wifi_sensor_update", new SensedDevice("my_office", "255.255.255.255", "-56"), Error, sessionOne);
+    // legal stuff
+    unitTest("wifi_sensor_update", inOne, Success, sessionOne);
+    unitTest("wifi_sensor_update", inTwo, Success, sessionOne);
+    // todo more
 
     cleanDB();
     alert("Finished WifiSensor API test.")
