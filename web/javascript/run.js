@@ -70,7 +70,7 @@ function loginDisplay(identification, password, callback) {
     send(request, function (data) {
         // callback simply saves the session
         session = data.object.description;
-        writeCookie("MIND_PD_C", session); //TODO add id/.. of PD to cookie-name
+        writeCookie("MIND_PD_C", session);
         //alert("PD_session: " + session);
         callback();
     });
@@ -763,11 +763,9 @@ function onLoadOfAdminPage() {
 
 /**
  * This function is called onLoad of each PD page.
- * The session will be checked by the checkSessionFromURL function
- * and the session id will be added to all links classified as "pd_link"
  */
 function onLoadOfPdPage() {
-    var session = readCookie("MIND_PD_C");
+    session = readCookie("MIND_PD_C");
     send(new Arrival("check",session),function(data){
 //    	alert(JSON.stringify(data));
 //    	alert(data.object.description.$type);
@@ -776,7 +774,8 @@ function onLoadOfPdPage() {
     		window.location.href = "public_display_login.jsp";
     		
     	} else {
-    		return session;
+    		//return session;
+    		displayUserLocations();
     	}
     });
 }
@@ -799,14 +798,13 @@ function handleAllUsersPositionData(){
 	user1.lastPosition = 3304;
 	user1.iconRef = "crab.png";
 	var user2 = new User("b@b.b",null,"b",false);
-	user2.lastPosition = 336;
+	user2.lastPosition = 3303;
 	user2.iconRef = "lion.png";
 	
 	var users = new Array();
 	users[0] = user1;
 	users[1] = user2;
-	
-	retriveOriginalIconMetrics(users);
+	initPublicDisplayStuff(users);
 //END TESTAREA
 }
 

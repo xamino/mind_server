@@ -6,6 +6,10 @@ var heigthFactor=1; //the factor by which the height of the displayed image devi
 var zoomValue = 30; //holds the width value for each zoom-step in pixels
 
 var users; //the current (to be) displayed users;
+var areas; //an array of areas - contains all areas that have already been used/needed
+
+//TODO call refreshUserData() considering refresh rate of display
+
 /*NOT IN USE
 var slider; //the slider element */
 /**
@@ -36,18 +40,31 @@ function retriveOriginalMetrics(allusers){
  * This function retrives the original metrics (width & height) of one icon image
  * @param allusers
  */
-function retriveOriginalIconMetrics(allusers){
+function initPublicDisplayStuff(allusers){
 	
-	users = allusers;
-	
-	var imgLoad = $("<img />");
-	imgLoad.attr("src", "images/micons/crab.png");
-	imgLoad.unbind("load");
-	imgLoad.bind("load", function () {
-		originalIconSize = this.width;
-//		originalIconSize = 110;
-		initUsersPlacement();
-	});
+	//TODO remove parameter
+
+	users = new Array();
+
+    send(new Arrival("READ_ALL_AREAS", session), function (data) {
+
+        areas = data.object;
+    	
+    	var imgLoad = $("<img />");
+    	imgLoad.attr("src", "images/micons/crab.png");
+    	imgLoad.unbind("load");
+    	imgLoad.bind("load", function () {
+//    		originalIconSize = this.width;
+    		originalIconSize = 110;
+    		
+    		//TODO remove
+    		updateUserListOnReceive(allusers);
+    		//instead: refreshUserData();
+    	});
+        
+    });
+    
+
 }
 
 
@@ -96,10 +113,12 @@ function getScale(raw_scale){
 	return Math.round(raw_scale*widthFactor);
 }
 
+
 /**
- * This function is practically called on startup of the page,
+ * This function is called on startup of the page,
  * creating and placing all the icons of all users
  */
+/*
 function initUsersPlacement(){
 	//create <img/>s for each icon
 	for ( var i = 0; i < users.length; i++) {
@@ -110,7 +129,7 @@ function initUsersPlacement(){
 	setUserIconCoordsByArea();
 	//display all currently tracked users
 	updateUserIconPlacement();
-}
+}*/
 
 /**
  * This function creates a user icon as an <img/>
@@ -146,6 +165,7 @@ function placeUserIcon(user){
 		icon.style.width=scale+"px";
 		icon.style.left=getX(user.x,scale)+"px";
 		icon.style.top=getX(user.y,scale)+"px";
+		//TODO apply visual effect regarding user status
 		icon = null;
 	}
 }
@@ -293,6 +313,7 @@ function updateUserListOnReceive(updatedUsers){
 		users.push(updatedUsers[i]);
 		addUserIcon(updatedUsers[i]);
 	}
+
 	//set individual user icon coordinates considering area
 	setUserIconCoordsByArea();
 	//display all currently tracked users
@@ -328,28 +349,28 @@ function refreshUserData(){
 
 function loadTestUser(){
 	var user1 = new User("a@a.a",null,"a",false);
-	user1.lastPosition = 336;
+	user1.lastPosition = 3304;
 	user1.iconRef = "crab.png";
 //	user1.x = 400;
 //	user1.y = 300;
 	var user2 = new User("c@c.c",null,"c",false);
-	user2.lastPosition = 333;
+	user2.lastPosition = 3301;
 	user2.iconRef = "cow.png";
 //	user2.x = 450;
 //	user2.y = 400;
 	var user3 = new User("d@d.d",null,"d",false);
-	user3.lastPosition = 333;
+	user3.lastPosition = 3304;
 	user3.iconRef = "rabbit.png";
 //	user3.x = 450;
 //	user3.y = 600;
 	var user4 = new User("e@e.e",null,"e",false);
-	user4.lastPosition = 333;
+	user4.lastPosition = 3304;
 	user4.iconRef = "sheep.png";
 	var user5 = new User("f@f.f",null,"f",false);
 	user5.lastPosition = 3304;
 	user5.iconRef = "deer.png";
 	var user6 = new User("g@g.g",null,"g",false);
-	user6.lastPosition = 333;
+	user6.lastPosition = 3301;
 	user6.iconRef = "crab.png";
 	
 	var testusers = new Array();
@@ -362,7 +383,20 @@ function loadTestUser(){
 	updateUserListOnReceive(testusers);
 }
 
+
+
 function getAreaById(id){
+	
+
+	for ( var i = 0; i < areas.length; i++) {
+		if(areas[i].ID==id){
+			return areas[i]; //area has already benn worked with
+		}
+	}
+	alert("not in array");
+
+	//TODO remove static test-data
+	//TODO if area not found (should not happen) - don't display or put to away-area or ...
 	var area = null;
 	switch (id) {
 	case 3304:
@@ -412,7 +446,7 @@ function getUserByEmail(email){
 function displayUserInfo(email){
 	var user = getUserByEmail(email);
 	if(user!=null){
-		alert("email:"+user.email+" ; name:"+user.name);		
+		alert("email:"+user.email+" ; name:"+user.name+" x:"+user.x+" y:"+user.y);		
 	}
 }
 
