@@ -93,10 +93,20 @@ public class LocationModule extends Module {
                     updateMapping();
                     return returnArea;
                 case READ:
+                    // get all Areas
                     if (area == null) {
-                        return new Error(Error.Type.WRONG_OBJECT, "Filter area was null!");
+                        return read(new Area(null));
                     }
-                    return read(area);
+                    // get filtered Areas
+                    if (area.getKey() == null) {
+                        return read(area);
+                    }
+                    // from here on only objects with a valid key == single ones are queried
+                    Data data = read(area);
+                    if (data instanceof DataList && ((DataList) data).isEmpty()) {
+                        return new Error(Error.Type.DATABASE, "Area could not be found!");
+                    }
+                    return data;
                 case UPDATE:
                     if (area == null) {
                         return new Error(Error.Type.WRONG_OBJECT, "Area was null!");

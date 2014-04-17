@@ -51,21 +51,16 @@ public class UserModule extends Module {
             return read(new User(null));
         }
         // get filtered Users
-        if (user.getEmail() == null) {
+        if (user.getKey() == null) {
             return read(user);
         }
-
-        //TODO  remove, already covered above
-        // from here on single users were requested
+        // from here on only objects with a valid key == single ones are queried
         Data data = read(user);
-        if (data instanceof DataList) {
-            if (((DataList) data).isEmpty()) {
-                return new Error(Error.Type.DATABASE, "User could not be found!");
-            }
-            return data;
-        } else {
-            return data; // Error
+        if (data instanceof DataList && ((DataList) data).isEmpty()) {
+            return new Error(Error.Type.DATABASE, "User could not be found!");
         }
+        return data;
+
     }
 
     private Data annihilateUsers() {
