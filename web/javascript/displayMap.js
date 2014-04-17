@@ -440,15 +440,139 @@ function getUserByEmail(email){
 }
 
 /**
- * This function displays the user's info when clicked on her/his icon
+ * This function is called when a user's icon was clicked.
  * @param email the email of the user that was clicked on
  */
 function displayUserInfo(email){
 	var user = getUserByEmail(email);
 	if(user!=null){
-		alert("email:"+user.email+" ; name:"+user.name+" x:"+user.x+" y:"+user.y);		
+		balloonify(user);
+		//alert("email:"+user.email+" ; name:"+user.name+" x:"+user.x+" y:"+user.y);		
 	}
 }
+
+//the modified id (for closing purposes) of the current opened balloon, null if no balloon is open 
+var openBalloonUserID = null;
+
+/**
+ * This function displays or removes a user balloon
+ * @param user the user that was clicked on
+ */
+function balloonify(user){
+	
+	var id = '#icon_'+user.email;
+	//modifying the id by escaping '.' & '@'
+	var mod_id = id.replace(/\./g, '\\.');
+	mod_id = mod_id.replace(/\@/g, '\\@');
+	
+	
+	if(openBalloonUserID!=null){ //some balloon is open -> close balloon
+		$(openBalloonUserID).hideBalloon();
+		if(mod_id===openBalloonUserID){//clicked on icon of just hid balloon -> do not open it again
+			openBalloonUserID=null;
+			return;
+		}
+	}
+
+	//SHOW BALLOON
+		openBalloonUserID = mod_id;
+		
+		//TODO dynamitise
+		var horizontalpos;
+		var verticalpos;
+		if(user.x<720){ //half of 1440 - width of our map
+			horizontalpos = "right"; }else{ horizontalpos = "left"; }
+		if(user.y<540){
+			verticalpos = "bottom"; }else{ verticalpos = "top"; }
+		var positioning = verticalpos+" "+horizontalpos;
+		
+		$(mod_id).showBalloon({
+		    //TODO possibly check for user status - alter balloon
+			position: positioning,
+			contents: '<strong>'+user.name+'</strong>'
+			+'<p>Send me a message!</p>'
+			//+'<input type="hidden" value="'+user.email+'" id="userBalloonID" />'
+			+'<form id="messageForm_'+user.email+'">'
+			+'<select id="predefMsg_'+user.email+'">'
+			+'<option value="komm du">Kannst Du kurz vorbeikommen?</option>'
+			+'<option value="ich komme">Ich komme gleich vorbei.</option>'
+			+'<option value="keine Zeit">Ich habe keine Zeit.</option>'
+			+'<option value="ja">Ja</option>'
+			+'<option value="nein">Nein</option>'
+			+'</select>'
+			+'<br>'
+			+'<input id="customMsg_'+user.email+'" type="text" size="40"/>'
+			+'<br>'
+			+'<input type="submit" value="Benachrichtigen"/>'
+			+'</form>'
+			
+			+'<br>'
+			
+			+'<p>Call me!</p>'
+			+'<form id="callForm_'+user.email+'">'
+			+'<input type="submit" value="Call '+user.name+'"/>'
+			+'</form>'
+		});		
+		
+}
+
+/**
+ * This function is called when the map was clicked on
+ * and handles balloon hiding in case of clicking on no icon
+ */
+$(document).on("mousedown", "#mapscroll", function (event) {
+	  if (!$(event.target).hasClass('micon')) { //if !(click on icon)
+		  if(openBalloonUserID!=null){ //if balloon is open -> hide balloon
+			  $(openBalloonUserID).hideBalloon();
+			  openBalloonUserID = null;
+		  }		  
+	  }
+	  
+});
+
+
+/**
+ * This function is called when the Call button is clicked on the user's popup balloon
+ */
+$(document).on("submit", "form[id^='callForm_']", function (event) {
+    event.preventDefault();
+  //get email of recipient
+    var recipient = openBalloonUserID.replace(/\\/g, '');
+    recipient = recipient.substring(6, recipient.length);
+    alert("call "+recipient);
+
+    //TODO obvious
+
+});
+
+/**
+ * This function is called when the 'Benachrichtigen' button is clicked on the user's popup balloon
+ */
+$(document).on("submit", "form[id^='messageForm_']", function (event) {
+    event.preventDefault();
+    //get email of recipient
+    var recipient = openBalloonUserID.replace(/\\/g, '');
+    recipient = recipient.substring(6, recipient.length);
+
+    var predefMsg = $("#predefMsg_"+recipient).find(":selected").text();
+    var customMsg = $("#customMsg_"+recipient).val();
+    alert("send message to "+recipient+":\nPredefMsg: "+predefMsg+"\nCustomMsg: "+customMsg);
+    
+    //TODO if custommsg is empty - send predefmsg, else send custommsg
+    //TODO possibly check for user status
+});
+
+
+/*
+$(document).ready(function(){
+	$('.micon').balloon({
+		position: "right",
+		  contents: '<a href="#">Any HTML!</a><br />'
+			    +'<input type="text" size="40" />'
+			    +'<input type="submit" value="Search" />'
+			});
+});*/
+
 
 
 //MAP SCALING AND PANNING STUFF - NOT IN USE
