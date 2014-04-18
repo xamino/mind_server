@@ -467,7 +467,8 @@ function balloonify(user){
 	
 	
 	if(openBalloonUserID!=null){ //some balloon is open -> close balloon
-		$(openBalloonUserID).hideBalloon();
+//		$(openBalloonUserID).hideBalloon();
+		removeBalloon();
 		if(mod_id===openBalloonUserID){//clicked on icon of just hid balloon -> do not open it again
 			openBalloonUserID=null;
 			return;
@@ -489,11 +490,12 @@ function balloonify(user){
 		$(mod_id).showBalloon({
 		    //TODO possibly check for user status - alter balloon
 			position: positioning,
+			showDuration: 250,
 			contents: '<strong>'+user.name+'</strong>'
 			+'<p>Send me a message!</p>'
 			//+'<input type="hidden" value="'+user.email+'" id="userBalloonID" />'
-			+'<form id="messageForm_'+user.email+'">'
-			+'<select id="predefMsg_'+user.email+'">'
+			+'<form id="messageForm">'
+			+'<select id="predefMsg">'
 			+'<option value="komm du">Kannst Du kurz vorbeikommen?</option>'
 			+'<option value="ich komme">Ich komme gleich vorbei.</option>'
 			+'<option value="keine Zeit">Ich habe keine Zeit.</option>'
@@ -501,7 +503,7 @@ function balloonify(user){
 			+'<option value="nein">Nein</option>'
 			+'</select>'
 			+'<br>'
-			+'<input id="customMsg_'+user.email+'" type="text" size="40"/>'
+			+'<input id="customMsg" type="text" size="40"/>'
 			+'<br>'
 			+'<input type="submit" value="Benachrichtigen"/>'
 			+'</form>'
@@ -509,11 +511,18 @@ function balloonify(user){
 			+'<br>'
 			
 			+'<p>Call me!</p>'
-			+'<form id="callForm_'+user.email+'">'
+			+'<form id="callForm">'
 			+'<input type="submit" value="Call '+user.name+'"/>'
 			+'</form>'
 		});		
-		
+		document.getElementById("messageForm").parentNode.id = "userBalloon";
+}
+
+
+function removeBalloon(){
+	$(openBalloonUserID).hideBalloon();
+	var balloonElement = document.getElementById("userBalloon");
+	balloonElement.parentNode.removeChild(balloonElement);
 }
 
 /**
@@ -523,7 +532,7 @@ function balloonify(user){
 $(document).on("mousedown", "#mapscroll", function (event) {
 	  if (!$(event.target).hasClass('micon')) { //if !(click on icon)
 		  if(openBalloonUserID!=null){ //if balloon is open -> hide balloon
-			  $(openBalloonUserID).hideBalloon();
+			  removeBalloon();
 			  openBalloonUserID = null;
 		  }		  
 	  }
@@ -534,7 +543,7 @@ $(document).on("mousedown", "#mapscroll", function (event) {
 /**
  * This function is called when the Call button is clicked on the user's popup balloon
  */
-$(document).on("submit", "form[id^='callForm_']", function (event) {
+$(document).on("submit", "form[id^='callForm']", function (event) {
     event.preventDefault();
   //get email of recipient
     var recipient = openBalloonUserID.replace(/\\/g, '');
@@ -548,14 +557,14 @@ $(document).on("submit", "form[id^='callForm_']", function (event) {
 /**
  * This function is called when the 'Benachrichtigen' button is clicked on the user's popup balloon
  */
-$(document).on("submit", "form[id^='messageForm_']", function (event) {
+$(document).on("submit", "form[id^='messageForm']", function (event) {
     event.preventDefault();
     //get email of recipient
     var recipient = openBalloonUserID.replace(/\\/g, '');
     recipient = recipient.substring(6, recipient.length);
 
-    var predefMsg = $("#predefMsg_"+recipient).find(":selected").text();
-    var customMsg = $("#customMsg_"+recipient).val();
+    var predefMsg = $("#predefMsg").find(":selected").text();
+    var customMsg = $("#customMsg").val();
     alert("send message to "+recipient+":\nPredefMsg: "+predefMsg+"\nCustomMsg: "+customMsg);
     
     //TODO if custommsg is empty - send predefmsg, else send custommsg

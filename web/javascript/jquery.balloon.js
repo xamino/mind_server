@@ -199,6 +199,8 @@
 				? options.contents()
 				: (options.contents || $target.attr("title"));
 			var isNew = !($balloon = $target.data("balloon"));
+			//TODO always true is set due to removing (after hiding) the balloon - check if there is some caching ?
+			isNew = true;
 			if(isNew) $balloon = $("<div>").append(contents);
 			if(!options.url && (!$balloon || $balloon.html() == "")) return;
 			if(!isNew && contents && contents != $balloon.html()) $balloon.empty().append(contents);
