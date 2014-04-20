@@ -1,138 +1,216 @@
 package de.uulm.mi.mind.json;
 
-import com.github.julman99.gsonfire.GsonFireBuilder;
-import com.github.julman99.gsonfire.PostProcessor;
-import com.github.julman99.gsonfire.TypeSelector;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.Data;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Tamino Hartmann
  *         <p/>
- *         Our version of GSON. Implements the RuntimeTypeAdapterFactory to allow easy recursive JSON data transfer. Do not
- *         touch if you don't know what you are doing! Also note that ArrayList for example does NOT throw an error, will
- *         be converted to JSON, but does NOT contain the required $type field to be parsed again! Make sure to use
- *         objects that extend the Data interface for EVERYTHING you send.
  */
-public class JsonConverter {
+public class JsonConverter<E> {
 
-    private static JsonConverter INSTANCE;
     private final String TAG = "JsonConverter";
-    private Gson gson;
+    private final String ESCAPE = "\"";
+    private final String TYPE_KEY;
     private Messenger log;
     /**
-     * Hashmap of the registered types that the converter will convert with $type.
+     * Hashmap of the registered types that the converter will convert with $TYPE_KEY.
      */
-    private HashMap<String, Class<? extends Data>> objects;
+    private HashMap<Class<? extends E>, String> types;
 
-    /**
-     * Private constructor. Use getInstance() to get an instance of this class.
-     */
-    private JsonConverter() {
+    public JsonConverter() {
+        this("$type");
+    }
+
+    public JsonConverter(String typeKey) {
         log = Messenger.getInstance();
-        GsonFireBuilder builder = new GsonFireBuilder();
-        objects = new HashMap<>();
-        // register in switch
-        builder.registerTypeSelector(Data.class, new TypeSelector<Data>() {
-            @Override
-            public Class<? extends Data> getClassForElement(JsonElement readElement) {
-                String kind = readElement.getAsJsonObject().get("$type").getAsString();
-                if (objects.containsKey(kind)) {
-                    // log.log(TAG, "Found $type:" + kind + "!");
-                    return objects.get(kind);
-                }
-                log.error(TAG, "Unknown object found! $type:" + kind);
-                return null;
-            }
-        });
-        // add out switch
-        builder.registerPostProcessor(Data.class, new PostProcessor<Data>() {
-            @Override
-            public void postDeserialize(Data data, JsonElement jsonElement, Gson gson) {
-            }
-
-            @Override
-            public void postSerialize(JsonElement jsonElement, Data data, Gson gson) {
-                // If it's just an array, return
-                if (!jsonElement.isJsonObject()) {
-                    return;
-                }
-                // if it is an object, write $type to it
-                String name = data.getClass().getCanonicalName();
-                name = name.substring(name.lastIndexOf('.') + 1, name.length());
-                // if it wasn't registered, don't do anything
-                if (!objects.containsKey(name)) {
-                    log.error(TAG, "Object " + name + " isn't registered, so not adding $type information!");
-                    return;
-                }
-                jsonElement.getAsJsonObject().add("$type", new JsonPrimitive(name));
-            }
-        });
-        gson = builder.createGson();
+        this.TYPE_KEY = typeKey;
+        types = new HashMap<>();
         log.log(TAG, "Created.");
     }
 
     /**
-     * Get the instance of this class.
-     *
-     * @return The instance of this class.
-     */
-    public static JsonConverter getInstance() {
-        if (INSTANCE == null)
-            INSTANCE = new JsonConverter();
-        return INSTANCE;
-    }
-
-    /**
-     * Method that registers an object for JSONating with $type field.
+     * Method that registers an object for JSONating with $TYPE_KEY field.
      *
      * @param clazz The class which to register. Note that the name of the class is used WITHOUT the package name. This
      *              means that these should be unique!
      */
-    public void registerType(Class<? extends Data> clazz) {
+    public void registerType(Class<? extends E> clazz) {
+        // todo check that classes do not clash with TYPE_KEY!!!
         String name = clazz.getCanonicalName();
         name = name.substring(name.lastIndexOf('.') + 1, name.length());
-        objects.put(name, clazz);
-        log.log(TAG, "Registered $type:" + name + ".");
+        types.put(clazz, name);
+        log.log(TAG, "Registered " + TYPE_KEY + ":" + name + ".");
     }
 
     /**
-     * Converts any object to JSON. Note that it and ALL subtypes MUST implement the Data interface, otherwise
-     * the all-important type information is not written to the JSON field and the data becomes machine-unreadable.
-     *
-     * @param object The object to write to JSON.
-     * @return The string with the JSON representation.
+     * @param object
+     * @return
      */
-    public String toJson(Data object) {
-        try {
-            return gson.toJson(object);
-        } catch (JsonParseException e) {
-            log.error(TAG, "Error parsing data to JSON! Maybe you're sending an array instead of an object?");
-            log.error(TAG, "" + object.getClass().getCanonicalName());
-            return null;
+    public <S extends E> String toJson(S object) throws IOException {
+        Class objectClass = object.getClass();
+        // Check if registered TYPE_KEY
+        if (!types.containsKey(objectClass)) {
+            throw new IOException("Unregistered TYPE_KEY! Unable to parse to JSON.");
         }
+        // Get all fields and values recursively
+        HashMap<Field, Object> fieldValueList = new HashMap<>();
+        for (Class c = objectClass; c != null; c = c.getSuperclass()) {
+            for (Field field : c.getDeclaredFields()) {
+                try {
+                    field.setAccessible(true);  // otherwise private won't work
+                    fieldValueList.put(field, field.get(object));
+                } catch (IllegalAccessException e) {
+                    throw new IOException("IllegalAccessException inside " + TAG + "!");
+                }
+            }
+        }
+        // JSON object start
+        // todo use stringbuffer to make faster?
+        String jsonObject = "{" + pack(TYPE_KEY, types.get(objectClass));
+        // Now correctly handle each TYPE_KEY
+        // todo do it all in one loop?
+        // todo collection and array can contain primitive data types... :P
+        for (Map.Entry<Field, Object> entry : fieldValueList.entrySet()) {
+            // add comma
+            jsonObject += ",";
+            Field field = entry.getKey();
+            String fieldName = fieldName(field);
+            Object value = entry.getValue();
+            // collections
+            if (value instanceof Collection) {
+                // start array
+                jsonObject += ESCAPE + fieldName + ESCAPE + ":[";
+                // collection
+                Collection collection = ((Collection) value);
+                // recursively solve
+                for (Object collectionObject : collection) {
+                    jsonObject += toJson(((E) collectionObject)) + ",";
+                }
+                // remove last comma if placed
+                if (jsonObject.endsWith(",")) {
+                    jsonObject = jsonObject.substring(0, jsonObject.length() - 1);
+                }
+                jsonObject += "]";
+            }
+            // arrays
+            else if (value instanceof Object[]) {
+                // start array
+                jsonObject += ESCAPE + fieldName + ESCAPE + ":[";
+                // collection
+                Object[] array = ((Object[]) value);
+                // recursively solve
+                for (Object collectionObject : array) {
+                    jsonObject += toJson(((E) collectionObject)) + ",";
+                }
+                // remove last comma if placed
+                if (jsonObject.endsWith(",")) {
+                    jsonObject = jsonObject.substring(0, jsonObject.length() - 1);
+                }
+                jsonObject += "]";
+            }
+            // string
+            else if (value instanceof String) {
+                jsonObject += pack(fieldName, ((String) value));
+                // todo how do i get subobjects?
+            }
+            // numbers
+            else if (value instanceof Byte || value instanceof Short || value instanceof Integer ||
+                    value instanceof Long || value instanceof Float || value instanceof Double) {
+                jsonObject += pack(fieldName, value.toString());
+            }
+            // enums
+            else if (value instanceof Enum) {
+                jsonObject += pack(fieldName, value.toString());
+            }
+            // probably object (if not registered it will throw an IOException on recursion)
+            else {
+                jsonObject += ESCAPE + fieldName + ESCAPE + ":" + toJson(((E) value));
+            }
+
+        }
+        // finish object
+        jsonObject += "}";
+        return jsonObject;
     }
 
-    /**
-     * Converts a string to the correct Data implementing class.
-     *
-     * @param data The string containing the JSON data.
-     * @return An object implementing Data with all the correct data. If an error happened, returns null.
-     */
-    public Data fromJson(String data) {
-        // Returns the correct extended Data class, no need for casting.
-        try {
-            return gson.fromJson(data, Data.class);
-        } catch (JsonParseException e) {
-            log.error(TAG, "Error parsing data from JSON!");
-            log.error(TAG, "" + data);
-            return null;
+    public E fromJson(String jsonObject) throws IOException {
+        // sanity: string starts and ends with {}
+        if (!jsonObject.startsWith("{") || !jsonObject.endsWith("}")) {
+            throw new IOException("String is not bracketed by {}!");
         }
+        // get values
+        HashMap<String, String> simplePairs = jsonValues(jsonObject);
+        // check that we have our class type information
+        if (!jsonObject.contains(TYPE_KEY)) {
+            throw new IOException("Required field " + TYPE_KEY + " not found!");
+        }
+        // check that registered
+        // create java object
+        // todo json arrays instantiate in java based on field type in class
+        return null;
+    }
+
+    private String pack(String key, String value) {
+        return ESCAPE + key + ESCAPE + ":" + ESCAPE + value + ESCAPE;
+    }
+
+    private String fieldName(Field field) {
+        return field.toString().substring(field.toString().lastIndexOf(".") + 1);
+    }
+
+    private HashMap<String, String> jsonValues(String jsonObject) {
+        HashMap<String, String> tree = new HashMap<>();
+        // remove object brackets at start and end
+        jsonObject = jsonObject.substring(1, jsonObject.length() - 1);
+        while (!jsonObject.isEmpty()) {
+            int splitIndex = jsonObject.indexOf(":");
+            int keyStart = jsonObject.indexOf(ESCAPE) + 1;
+            int keyStop = splitIndex - 1;
+            String key = jsonObject.substring(keyStart, keyStop);
+            int valueStart = splitIndex;
+            int valueStop = findValueEndIndex(jsonObject.substring(valueStart)) + valueStart;
+            String value = jsonObject.substring(valueStart, valueStop);
+            jsonObject = jsonObject.substring(valueStop + 1);
+            System.out.println(key + ":" + value);
+        }
+        return tree;
+    }
+
+    private int findValueEndIndex(String rest) {
+        char begin = rest.charAt(0);
+        // for example if null
+        if (begin != '"' && begin != '\'' && begin != '{' && begin != '[') {
+            return rest.indexOf(',') - 1;
+        }
+        char end = '"';
+        if (begin == '{') {
+            end = '}';
+        } else if (begin == '[') {
+            end = ']';
+        } else {
+            System.out.println("Nope");
+        }
+        int levelCounter = 0;
+        int index = 1;
+        for (; index < rest.length(); index++) {
+            char at = rest.charAt(index);
+            // break if end and no levels down
+            if (at == end && levelCounter == 0) {
+                break;
+            }
+            if (at == end && levelCounter > 0) {
+                levelCounter--;
+            }
+            if (at == begin) {
+                levelCounter++;
+            }
+        }
+        return index;
     }
 }
