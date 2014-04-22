@@ -15,6 +15,14 @@ public class Error extends Information {
         this.description = description;
     }
 
+    @Override
+    public String toString() {
+        return "Error{" +
+                "type=" + type +
+                ", description='" + description + '\'' +
+                '}';
+    }
+
     /**
      * Constructor that adds a default message if available, otherwise the description is left empty.
      *

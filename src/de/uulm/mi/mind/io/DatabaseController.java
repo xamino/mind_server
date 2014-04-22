@@ -54,7 +54,7 @@ public class DatabaseController implements ServletContextListener {
      */
     public boolean create(Data data) {
         // Sanitize input on DB, only allow Data objects implementing a unique key
-        if (data == null || data.getKey() == null || data.getKey().equals("")) {
+        if (data == null || data.getKey() == null || data.getKey().equals("0/0")) {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
@@ -87,7 +87,7 @@ public class DatabaseController implements ServletContextListener {
             if (requestFilter == null
                     || requestFilter.getKey() == null
                     || requestFilter.getKey().equals("")
-                    || requestFilter.getKey().equals("0.0/0.0")) { //TODO better location key
+                    || requestFilter.getKey().equals("0/0")) { //TODO better location key
                 queryResult = con.queryByExample(requestFilter);
             } else {
                 Query query = con.query();
@@ -232,7 +232,7 @@ public class DatabaseController implements ServletContextListener {
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
                 return false;
-            } else if (data != null && (data.getKey() == null || data.getKey().equals("0.0/0.0")) && dataList.isEmpty()) { // removal of multiple
+            } else if (data != null && (data.getKey() == null || data.getKey().equals("0/0")) && dataList.isEmpty()) { // removal of multiple
                 return true;
             } else if (data != null && data.getKey() != null && dataList.isEmpty()) { // removal of specific instance
                 return false;

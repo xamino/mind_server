@@ -208,7 +208,7 @@ public class LocationModule extends Module {
         Boolean deleted = database.delete(new Area(null));
         // Delete these to be sure...
         deleted &= database.delete(new Location(0, 0, null));
-        deleted &= database.delete(new WifiMorsel(null, null, 0));
+        deleted &= database.delete(new WifiMorsel(null, null, 0, 0));
         if (deleted) {
             database.reinit();
             return new Success("All areas were removed from Database.");
