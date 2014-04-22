@@ -23,7 +23,7 @@ public class DatabaseController implements ServletContextListener {
      */
     private static DatabaseController instance;
     private final String TAG = "DatabaseController";
-    private ObjectContainer con;
+    private ObjectContainer rootContainer;
     private Messenger log;
 
     /**
@@ -52,19 +52,18 @@ public class DatabaseController implements ServletContextListener {
      * @param data The Object to be stored.
      * @return true if the operation was successful and false otherwise.
      */
-    public boolean create(Data data) {
+    public boolean create(ObjectContainer sessionContainer, Data data) {
         // Sanitize input on DB, only allow Data objects implementing a unique key
         if (data == null || data.getKey() == null || data.getKey().equals("0/0")) {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
-        DataList<Data> readData = read(data);
+        DataList<Data> readData = read(sessionContainer,data);
         if (readData != null && !readData.isEmpty()) {
             return false;
         }
         try {
-            con.store(data);
-            con.commit();
+            sessionContainer.store(data);
             log.log(TAG, "Written to DB: " + data.toString());
             return true;
         } catch (Exception e) {
@@ -80,7 +79,7 @@ public class DatabaseController implements ServletContextListener {
      * @param <T>           A DataType extending Data.
      * @return A DataList of the specified filter parameter Type or null on error.
      */
-    public <T extends Data> DataList<T> read(final T requestFilter) {
+    public <T extends Data> DataList<T> read(ObjectContainer sessionContainer, final T requestFilter) {
         try {
             List queryResult;
             // When unique key is empty, directly use the filter.
@@ -88,9 +87,9 @@ public class DatabaseController implements ServletContextListener {
                     || requestFilter.getKey() == null
                     || requestFilter.getKey().equals("")
                     || requestFilter.getKey().equals("0/0")) { //TODO better location key
-                queryResult = con.queryByExample(requestFilter);
+                queryResult = sessionContainer.queryByExample(requestFilter);
             } else {
-                Query query = con.query();
+                Query query = sessionContainer.query();
                 query.constrain(requestFilter.getClass());
                 if (requestFilter instanceof User) {
                     query.descend("email").constrain(requestFilter.getKey());
@@ -106,7 +105,7 @@ public class DatabaseController implements ServletContextListener {
                     queryResult = query.execute();
                 } else {
                     log.log(TAG, "Object Type " + requestFilter.getClass().getSimpleName() + " reading could be optimized.");
-                    queryResult = con.query(new Predicate<T>() {
+                    queryResult = sessionContainer.query(new Predicate<T>() {
                         @Override
                         public boolean match(T o) {
                             return o.getKey().equals(requestFilter.getKey());
@@ -131,8 +130,8 @@ public class DatabaseController implements ServletContextListener {
     }
 
     // todo look if we can use this
-    public DataList<Area> getAreasContainingLocation(final Location contained) {
-        List queryResult = con.query(new Predicate<Area>() {
+    public DataList<Area> getAreasContainingLocation(ObjectContainer sessionContainer, final Location contained) {
+        List queryResult = sessionContainer.query(new Predicate<Area>() {
             @Override
             public boolean match(Area match) {
                 // return all areas that include the single location contained in the requestfilter
@@ -157,7 +156,7 @@ public class DatabaseController implements ServletContextListener {
      * @param requestFilter The Data object of which the children should be fetched.
      * @return a Datalist of children or null on error.
      */
-    public Data readChildren(Data requestFilter) {
+    public Data readChildren(ObjectContainer sessionContainer, Data requestFilter) {
         try {
             List queryResult;
             DataList result = null;
@@ -165,7 +164,7 @@ public class DatabaseController implements ServletContextListener {
             // process all possible classes
             if (requestFilter instanceof Location) {
                 final Location loc = (Location) requestFilter;
-                queryResult = con.query(new Predicate<Location>() {
+                queryResult = sessionContainer.query(new Predicate<Location>() {
                     @Override
                     public boolean match(Location o) {
                         return o.getCoordinateX() == loc.getCoordinateX() && o.getCoordinateY() == loc.getCoordinateY();
@@ -178,7 +177,7 @@ public class DatabaseController implements ServletContextListener {
 
             } else if (requestFilter instanceof Area) {
                 final Area area = (Area) requestFilter;
-                queryResult = con.query(new Predicate<Area>() {
+                queryResult = sessionContainer.query(new Predicate<Area>() {
                     @Override
                     public boolean match(Area o) {
                         return o.getID().equals(area.getID());
@@ -201,14 +200,13 @@ public class DatabaseController implements ServletContextListener {
         }
     }
 
-    public boolean update(Data data) {
+    public boolean update(ObjectContainer sessionContainer, Data data) {
         if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
         try {
             DataList<Data> dataList;
-            if (!(dataList = read(data)).isEmpty()) {
-                con.delete(dataList.get(0));
-                con.store(data);
-                con.commit();
+            if (!(dataList = read(sessionContainer,data)).isEmpty()) {
+                sessionContainer.delete(dataList.get(0));
+                sessionContainer.store(data);
                 log.log(TAG, "Updated in DB: " + data.toString());
                 return true;
             }
@@ -225,9 +223,9 @@ public class DatabaseController implements ServletContextListener {
      * @param data the object to be deleted.
      * @return true if deletion was successful or the object does not exist, otherwise false
      */
-    public boolean delete(Data data) {
+    public boolean delete(ObjectContainer sessionContainer, Data data) {
         try {
-            DataList<Data> dataList = read(data);
+            DataList<Data> dataList = read(sessionContainer,data);
 
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
@@ -238,15 +236,19 @@ public class DatabaseController implements ServletContextListener {
                 return false;
             } else {
                 for (Data d : dataList) {
-                    con.delete(d);
+                    sessionContainer.delete(d);
                 }
-                con.commit();
                 log.log(TAG, "Deleted from DB: " + dataList.toString());
                 return true;
             }
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public ObjectContainer getSessionContainer(){
+        // open the db4o-session.
+       return rootContainer.ext().openSession();
     }
 
     public void init(String servletFilePath, boolean reinitialize) {
@@ -264,39 +266,41 @@ public class DatabaseController implements ServletContextListener {
         dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
         dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
         dbconfig.common().objectClass(WifiSensor.class).objectField("position").indexed(true);
-        con = Db4oEmbedded.openFile(dbconfig, dbFilePath);
+        rootContainer = Db4oEmbedded.openFile(dbconfig, dbFilePath);
 
         log.log(TAG, "db4o startup on " + dbFilePath);
 
-        if (reinitialize)
-            reinit();
+        if (reinitialize) {
+            reinit(rootContainer);
+            rootContainer.commit();
+        }
     }
 
     /**
      * Must not be called before the
      */
-    public void reinit() {
+    public void reinit(ObjectContainer sessionContainer) {
         //
         Configuration config = Configuration.getInstance();
 
         // Initializing Database
         log.log(TAG, "Running DB init.");
-        DataList<Area> areaData = read(new Area("universe", null, 0, 0, 0, 0));
+        DataList<Area> areaData = read(sessionContainer,new Area("universe", null, 0, 0, 0, 0));
         if (areaData == null || areaData.isEmpty()) {
             log.log(TAG, "Universe not existing, creating it.");
-            create(new Area("universe", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            create(sessionContainer,new Area("universe", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
         }
 
         // Create default admin if no other admin exists
         User adminProto = new User(null);
         adminProto.setAdmin(true);
-        DataList<User> adminData = read(adminProto);
+        DataList<User> adminData = read(sessionContainer,adminProto);
         // test for existing single admin or list of admins
         if (adminData == null || adminData.isEmpty()) {
             log.log(TAG, "Admin not existing, creating one.");
             adminProto = new User(config.getAdminEmail(), config.getAdminName(), true);
             adminProto.setPwdHash(BCrypt.hashpw(config.getAdminPassword(), BCrypt.gensalt(12)));
-            create(adminProto);
+            create(sessionContainer,adminProto);
         }
     }
 
@@ -314,8 +318,8 @@ public class DatabaseController implements ServletContextListener {
     }
 
     public void close() {
-        if (con != null) {
-            con.close();
+        if (rootContainer != null) {
+            rootContainer.close();
             log.log(TAG, "db4o shutdown");
         }
     }

@@ -1,5 +1,6 @@
 package de.uulm.mi.mind.logic.modules;
 
+import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
@@ -30,6 +31,7 @@ public class LocationModule extends Module {
             return new Error(Error.Type.WRONG_OBJECT, "The Location Module requires a Area, WifiMorsel or Location Object.");
         }
 
+        // Location
         if (task instanceof Task.Location) {
             if (!(request instanceof Location)) {
                 return new Error(Error.Type.TASK, "Location tasks always require a location object!");
@@ -78,6 +80,7 @@ public class LocationModule extends Module {
                 case READ_MORSELS:
                     return readMorsels(location);
             }
+            // Area
         } else if (task instanceof Task.Area) {
             // No check because we don't always need it
             Area area = (Area) request;
@@ -181,8 +184,11 @@ public class LocationModule extends Module {
      * Method that updates the Location <--> Area mapping.
      */
     private void updateMapping() {
-        DataList<Location> locations = database.read(new Location(0, 0, null));
-        DataList<Area> areas = database.read(new Area(null));
+        ObjectContainer dbc = database.getSessionContainer();
+
+        DataList<Location> locations = database.read(dbc,new Location(0, 0, null));
+        DataList<Area> areas = database.read(dbc,new Area(null));
+
         log.pushTimer(this, "");
         for (Area area : areas) {
             area.setLocations(new DataList<Location>());
@@ -192,10 +198,16 @@ public class LocationModule extends Module {
                 }
             }
             // must write data back to DB
-            if (!database.update(area)) {
+            if (!database.update(dbc,area)) {
                 log.error(TAG, "Failed to update mapping in DB for " + area.getID() + "!");
+                dbc.rollback();
+                dbc.close();
+                return;
             }
         }
+        // All operations were successful, commit
+        dbc.commit();
+        dbc.close();
         log.log(TAG, "Updated Location <--> Area mapping. Took " + log.popTimer(this).time + "ms.");
     }
 
@@ -205,19 +217,25 @@ public class LocationModule extends Module {
      * @return Success or Error depending on DB action.
      */
     private Data annihilateAreas() {
-        Boolean deleted = database.delete(new Area(null));
+        ObjectContainer dbc = database.getSessionContainer();
+        Boolean deleted = database.delete(dbc,new Area(null));
         // Delete these to be sure...
-        deleted &= database.delete(new Location(0, 0, null));
-        deleted &= database.delete(new WifiMorsel(null, null, 0, 0));
+        deleted &= database.delete(dbc,new Location(0, 0, null));
+        deleted &= database.delete(dbc,new WifiMorsel(null, null, 0, 0));
         if (deleted) {
-            database.reinit();
+            database.reinit(dbc);
+            dbc.commit();
+            dbc.close();
             return new Success("All areas were removed from Database.");
         }
+        dbc.rollback();
+        dbc.close();
         return new Error(Error.Type.DATABASE, "Removal of areas failed.");
     }
 
     private Data readLocations(Area area) {
-        Data data = database.readChildren(area);
+        ObjectContainer dbc = database.getSessionContainer();
+        Data data = database.readChildren(dbc,area);
         if (data != null)
             return data;
         else
