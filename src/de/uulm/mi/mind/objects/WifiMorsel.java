@@ -14,14 +14,17 @@ public class WifiMorsel implements Data, Comparable {
      */
     private String wifiName;
     /**
-     * The noise level of the wifi.
+     * The strength level of the wifi signal.
      */
     private int wifiLevel;
 
-    public WifiMorsel(String wifiMac, String wifiName, int wifiLevel) {
+    private int wifiChannel;
+
+    public WifiMorsel(String wifiMac, String wifiName, int wifiLevel, int wifiChannel) {
         this.wifiMac = wifiMac;
         this.wifiName = wifiName;
         this.wifiLevel = wifiLevel;
+        this.wifiChannel = wifiChannel;
     }
 
     public String getWifiMac() {
@@ -64,9 +67,7 @@ public class WifiMorsel implements Data, Comparable {
 
         WifiMorsel that = (WifiMorsel) o;
 
-        if (!wifiMac.equals(that.wifiMac)) return false;
-
-        return true;
+        return wifiMac.equals(that.wifiMac);
     }
 
     @Override
@@ -76,7 +77,6 @@ public class WifiMorsel implements Data, Comparable {
 
     @Override
     public int compareTo(Object obj) {
-    	//LAST CHANGE - REVERSE
         WifiMorsel temp = (WifiMorsel) obj;
         if (this.wifiLevel > temp.wifiLevel)
             return -1;
@@ -84,6 +84,14 @@ public class WifiMorsel implements Data, Comparable {
             return 1;
         else
             return 0;
+    }
+
+    public int getWifiChannel() {
+        return wifiChannel;
+    }
+
+    public void setWifiChannel(int wifiChannel) {
+        this.wifiChannel = wifiChannel;
     }
 
     @Override

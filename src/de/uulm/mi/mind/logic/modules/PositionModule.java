@@ -170,7 +170,7 @@ public class PositionModule extends Module {
                     }
                 }
                 int average = summedLevel / counter;
-                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average));
+                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel()));
             }
             averagedDatabaseLocations.add(new Location(databaseLocation.getCoordinateX(), databaseLocation.getCoordinateY(), averageMorsels));
         }

@@ -18,6 +18,14 @@ public class Success extends Information {
         this.description = description;
     }
 
+    @Override
+    public String toString() {
+        return "Success{" +
+                "type=" + type +
+                ", description='" + description + '\'' +
+                '}';
+    }
+
     public String getDescription() {
         return description;
     }
