@@ -170,6 +170,7 @@ public class JsonConverter<E> {
         E object;
         // use any constructor to build the object, we'll fill the fields correctly manually later
         // this means we need to feed some constructor some values
+        // todo implement that all classes MUST have default constructor (public or private we don't care)
         Constructor constructor = objectClass.getConstructors()[0];
         List<Object> params = new ArrayList<Object>();
         for (Class<?> pType : constructor.getParameterTypes()) {
@@ -262,6 +263,7 @@ public class JsonConverter<E> {
             return null;
         } else if (type.isInstance(Collection.class)) {
             // todo
+            // todo can i just give back List?
             return null;
         } else {
             // this probably means object

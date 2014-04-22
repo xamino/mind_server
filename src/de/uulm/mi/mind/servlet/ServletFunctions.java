@@ -21,6 +21,7 @@ import java.util.Date;
  * @author Tamino Hartmann
  *         Class for handling all the serious tasks of the servlet. Mainly there to keep Servlet comparatively clean.
  */
+// TODO reimplement tasks as anonymous interface objects with class[] info for who may access them
 public class ServletFunctions {
     private static ServletFunctions INSTANCE;
     private final String TAG = "ServletFunctions";
