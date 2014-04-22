@@ -25,6 +25,9 @@ public class WifiSensor implements Authenticated, Data {
 
     private Date lastAccess;
 
+    private WifiSensor() {
+    }
+
     public WifiSensor(String position, String tokenHash) {
         this.position = position;
         this.tokenHash = tokenHash;

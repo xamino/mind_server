@@ -19,6 +19,9 @@ public class User implements Data, Authenticated {
     private Date lastAccess;
     private Status status;
 
+    private User() {
+    }
+
     public User(String email) {
         this.email = email;
     }

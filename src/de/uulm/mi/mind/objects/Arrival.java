@@ -22,6 +22,9 @@ public class Arrival implements Data {
      */
     private String ipAddress;
 
+    private Arrival() {
+    }
+
     public Arrival(String sessionHash, String task, Data object) {
         this.sessionHash = sessionHash;
         this.task = task;

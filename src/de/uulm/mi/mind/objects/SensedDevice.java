@@ -10,6 +10,9 @@ public class SensedDevice implements Data {
     private String ipAddress;
     private int levelValue;
 
+    private SensedDevice() {
+    }
+
     public SensedDevice(String sensor, String ipAddress, int levelValue) {
         this.sensor = sensor;
         this.ipAddress = ipAddress;

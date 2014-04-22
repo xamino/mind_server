@@ -22,6 +22,9 @@ public class PublicDisplay implements Data, Authenticated {
     private int coordinateY;
     private Date lastAccess;
 
+    private PublicDisplay() {
+    }
+
     public PublicDisplay(String identification, String token, String location, int coordinateX, int coordinateY) {
         this.location = location;
         this.identification = identification;

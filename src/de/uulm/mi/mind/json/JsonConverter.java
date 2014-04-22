@@ -6,17 +6,24 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Tamino Hartmann
  *         <p/>
  */
+// todo abstract away primitives and not-primitive-primitives (like Date)
 public class JsonConverter<E> {
 
     private final String TAG = "JsonConverter";
     private final String ESCAPE = "\"";
     private final String TYPE_KEY;
+    private SimpleDateFormat sdf;
     private Messenger log;
     /**
      * Hashmap of the registered typesClassString that the converter will convert with $TYPE_KEY.
@@ -33,6 +40,7 @@ public class JsonConverter<E> {
         this.TYPE_KEY = typeKey;
         typesClassString = new HashMap<>();
         typesStringClass = new HashMap<>();
+        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         log.log(TAG, "Created.");
     }
 
@@ -57,10 +65,14 @@ public class JsonConverter<E> {
      * @return
      */
     public <S extends E> String toJson(S object) throws IOException {
+        if (object == null) {
+            throw new IOException(TAG + ": Null object passed!");
+        }
         Class objectClass = object.getClass();
         // Check if registered TYPE_KEY
         if (!typesClassString.containsKey(objectClass)) {
-            throw new IOException("Unregistered TYPE_KEY! Unable to parse to JSON.");
+            throw new IOException("Unregistered TYPE_KEY! Unable to parse to JSON. Register "
+                    + object.getClass().getSimpleName() + "!");
         }
         // Get all fields and values recursively
         HashMap<Field, Object> fieldValueList = new HashMap<>();
@@ -78,7 +90,6 @@ public class JsonConverter<E> {
         // todo use stringbuffer to make faster?
         String jsonObject = "{" + pack(TYPE_KEY, typesClassString.get(objectClass));
         // Now correctly handle each TYPE_KEY
-        // todo do it all in one loop?
         // todo collection and array can contain primitive data typesClassString... :P
         for (Map.Entry<Field, Object> entry : fieldValueList.entrySet()) {
             // add comma
@@ -86,8 +97,12 @@ public class JsonConverter<E> {
             Field field = entry.getKey();
             String fieldName = fieldName(field);
             Object value = entry.getValue();
+            // null value
+            if (value == null) {
+                jsonObject += ESCAPE + fieldName + ESCAPE + ":null";
+            }
             // collections
-            if (value instanceof Collection) {
+            else if (value instanceof Collection) {
                 // start array
                 jsonObject += ESCAPE + fieldName + ESCAPE + ":[";
                 // collection
@@ -121,7 +136,6 @@ public class JsonConverter<E> {
             // string
             else if (value instanceof String) {
                 jsonObject += pack(fieldName, ((String) value));
-                // todo how do i get subobjects?
             }
             // numbers
             else if (value instanceof Byte || value instanceof Short || value instanceof Integer ||
@@ -135,6 +149,10 @@ public class JsonConverter<E> {
             // enums
             else if (value instanceof Enum) {
                 jsonObject += pack(fieldName, value.toString());
+            }
+            // date
+            else if (value instanceof Date) {
+                jsonObject += pack(fieldName, sdf.format(value));
             }
             // probably object (if not registered it will throw an IOException on recursion)
             else {
@@ -168,43 +186,22 @@ public class JsonConverter<E> {
         simplePairs.remove(TYPE_KEY);
         // create java object
         E object;
-        // use any constructor to build the object, we'll fill the fields correctly manually later
-        // this means we need to feed some constructor some values
-        // todo implement that all classes MUST have default constructor (public or private we don't care)
-        Constructor constructor = objectClass.getConstructors()[0];
-        List<Object> params = new ArrayList<Object>();
-        for (Class<?> pType : constructor.getParameterTypes()) {
-            try {
-                if (pType == boolean.class) {
-                    try {
-                        params.add(Boolean.class.getConstructors()[0].newInstance(new Object[]{false}));
-                    } catch (InvocationTargetException e) {
-                        e.printStackTrace();
-                        throw new IOException(TAG + ": Failed to construct object!");
-                    }
-                } else {
-                    params.add((pType.isPrimitive()) ? pType.newInstance() : null);
-                }
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-                throw new IOException(TAG + ": Failed to construct object!");
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                throw new IOException(TAG + ": Failed to construct object!");
-            }
-        }
-        // now get an instance
         try {
-            object = (E) constructor.newInstance(params.toArray());
+            Constructor constructor = objectClass.getDeclaredConstructor(new Class[]{});
+            constructor.setAccessible(true);
+            object = (E) constructor.newInstance(new Class[]{});
         } catch (InstantiationException e) {
             e.printStackTrace();
-            throw new IOException(TAG + ": Failed to construct object!");
+            throw new IOException(TAG + ": Objects must have default constructor! May be private though.");
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-            throw new IOException(TAG + ": Failed to construct object!");
+            throw new IOException(TAG + ": Objects must have default constructor! May be private though.");
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new IOException(TAG + ": Objects must have default constructor! May be private though.");
         } catch (InvocationTargetException e) {
             e.printStackTrace();
-            throw new IOException(TAG + ": Failed to construct object!");
+            throw new IOException(TAG + ": Objects must have default constructor! May be private though.");
         }
         // apply all fields, leaving those we have no value for at their default value
         for (Map.Entry<String, String> entry : simplePairs.entrySet()) {
@@ -217,7 +214,7 @@ public class JsonConverter<E> {
                 continue;
             }
             f.setAccessible(true);
-            Object parsedValue = typeCastParse(f, entry.getValue());
+            Object parsedValue = typeCastParse(f.getType(), entry.getValue());
             try {
                 // this is where we also parse the value to the correct type
                 f.set(object, parsedValue);
@@ -232,40 +229,49 @@ public class JsonConverter<E> {
     /**
      * Method that returns the parsed value as the correct type of object for the given field.
      *
-     * @param field The field where to set the value.
+     * @param clazz The class to which to try and cast it.
      * @param value The string value to parse.
      * @return The parsed value.
      */
-    // todo why not set the field right away?
-    // todo need to do something about value.equals("null")  --> null
-    private Object typeCastParse(Field field, String value) throws IOException {
-        Class type = field.getType();
-        if (type == boolean.class) {
+    // todo catch arrays and collections of primitives
+    private Object typeCastParse(Class clazz, String value) throws IOException {
+        if (clazz == boolean.class) {
             return Boolean.parseBoolean(value);
-        } else if (type == String.class) {
+        } else if (clazz == String.class) {
             return value;
-        } else if (type == Integer.class) {
+        } else if (clazz == Integer.class) {
             return Integer.parseInt(value);
-        } else if (type == Byte.class) {
+        } else if (clazz == Byte.class) {
             return Byte.parseByte(value);
-        } else if (type == Short.class) {
+        } else if (clazz == Short.class) {
             return Short.parseShort(value);
-        } else if (type == Long.class) {
+        } else if (clazz == Long.class) {
             return Long.parseLong(value);
-        } else if (type == Float.class) {
+        } else if (clazz == Float.class) {
             return Float.parseFloat(value);
-        } else if (type == Double.class) {
+        } else if (clazz == Double.class) {
             return Double.parseDouble(value);
-        } else if (type.isEnum()) {
-            return Enum.valueOf(type, value);
-        } else if (type == Object[].class) {
+        } else if (clazz.isEnum()) {
+            return Enum.valueOf(clazz, value);
+        } else if (clazz == Date.class) {
+            try {
+                return sdf.parse(value);
+            } catch (ParseException e) {
+                e.printStackTrace();
+                throw new IOException(TAG + ": JsonConverter failed to convert java.util.Date back! Format required " +
+                        "is yyyy-MM-dd HH:mm:ss");
+            }
+        } else if (clazz == Object[].class) {
             // todo
             return null;
-        } else if (type.isInstance(Collection.class)) {
+        } else if (clazz.isInstance(Collection.class)) {
             // todo
             // todo can i just give back List?
             return null;
         } else {
+            if (value.equals("null")) {
+                return null;
+            }
             // this probably means object
             return fromJson(value);
         }
@@ -296,6 +302,9 @@ public class JsonConverter<E> {
             int valueStart = splitIndex + 1;
             // findValueEndIndex + valueStart because the method is relative, +1 to get enclosing char back too
             int valueStop = 1 + valueStart + findValueEndIndex(jsonObject.charAt(valueStart), jsonObject.substring(valueStart + 1));
+            // this can happen if empty string
+            // todo and if the empty string isn't at the end of an object? REWORK findValueEndIndex!!!
+            valueStop = valueStop > jsonObject.length() ? jsonObject.length() : valueStop;
             String value = jsonObject.substring(valueStart, valueStop);
             // must unpack value if only simple value (" ")
             if (value.startsWith("\"")) {
@@ -320,7 +329,7 @@ public class JsonConverter<E> {
         if (begin != '"' && begin != '\'' && begin != '{' && begin != '[') {
             int index = rest.indexOf(',');
             // this can happen when last value in object
-            if (index < 0 ) {
+            if (index < 0) {
                 return rest.length();
             }
             return rest.indexOf(',');

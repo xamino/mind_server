@@ -20,6 +20,9 @@ public class WifiMorsel implements Data, Comparable {
 
     private int wifiChannel;
 
+    private WifiMorsel() {
+    }
+
     public WifiMorsel(String wifiMac, String wifiName, int wifiLevel, int wifiChannel) {
         this.wifiMac = wifiMac;
         this.wifiName = wifiName;

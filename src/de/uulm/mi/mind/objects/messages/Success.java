@@ -8,6 +8,9 @@ public class Success extends Information {
     private String description;
     private Type type;
 
+    private Success() {
+    }
+
     public Success(String description) {
         this.type = Type.OK;
         this.description = description;

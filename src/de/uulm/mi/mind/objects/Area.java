@@ -20,6 +20,9 @@ public class Area implements Data {
     private int topLeftX, topLeftY;
     private int width, height;
 
+    private Area() {
+    }
+
     public Area(String ID) {
         this.ID = ID;
     }
