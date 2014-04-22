@@ -21,7 +21,7 @@ import java.util.Map;
 public class JsonConverter<E> {
 
     private final String TAG = "JsonConverter";
-    private final String ESCAPE = "\"";
+    private final char ESCAPE = '"';
     private final String TYPE_KEY;
     private SimpleDateFormat sdf;
     private Messenger log;
@@ -222,7 +222,6 @@ public class JsonConverter<E> {
                 throw new IOException(TAG + ": Failed to write fields!");
             }
         }
-        // todo json arrays instantiate in java based on field type in class
         return object;
     }
 
@@ -254,6 +253,7 @@ public class JsonConverter<E> {
         } else if (clazz.isEnum()) {
             return Enum.valueOf(clazz, value);
         } else if (clazz == Date.class) {
+            // note that Date is considered a primitive type here... really. :P
             try {
                 return sdf.parse(value);
             } catch (ParseException e) {
@@ -300,12 +300,10 @@ public class JsonConverter<E> {
             String key = jsonObject.substring(keyStart, keyStop);
             // now the tricky part: getting the complete value, independent of type and complexity
             int valueStart = splitIndex + 1;
-            // findValueEndIndex + valueStart because the method is relative, +1 to get enclosing char back too
-            int valueStop = 1 + valueStart + findValueEndIndex(jsonObject.charAt(valueStart), jsonObject.substring(valueStart + 1));
-            // this can happen if empty string
-            // todo and if the empty string isn't at the end of an object? REWORK findValueEndIndex!!!
-            valueStop = valueStop > jsonObject.length() ? jsonObject.length() : valueStop;
-            String value = jsonObject.substring(valueStart, valueStop);
+            // + valueStart because the method is relative
+            int valueStop = valueStart + findEndBracket(jsonObject.substring(valueStart));
+            // +1 because of substring exclusion
+            String value = jsonObject.substring(valueStart, valueStop + 1);
             // must unpack value if only simple value (" ")
             if (value.startsWith("\"")) {
                 value = value.substring(1, value.length() - 1);
@@ -324,39 +322,48 @@ public class JsonConverter<E> {
         return tree;
     }
 
-    private int findValueEndIndex(char begin, String rest) {
-        // for example if null
-        if (begin != '"' && begin != '\'' && begin != '{' && begin != '[') {
-            int index = rest.indexOf(',');
-            // this can happen when last value in object
-            if (index < 0) {
-                return rest.length();
-            }
-            return rest.indexOf(',');
-        }
-        char end = '"';
-        if (begin == '{') {
-            end = '}';
-        } else if (begin == '[') {
-            end = ']';
-        }
-        int levelCounter = 0;
-        int index = 1;
-        for (; index < rest.length(); index++) {
-            char at = rest.charAt(index);
-            // break if end and no levels down
-            // todo ignore if escape slash before, like \{ or \"
-            if (at == end && levelCounter == 0) {
+    /**
+     * Helper function that will try to find the scope of the next value in the json-string. Detection is based upon
+     * what the first char of the string is. Function is capable of keeping track of recursive objects and will try to
+     * find the correct end mark. Legal marks are (with their end mark): "–", {–}, [–]. If none of these three, it will
+     * return the the index before the next comma (for example when the string looks like thus: "null, ...").
+     *
+     * @param string The string upon which to work
+     * @return The index.
+     */
+    private int findEndBracket(String string) {
+        // get starting char
+        char begin = string.charAt(0);
+        // set ending char we're searching for
+        char end;
+        switch (begin) {
+            case ESCAPE:
+                end = ESCAPE;
                 break;
-            }
-            if (at == end && levelCounter > 0) {
-                levelCounter--;
-            }
-            if (at == begin) {
-                levelCounter++;
+            case '{':
+                end = '}';
+                break;
+            case '[':
+                end = ']';
+                break;
+            default:
+                // can happen when :null, so return value before comma
+                return string.indexOf(',') - 1;
+        }
+        // now walk through while counting the values
+        int index = 1;
+        int level = 0;
+        for (; index < string.length(); index++) {
+            char check = string.charAt(index);
+            if (level == 0 && check == end) {
+                break;
+            } else if (check == begin) {
+                level++;
+            } else if (check == end) {
+                level--;
             }
         }
-        // +1 because substring(start, end) -> end is exclusive
-        return index + 1;
+        System.out.println(string.substring(0, index + 1));
+        return index;
     }
 }
