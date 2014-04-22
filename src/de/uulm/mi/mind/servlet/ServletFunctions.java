@@ -216,6 +216,7 @@ public class ServletFunctions {
                 return (Data) activeUser.readData(REAL_POSITION);
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
+                System.out.println("TOGGLED ADMIN");
                 user.setAdmin(!user.isAdmin());
                 return moduleManager.handleTask(Task.User.UPDATE, user);
             default:

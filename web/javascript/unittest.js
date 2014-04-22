@@ -759,7 +759,7 @@ function statusTest() {
  * Use this method to clean the DB.
  */
 function cleanDB() {
-    unitTest("registration", new User("special@admin.eu", "admin", ""), Success, null);
+    unitTest("registration", new User("special@admin.eu", "admin"), Success, null);
     var arrival = new Arrival("login", null, new User("special@admin.eu", "admin"));
     var adminSession = JSON.parse($.ajax({
         data: JSON.stringify(arrival),
@@ -774,7 +774,7 @@ function cleanDB() {
         data: JSON.stringify(new Arrival("user_read", adminSession)),
         async: false
     }).responseText).object;
-    if (!admin.admin) {
+    if (admin.admin == "false") {
         unitTest("toggle_admin", null, Success, adminSession);
     }
     // Destroy areas

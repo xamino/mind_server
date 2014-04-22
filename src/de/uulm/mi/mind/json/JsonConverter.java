@@ -1,6 +1,7 @@
 package de.uulm.mi.mind.json;
 
 import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.objects.DataList;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -235,21 +236,49 @@ public class JsonConverter<E> {
     // todo catch arrays and collections of primitives
     private Object typeCastParse(Class clazz, String value) throws IOException {
         if (clazz == boolean.class) {
+            if (value.equals("null")) {
+                return false;
+            }
             return Boolean.parseBoolean(value);
-        } else if (clazz == String.class) {
-            return value;
-        } else if (clazz == Integer.class) {
+        } else if (clazz == int.class) {
+            if (value.equals("null")) {
+                return 0;
+            }
             return Integer.parseInt(value);
-        } else if (clazz == Byte.class) {
+        } else if (clazz == byte.class) {
+            if (value.equals("null")) {
+                return 0;
+            }
             return Byte.parseByte(value);
-        } else if (clazz == Short.class) {
+        } else if (clazz == short.class) {
+            if (value.equals("null")) {
+                return 0;
+            }
             return Short.parseShort(value);
-        } else if (clazz == Long.class) {
+        } else if (clazz == long.class) {
+            if (value.equals("null")) {
+                return 0;
+            }
             return Long.parseLong(value);
-        } else if (clazz == Float.class) {
+        } else if (clazz == float.class) {
+            if (value.equals("null")) {
+                return 0;
+            }
             return Float.parseFloat(value);
-        } else if (clazz == Double.class) {
+        } else if (clazz == double.class) {
+            if (value.equals("null")) {
+                return 0;
+            }
             return Double.parseDouble(value);
+        } else if (clazz == String.class) {
+            if (value.equals("null")) {
+                return null;
+            }
+            return value;
+        }
+        // null is caught exactly here for a reason! --> int = null is impossible... :P
+        else if (value.equals("null")) {
+            return null;
         } else if (clazz.isEnum()) {
             return Enum.valueOf(clazz, value);
         } else if (clazz == Date.class) {
@@ -261,17 +290,33 @@ public class JsonConverter<E> {
                 throw new IOException(TAG + ": JsonConverter failed to convert java.util.Date back! Format required " +
                         "is yyyy-MM-dd HH:mm:ss");
             }
-        } else if (clazz == Object[].class) {
-            // todo
-            return null;
-        } else if (clazz.isInstance(Collection.class)) {
-            // todo
-            // todo can i just give back List?
-            return null;
-        } else {
-            if (value.equals("null")) {
-                return null;
+        } else if (clazz == Object[].class || clazz.isInstance(Collection.class) || value.startsWith("[")) {
+            DataList objects = new DataList();
+            // remove []
+            value = value.substring(1, value.length() - 1);
+            // must split value into objects
+            while (value.contains(",")) {
+                int end = findEndBracket(value) + 1;
+                String nextObject = value.substring(0, end);
+                objects.add(fromJson(nextObject));
+                // remove finished object
+                // some vodoo required to correctly move the string over
+                if (value.charAt(end - 1) == ',') {
+                    value = value.substring(end);
+                } else {
+                    if (end + 1 >= value.length()) {
+                        value = "";
+                    } else {
+                        value = value.substring(end + 1);
+                    }
+                }
             }
+            if (clazz == Object[].class) {
+                return objects.toArray();
+            } else {
+                return objects;
+            }
+        } else {
             // this probably means object
             return fromJson(value);
         }
@@ -348,7 +393,12 @@ public class JsonConverter<E> {
                 break;
             default:
                 // can happen when :null, so return value before comma
-                return string.indexOf(',') - 1;
+                int comma = string.indexOf(',');
+                if (comma < 0) {
+                    return string.length() - 1;
+                } else {
+                    return string.indexOf(',') - 1;
+                }
         }
         // now walk through while counting the values
         int index = 1;
@@ -363,7 +413,7 @@ public class JsonConverter<E> {
                 level--;
             }
         }
-        System.out.println(string.substring(0, index + 1));
+        // System.out.println(string.substring(0, index + 1));
         return index;
     }
 }
