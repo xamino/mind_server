@@ -112,24 +112,26 @@ public class PositionModule extends Module {
                 }
                 return sendUsers;
             case SENSOR_WRITE:
-                if (!(request instanceof SensedDevice)) {
+                if (!(request instanceof DataList)) {
                     return new Error(Error.Type.WRONG_OBJECT, "SensorWrite was called with the wrong object type!");
                 }
                 // todo this always adds devices, when do we remove them from the sensedDevices HashMap? Timeout?
-                SensedDevice device = ((SensedDevice) request);
-                if (!sensedDevices.containsKey(device.getIpAddress())) {
-                    // not sensed before, so just add it and continue
-                    log.log(TAG, "Found new device to track: " + device.getIpAddress());
-                    sensedDevices.put(device.getIpAddress(), device);
-                    return new Success("New device added.");
-                }
-                // already in list, so check if to update if level is higher
-                // todo: we should also check for update of location with a threshold
-                // so that lvl40 but new room is taken over lvl41 old room
-                int oldLevel = sensedDevices.get(device.getIpAddress()).getLevelValue();
-                if (oldLevel <= device.getLevelValue()) {
-                    log.log(TAG, "Updated location of " + device.getIpAddress() + " to " + device.getSensor() + ".");
-                    sensedDevices.put(device.getIpAddress(), device);
+                DataList<SensedDevice> receivedDevices = (DataList<SensedDevice>) request;
+                for (SensedDevice device : receivedDevices) {
+                    if (!sensedDevices.containsKey(device.getIpAddress())) {
+                        // not sensed before, so just add it and continue
+                        log.log(TAG, "Found new device to track: " + device.getIpAddress());
+                        sensedDevices.put(device.getIpAddress(), device);
+                        continue;
+                    }
+                    // already in list, so check if to update if level is higher
+                    // todo: we should also check for update of location with a threshold
+                    // so that lvl40 but new room is taken over lvl41 old room
+                    int oldLevel = sensedDevices.get(device.getIpAddress()).getLevelValue();
+                    if (oldLevel <= device.getLevelValue()) {
+                        log.log(TAG, "Updated location of " + device.getIpAddress() + " to " + device.getSensor() + ".");
+                        sensedDevices.put(device.getIpAddress(), device);
+                    }
                 }
                 return new Success("Updated lists.");
             default:
@@ -142,6 +144,7 @@ public class PositionModule extends Module {
      * @param request
      * @return Location if found, else null.
      */
+
     private Location calculateLocation(Location request) {
         // Morsels from the current request which are to be compared to the database values
         DataList<WifiMorsel> requestWifiMorsels = request.getWifiMorsels();

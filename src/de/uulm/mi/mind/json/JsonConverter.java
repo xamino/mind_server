@@ -145,7 +145,17 @@ public class JsonConverter<E> {
         return jsonObject.toString();
     }
 
-    public E fromJson(String jsonObject) throws IOException {
+    public E fromJson(String json) {
+        try {
+            return writeObject(json);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.error(TAG, "Failed!");
+            return null;
+        }
+    }
+
+    private E writeObject(String jsonObject) throws IOException {
         // sanity: string starts and ends with {}
         if (!jsonObject.startsWith("{") || !jsonObject.endsWith("}")) {
             throw new IOException("String is not bracketed by {}!");
@@ -214,7 +224,11 @@ public class JsonConverter<E> {
             if (value.equals("null")) {
                 return 0;
             }
-            return Integer.parseInt(value);
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                throw new IOException(TAG + ": Not an integer: " + value);
+            }
         } else if (clazz == byte.class) {
             if (value.equals("null")) {
                 return 0;
@@ -268,7 +282,7 @@ public class JsonConverter<E> {
             while (value.contains(",")) {
                 int end = findEndBracket(value) + 1;
                 String nextObject = value.substring(0, end);
-                objects.add(fromJson(nextObject));
+                objects.add(writeObject(nextObject));
                 // remove finished object
                 // some vodoo required to correctly move the string over
                 if (value.charAt(end - 1) == ',') {
@@ -288,7 +302,7 @@ public class JsonConverter<E> {
             }
         } else {
             // this probably means object
-            return fromJson(value);
+            return writeObject(value);
         }
     }
 

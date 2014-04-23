@@ -585,8 +585,7 @@ function wifiSensorAPITest() {
     unitTest("wifi_sensor_update", new User("blub", "test"), Error, sessionOne);
     unitTest("wifi_sensor_update", new SensedDevice("my_office", "255.255.255.255", "-56"), Error, sessionOne);
     // legal stuff
-    unitTest("wifi_sensor_update", inOne, Success, sessionOne);
-    unitTest("wifi_sensor_update", inTwo, Success, sessionOne);
+    unitTest("wifi_sensor_update", [inOne, inTwo], Success, sessionOne);
     // todo more
 
     cleanDB();
