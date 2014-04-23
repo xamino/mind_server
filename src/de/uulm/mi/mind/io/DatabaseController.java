@@ -58,7 +58,7 @@ public class DatabaseController implements ServletContextListener {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
-        DataList<Data> readData = read(sessionContainer,data);
+        DataList<Data> readData = read(sessionContainer, data);
         if (readData != null && !readData.isEmpty()) {
             return false;
         }
@@ -150,61 +150,11 @@ public class DatabaseController implements ServletContextListener {
         return result;
     }
 
-    /**
-     * Reads child lists of the specified Data object if any available.
-     *
-     * @param requestFilter The Data object of which the children should be fetched.
-     * @return a Datalist of children or null on error.
-     */
-    public Data readChildren(ObjectContainer sessionContainer, Data requestFilter) {
-        try {
-            List queryResult;
-            DataList result = null;
-
-            // process all possible classes
-            if (requestFilter instanceof Location) {
-                final Location loc = (Location) requestFilter;
-                queryResult = sessionContainer.query(new Predicate<Location>() {
-                    @Override
-                    public boolean match(Location o) {
-                        return o.getCoordinateX() == loc.getCoordinateX() && o.getCoordinateY() == loc.getCoordinateY();
-                    }
-                });
-
-                if (queryResult.size() > 0) {
-                    result = ((Location) queryResult.get(0)).getWifiMorsels();
-                }
-
-            } else if (requestFilter instanceof Area) {
-                final Area area = (Area) requestFilter;
-                queryResult = sessionContainer.query(new Predicate<Area>() {
-                    @Override
-                    public boolean match(Area o) {
-                        return o.getID().equals(area.getID());
-                    }
-                });
-
-                if (queryResult.size() > 0) {
-                    result = ((Area) queryResult.get(0)).getLocations();
-                }
-            } else {
-                return null;
-            }
-            if (result == null)
-                result = new DataList();
-
-            //log.log(TAG, result.toString() + " read from DB!");
-            return result;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     public boolean update(ObjectContainer sessionContainer, Data data) {
         if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
         try {
             DataList<Data> dataList;
-            if (!(dataList = read(sessionContainer,data)).isEmpty()) {
+            if (!(dataList = read(sessionContainer, data)).isEmpty()) {
                 sessionContainer.delete(dataList.get(0));
                 sessionContainer.store(data);
                 log.log(TAG, "Updated in DB: " + data.toString());
@@ -225,7 +175,7 @@ public class DatabaseController implements ServletContextListener {
      */
     public boolean delete(ObjectContainer sessionContainer, Data data) {
         try {
-            DataList<Data> dataList = read(sessionContainer,data);
+            DataList<Data> dataList = read(sessionContainer, data);
 
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
@@ -246,9 +196,9 @@ public class DatabaseController implements ServletContextListener {
         }
     }
 
-    public ObjectContainer getSessionContainer(){
+    public ObjectContainer getSessionContainer() {
         // open the db4o-session.
-       return rootContainer.ext().openSession();
+        return rootContainer.ext().openSession();
     }
 
     public void init(String servletFilePath, boolean reinitialize) {
@@ -285,22 +235,22 @@ public class DatabaseController implements ServletContextListener {
 
         // Initializing Database
         log.log(TAG, "Running DB init.");
-        DataList<Area> areaData = read(sessionContainer,new Area("universe", null, 0, 0, 0, 0));
+        DataList<Area> areaData = read(sessionContainer, new Area("universe", null, 0, 0, 0, 0));
         if (areaData == null || areaData.isEmpty()) {
             log.log(TAG, "Universe not existing, creating it.");
-            create(sessionContainer,new Area("universe", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            create(sessionContainer, new Area("universe", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
         }
 
         // Create default admin if no other admin exists
         User adminProto = new User(null);
         adminProto.setAdmin(true);
-        DataList<User> adminData = read(sessionContainer,adminProto);
+        DataList<User> adminData = read(sessionContainer, adminProto);
         // test for existing single admin or list of admins
         if (adminData == null || adminData.isEmpty()) {
             log.log(TAG, "Admin not existing, creating one.");
             adminProto = new User(config.getAdminEmail(), config.getAdminName(), true);
             adminProto.setPwdHash(BCrypt.hashpw(config.getAdminPassword(), BCrypt.gensalt(12)));
-            create(sessionContainer,adminProto);
+            create(sessionContainer, adminProto);
         }
     }
 
