@@ -52,8 +52,6 @@ public class JsonConverter<E> {
      *              means that these should be unique!
      */
     public void registerType(Class<? extends E> clazz) {
-        // todo check that classes do not clash with TYPE_KEY!!!
-        // todo check that the two hashmaps are always in sync (meaning catch double adding of classes)
         String name = clazz.getCanonicalName();
         name = name.substring(name.lastIndexOf('.') + 1, name.length());
         typesClassString.put(clazz, name);
@@ -88,82 +86,63 @@ public class JsonConverter<E> {
             }
         }
         // JSON object start
-        // todo use stringbuffer to make faster?
-        String jsonObject = "{" + pack(TYPE_KEY, typesClassString.get(objectClass));
+        StringBuffer jsonObject = new StringBuffer();
+        jsonObject.append("{" + pack(TYPE_KEY, typesClassString.get(objectClass)));
         // Now correctly handle each TYPE_KEY
-        // todo collection and array can contain primitive data typesClassString... :P
+        // todo collection and array can contain primitive data
         for (Map.Entry<Field, Object> entry : fieldValueList.entrySet()) {
             // add comma
-            jsonObject += ",";
+            jsonObject.append(",");
             Field field = entry.getKey();
             String fieldName = fieldName(field);
             Object value = entry.getValue();
             // null value
             if (value == null) {
-                jsonObject += ESCAPE + fieldName + ESCAPE + ":null";
+                jsonObject.append(ESCAPE + fieldName + ESCAPE + ":null");
             }
-            // collections
-            else if (value instanceof Collection) {
+            // collections && arrays
+            else if (value instanceof Collection || value instanceof Object[]) {
                 // start array
-                jsonObject += ESCAPE + fieldName + ESCAPE + ":[";
+                jsonObject.append(ESCAPE + fieldName + ESCAPE + ":[");
                 // collection
-                Collection collection = ((Collection) value);
-                // recursively solve
-                for (Object collectionObject : collection) {
-                    jsonObject += toJson(((E) collectionObject)) + ",";
+                Object[] array;
+                if (value instanceof Collection) {
+                    array = ((Collection) value).toArray();
+                } else {
+                    array = (Object[]) value;
                 }
-                // remove last comma if placed
-                if (jsonObject.endsWith(",")) {
-                    jsonObject = jsonObject.substring(0, jsonObject.length() - 1);
-                }
-                jsonObject += "]";
-            }
-            // arrays
-            else if (value instanceof Object[]) {
-                // start array
-                jsonObject += ESCAPE + fieldName + ESCAPE + ":[";
-                // collection
-                Object[] array = ((Object[]) value);
                 // recursively solve
                 for (Object collectionObject : array) {
-                    jsonObject += toJson(((E) collectionObject)) + ",";
+                    jsonObject.append(toJson(((E) collectionObject)) + ",");
                 }
                 // remove last comma if placed
-                if (jsonObject.endsWith(",")) {
-                    jsonObject = jsonObject.substring(0, jsonObject.length() - 1);
+                if (jsonObject.charAt(jsonObject.length() - 1) == ',') {
+                    jsonObject.deleteCharAt(jsonObject.length() - 1);
                 }
-                jsonObject += "]";
+                jsonObject.append(']');
             }
-            // string
-            else if (value instanceof String) {
-                jsonObject += pack(fieldName, ((String) value));
-            }
-            // numbers
-            else if (value instanceof Byte || value instanceof Short || value instanceof Integer ||
-                    value instanceof Long || value instanceof Float || value instanceof Double) {
-                jsonObject += pack(fieldName, value.toString());
+            // string, numbers, enums
+            else if (value instanceof Enum || value instanceof String || value instanceof Byte || value instanceof Short
+                    || value instanceof Integer || value instanceof Long || value instanceof Float
+                    || value instanceof Double) {
+                jsonObject.append(pack(fieldName, value.toString()));
             }
             // boolean
             else if (value instanceof Boolean) {
-                jsonObject += pack(fieldName, value.toString());
-            }
-            // enums
-            else if (value instanceof Enum) {
-                jsonObject += pack(fieldName, value.toString());
+                jsonObject.append(pack(fieldName, value.toString()));
             }
             // date
             else if (value instanceof Date) {
-                jsonObject += pack(fieldName, sdf.format(value));
+                jsonObject.append(pack(fieldName, sdf.format(value)));
             }
             // probably object (if not registered it will throw an IOException on recursion)
             else {
-                jsonObject += ESCAPE + fieldName + ESCAPE + ":" + toJson(((E) value));
+                jsonObject.append(ESCAPE + fieldName + ESCAPE + ":" + toJson(((E) value)));
             }
-
         }
         // finish object
-        jsonObject += "}";
-        return jsonObject;
+        jsonObject.append('}');
+        return jsonObject.toString();
     }
 
     public E fromJson(String jsonObject) throws IOException {
@@ -191,16 +170,7 @@ public class JsonConverter<E> {
             Constructor constructor = objectClass.getDeclaredConstructor(new Class[]{});
             constructor.setAccessible(true);
             object = (E) constructor.newInstance(new Class[]{});
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-            throw new IOException(TAG + ": Objects must have default constructor! May be private though.");
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            throw new IOException(TAG + ": Objects must have default constructor! May be private though.");
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new IOException(TAG + ": Objects must have default constructor! May be private though.");
-        } catch (InvocationTargetException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
             throw new IOException(TAG + ": Objects must have default constructor! May be private though.");
         }
