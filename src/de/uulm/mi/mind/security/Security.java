@@ -131,7 +131,10 @@ public class Security {
             return null;
         }
         // now get database object
-        Authenticated databaseSafe = readDB(active.getAuthenticated());
+        ObjectContainer sessionContainer = database.getSessionContainer();
+        Authenticated databaseSafe = readDB(sessionContainer,active.getAuthenticated());
+        sessionContainer.close();
+
         // check if the user is still legal
         if (databaseSafe == null) {
             log.log(TAG, "Check failed: Authenticated not found.");
@@ -178,12 +181,13 @@ public class Security {
             firstFlag = true;
         }
         // try to update last access time
+        // TODO better error handling
         databaseSafe.setAccessDate(new Date());
         if (!(database.update(sessionContainer, (Data) databaseSafe))) {
             log.error(TAG, "Login failed for " + authenticated.readIdentification() + " due to error updating access time!");
             return null;
         }
-
+        sessionContainer.commit();
         sessionContainer.close();
 
         // generate the session

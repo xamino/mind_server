@@ -29,7 +29,7 @@ public class LocationModule implements Module {
     public Data run(Task task, Data request) {
 
         if (task == Task.Area.ANNIHILATE) {
-            annihilateAreas();
+            return annihilateAreas();
         }
 
         // Location

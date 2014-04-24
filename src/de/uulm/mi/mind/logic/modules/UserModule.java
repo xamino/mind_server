@@ -23,8 +23,9 @@ public class UserModule implements Module {
     @Override
     public Data run(Task task, Data request) {
 
-        if (task == Task.User.ANNIHILATE)
+        if (task == Task.User.ANNIHILATE) {
             return annihilateUsers();
+        }
 
         if (request == null) {
             request = new User(null);
