@@ -348,14 +348,14 @@ public class LocationModule implements Module {
             }
         }
         //TODO clone for bug fix WTF
-        Area f = new Area(finalArea.getID());
+        /*Area f = new Area(finalArea.getID());
         f.setHeight(finalArea.getHeight());
         f.setWidth(finalArea.getWidth());
         f.setTopLeftX(finalArea.getTopLeftX());
         f.setTopLeftY(finalArea.getTopLeftY());
         f.setLocations(finalArea.getLocations());
-
-        return f;
+*/
+        return finalArea;
     }
 
     /**

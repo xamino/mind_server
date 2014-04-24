@@ -64,6 +64,7 @@ public class PositionModule implements Module {
                 DataList<Location> loca = new DataList<>();
                 loca.add(location);
                 area.setLocations(loca); // TODO This causes the bug, but why?!
+
                 return area;
             case READ:
                 // read all users
@@ -153,7 +154,6 @@ public class PositionModule implements Module {
         // Get universe Area containing all locations from database
         Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe"))).get(0);
         DataList<Location> dataBaseLocations = uniArea.getLocations();
-        DataList<Location> averagedDatabaseLocations = new DataList<>(); //TODO another DB overwrite Bug fix
 
         // Modify database List to contain the average Morsel signal strengths for each location
         for (Location databaseLocation : dataBaseLocations) {
@@ -176,11 +176,8 @@ public class PositionModule implements Module {
                 int average = summedLevel / counter;
                 averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel()));
             }
-            averagedDatabaseLocations.add(new Location(databaseLocation.getCoordinateX(), databaseLocation.getCoordinateY(), averageMorsels));
+            databaseLocation.setWifiMorsels(averageMorsels);
         }
-
-        // TODO For testing the DB bug
-        // Area uniArea1 = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe"))).get(0);
 
         // A Map that describes how many matches there are for this location
         HashMap<Location, Integer> locationMatchesMap = new HashMap<>();
@@ -192,7 +189,7 @@ public class PositionModule implements Module {
         // For each request morsel, check if a morsel with the same mac address exists in a database location.
         // Then check how far wifi levels are apart. If it is below a tolerance value increase the goodness of that location.
         for (WifiMorsel currentRequestMorsel : requestWifiMorsels) {
-            for (Location dataBaseLocation : averagedDatabaseLocations) {
+            for (Location dataBaseLocation : dataBaseLocations) {
 
                 DataList<WifiMorsel> dataBaseLocationMorsels = dataBaseLocation.getWifiMorsels();
 
