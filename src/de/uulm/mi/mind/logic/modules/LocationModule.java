@@ -85,7 +85,7 @@ public class LocationModule implements Module {
 
     private Data createArea(Area area) {
         if (area.getKey() == null) {
-            return new Error(Error.Type.WRONG_OBJECT, "Area was null!");
+            return new Error(Error.Type.WRONG_OBJECT, "Area to be created was null!");
         }
 
         ObjectContainer sessionContainer = database.getSessionContainer();
@@ -96,7 +96,7 @@ public class LocationModule implements Module {
         if (success1 && success2) {
             sessionContainer.commit();
             sessionContainer.close();
-            return new Success(Success.Type.OK, "Area was created successfully.");
+            return new Success("Area was created successfully.");
         }
 
         // some kind of error occurred
@@ -132,7 +132,7 @@ public class LocationModule implements Module {
 
     private Data updateArea(Area area) {
         if (area.getKey() == null) {
-            return new Error(Error.Type.WRONG_OBJECT, "Area was null!");
+            return new Error(Error.Type.WRONG_OBJECT, "Area to be updated was null!");
         }
 
         ObjectContainer sessionContainer = database.getSessionContainer();
@@ -143,7 +143,7 @@ public class LocationModule implements Module {
         if (success1 && success2) {
             sessionContainer.commit();
             sessionContainer.close();
-            return new Success(Success.Type.OK, "Area was updated successfully.");
+            return new Success("Area was updated successfully.");
         }
 
         // some kind of error occurred
@@ -168,7 +168,7 @@ public class LocationModule implements Module {
         if (success1 && success2) {
             sessionContainer.commit();
             sessionContainer.close();
-            return new Success(Success.Type.OK, "Area was deleted successfully.");
+            return new Success("Area was deleted successfully.");
         }
 
         // some kind of error occurred
@@ -185,7 +185,7 @@ public class LocationModule implements Module {
 
     private Data createLocation(Location location) {
         if (location.getKey() == null) {
-            return new Error(Error.Type.WRONG_OBJECT, "Location was null!");
+            return new Error(Error.Type.WRONG_OBJECT, "Location to be created was null!");
         }
 
         ObjectContainer sessionContainer = database.getSessionContainer();
@@ -200,7 +200,7 @@ public class LocationModule implements Module {
             if (success1 && success2) {
                 sessionContainer.commit();
                 sessionContainer.close();
-                return new Success(Success.Type.OK, "Location was created successfully.");
+                return new Success("Location was created successfully.");
             }
 
             // some kind of error occurred
@@ -225,7 +225,7 @@ public class LocationModule implements Module {
             if (success1 && success2) {
                 sessionContainer.commit();
                 sessionContainer.close();
-                return new Success(Success.Type.OK, "Location was not created but updated successfully as it existed already.");
+                return new Success("Location was not created but updated successfully as it existed already.");
             }
 
             // some kind of error occurred
@@ -264,7 +264,7 @@ public class LocationModule implements Module {
 
     private Data updateLocation(Location location) {
         if (location.getKey() == null) {
-            return new Error(Error.Type.WRONG_OBJECT, "Location was null!");
+            return new Error(Error.Type.WRONG_OBJECT, "Location to be updated was null!");
         }
 
         ObjectContainer sessionContainer = database.getSessionContainer();
@@ -277,7 +277,7 @@ public class LocationModule implements Module {
         if (success1 && success2) {
             sessionContainer.commit();
             sessionContainer.close();
-            return new Success(Success.Type.OK, "Location was updated successfully.");
+            return new Success("Location was updated successfully.");
         }
 
         // some kind of error occurred
@@ -302,7 +302,7 @@ public class LocationModule implements Module {
         if (success1 && success2) {
             sessionContainer.commit();
             sessionContainer.close();
-            return new Success(Success.Type.OK, "Location was deleted successfully.");
+            return new Success("Location was deleted successfully.");
         }
 
         // some kind of error occurred
@@ -421,8 +421,7 @@ public class LocationModule implements Module {
 
         if (read instanceof DataList && !((DataList<Area>) read).isEmpty()) {
             return ((DataList<Area>) read).get(0).getLocations();
-        }
-        else
+        } else
             return new Error(Error.Type.DATABASE, "Reading of " + area + " Locations failed!");
     }
 
@@ -445,8 +444,7 @@ public class LocationModule implements Module {
 
         if (read instanceof DataList && !((DataList<Location>) read).isEmpty()) {
             return ((DataList<Location>) read).get(0).getWifiMorsels();
-        }
-        else
+        } else
             return new Error(Error.Type.DATABASE, "Reading of " + loc + " Morsels failed!");
     }
 }

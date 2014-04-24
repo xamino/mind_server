@@ -1,5 +1,7 @@
 package de.uulm.mi.mind.logic.modules;
 
+import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
@@ -17,7 +19,7 @@ import java.util.*;
  * @author Tamino Hartmann
  *         Module that calculates a position based on a given set of WifiMorsels in a Location object.
  */
-public class PositionModule extends Module {
+public class PositionModule implements Module {
 
     private final int tolerance = 3;
     /**
@@ -65,7 +67,9 @@ public class PositionModule extends Module {
                 return area;
             case READ:
                 // read all users
-                Data evtlUserList = read(new User(null));
+                ObjectContainer sessionContainer = DatabaseController.getInstance().getSessionContainer();
+                Data evtlUserList = DatabaseController.getInstance().read(sessionContainer, new User(null));
+                sessionContainer.close();
                 Data msg = ServletFunctions.getInstance().checkDataMessage(evtlUserList, DataList.class);
                 if (msg != null) {
                     return msg;
