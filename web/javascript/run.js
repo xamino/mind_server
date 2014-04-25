@@ -384,7 +384,7 @@ function writeUsers(data) {
             tablecontents += "<td>" + data.object[i].name + "</td>";
             tablecontents += "<td>" + data.object[i].email + "</td>";
             tablecontents += "<td>" + (data.object[i].lastAccess == undefined ? "Never" : data.object[i].lastAccess) + "</td>";
-            lastPosition = data.object[i].lastPosition;
+            lastPosition = data.object[i].position;
             lastPosition = (lastPosition == undefined || lastPosition == null) ? "Unknown" : lastPosition;
             tablecontents += "<td>" + lastPosition + "</td>";
             tablecontents += "<td>" + data.object[i].admin + "</td>";
