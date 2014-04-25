@@ -27,6 +27,7 @@ function doUnitTest() {
     displayAdminTest();
     displayUserTest();
     wifiSensorAPITest();
+    statusTest();
 
     cleanDB();
 
@@ -463,7 +464,7 @@ function testPositionRead() {
         alert("P2: Failed correct server side area fuzziness! Expected universe, received " + area.ID + "!\n\n" + JSON.stringify(area));
     }
     // try illegal access
-    unitTest("read_all_positions", null, Error, sharkSession);
+    //unitTest("read_all_positions", null, Error, sharkSession); TODO removed as allowed now
     // now try with public display
     unitTest("display_add", new PublicDisplay("hallway", "hallway", "Public Hallway", 34, 45), Success, adminSession);
     var pD = unitTest("login", new PublicDisplay("hallway", "hallway"), Success, null).description;

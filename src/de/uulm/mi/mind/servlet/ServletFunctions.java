@@ -196,8 +196,9 @@ public class ServletFunctions {
                     activeUser.writeData(REAL_POSITION, area);
                     user.setPosition(area.getID());
                     areaChanged = true;
-                } else if (((Area) activeUser.readData(LAST_POSITION)).getID().equals(area.getID())) {
-                    // update user for position, but only if last was already the same
+                } else if (((Area) activeUser.readData(LAST_POSITION)).getID().equals(area.getID())
+                        && !user.getPosition().equals(area.getID())) {
+                    // update user for position, but only if last was already the same and the previous db entry is different
                     activeUser.writeData(REAL_POSITION, area);
                     user.setPosition(area.getID());
                     areaChanged = true;
@@ -207,6 +208,7 @@ public class ServletFunctions {
                 }
                 // Only update user if location has actually changed.
                 if (areaChanged) {
+                    log.log(TAG, "Area changed update user!");
                     msg = moduleManager.handleTask(Task.User.UPDATE, user);
                     if (!(msg instanceof Success)) {
                         return msg;
@@ -219,6 +221,10 @@ public class ServletFunctions {
                 System.out.println("TOGGLED ADMIN");
                 user.setAdmin(!user.isAdmin());
                 return moduleManager.handleTask(Task.User.UPDATE, user);
+            case READ_ALL_POSITIONS:
+                return moduleManager.handleTask(Task.Position.READ, null);
+            case READ_ALL_AREAS:
+                return moduleManager.handleTask(Task.Area.READ, new Area(null));
             default:
                 return null;
         }
