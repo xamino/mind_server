@@ -1,5 +1,7 @@
 package de.uulm.mi.mind.logic.modules;
 
+import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
@@ -17,7 +19,7 @@ import java.util.*;
  * @author Tamino Hartmann
  *         Module that calculates a position based on a given set of WifiMorsels in a Location object.
  */
-public class PositionModule extends Module {
+public class PositionModule implements Module {
 
     private final int tolerance = 3;
     /**
@@ -62,10 +64,13 @@ public class PositionModule extends Module {
                 DataList<Location> loca = new DataList<>();
                 loca.add(location);
                 area.setLocations(loca); // TODO This causes the bug, but why?!
+
                 return area;
             case READ:
                 // read all users
-                Data evtlUserList = read(new User(null));
+                ObjectContainer sessionContainer = DatabaseController.getInstance().getSessionContainer();
+                Data evtlUserList = DatabaseController.getInstance().read(sessionContainer, new User(null));
+                sessionContainer.close();
                 Data msg = ServletFunctions.getInstance().checkDataMessage(evtlUserList, DataList.class);
                 if (msg != null) {
                     return msg;
@@ -152,7 +157,6 @@ public class PositionModule extends Module {
         // Get universe Area containing all locations from database
         Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe"))).get(0);
         DataList<Location> dataBaseLocations = uniArea.getLocations();
-        DataList<Location> averagedDatabaseLocations = new DataList<>(); //TODO another DB overwrite Bug fix
 
         // Modify database List to contain the average Morsel signal strengths for each location
         for (Location databaseLocation : dataBaseLocations) {
@@ -175,11 +179,8 @@ public class PositionModule extends Module {
                 int average = summedLevel / counter;
                 averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel()));
             }
-            averagedDatabaseLocations.add(new Location(databaseLocation.getCoordinateX(), databaseLocation.getCoordinateY(), averageMorsels));
+            databaseLocation.setWifiMorsels(averageMorsels);
         }
-
-        // TODO For testing the DB bug
-        // Area uniArea1 = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe"))).get(0);
 
         // A Map that describes how many matches there are for this location
         HashMap<Location, Integer> locationMatchesMap = new HashMap<>();
@@ -191,7 +192,7 @@ public class PositionModule extends Module {
         // For each request morsel, check if a morsel with the same mac address exists in a database location.
         // Then check how far wifi levels are apart. If it is below a tolerance value increase the goodness of that location.
         for (WifiMorsel currentRequestMorsel : requestWifiMorsels) {
-            for (Location dataBaseLocation : averagedDatabaseLocations) {
+            for (Location dataBaseLocation : dataBaseLocations) {
 
                 DataList<WifiMorsel> dataBaseLocationMorsels = dataBaseLocation.getWifiMorsels();
 
