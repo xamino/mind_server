@@ -316,7 +316,7 @@ public class PositionModule implements Module {
                 }
             }
 
-            if (finalMatch == null) { //if no final match evaluted (e.g. only 1 match-point was found)
+            if (finalMatch == null && sortedLocationCandidateList.size() > 0) { //if no final match evaluted (e.g. only 1 match-point was found)
                 finalMatch = sortedLocationCandidateList.get(0);
             }
         }
