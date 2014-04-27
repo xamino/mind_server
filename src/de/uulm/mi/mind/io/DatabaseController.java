@@ -235,10 +235,10 @@ public class DatabaseController implements ServletContextListener {
 
         // Initializing Database
         log.log(TAG, "Running DB init.");
-        DataList<Area> areaData = read(sessionContainer, new Area("universe", null, 0, 0, 0, 0));
+        DataList<Area> areaData = read(sessionContainer, new Area("University", null, 0, 0, 0, 0));
         if (areaData == null || areaData.isEmpty()) {
             log.log(TAG, "Universe not existing, creating it.");
-            create(sessionContainer, new Area("universe", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            create(sessionContainer, new Area("University", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
         }
 
         // Create default admin if no other admin exists
