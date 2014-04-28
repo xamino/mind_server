@@ -1,9 +1,14 @@
 var originalWidth; //the native width of the map-image in pixels
 var originalHeight; //the native height of the map-image in pixels
-var originalIconSize; //the native size of the icon in pixels
-var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
-var heigthFactor=1; //the factor by which the height of the displayed image deviates from the original image height
-var zoomValue = 30; //holds the width value for each zoom-step in pixels
+var displayedWidth; //the current width of the displayed map-image in pixels
+var displayedHeight; //the current height of the map-image in pixels
+var displayedIconSize=0; //the native size of the icon in pixels
+var iconByAreaFactor = 0.5; //the factor by which the icon size is set -> (smallest area width or height)*iconByAreaFactor
+var defaultIconSize = 110; //if something goes wrong when setting the icon size - defaultIconSize will be applied
+var factor=1; //the size-factor by which the displayed image deviates from the original image
+//var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
+//var heigthFactor=1; //the factor by which the height of the displayed image deviates from the original image height
+//var zoomValue = 30; //holds the width value for each zoom-step in pixels
 
 var users; //the current (to be) displayed users;
 var areas; //an array of areas - contains all areas that have already been used/needed
@@ -50,29 +55,81 @@ function initPublicDisplayStuff(allusers){
 
         areas = data.object;
     	
-    	var imgLoad = $("<img />");
-    	imgLoad.attr("src", "images/micons/crab.png");
-    	imgLoad.unbind("load");
-    	imgLoad.bind("load", function () {
-//    		originalIconSize = this.width;
-    		originalIconSize = 110;
+        //get Metrics
+        //get icon metrics
+//    	var imgLoad = $("<img />");
+//    	imgLoad.attr("src", "images/micons/crab.png");
+//    	imgLoad.unbind("load");
+//    	imgLoad.bind("load", function () {
+//    		displayedIconSize = this.width;
+//    		displayedIconSize = 110;
     		
-    		//TODO remove
-    		updateUserListOnReceive(allusers);
-    		//instead: refreshUserData();
-    	});
-        
-    });
-    
+    		//get map metrics
+    		var mapImgLoad = $("<img />");
+    		mapImgLoad.attr("src", "images/map.png");
+    		mapImgLoad.unbind("load");
+    		mapImgLoad.bind("load", function () {
+    			originalWidth = this.width;
+    			originalHeight = this.height;
+    			
+    			retriveBackgroundImageSizeMetricsAndFactor();
 
+    			computeIconSize();
+    			
+    			//TODO remove
+    			updateUserListOnReceive(allusers);
+    			//instead: refreshUserData();
+    		});
+    	
+    	});
+//    });
+    
 }
 
+/**
+ * This funciton computes the icon size by considering the smalles area height or width
+ */
+function computeIconSize(){
+	var smallest = 99999999;
+	for ( var i = 0; i < areas.length; i++) {
+		if(areas[i].width<smallest){smallest = areas[i].width;}
+		if(areas[i].hegiht<smallest){smallest = areas[i].height;}
+	}
+	
+	if(smallest<9999999){
+		displayedIconSize = Math.round(iconByAreaFactor*smallest*factor);
+	}
+	if(displayedIconSize==0){
+		displayedIconSize = defaultIconSize;
+	}
+	alert("iconsize: "+displayedIconSize);
+}
+
+/**
+ * This function retrives the actual width and height of the map image
+ * and computes the factor by which the displayed image deviates from the actual image
+ */
+function retriveBackgroundImageSizeMetricsAndFactor(){
+	
+	displayedHeight = $("#mapscroll").height();
+	displayedWidth = $("#mapscroll").width();
+	
+	if( (displayedWidth/displayedHeight) >= (originalWidth/originalHeight) ){
+		factor = displayedHeight/originalHeight;
+		displayedWidth = factor*originalWidth;
+	}else{
+		factor = displayedWidth/originalWidth;
+		displayedHeight = factor*originalHeight;
+	}
+	
+//	alert('width =' + displayedWidth + ', height = ' + displayedHeight); 
+}
 
 /**
  * This function computes the scale factor of the image
  * and should be called on startup as well as after/when scaling
  */
-/* NOT IN USE
+/*
 function computeFactors(){
 	var mapimg = document.getElementById("mapimg");
 	if(originalHeight!=null&&originalHeight!=0){
@@ -84,13 +141,13 @@ function computeFactors(){
 }*/
 
 /**
- * This method converts the x value for displaying purposes (subtracting half the width)
+ * This method converts the x (or y) value for displaying purposes (subtracting half the width)
  * @param raw_x the original x value (how it is retrieved from the server)
  * @param the width of the element
  * @returns the x value ready for displaying purposes
  */
 function getX(raw_x,scale){
-	return Math.round((raw_x*widthFactor-(scale/2)));
+	return Math.round((raw_x*factor-(scale/2)));
 }
 
 ///**
@@ -110,7 +167,7 @@ function getX(raw_x,scale){
  * @returns the scale value ready for displaying purposes
  */
 function getScale(raw_scale){
-	return Math.round(raw_scale*widthFactor);
+	return Math.round(raw_scale*factor);
 }
 
 
@@ -161,10 +218,12 @@ function placeUserIcon(user){
 	var scale = 0; //the scaled size of the current icon
 	var icon = document.getElementById("icon_"+user.email);
 	if(icon!=null){
-		scale = getScale(originalIconSize);
+		scale = getScale(displayedIconSize);
 		icon.style.width=scale+"px";
-		icon.style.left=getX(user.x,scale)+"px";
-		icon.style.top=getX(user.y,scale)+"px";
+//		icon.style.left=getX(user.x,scale)+"px";
+//		icon.style.top=getX(user.y,scale)+"px";
+		icon.style.left=Math.round(user.x)+"px";
+		icon.style.top=Math.round(user.y)+"px";
 		//TODO apply visual effect regarding user status
 		icon = null;
 	}
@@ -198,37 +257,41 @@ function setUserIconCoordsByArea(){
 			}
 			if(users[i]==null){break;}
 			area = getAreaById(users[i].lastPosition);
-			currentx = area.topLeftX+Math.round(originalIconSize/2);
-			currenty = area.topLeftY+Math.round(originalIconSize/2);
+			currentx = area.topLeftX*factor+Math.round(displayedIconSize/2);
+			currenty = area.topLeftY*factor+Math.round(displayedIconSize/2);
 			firstinrow = true;
 			iconsinarea = 0;
 		}
 		if(firstinrow){ //if first in this row - always draw -> move currentx
 			users[i].x = currentx;
 			users[i].y = currenty;
-			currentx += originalIconSize;
+			alert(currentx+","+currenty);
+			currentx += displayedIconSize;
 			firstinrow = false;
 			iconsinarea++;
 			i++;
 		}else{
-			if( (currentx+(originalIconSize/2)) > (area.topLeftX+area.width) ){ //current icon would exceed the row
+			if( (currentx+(displayedIconSize/2)) > (area.topLeftX*factor+area.width*factor) ){ //current icon would exceed the row
 				firstinrow = true;
-				currentx = area.topLeftX+Math.round(originalIconSize/2);
-				currenty += originalIconSize;
+				currentx = area.topLeftX*factor+Math.round(displayedIconSize/2);
+				currenty += displayedIconSize;
 				if(iconsperrow<1){
 					iconsperrow = iconsinarea;					
 				}
 			}else{ //current icon still fits in this row
 				users[i].x = currentx;
 				users[i].y = currenty;
-				currentx += originalIconSize;
+				currentx += displayedIconSize;
 				iconsinarea++;
 				i++;
 			}
 		}
 		
-//		users[i].x = area.topLeftX+Math.round(originalIconSize/2);
-//		users[i].y = area.topLeftY+Math.round(originalIconSize/2);
+//		users[i].x = area.topLeftX+Math.round(displayedIconSize/2);
+//		users[i].y = area.topLeftY+Math.round(displayedIconSize/2);
+		
+//		alert(users[i].x+","+users[i].y);
+		
 	}
 }
 
@@ -242,9 +305,10 @@ function setUserIconCoordsByArea(){
  */
 function checkHeight(area,iconsInArea,iconsPerRow,i){
 	
-	var outstand = ((users[i+iconsInArea-1].y+Math.round(originalIconSize/2)) - (area.topLeftY+area.height));
+	var outstand = ((users[i+iconsInArea-1].y+Math.round(displayedIconSize/2)) - (area.topLeftY*factor+area.height));
 //	alert("outstandy "+outstand);
 	//if (one of the) lowest icons stands out of the area
+//	alert(outstand);
 	if(outstand > 0){
 		var rows = Math.ceil(iconsInArea/iconsPerRow);
 		var perRowCounter = 0;
@@ -481,9 +545,9 @@ function balloonify(user){
 		//TODO dynamitise
 		var horizontalpos;
 		var verticalpos;
-		if(user.x<720){ //half of 1440 - width of our map
+		if((user.x*factor)<(displayedWidth/2)){ //half of 1440 - width of our map
 			horizontalpos = "right"; }else{ horizontalpos = "left"; }
-		if(user.y<540){
+		if((user.y*factor)<(displayedHeight/2)){
 			verticalpos = "bottom"; }else{ verticalpos = "top"; }
 		var positioning = verticalpos+" "+horizontalpos;
 		

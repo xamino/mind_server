@@ -798,7 +798,7 @@ function handleAllUsersPositionData(){
 	user1.lastPosition = 3304;
 	user1.iconRef = "crab.png";
 	var user2 = new User("b@b.b",null,"b",false);
-	user2.lastPosition = 3303;
+	user2.lastPosition = 3304;
 	user2.iconRef = "lion.png";
 	
 	var users = new Array();
