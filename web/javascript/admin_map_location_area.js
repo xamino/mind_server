@@ -91,7 +91,7 @@ $(document).on("mousedown", "#map_png_div", function (e) {
     y1 = e.pageY - this.offsetTop;
     for (var i = 0; i < allAreas.length; i++) {	//all existing areas
         var id = allAreas[i].ID;
-        if (id != "University") {	//not in University
+        if (id != "universe" || id != "University") {	//not in University
             if (x1 >= allAreas[i].topLeftX && x1 <= (allAreas[i].topLeftX + allAreas[i].width)) {	    	//in x-values of existing area
                 if (y1 >= allAreas[i].topLeftY && y1 <= (allAreas[i].topLeftY + allAreas[i].height)) { 	//in y-values of existing area
                     selection = false;
@@ -131,7 +131,7 @@ $(document).on("mousemove", "#map_png_div", function (e) {
 
             for (var i = 0; i < allAreas.length; i++) {	//all existing areas
                 var id = allAreas[i].ID;
-                if (id != "University") {	//not in University
+                if (id != "universe" || id != "University") {	//not in University
                     if (x2 >= allAreas[i].topLeftX && x2 <= (allAreas[i].topLeftX + allAreas[i].width)) {	    	//in x-values of existing area
                         if (y2 >= allAreas[i].topLeftY && y2 <= (allAreas[i].topLeftY + allAreas[i].height)) { 	//in y-values of existing area
                             selection = false; //x2,y2 in area
@@ -265,7 +265,7 @@ $(document).on("mouseup", "#map_png_div", function (e) {
         var currentX = Number.MAX_VALUE;
         for (var i = 0; i < allAreas.length; i++) {	//all existing areas
             var id = allAreas[i].ID;
-            if (id != "University") {	//not in University
+            if (id != "universe" || id != "University") {	//not in University
 //	       		alert("id: "+id+";y1: "+y1+";y2: "+y2+";topLeftY: "+allAreas[i].topLeftY+";height: "+allAreas[i].height+";topLeftY+height: "+(allAreas[i].topLeftY + allAreas[i].height));
 	       		 
 	       		 //from right to left
@@ -504,7 +504,6 @@ function writeAreas(data) {
         document.getElementById("table_space_areas").innerHTML = noLocationsInDatabase;
     }
     else {
-
         var tablecontents = "";
         tablecontents = "<table border ='1'>";
         tablecontents += "<tr>";
@@ -525,7 +524,7 @@ function writeAreas(data) {
             tablecontents += "<td>" + data.object[i].topLeftY + "</td>";
             tablecontents += "<td>" + data.object[i].width + "</td>";
             tablecontents += "<td>" + data.object[i].height + "</td>";
-            if (data.object[i].ID == "University") {
+            if (data.object[i].ID == "universe" || data.object[i].ID == "University") {
                 tablecontents += "<td><input type='submit' value='Remove Location' disabled='true' /></td>";
             } else {
                 tablecontents += "<td><input type='submit' value='Remove Location' onClick='removeAreaViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
@@ -616,18 +615,24 @@ function drawAreas() {
         else {
             for (var i = 0; i < data.object.length; i++) {
                 var id = data.object[i].ID;
-                if (id == "University") {
+                if (id == "universe" || id == "University") {
                     // don't do anything --> University isn't been drawn
                 }
                 else {
+                	//alert("hui");
                     var x = data.object[i].topLeftX;
                     var y = data.object[i].topLeftY;
                     var width = data.object[i].width;
-                    var height = data.object[i].height;
+                    var height =data.object[i].height;
+                    //x = x + 2; //?????? ERROR
+                    //y = y + 2;	//?????? ERROR
+                    width = width - 4;
+                    height = height - 4;
+                    alert("x: "+x+" y: "+y+" w: "+width+" h: "+height);
 
                     var div = document.getElementById("map_png_div");
                     var clickedArea = "";
-                    clickedArea += '<div id="' + id + '" onClick="clickOnArea(' + id + ')" style=" cursor:pointer; background-color: #C2DFFF; border: 2px solid black; opacity: .5; filter: alpha(opacity=50); position:absolute; margin-top:' + (y + 2) + 'px; margin-left: ' + (x + 2) + 'px; width: ' + (width - 4) + 'px; height: ' + (height - 4) + 'px;"></div>';
+                    clickedArea += '<div id="' + id + '" onClick="clickOnArea(' + id + ')" style=" cursor:pointer; background-color: #C2DFFF; border: 2px solid black; opacity: .5; filter: alpha(opacity=50); position:absolute; margin-top:' + (y) + 'px; margin-left: ' + (x) + 'px; width: ' + (width) + 'px; height: ' + (height) + 'px;"></div>';
                     div.innerHTML = div.innerHTML + clickedArea;
 
                 }
@@ -769,8 +774,8 @@ function removeLocationViaPopup(data) {
  */
 function checkInp() {
     var x = document.getElementById("id").value;
-//  if (x.match(/^[a-zA-Z0-9\-_]+$/))		--> problem with click method
-    if (x.match(/^[0-9]+$/)) {
+  if (x.match(/^[a-zA-Z0-9\-_]+$/)){		//--> problem with click method
+//    if (x.match(/^[0-9]+$/)) {
         return true;
     }
 }
