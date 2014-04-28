@@ -2,3 +2,4 @@
 /lib
 /out
 /*.iml
+web/WEB-INF/config.properties

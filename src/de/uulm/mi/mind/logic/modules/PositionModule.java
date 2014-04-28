@@ -1,5 +1,8 @@
 package de.uulm.mi.mind.logic.modules;
 
+import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Configuration;
+import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
@@ -17,7 +20,7 @@ import java.util.*;
  * @author Tamino Hartmann
  *         Module that calculates a position based on a given set of WifiMorsels in a Location object.
  */
-public class PositionModule extends Module {
+public class PositionModule implements Module {
 
     private final int tolerance = 3;
     /**
@@ -42,75 +45,9 @@ public class PositionModule extends Module {
         Task.Position todo = (Task.Position) task;
         switch (todo) {
             case FIND:
-                if (!(request instanceof Location)) {
-                    return new Error(Error.Type.WRONG_OBJECT, "PositionModule was called with the wrong object type!");
-                }
-                // Everything okay from here on out:
-                Location location = calculateLocation((Location) request);
-                if (location == null) {
-                    // this means the location could not be found in the DB
-                    return new Success(Success.Type.NOTE, "Your position could not be found.");
-                }
-                // get best area for location to return
-                Area area = getBestArea(location);
-                if (area == null) {
-                    log.error(TAG, "NULL area for position_find – shouldn't happen as universe should be returned at least!");
-                    return new Success(Success.Type.NOTE, "Your position could not be found.");
-                }
-                // todo add wifisensor functions
-                // send back the location that the server thinks you're at with the area
-                DataList<Location> loca = new DataList<>();
-                loca.add(location);
-                area.setLocations(loca); // TODO This causes the bug, but why?!
-                return area;
+                return findPosition(request);
             case READ:
-                // read all users
-                Data evtlUserList = read(new User(null));
-                Data msg = ServletFunctions.getInstance().checkDataMessage(evtlUserList, DataList.class);
-                if (msg != null) {
-                    return msg;
-                }
-                DataList users = ((DataList) evtlUserList);
-                // filter the list – apply status and set special cases
-                DataList<User> sendUsers = new DataList<>();
-                for (Object obj : users) {
-                    User us = ((User) obj);
-                    String position = us.getPosition();
-                    // if lastPosition is null, the user may not be active in the system
-                    if (position == null || !Security.readActives().contains(us)) { //TODO update user when logged out or keep position?
-                        // so ignore
-                        continue;
-                    } else if (position.equals("universe")) {
-                        position = null;
-                    }
-                    // filter by status, don't return invisible users
-                    if (us.getStatus() == null || us.getStatus() == Status.INVISIBLE) {
-                        continue;
-                    } else if (us.getStatus() == Status.AWAY) { // TODO prob not needed as null should be mapped to away by client already.
-                        position = null;
-                    }
-
-                    // filter based on time
-                    // todo This is not the last position time – how do i do this better?
-                    // todo Update lastPosition to null?
-                    Date lastAccess = us.getAccessDate();
-                    // if the user object has a position, it should have an access, so we warn for this as it could be
-                    // a bug
-                    if (lastAccess == null) {
-                        log.error(TAG, "Read positions: user " + us.readIdentification() + " has position but no access! Probably a bug...");
-                        continue;
-                    }
-                    Long timeDelta = System.currentTimeMillis() - lastAccess.getTime();
-                    if (timeDelta > POSITION_VALID_TIMEOUT) {
-                        // if last update is longer gone, then ignore
-                        continue;
-                    }
-                    // Filter user object to only give name + position
-                    User toSend = new User(us.getEmail(), us.getName());
-                    toSend.setPosition(position);
-                    sendUsers.add(toSend);
-                }
-                return sendUsers;
+                return readPositions();
             case SENSOR_WRITE:
                 if (!(request instanceof DataList)) {
                     return new Error(Error.Type.WRONG_OBJECT, "SensorWrite was called with the wrong object type!");
@@ -140,6 +77,111 @@ public class PositionModule extends Module {
         }
     }
 
+    private Data findPosition(Data request) {
+        if (!(request instanceof Location)) {
+            return new Error(Error.Type.WRONG_OBJECT, "PositionModule was called with the wrong object type!");
+        }
+        Location requestLocation = (Location) request;
+
+        // First check if there is any AP measurement from the university
+        boolean isAtUniversity = false;
+        for (WifiMorsel morsel : requestLocation.getWifiMorsels()) {
+            if (morsel.getWifiName().equals(Configuration.getInstance().getUniversitySSID())) {
+                isAtUniversity = true;
+                break;
+            }
+        }
+
+        if (!isAtUniversity) {
+            return new Success(Success.Type.NOTE, "Your position could not be found, you don't seem to be at university.");
+        }
+
+        // Everything okay from here on out:
+        Location location = calculateLocation(requestLocation);
+        if (location == null) {
+            // this means the location could not be found in the DB but user is at University
+            return new Area("University");
+        }
+
+        // get best area for location to return
+        Area area = getBestArea(location);
+        if (area == null) {
+            log.error(TAG, "NULL area for position_find – shouldn't happen as University should be returned at least!");
+            return new Success(Success.Type.NOTE, "Your position could not be found.");
+        }
+        // todo add wifisensor functions
+
+
+        // send back the location that the server thinks you're at with the area
+        DataList<Location> loca = new DataList<>();
+        loca.add(location);
+        area.setLocations(loca);
+
+        return area;
+    }
+
+    private Data readPositions() {
+        // read all users
+        ObjectContainer sessionContainer = DatabaseController.getInstance().getSessionContainer();
+        Data evtlUserList = DatabaseController.getInstance().read(sessionContainer, new User(null));
+        sessionContainer.close();
+        Data msg = ServletFunctions.getInstance().checkDataMessage(evtlUserList, DataList.class);
+        if (msg != null) {
+            return msg;
+        }
+        DataList<User> users = ((DataList<User>) evtlUserList);
+        // filter the list – apply status and set special cases
+        DataList<User> sendUsers = new DataList<>();
+        for (User us : users) {
+            String position = us.getPosition();
+            Status status = us.getStatus();
+            Long timeSinceLastLogin = us.getAccessDate() == null ? 0 : System.currentTimeMillis() - us.getAccessDate().getTime();
+
+            // Handle logic as to what should be output
+            boolean isLoggedOut = !Security.readActives().contains(us);
+            boolean isAtUniversity = position != null && position.equals("University"); //TODO set in find
+            boolean isAtLocation = position != null && !position.equals("University");
+            boolean isInvisible = us.getStatus() == null || us.getStatus() == Status.INVISIBLE;
+            boolean isTimedOut = timeSinceLastLogin == 0 || timeSinceLastLogin > POSITION_VALID_TIMEOUT;
+
+            // Continue means is not added to output
+            // removed inactive users
+            if (isLoggedOut) {
+                continue;
+            }
+
+            // remove timed out users
+            if (isTimedOut) {
+                // if last update is longer gone, then ignore
+                continue;
+                // todo This is not the last position time – how do i do this better?
+                // todo Update lastPosition to null?
+            }
+
+            // remove invisible users
+            if (isInvisible) {
+                continue;
+            }
+
+            // user is somewhere at an unknown location at university
+            if (isAtUniversity) {
+                position = null; // "University" is not seen from outside but displayed as "away"
+                status = Status.AWAY;
+            } else if (isAtLocation) {
+                // nothing to do?
+            } else {
+                continue; // position was null
+            }
+
+            // Filter user object to only give name + position
+            User toSend = new User(us.getEmail(), us.getName());
+            toSend.setPosition(position);
+            toSend.setStatus(status);
+            sendUsers.add(toSend);
+        }
+        return sendUsers;
+    }
+
     /**
      * @param request
      * @return Location if found, else null.
@@ -149,10 +191,9 @@ public class PositionModule extends Module {
         // Morsels from the current request which are to be compared to the database values
         DataList<WifiMorsel> requestWifiMorsels = request.getWifiMorsels();
 
-        // Get universe Area containing all locations from database
-        Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe"))).get(0);
+        // Get University Area containing all locations from database
+        Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("University"))).get(0);
         DataList<Location> dataBaseLocations = uniArea.getLocations();
-        DataList<Location> averagedDatabaseLocations = new DataList<>(); //TODO another DB overwrite Bug fix
 
         // Modify database List to contain the average Morsel signal strengths for each location
         for (Location databaseLocation : dataBaseLocations) {
@@ -175,11 +216,8 @@ public class PositionModule extends Module {
                 int average = summedLevel / counter;
                 averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel()));
             }
-            averagedDatabaseLocations.add(new Location(databaseLocation.getCoordinateX(), databaseLocation.getCoordinateY(), averageMorsels));
+            databaseLocation.setWifiMorsels(averageMorsels);
         }
-
-        // TODO For testing the DB bug
-        // Area uniArea1 = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("universe"))).get(0);
 
         // A Map that describes how many matches there are for this location
         HashMap<Location, Integer> locationMatchesMap = new HashMap<>();
@@ -191,7 +229,7 @@ public class PositionModule extends Module {
         // For each request morsel, check if a morsel with the same mac address exists in a database location.
         // Then check how far wifi levels are apart. If it is below a tolerance value increase the goodness of that location.
         for (WifiMorsel currentRequestMorsel : requestWifiMorsels) {
-            for (Location dataBaseLocation : averagedDatabaseLocations) {
+            for (Location dataBaseLocation : dataBaseLocations) {
 
                 DataList<WifiMorsel> dataBaseLocationMorsels = dataBaseLocation.getWifiMorsels();
 
@@ -278,7 +316,7 @@ public class PositionModule extends Module {
                 }
             }
 
-            if (finalMatch == null) { //if no final match evaluted (e.g. only 1 match-point was found)
+            if (finalMatch == null && sortedLocationCandidateList.size() > 0) { //if no final match evaluted (e.g. only 1 match-point was found)
                 finalMatch = sortedLocationCandidateList.get(0);
             }
         }
@@ -316,7 +354,7 @@ public class PositionModule extends Module {
      * Method that calls and handles finding of the best suited area to return based on the found location.
      *
      * @param location The location for which to find an area.
-     * @return Most assuredly at least universe, otherwise null. Usually you'll get a smaller area than universe.
+     * @return Most assuredly at least University, otherwise null. Usually you'll get a smaller area than University.
      */
     private Area getBestArea(Location location) {
         EventModuleManager eventModuleManager = EventModuleManager.getInstance();

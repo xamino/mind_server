@@ -1,5 +1,6 @@
 package de.uulm.mi.mind.security;
 
+import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
@@ -130,7 +131,10 @@ public class Security {
             return null;
         }
         // now get database object
-        Authenticated databaseSafe = readDB(active.getAuthenticated());
+        ObjectContainer sessionContainer = database.getSessionContainer();
+        Authenticated databaseSafe = readDB(sessionContainer,active.getAuthenticated());
+        sessionContainer.close();
+
         // check if the user is still legal
         if (databaseSafe == null) {
             log.log(TAG, "Check failed: Authenticated not found.");
@@ -154,8 +158,9 @@ public class Security {
      * @return The Active object if legal, otherwise null.
      */
     private Active login(final Authenticated authenticated) {
+        ObjectContainer sessionContainer = database.getSessionContainer();
         // get safe object
-        Authenticated databaseSafe = readDB(authenticated);
+        Authenticated databaseSafe = readDB(sessionContainer, authenticated);
         if (databaseSafe == null) {
             log.log(TAG, "Login failed for " + authenticated.readIdentification() + " due to no found legal authenticated!");
             return null;
@@ -176,11 +181,15 @@ public class Security {
             firstFlag = true;
         }
         // try to update last access time
+        // TODO better error handling
         databaseSafe.setAccessDate(new Date());
-        if (!(database.update((Data) databaseSafe))) {
+        if (!(database.update(sessionContainer, (Data) databaseSafe))) {
             log.error(TAG, "Login failed for " + authenticated.readIdentification() + " due to error updating access time!");
             return null;
         }
+        sessionContainer.commit();
+        sessionContainer.close();
+
         // generate the session
         String session = new BigInteger(130, random).toString(32);
         // build active
@@ -255,14 +264,14 @@ public class Security {
      *
      * @return The Authenticated freshly read if available, else null.
      */
-    private Authenticated readDB(Authenticated authenticated) {
+    private Authenticated readDB(ObjectContainer sessionContainer, Authenticated authenticated) {
         DataList data;
         if (authenticated instanceof User) {
-            data = database.read(new User(authenticated.readIdentification()));
+            data = database.read(sessionContainer, new User(authenticated.readIdentification()));
         } else if (authenticated instanceof PublicDisplay) {
-            data = database.read(new PublicDisplay(authenticated.readIdentification(), null, null, 0, 0));
+            data = database.read(sessionContainer, new PublicDisplay(authenticated.readIdentification(), null, null, 0, 0));
         } else if (authenticated instanceof WifiSensor) {
-            data = database.read(new WifiSensor(authenticated.readIdentification(), null));
+            data = database.read(sessionContainer, new WifiSensor(authenticated.readIdentification(), null));
         } else {
             log.error(TAG, "Read from DB failed because of wrong object given!");
             return null;
