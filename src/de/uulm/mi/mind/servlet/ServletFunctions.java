@@ -181,7 +181,7 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.User.DELETE, user);
             case POSITION_FIND:
                 // find the area
-                Data data = moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
+                Data data = moduleManager.handleTask(Task.Position.FIND, arrival);
                 Data msg = checkDataMessage(data, Area.class);
                 if (msg != null) {
                     return msg;
@@ -596,12 +596,14 @@ public class ServletFunctions {
                 if (devices.isEmpty()) {
                     return new Success(Success.Type.NOTE, "Operation okay, but empty device list!");
                 }
-                // security check
+                // security check && fill in information
                 for (SensedDevice device : devices) {
                     if (!device.getSensor().equals(sensor.readIdentification())) {
                         // make sure a sensor only updates the devices for its own location
                         return new Error(Error.Type.ILLEGAL_VALUE, "Sensor device injection is illegal!");
                     }
+                    // store position of sensor for easy access later on
+                    device.setPosition(sensor.getPosition());
                 }
                 // pass tasks down
                 return moduleManager.handleTask(Task.Position.SENSOR_WRITE, devices);

@@ -585,24 +585,67 @@ function wifiSensorAPITest() {
     // log 2 out
     unitTest("logout", null, Success, sessionTwo);
     // try new login
-    unitTest("login", sensorTwo, Success, null);
+    sessionTwo = unitTest("login", sensorTwo, Success, null).description;
     // admin remove
     unitTest("sensor_remove", sensorTwo, Success, adminSession);
     // test
     unitTest("check", null, Error, sessionTwo);
 
-    // todo add test for sensing capabilities
+    cleanDB();
+    alert("Finished WifiSensor API test.")
+}
+
+function sensorAlgoFusionTest() {
+    alert("Starting fusion test...");
+    cleanDB();
+
+    var adminSession = getAdminSession();
+    unitTest("sensor_add", new WifiSensor("Somewhere", "blub"), Success, adminSession);
+    unitTest("sensor_add", new WifiSensor("Elsewhere", "blub"), Success, adminSession);
+    var sessionOne = unitTest("login", new WifiSensor("Somewhere", "blub"), Success, null).description;
+    var sessionTwo = unitTest("login", new WifiSensor("Elsewhere", "blub"), Success, null).description;
+    // sensing abilities
+    unitTest("admin_user_add", new User("user@user.user", "user"), Success, adminSession);
+    var userOne = unitTest("login", new User("user@user.user", "user"), Success, null).description;
     var inOne = new SensedDevice("hallway", "192.168.178.1", "-40");
-    var inTwo = new SensedDevice("hallway", "192.168.178.2", "-50");
     // illegal stuff
     unitTest("wifi_sensor_update", new User("blub", "test"), Error, sessionOne);
     unitTest("wifi_sensor_update", new SensedDevice("my_office", "255.255.255.255", "-56"), Error, sessionOne);
-    // legal stuff
-    unitTest("wifi_sensor_update", [inOne, inTwo], Success, sessionOne);
+    unitTest("wifi_sensor_update", [inOne], Error, sessionOne); // device injection
+    //prepare test environment
+    var wifis1 = [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -93),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -90),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -85)
+    ];
+    var wifis2 = [
+        new WifiMorsel("00:19:07:07:24:00", "eduroam", -12),
+        new WifiMorsel("00:19:07:07:24:01", "welcome", -34),
+        new WifiMorsel("00:19:07:07:24:02", "welcome", -23)
+    ];
+    var wifiRequestOutside = [
+        new WifiMorsel("00:19:07:07:64:00", "eduroam", -95),
+        new WifiMorsel("00:19:07:07:64:01", "eduroam", -91),
+        new WifiMorsel("00:19:07:07:64:02", "welcome", -83)
+    ];
+    unitTest("area_add", new Area("Somewhere", null, 10, 10, 30, 30), Success, adminSession);
+    unitTest("area_add", new Area("Elsewhere", null, 1, 1, 9, 9), Success, adminSession)
+    unitTest("location_add", new Location(1, 1, wifis1), Success, adminSession);
+    unitTest("location_add", new Location(12, 12, wifis2), Success, adminSession);
+    // set user position
+    unitTest("position_find", new Location(0, 0, wifiRequestOutside), Area, userOne);
+    // sensor senses (two is correct)
+    unitTest("wifi_sensor_update", [new SensedDevice("Elsewhere", "0:0:0:0:0:0:0:1", -43)], Success, sessionTwo);
+    unitTest("wifi_sensor_update", [new SensedDevice("Somewhere", "0:0:0:0:0:0:0:1", -93)], Success, sessionOne);
+    var area = unitTest("position_find", new Location(0, 0, wifiRequestOutside), Area, userOne);
+    if (area == null || area.ID != "Elsewhere") {
+        alert("Fusioned position not where expected!\n" + JSON.stringify(area));
+    }
+
     // todo more
 
     cleanDB();
-    alert("Finished WifiSensor API test.")
+    alert("Fusion test done.");
 }
 
 function statusTest() {

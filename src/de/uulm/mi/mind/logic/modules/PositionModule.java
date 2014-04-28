@@ -52,7 +52,7 @@ public class PositionModule implements Module {
                 if (!(request instanceof DataList)) {
                     return new Error(Error.Type.WRONG_OBJECT, "SensorWrite was called with the wrong object type!");
                 }
-                // todo this always adds devices, when do we remove them from the sensedDevices HashMap? Timeout?
+                // todo implement timeout, otherwise devices are never removed and we'll have unnecessary collisions
                 DataList<SensedDevice> receivedDevices = (DataList<SensedDevice>) request;
                 for (SensedDevice device : receivedDevices) {
                     if (!sensedDevices.containsKey(device.getIpAddress())) {
@@ -77,11 +77,19 @@ public class PositionModule implements Module {
         }
     }
 
+    /**
+     * Takes an Arrival object for its IP address and Location and calculates a position from that.
+     *
+     * @param request Arrival object containing IP and Location.
+     * @return The Area with the calculated Location in it.
+     */
     private Data findPosition(Data request) {
-        if (!(request instanceof Location)) {
+        if (!(request instanceof Arrival) || !(((Arrival) request).getObject() instanceof Location)) {
             return new Error(Error.Type.WRONG_OBJECT, "PositionModule was called with the wrong object type!");
         }
-        Location requestLocation = (Location) request;
+        // extract data we need
+        Location requestLocation = ((Location) ((Arrival) request).getObject());
+        String ip = ((Arrival) request).getIpAddress();
 
         // First check if there is any AP measurement from the university
         boolean isAtUniversity = false;
@@ -109,8 +117,16 @@ public class PositionModule implements Module {
             log.error(TAG, "NULL area for position_find – shouldn't happen as University should be returned at least!");
             return new Success(Success.Type.NOTE, "Your position could not be found.");
         }
-        // todo add wifisensor functions
-
+        // check location against available sensor data
+        if (sensedDevices.containsKey(ip)) {
+            SensedDevice device = sensedDevices.get(ip);
+            if (!device.getPosition().equals(area.getID())) {
+                log.error(TAG, "Sensor and algorithm see different positions!");
+                // todo resolve conflict -- how?
+            } else {
+                log.log(TAG, "Sensor and algo are synced.");
+            }
+        }
 
         // send back the location that the server thinks you're at with the area
         DataList<Location> loca = new DataList<>();
