@@ -91,10 +91,11 @@ $(document).on("mousedown", "#map_png_div", function (e) {
     y1 = e.pageY - this.offsetTop;
     for (var i = 0; i < allAreas.length; i++) {	//all existing areas
         var id = allAreas[i].ID;
-        if (id != "universe" || id != "University") {	//not in University
+        if (id != "universe" && id != "University") {	//not in University
             if (x1 >= allAreas[i].topLeftX && x1 <= (allAreas[i].topLeftX + allAreas[i].width)) {	    	//in x-values of existing area
                 if (y1 >= allAreas[i].topLeftY && y1 <= (allAreas[i].topLeftY + allAreas[i].height)) { 	//in y-values of existing area
-                    selection = false;
+                    alert("false")
+                	selection = false;
                 }
             }
         }
@@ -131,7 +132,7 @@ $(document).on("mousemove", "#map_png_div", function (e) {
 
             for (var i = 0; i < allAreas.length; i++) {	//all existing areas
                 var id = allAreas[i].ID;
-                if (id != "universe" || id != "University") {	//not in University
+                if (id != "universe" && id != "University") {	//not in University
                     if (x2 >= allAreas[i].topLeftX && x2 <= (allAreas[i].topLeftX + allAreas[i].width)) {	    	//in x-values of existing area
                         if (y2 >= allAreas[i].topLeftY && y2 <= (allAreas[i].topLeftY + allAreas[i].height)) { 	//in y-values of existing area
                             selection = false; //x2,y2 in area
@@ -265,9 +266,9 @@ $(document).on("mouseup", "#map_png_div", function (e) {
         var currentX = Number.MAX_VALUE;
         for (var i = 0; i < allAreas.length; i++) {	//all existing areas
             var id = allAreas[i].ID;
-            if (id != "universe" || id != "University") {	//not in University
+            if (id != "universe" && id != "University") {	//not in University
 //	       		alert("id: "+id+";y1: "+y1+";y2: "+y2+";topLeftY: "+allAreas[i].topLeftY+";height: "+allAreas[i].height+";topLeftY+height: "+(allAreas[i].topLeftY + allAreas[i].height));
-	       		 
+	       		 alert("drin hier so");
 	       		 //from right to left
 		 		 if(x2 <= allAreas[i].topLeftX && x1 >= allAreas[i].topLeftX){
 		 			//TopLeftX and TopLeftY are in the drawed rect --> add 2px because of border
