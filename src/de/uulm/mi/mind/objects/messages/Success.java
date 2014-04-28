@@ -8,6 +8,9 @@ public class Success extends Information {
     private String description;
     private Type type;
 
+    private Success() {
+    }
+
     public Success(String description) {
         this.type = Type.OK;
         this.description = description;
@@ -16,6 +19,14 @@ public class Success extends Information {
     public Success(Type type, String description) {
         this.type = type;
         this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return "Success{" +
+                "type=" + type +
+                ", description='" + description + '\'' +
+                '}';
     }
 
     public String getDescription() {

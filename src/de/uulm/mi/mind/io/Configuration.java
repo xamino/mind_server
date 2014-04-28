@@ -22,6 +22,7 @@ public class Configuration {
     private String adminName;
     private String adminEmail;
     private String adminPassword;
+    private String universitySSID;
 
 
     private Configuration() {
@@ -43,6 +44,7 @@ public class Configuration {
                 this.adminName = config.getProperty("ADMIN_NAME");
                 this.adminEmail = config.getProperty("ADMIN_EMAIL");
                 this.adminPassword = config.getProperty("ADMIN_PASSWORD");
+                this.universitySSID = config.getProperty("UNIVERSITY_SSID");
 
 
             } catch (IOException e) {
@@ -63,6 +65,8 @@ public class Configuration {
                 this.adminEmail = config.getProperty("ADMIN_EMAIL");
             if (this.adminPassword == null)
                 this.adminPassword = config.getProperty("ADMIN_PASSWORD");
+            if (this.universitySSID == null)
+                this.universitySSID = config.getProperty("UNIVERSITY_SSID");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -96,4 +100,9 @@ public class Configuration {
     public String getAdminPassword() {
         return this.adminPassword;
     }
+
+    public String getUniversitySSID() {
+        return this.universitySSID;
+    }
+
 }

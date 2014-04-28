@@ -69,11 +69,15 @@ Click here to run a unit test of the API. WARNING: while the test is running, th
 <br>
 <input type="button" name="positionreadtest" value="Position Read Unit Test" onclick="testPositionRead();">
 <br>
+<input type="button" name="statustest" value="Status Unit Test" onclick="statusTest();">
+<br>
 <input type="button" name="admindisplaytest" value="PD Admin Test" onclick="displayAdminTest();">
 <br>
 <input type="button" name="displayusertest" value="PD User Test" onclick="displayUserTest();">
 <br>
 <input type="button" name="sensortest" value="WifiSensor Test" onclick="wifiSensorAPITest();">
+<br>
+<input type="button" name="fusiontest" value="SensorAlgoFusion Test" onclick="sensorAlgoFusionTest();">
 <br>
 <br>
 <input type="button" name="cleandb" value="WARNING: Clean DB" onclick="cleanDB();alert('Done');">

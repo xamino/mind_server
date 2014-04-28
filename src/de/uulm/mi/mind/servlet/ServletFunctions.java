@@ -21,6 +21,7 @@ import java.util.Date;
  * @author Tamino Hartmann
  *         Class for handling all the serious tasks of the servlet. Mainly there to keep Servlet comparatively clean.
  */
+// TODO reimplement tasks as anonymous interface objects with class[] info for who may access them
 public class ServletFunctions {
     private static ServletFunctions INSTANCE;
     private final String TAG = "ServletFunctions";
@@ -161,6 +162,9 @@ public class ServletFunctions {
                 if (safeString(sentUser.getName())) {
                     user.setName(sentUser.getName());
                 }
+                // status TODO remove log when working
+                log.log(TAG, "User update status set to: " + sentUser.getStatus());
+                user.setStatus(sentUser.getStatus());
                 // Note that the session user object now needs to be updated. This is done the next time the user
                 // sends a request through SecurityModule; it will always get the up to date object from the
                 // database.
@@ -177,12 +181,13 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.User.DELETE, user);
             case POSITION_FIND:
                 // find the area
-                Data data = moduleManager.handleTask(Task.Position.FIND, arrival.getObject());
+                Data data = moduleManager.handleTask(Task.Position.FIND, arrival);
                 Data msg = checkDataMessage(data, Area.class);
                 if (msg != null) {
                     return msg;
                 }
                 Area area = ((Area) data);
+                boolean areaChanged = false;
                 // todo user should not save area again, could overwrite!!!
                 // this implements server-side fuzziness to avoid fluttering of position_find
                 if (!(activeUser.readData(LAST_POSITION) instanceof Area)) {
@@ -190,24 +195,36 @@ public class ServletFunctions {
                     activeUser.writeData(LAST_POSITION, area);
                     activeUser.writeData(REAL_POSITION, area);
                     user.setPosition(area.getID());
-                } else if (((Area) activeUser.readData(LAST_POSITION)).getID().equals(area.getID())) {
-                    // update user for position, but only if last was already the same
+                    areaChanged = true;
+                } else if (((Area) activeUser.readData(LAST_POSITION)).getID().equals(area.getID())
+                        && !user.getPosition().equals(area.getID())) {
+                    // update user for position, but only if last was already the same and the previous db entry is different
                     activeUser.writeData(REAL_POSITION, area);
                     user.setPosition(area.getID());
+                    areaChanged = true;
                 } else {
                     // this means the area is different than the one before, so change lastPosition but not User:
                     activeUser.writeData(LAST_POSITION, area);
                 }
-                msg = moduleManager.handleTask(Task.User.UPDATE, user);
-                if (!(msg instanceof Success)) {
-                    return msg;
+                // Only update user if location has actually changed.
+                if (areaChanged) {
+                    log.log(TAG, "Area changed update user!");
+                    msg = moduleManager.handleTask(Task.User.UPDATE, user);
+                    if (!(msg instanceof Success)) {
+                        return msg;
+                    }
                 }
                 // everything okay, return real position area
                 return (Data) activeUser.readData(REAL_POSITION);
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
+                System.out.println("TOGGLED ADMIN");
                 user.setAdmin(!user.isAdmin());
                 return moduleManager.handleTask(Task.User.UPDATE, user);
+            case READ_ALL_POSITIONS:
+                return moduleManager.handleTask(Task.Position.READ, null);
+            case READ_ALL_AREAS:
+                return moduleManager.handleTask(Task.Area.READ, new Area(null));
             default:
                 return null;
         }
@@ -316,6 +333,8 @@ public class ServletFunctions {
                 if (safeString(tempUser.getPwdHash())) {
                     originalUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
                 }
+                // change status
+                originalUser.setStatus(tempUser.getStatus());
                 // change admin status
                 originalUser.setAdmin(tempUser.isAdmin());
                 // and update
@@ -545,7 +564,7 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.Position.READ, null);
             case READ_ALL_AREAS:
                 Area filter = new Area(null);
-                // todo filter these maybe?
+                // TODO filter these maybe?
                 return moduleManager.handleTask(Task.Area.READ, filter);
             default:
                 return null;
@@ -569,10 +588,25 @@ public class ServletFunctions {
         API task = API.safeValueOf(arrival.getTask());
         switch (task) {
             case WIFI_SENSOR_UPDATE:
-                // todo: better would be to add a task for position module to accept this data
-                // that way, the information is exactly where we want it during runtime
-                // (+ position find wouldn't need to wait for a sensor; it would just use what was available)
-                return new Success(Success.Type.NOTE, "Nothing implemented yet!");
+                if (!(arrival.getObject() instanceof DataList)) {
+                    return new Error(Error.Type.WRONG_OBJECT);
+                }
+                DataList<SensedDevice> devices = ((DataList) arrival.getObject());
+                // no need to continue if empty
+                if (devices.isEmpty()) {
+                    return new Success(Success.Type.NOTE, "Operation okay, but empty device list!");
+                }
+                // security check && fill in information
+                for (SensedDevice device : devices) {
+                    if (!device.getSensor().equals(sensor.readIdentification())) {
+                        // make sure a sensor only updates the devices for its own location
+                        return new Error(Error.Type.ILLEGAL_VALUE, "Sensor device injection is illegal!");
+                    }
+                    // store position of sensor for easy access later on
+                    device.setPosition(sensor.getPosition());
+                }
+                // pass tasks down
+                return moduleManager.handleTask(Task.Position.SENSOR_WRITE, devices);
             default:
                 return null;
         }

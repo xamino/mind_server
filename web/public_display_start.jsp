@@ -8,10 +8,11 @@
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
 <script src="javascript/displayMap.js"></script>
+<script src="javascript/jquery.balloon.js"></script>
 <link href="${pageContext.request.contextPath}/css/public_display.css" rel="stylesheet" type="text/css">
 <title>Public Display</title>
 </head>
-<body onload="onLoadOfPdPage(),displayUserLocations()">
+<body onload="onLoadOfPdPage()">
 
 
 <!-- MAP DISPLAY STUFF -->
@@ -41,7 +42,7 @@
 		</div>
 	</div>
 	<div id="content_popup">
-	TODO: CSS
+		TODO: CSS
 	</div>
 	<div id="login_location">
 		<div id="location">

@@ -70,7 +70,7 @@ function loginDisplay(identification, password, callback) {
     send(request, function (data) {
         // callback simply saves the session
         session = data.object.description;
-        writeCookie("MIND_PD_C", session); //TODO add id/.. of PD to cookie-name
+        writeCookie("MIND_PD_C", session);
         //alert("PD_session: " + session);
         callback();
     });
@@ -372,6 +372,7 @@ function writeUsers(data) {
         tablecontents += "<td>User Email: </td>";
         tablecontents += "<td>Last Access Time: </td>";
         tablecontents += "<td>Position: </td>";
+        tablecontents += "<td>Status: </td>";
         tablecontents += "<td>Is Admin: </td>";
         tablecontents += "<td>Edit User: </td>";
         tablecontents += "<td>Remove User: </td>";
@@ -384,9 +385,10 @@ function writeUsers(data) {
             tablecontents += "<td>" + data.object[i].name + "</td>";
             tablecontents += "<td>" + data.object[i].email + "</td>";
             tablecontents += "<td>" + (data.object[i].lastAccess == undefined ? "Never" : data.object[i].lastAccess) + "</td>";
-            lastPosition = data.object[i].lastPosition;
+            lastPosition = data.object[i].position;
             lastPosition = (lastPosition == undefined || lastPosition == null) ? "Unknown" : lastPosition;
             tablecontents += "<td>" + lastPosition + "</td>";
+            tablecontents += "<td>" + data.object[i].status + "</td>";
             tablecontents += "<td>" + data.object[i].admin + "</td>";
             //tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen_editUser(this.id)' id='editUser" +i+ "'/></td>";
             //tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen_removeUser(this.id)' id='removeUser" +i+ "'/></td>";
@@ -763,11 +765,9 @@ function onLoadOfAdminPage() {
 
 /**
  * This function is called onLoad of each PD page.
- * The session will be checked by the checkSessionFromURL function
- * and the session id will be added to all links classified as "pd_link"
  */
 function onLoadOfPdPage() {
-    var session = readCookie("MIND_PD_C");
+    session = readCookie("MIND_PD_C");
     send(new Arrival("check",session),function(data){
 //    	alert(JSON.stringify(data));
 //    	alert(data.object.description.$type);
@@ -776,7 +776,8 @@ function onLoadOfPdPage() {
     		window.location.href = "public_display_login.jsp";
     		
     	} else {
-    		return session;
+    		//return session;
+    		displayUserLocations();
     	}
     });
 }
@@ -799,14 +800,13 @@ function handleAllUsersPositionData(){
 	user1.lastPosition = 3304;
 	user1.iconRef = "crab.png";
 	var user2 = new User("b@b.b",null,"b",false);
-	user2.lastPosition = 336;
+	user2.lastPosition = 3304;
 	user2.iconRef = "lion.png";
 	
 	var users = new Array();
 	users[0] = user1;
 	users[1] = user2;
-	
-	retriveOriginalIconMetrics(users);
+	initPublicDisplayStuff(users);
 //END TESTAREA
 }
 

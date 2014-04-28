@@ -1,5 +1,6 @@
 package de.uulm.mi.mind.objects;
 
+import de.uulm.mi.mind.objects.enums.Status;
 import de.uulm.mi.mind.security.Authenticated;
 
 import java.util.Date;
@@ -16,6 +17,10 @@ public class User implements Data, Authenticated {
     private String position;
     private boolean admin;
     private Date lastAccess;
+    private Status status;
+
+    private User() {
+    }
 
     public User(String email) {
         this.email = email;
@@ -63,15 +68,20 @@ public class User implements Data, Authenticated {
         this.email = email;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "name='" + name + '\'' +
-                // ", pwdHash='" + pwdHash + '\'' +
-                ", email='" + email + '\'' +
-                ", admin=" + admin +
-                ", position=\'" + position + "'" +
-                '}';
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     /**
@@ -84,15 +94,8 @@ public class User implements Data, Authenticated {
         user.setPwdHash("");
         user.setPosition(this.position);
         user.setAccessDate(this.lastAccess);
+        user.setStatus(this.status);
         return user;
-    }
-
-    public boolean isAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
     }
 
     @Override
@@ -118,5 +121,17 @@ public class User implements Data, Authenticated {
     @Override
     public String getKey() {
         return email;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                // ", pwdHash='" + pwdHash + '\'' +
+                ", email='" + email + '\'' +
+                ", admin=" + admin +
+                ", position=\'" + position + "'" +
+                ", status=\'" + status + "'" +
+                '}';
     }
 }

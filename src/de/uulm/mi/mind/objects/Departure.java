@@ -10,6 +10,10 @@ public class Departure implements Data {
      */
     private Data object;
 
+    private Departure() {
+        
+    }
+
     /**
      * Constructor.
      *

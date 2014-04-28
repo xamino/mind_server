@@ -20,6 +20,9 @@ public class Area implements Data {
     private int topLeftX, topLeftY;
     private int width, height;
 
+    private Area() {
+    }
+
     public Area(String ID) {
         this.ID = ID;
     }
@@ -109,8 +112,12 @@ public class Area implements Data {
     public String toString() {
         return "Area{" +
                 "ID='" + ID + '\'' +
-                ", locations='" + locations +
-                "'}";
+                ", topLeftX=" + topLeftX +
+                ", topLeftY=" + topLeftY +
+                ", width=" + width +
+                ", height=" + height +
+                ", locations=" + locations +
+                '}';
     }
 
     /**

@@ -6,7 +6,6 @@ package de.uulm.mi.mind.servlet;
 
 import de.uulm.mi.mind.json.JsonConverter;
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
@@ -36,12 +35,11 @@ public class Servlet extends HttpServlet {
     /**
      * JSON library.
      */
-    private JsonConverter json;
+    private JsonConverter<Data> json;
     /**
      * Class for logging stuff.
      */
     private Messenger log;
-    private EventModuleManager moduleManager;
     private ServletFunctions functions;
 
     @Override
@@ -49,18 +47,17 @@ public class Servlet extends HttpServlet {
         // init all
         super.init();
         log = Messenger.getInstance();
-        moduleManager = EventModuleManager.getInstance();
-        json = JsonConverter.getInstance();
+        json = new JsonConverter();
         functions = ServletFunctions.getInstance();
         // register JSONator types
         json.registerType(Area.class);
         json.registerType(Arrival.class);
         json.registerType(Departure.class);
-        json.registerType(DataList.class);
         json.registerType(Error.class);
         json.registerType(Location.class);
         json.registerType(PublicDisplay.class);
         json.registerType(Success.class);
+        json.registerType(SensedDevice.class);
         json.registerType(User.class);
         json.registerType(WifiMorsel.class);
         json.registerType(WifiSensor.class);
@@ -215,8 +212,8 @@ public class Servlet extends HttpServlet {
             answer = new Error(Error.Type.WRONG_OBJECT, "Answer does not contain an object! Make sure your request is valid!");
         }
         Departure dep = new Departure(answer);
-        String blub = json.toJson(dep);
-        response.getWriter().write(blub);
+        String jsonBack = json.toJson(dep);
+        response.getWriter().write(jsonBack);
         response.setContentType("application/json");
     }
 }

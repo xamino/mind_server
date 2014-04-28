@@ -5,35 +5,38 @@ package de.uulm.mi.mind.objects;
  *         Data object for a location. References multiple WifiMorsels that have been detected at this location.
  */
 public class Location implements Data {
-    private double coordinateX, coordinateY;
+    private int coordinateX, coordinateY;
     /**
      * Contains WifiMorsel
      */
     private DataList<WifiMorsel> wifiMorsels;
 
-    public Location(double coordinateX, double coordinateY) {
+    private Location() {
+    }
+
+    public Location(int coordinateX, int coordinateY) {
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
     }
 
-    public Location(double coordinateX, double coordinateY, DataList<WifiMorsel> wifiMorsels) {
+    public Location(int coordinateX, int coordinateY, DataList<WifiMorsel> wifiMorsels) {
         this(coordinateX, coordinateY);
         this.wifiMorsels = wifiMorsels;
     }
 
-    public double getCoordinateX() {
+    public int getCoordinateX() {
         return coordinateX;
     }
 
-    public void setCoordinateX(double coordinateX) {
+    public void setCoordinateX(int coordinateX) {
         this.coordinateX = coordinateX;
     }
 
-    public double getCoordinateY() {
+    public int getCoordinateY() {
         return coordinateY;
     }
 
-    public void setCoordinateY(double coordinateY) {
+    public void setCoordinateY(int coordinateY) {
         this.coordinateY = coordinateY;
     }
 

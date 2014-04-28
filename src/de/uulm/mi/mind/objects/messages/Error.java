@@ -9,6 +9,9 @@ public class Error extends Information {
     private String description;
     private Type type;
 
+    private Error() {
+    }
+
     public Error(Type type, String description) {
         this.type = type;
 
@@ -23,6 +26,14 @@ public class Error extends Information {
     public Error(Type type) {
         this.type = type;
         this.description = defaultMsg(type);
+    }
+
+    @Override
+    public String toString() {
+        return "Error{" +
+                "type=" + type +
+                ", description='" + description + '\'' +
+                '}';
     }
 
     public String getDescription() {
