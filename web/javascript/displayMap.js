@@ -3,7 +3,7 @@ var originalHeight; //the native height of the map-image in pixels
 var displayedWidth; //the current width of the displayed map-image in pixels
 var displayedHeight; //the current height of the map-image in pixels
 var displayedIconSize=0; //the native size of the icon in pixels
-var iconByAreaFactor = 0.5; //the factor by which the icon size is set -> (smallest area width or height)*iconByAreaFactor
+var iconByAreaFactor = 0.45; //the factor by which the icon size is set -> (smallest area width or height)*iconByAreaFactor
 var defaultIconSize = 110; //if something goes wrong when setting the icon size - defaultIconSize will be applied
 var factor=1; //the size-factor by which the displayed image deviates from the original image
 //var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
@@ -215,15 +215,15 @@ function addUserIcon(user){
  * @param user the user
  */
 function placeUserIcon(user){
-	var scale = 0; //the scaled size of the current icon
+//	var scale = 0; //the scaled size of the current icon
 	var icon = document.getElementById("icon_"+user.email);
 	if(icon!=null){
-		scale = getScale(displayedIconSize);
-		icon.style.width=scale+"px";
+//		scale = getScale(displayedIconSize);
+		icon.style.width=displayedIconSize+"px";
 //		icon.style.left=getX(user.x,scale)+"px";
 //		icon.style.top=getX(user.y,scale)+"px";
-		icon.style.left=Math.round(user.x)+"px";
-		icon.style.top=Math.round(user.y)+"px";
+		icon.style.left=Math.round(user.x-displayedIconSize/2)+"px";
+		icon.style.top=Math.round(user.y-displayedIconSize/2)+"px";
 		//TODO apply visual effect regarding user status
 		icon = null;
 	}
@@ -257,23 +257,25 @@ function setUserIconCoordsByArea(){
 			}
 			if(users[i]==null){break;}
 			area = getAreaById(users[i].lastPosition);
-			currentx = area.topLeftX*factor+Math.round(displayedIconSize/2);
-			currenty = area.topLeftY*factor+Math.round(displayedIconSize/2);
+			//alert("area: "+Math.round(area.topLeftX*factor)+","+Math.round(area.topLeftY*factor)+
+			//		","+Math.round(area.width*factor)+","+Math.round(area.height*factor));
+			currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
+			currenty = Math.round(area.topLeftY*factor+Math.round(displayedIconSize/2));
 			firstinrow = true;
 			iconsinarea = 0;
 		}
 		if(firstinrow){ //if first in this row - always draw -> move currentx
 			users[i].x = currentx;
 			users[i].y = currenty;
-			alert(currentx+","+currenty);
+			//alert(currentx+",-,"+currenty);
 			currentx += displayedIconSize;
 			firstinrow = false;
 			iconsinarea++;
 			i++;
 		}else{
-			if( (currentx+(displayedIconSize/2)) > (area.topLeftX*factor+area.width*factor) ){ //current icon would exceed the row
+			if( (currentx+(Math.round(displayedIconSize/2))) > Math.round(area.topLeftX*factor+area.width*factor) ){ //current icon would exceed the row
 				firstinrow = true;
-				currentx = area.topLeftX*factor+Math.round(displayedIconSize/2);
+				currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
 				currenty += displayedIconSize;
 				if(iconsperrow<1){
 					iconsperrow = iconsinarea;					
@@ -290,9 +292,9 @@ function setUserIconCoordsByArea(){
 //		users[i].x = area.topLeftX+Math.round(displayedIconSize/2);
 //		users[i].y = area.topLeftY+Math.round(displayedIconSize/2);
 		
-//		alert(users[i].x+","+users[i].y);
-		
-	}
+//		alert(users[i].x+","+users[i].y);	
+	}//end for each user
+	
 }
 
 /**
@@ -305,10 +307,10 @@ function setUserIconCoordsByArea(){
  */
 function checkHeight(area,iconsInArea,iconsPerRow,i){
 	
-	var outstand = ((users[i+iconsInArea-1].y+Math.round(displayedIconSize/2)) - (area.topLeftY*factor+area.height));
+	var outstand = ((users[i+iconsInArea-1].y+Math.round(displayedIconSize/2)) - Math.round((area.topLeftY*factor+area.height*factor)));
 //	alert("outstandy "+outstand);
+
 	//if (one of the) lowest icons stands out of the area
-//	alert(outstand);
 	if(outstand > 0){
 		var rows = Math.ceil(iconsInArea/iconsPerRow);
 		var perRowCounter = 0;
