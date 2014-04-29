@@ -123,6 +123,7 @@ public class PositionModule implements Module {
                 log.error(TAG, "Sensor and algorithm see different positions!");
                 // todo resolve conflict -- how?
             } else {
+                // todo remove this once the merge works
                 log.log(TAG, "Sensor and algo are synced.");
             }
         }
