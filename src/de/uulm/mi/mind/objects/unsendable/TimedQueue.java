@@ -1,9 +1,6 @@
 package de.uulm.mi.mind.objects.unsendable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Tamino Hartmann
@@ -121,5 +118,9 @@ public class TimedQueue<E, F> {
      */
     public long getTime(E key) {
         return time.get(key);
+    }
+
+    public Collection<F> getValues() {
+        return (Collection) objects.values();
     }
 }

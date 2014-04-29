@@ -4,18 +4,17 @@ import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.unsendable.TimedQueue;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Tamino Hartmann
- *
- * Class provides secure session based on hash or login information.
+ *         <p/>
+ *         Class provides secure session based on hash or login information.
  */
 // todo Limit max number of sessions per user!
 public class Security {
@@ -47,7 +46,7 @@ public class Security {
     /**
      * Collection of stored actives.
      */
-    private HashMap<String, Active> actives;
+    private TimedQueue<String, Active> actives;
 
     /**
      * Constructor. Security handles its instance by itself, simply use the public methods.
@@ -56,7 +55,7 @@ public class Security {
         this.log = Messenger.getInstance();
         this.database = DatabaseController.getInstance();
         this.random = new SecureRandom();
-        this.actives = new HashMap<>();
+        this.actives = new TimedQueue<>(TIMEOUT);
         log.log(TAG, "Created.");
     }
 
@@ -105,10 +104,17 @@ public class Security {
      */
     public static DataList<Authenticated> readActives() {
         DataList<Authenticated> list = new DataList<>();
-        for (Active active : getInstance().actives.values()) {
+        for (Active active : getInstance().actives.getValues()) {
             list.add(active.getAuthenticated());
         }
         return list;
+    }
+
+    /**
+     * Method that destroys all sessions.
+     */
+    public static void clear() {
+        INSTANCE = new Security();
     }
 
     //
@@ -122,8 +128,6 @@ public class Security {
      * @return The Active object if the session is valid, otherwise null.
      */
     private Active check(final String session) {
-        // Make sure all actives are up to date before a check
-        enforceTimeout();
         // now check if valid
         Active active = actives.get(session);
         if (active == null) {
@@ -132,7 +136,7 @@ public class Security {
         }
         // now get database object
         ObjectContainer sessionContainer = database.getSessionContainer();
-        Authenticated databaseSafe = readDB(sessionContainer,active.getAuthenticated());
+        Authenticated databaseSafe = readDB(sessionContainer, active.getAuthenticated());
         sessionContainer.close();
 
         // check if the user is still legal
@@ -145,7 +149,7 @@ public class Security {
         active.setAuthenticated(databaseSafe);
         active.setTimestamp(System.currentTimeMillis());
         // set in session list
-        actives.put(session, active);
+        actives.add(session, active);
         // and return the correct active
         return active;
     }
@@ -199,7 +203,7 @@ public class Security {
         active.setTimestamp(System.currentTimeMillis());
         active.setUnused(firstFlag);
         // add to list
-        actives.put(session, active);
+        actives.add(session, active);
         log.log(TAG, "Login of " + authenticated.readIdentification() + ".");
         return active;
     }
@@ -219,9 +223,7 @@ public class Security {
             // must destroy all session of the same user
             ArrayList<Active> remove = new ArrayList<>();
             remove.add(active);
-            Active check;
-            for (Map.Entry<String, Active> entry : actives.entrySet()) {
-                check = entry.getValue();
+            for (Active check : actives.getValues()) {
                 if (check.getAuthenticated().readIdentification().equals(active.getAuthenticated().readIdentification())) {
                     remove.add(check);
                 }
@@ -235,28 +237,7 @@ public class Security {
             return;
         }
         // otherwise update value
-        actives.put(active.getSESSION(), active);
-    }
-
-    /**
-     * Method that checks all the actives' timeout value. If the timeout has been exceeded, the active is removed.
-     */
-    private void enforceTimeout() {
-        ArrayList<Active> remove = new ArrayList<>();
-        // Find out which Actives have exceeded the timeout
-        Active active;
-        for (Map.Entry<String, Active> entry : actives.entrySet()) {
-            active = entry.getValue();
-            long delta = System.currentTimeMillis() - active.getTimestamp();
-            if (delta > TIMEOUT) {
-                remove.add(active);
-            }
-        }
-        // remove them
-        for (Active toRemove : remove) {
-            log.log(TAG, "Session for " + toRemove.getAuthenticated().readIdentification() + " timed out.");
-            actives.remove(toRemove.getSESSION());
-        }
+        actives.add(active.getSESSION(), active);
     }
 
     /**

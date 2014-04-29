@@ -641,6 +641,7 @@ function sensorAlgoFusionTest() {
     if (area == null || area.ID != "Elsewhere") {
         alert("Fusioned position not where expected!\n" + JSON.stringify(area));
     }
+    // todo test failed algo & sensor match
 
     // todo more
 

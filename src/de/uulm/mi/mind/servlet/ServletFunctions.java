@@ -340,7 +340,6 @@ public class ServletFunctions {
                 // and update
                 return moduleManager.handleTask(Task.User.UPDATE, originalUser);
             case ADMIN_USER_DELETE:
-                log.log("DELETE", arrival.getObject().toString());
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error(Error.Type.WRONG_OBJECT);
                 }
@@ -534,6 +533,8 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.Area.ANNIHILATE, null);
             case ADMIN_ANNIHILATE_USER:
                 log.log(TAG, "Removing all users!");
+                // purge sessions
+                Security.clear();
                 return moduleManager.handleTask(Task.User.ANNIHILATE, null);
             // Read all positions (as publicly seen)
             case READ_ALL_POSITIONS:
