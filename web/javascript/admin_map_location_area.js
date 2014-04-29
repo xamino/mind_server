@@ -92,17 +92,13 @@ $(document).on("mousedown", "#map_png_div", function (e) {
     for (var i = 0; i < allAreas.length; i++) {	//all existing areas
         var id = allAreas[i].ID;
         
-        if (id != "universe" && id != "University") {	//not in University
-            if ((x1 >= allAreas[i].topLeftX) && (x1 <= (+allAreas[i].topLeftX + +allAreas[i].width)) &&
-            		(y1 >= allAreas[i].topLeftY) && (y1 <= (+allAreas[i].topLeftY + +allAreas[i].height))) {	    	//in x-values of existing area
-//               alert("in area "+allAreas[i].ID+":"+(x1 >= allAreas[i].topLeftX) && (x1 <= (allAreas[i].topLeftX + allAreas[i].width)));
-//                alert("in_area "+allAreas[i].ID); 
-//            	if (y1 >= allAreas[i].topLeftY && y1 <= (allAreas[i].topLeftY + allAreas[i].height)) { 	//in y-values of existing area
-                    alert((allAreas[i].topLeftX + +allAreas[i].width)+","+(allAreas[i].topLeftY + +allAreas[i].height)+
-                    "click is:"+x1+","+y1+"\nfalse - you're in area "+id+" values:"+allAreas[i].topLeftX+","+
-                    		allAreas[i].topLeftY+","+allAreas[i].width+","+allAreas[i].height);
+        if (id != "universe" && id != "University") {	//not in University     
+            //alert(allAreas[i].topLeftY+" - "+allAreas[i].height);
+        	if (x1 >= +allAreas[i].topLeftX && x1 <= (+allAreas[i].topLeftX + +allAreas[i].width)) {	    	//in x-values of existing area
+                if (y1 >= +allAreas[i].topLeftY && y1 <= (+allAreas[i].topLeftY + +allAreas[i].height)) { 	//in y-values of existing area
+                    //alert("false");
                 	selection = false;
-//                }
+                }
             }
         }
     }
@@ -125,7 +121,7 @@ $(document).on("mousemove", "#map_png_div", function (e) {
 
         // Prevent the selection div to get outside of your frame
         (x2 < 0) ? selection = false : ($(this).width() < x2) ? selection = false : (y2 < 0) ? selection = false : ($(this).height() < y2) ? selection = false : selection = true;
-        ;
+        //;
 
         // If the mouse is inside your frame resize the selection div
         if (selection) {
@@ -139,16 +135,16 @@ $(document).on("mousemove", "#map_png_div", function (e) {
             for (var i = 0; i < allAreas.length; i++) {	//all existing areas
                 var id = allAreas[i].ID;
                 if (id != "universe" && id != "University") {	//not in University
-                    if (x2 >= allAreas[i].topLeftX && x2 <= (allAreas[i].topLeftX + allAreas[i].width)) {	    	//in x-values of existing area
-                        if (y2 >= allAreas[i].topLeftY && y2 <= (allAreas[i].topLeftY + allAreas[i].height)) { 	//in y-values of existing area
+                    if (x2 >= +allAreas[i].topLeftX && x2 <= (+allAreas[i].topLeftX + +allAreas[i].width)) {	    	//in x-values of existing area
+                        if (y2 >= +allAreas[i].topLeftY && y2 <= (+allAreas[i].topLeftY + +allAreas[i].height)) { 	//in y-values of existing area
                             selection = false; //x2,y2 in area
                         }
-                        else if (y1 >= allAreas[i].topLeftY && y1 <= (allAreas[i].topLeftY + allAreas[i].height)) {
+                        else if (y1 >= +allAreas[i].topLeftY && y1 <= (+allAreas[i].topLeftY + +allAreas[i].height)) {
                             selection = false; //x2,y1 in area
                         }
                     }
-                    else if (y2 >= allAreas[i].topLeftY && y2 <= (allAreas[i].topLeftY + allAreas[i].height)) {
-                        if (x1 >= allAreas[i].topLeftX && x1 <= (allAreas[i].topLeftX + allAreas[i].width)) {
+                    else if (y2 >= +allAreas[i].topLeftY && y2 <= (+allAreas[i].topLeftY + +allAreas[i].height)) {
+                        if (x1 >= +allAreas[i].topLeftX && x1 <= (+allAreas[i].topLeftX + +allAreas[i].width)) {
                             selection = false; //x1,y2 in area
                         }
                     }
@@ -187,19 +183,19 @@ $(document).on("mousemove", "#map_png_div", function (e) {
                     	'<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+WIDTH+'</td></tr>'+
                     	'<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+HEIGHT+'</td></tr>'+
                     	'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-            		finalX = (x1-WIDTH);
+            		finalX = (+x1 - +WIDTH);
             		finalY = y1;
             		finalWidth = WIDTH;
             		finalHeight = HEIGHT;
             	}else{ //from bottom to top
             		$('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
                         '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
-                        '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(x1-WIDTH)+'</td></tr>'+
+                        '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(+x1 - +WIDTH)+'</td></tr>'+
                         '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+y2+'</td></tr>'+
                         '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+WIDTH+'</td></tr>'+
                         '<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+HEIGHT+'</td></tr>'+
                         '<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-            		finalX = (x1-WIDTH);
+            		finalX = (+x1 - +WIDTH);
             		finalY = y2;
             		finalWidth = WIDTH;
             		finalHeight = HEIGHT;
@@ -274,7 +270,6 @@ $(document).on("mouseup", "#map_png_div", function (e) {
             var id = allAreas[i].ID;
             if (id != "universe" && id != "University") {	//not in University
 //	       		alert("id: "+id+";y1: "+y1+";y2: "+y2+";topLeftY: "+allAreas[i].topLeftY+";height: "+allAreas[i].height+";topLeftY+height: "+(allAreas[i].topLeftY + allAreas[i].height));
-	       		 alert("drin hier so");
 	       		 //from right to left
 		 		 if(x2 <= allAreas[i].topLeftX && x1 >= allAreas[i].topLeftX){
 		 			//TopLeftX and TopLeftY are in the drawed rect --> add 2px because of border
@@ -284,147 +279,147 @@ $(document).on("mouseup", "#map_png_div", function (e) {
 		   				}
 		   				else{
 		   					//alert("1");
-			            	drawrect.style.height = (HEIGHT-(y2-allAreas[i].topLeftY)+2)+"px";
+			            	drawrect.style.height = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2)+"px";
 	//		            	var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-(y2-allAreas[i].topLeftY))+'">';
-			            	var updateHeight = '<td>Height:</td><td id="heightValue">'+(HEIGHT-(y2-allAreas[i].topLeftY)+2)+'</td>';
+			            	var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2)+'</td>';
 			            	document.getElementById("update_tdHeight").innerHTML = updateHeight;
 			            	currentY = allAreas[i].topLeftY;
-		            		finalHeight = (HEIGHT-(y2-allAreas[i].topLeftY)+2);
+		            		finalHeight = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2);
 		   				}
 	   				}
 		 			//TopLeftX and (TopLeftY+height) are in the drawed rect 
-		 			else if(y1 >= (allAreas[i].topLeftY + allAreas[i].height) && y2 <= (allAreas[i].topLeftY + allAreas[i].height)){
-			 			if(currentY < Number.MAX_VALUE && currentY > (allAreas[i].topLeftY + allAreas[i].height)){
+		 			else if(y1 >= (+allAreas[i].topLeftY + +allAreas[i].height) && y2 <= (+allAreas[i].topLeftY + +allAreas[i].height)){
+			 			if(currentY < Number.MAX_VALUE && currentY > (+allAreas[i].topLeftY + +allAreas[i].height)){
 				 			//do nothing
 				 		}else{
 			 				//alert("2");
-			 				drawrect.style.height = (HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+"px";
-							drawrect.style.marginTop = (TOP+((allAreas[i].topLeftY+allAreas[i].height)-y2))+"px";
+			 				drawrect.style.height = (+HEIGHT - (+(allAreas[i].topLeftY + +allAreas[i].height) - +y2))+"px";
+							drawrect.style.marginTop = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2)+"px";
 	//			   				var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-							var updateHeight = '<td>Height:</td><td id="heightValue">'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'</td>';
+							var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2))+'</td>';
 			   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
 	//			   				var updateTopLeftY = '<input type="text" id="yCor" name="yCor" value="'+(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-			   				var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">'+ (TOP+((allAreas[i].topLeftY+allAreas[i].height)-y2)-2)+'</td>';	//(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
+			   				var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">'+ (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2)+'</td>';	//(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
 			   				document.getElementById("update_tdY").innerHTML = updateTopLeftY;
-			   				currentY = (allAreas[i].topLeftY + allAreas[i].height);
-			   				finalY = (TOP+((allAreas[i].topLeftY+allAreas[i].height)-y2)-2);
-		            		finalHeight = (HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2));
+			   				currentY = (+allAreas[i].topLeftY + +allAreas[i].height);
+			   				finalY = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2);
+		            		finalHeight = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2));
 			   			 }
 			 		}
 		 			 
 		   		 }
 		 		
-		 		 else if(x1 <= allAreas[i].topLeftX && x2 >= allAreas[i].topLeftX){
+		 		 else if(x1 <= +allAreas[i].topLeftX && x2 >= +allAreas[i].topLeftX){
 		 			//TopLeftX and TopLeftY are in the drawed rect
 		   			//drawing from left to right --> add 2px because of border || drawing from top to bottom --> add 2px because of border
-		   			if(y2 >= allAreas[i].topLeftY && y1 <= allAreas[i].topLeftY){
-			   			if(x2 > (allAreas[i].topLeftX+ allAreas[i].width)){
-			   				if(currentY < Number.MAX_VALUE && currentY < allAreas[i].topLeftY){
+		   			if(y2 >= +allAreas[i].topLeftY && y1 <= +allAreas[i].topLeftY){
+			   			if(x2 > (+allAreas[i].topLeftX + +allAreas[i].width)){
+			   				if(currentY < Number.MAX_VALUE && currentY < +allAreas[i].topLeftY){
 				   				//do nothing
 				   			}
 				   			else{
 			   					//alert("3");
-			   					drawrect.style.height = (HEIGHT-(y2-allAreas[i].topLeftY)+2)+"px";
+			   					drawrect.style.height = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2)+"px";
 	//		   					var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-(y2-allAreas[i].topLeftY))+'">';
-			   					var updateHeight = '<td>Height:</td><td id="heightValue">'+(HEIGHT-(y2-allAreas[i].topLeftY)+2)+'</td>';
+			   					var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2)+'</td>';
 				   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
 				   				currentY = allAreas[i].topLeftY;
-			            		finalHeight = (HEIGHT-(y2-allAreas[i].topLeftY)+2);
+			            		finalHeight = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2);
 			   				}
 		   				}
-			   			else if(x2 < (allAreas[i].topLeftX+ allAreas[i].width)){
-			   				if(currentX < Number.MAX_VALUE && currentX < allAreas[i].topLeftX){
+			   			else if(x2 < (+allAreas[i].topLeftX + +allAreas[i].width)){
+			   				if(currentX < Number.MAX_VALUE && currentX < +allAreas[i].topLeftX){
 				   				//do nothing
 				   			}else{
 			   					//alert("4");
-			   					drawrect.style.width = (WIDTH-(x2-allAreas[i].topLeftX)+2)+"px";
+			   					drawrect.style.width = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2)+"px";
 	//		   					var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-(x2-allAreas[i].topLeftX))+'">';
-			   					var updateWidth = '<td>Width:</td><td id="xCorValue">'+(WIDTH-(x2-allAreas[i].topLeftX)+2)+'</td>';
+			   					var updateWidth = '<td>Width:</td><td id="xCorValue">'+(+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2)+'</td>';
 				   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
-				   				currentX = allAreas[i].topLeftX;
-				   				finalWidth = (WIDTH-(x2-allAreas[i].topLeftX)+2);
+				   				currentX = +allAreas[i].topLeftX;
+				   				finalWidth = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2);
 			   				}
 			   			}
 		   			 }
 		   			//TopLeftX and TopLeftY are in the drawed rect
 		   			//drawing from bottom to top --> add 2px because of border
-		   			if(y1 >= allAreas[i].topLeftY && y2 <= allAreas[i].topLeftY){
-		   				if(currentX < Number.MAX_VALUE && currentX < allAreas[i].topLeftX){
+		   			if(y1 >= +allAreas[i].topLeftY && y2 <= +allAreas[i].topLeftY){
+		   				if(currentX < Number.MAX_VALUE && currentX < +allAreas[i].topLeftX){
 		   					//do nothing
 		   				}else{
 			   				//alert("5");
-			   				drawrect.style.width = (WIDTH-(x2-allAreas[i].topLeftX)+2)+"px";
+			   				drawrect.style.width = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2)+"px";
 			   				drawrect.style.height = HEIGHT+"px";
 //			   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-(x2-allAreas[i].topLeftX))+'">';
-			   				var updateWidth = '<td>Width:</td><td id="xCorValue">'+(WIDTH-(x2-allAreas[i].topLeftX)+2)+'</td>';
+			   				var updateWidth = '<td>Width:</td><td id="xCorValue">'+(+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2)+'</td>';
 			   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
-			   				currentX = allAreas[i].topLeftX;
-			   				finalWidth = (WIDTH-(x2-allAreas[i].topLeftX)+2);
+			   				currentX = +allAreas[i].topLeftX;
+			   				finalWidth = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2);
 			   			}
 			   		}
 		   			//TopLeftX and (TopLeftY+height) are in the drawed rect
 		   			//from left to right
-		   			else if(y1 >= (allAreas[i].topLeftY + allAreas[i].height) && y2 <= (allAreas[i].topLeftY + allAreas[i].height)){
-			   			if(currentY < Number.MAX_VALUE && currentY > (allAreas[i].topLeftY + allAreas[i].height)){
+		   			else if(y1 >= (+allAreas[i].topLeftY + +allAreas[i].height) && y2 <= (+allAreas[i].topLeftY + +allAreas[i].height)){
+			   			if(currentY < Number.MAX_VALUE && currentY > (+allAreas[i].topLeftY + +allAreas[i].height)){
 				 			//do nothing
 				 		}else{
 			   				//alert("6");
 //			   				if(!(y2<allAreas[i].topLeftY)){
-			   				drawrect.style.height = (HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+"px";
-							drawrect.style.marginTop = (TOP+((allAreas[i].topLeftY+allAreas[i].height)-y2))+"px";
+			   				drawrect.style.height = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2))+"px";
+							drawrect.style.marginTop = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2)+"px";
 	//			   				var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-							var updateHeight = '<td>Height:</td><td id="heightValue">'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'</td>';
+							var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2))+'</td>';
 			   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
 	//			   				var updateTopLeftY = '<input type="text" id="yCor" name="yCor" value="'+(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-			   				var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">'+(TOP+((allAreas[i].topLeftY+allAreas[i].height)-y2)-2)+'</td>'; //(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
+			   				var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">'+(+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2)+'</td>'; //(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
 			   				document.getElementById("update_tdY").innerHTML = updateTopLeftY;
-			   				currentY = (allAreas[i].topLeftY + allAreas[i].height);
+			   				currentY = (+allAreas[i].topLeftY + +allAreas[i].height);
 			   				
-			   				finalHeight = (HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2));
-			   				finalY = (TOP+((allAreas[i].topLeftY+allAreas[i].height)-y2)-2);
+			   				finalHeight = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2));
+			   				finalY = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2);
 			   			 }
 			   		}
 		   			
 		   		 }
 	       		//(TopLeftX+width) and TopLeftY are in the drawed rect
-		 		 else if(x2 <= (allAreas[i].topLeftX +allAreas[i].width) && x1 >= (allAreas[i].topLeftX + allAreas[i].width)){	
+		 		 else if(x2 <= (+allAreas[i].topLeftX + +allAreas[i].width) && x1 >= (+allAreas[i].topLeftX + +allAreas[i].width)){	
 		 			 //draw from top to bottom 
-			    		if(y2 >= allAreas[i].topLeftY && y1 <= allAreas[i].topLeftY){ 
-			    			if(currentX < Number.MAX_VALUE && currentX > (allAreas[i].topLeftX + allAreas[i].width)){
+			    		if(y2 >= +allAreas[i].topLeftY && y1 <= +allAreas[i].topLeftY){ 
+			    			if(currentX < Number.MAX_VALUE && currentX > (+allAreas[i].topLeftX + +allAreas[i].width)){
 				 				//do nothing
 				 			}
 				 			else{
 			   					//alert("7");
-				    			drawrect.style.width = (WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+"px";
-								drawrect.style.marginLeft = (LEFT+((allAreas[i].topLeftX+allAreas[i].width)-x2))+"px";
+				    			drawrect.style.width = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+"px";
+								drawrect.style.marginLeft = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +2)+"px";
 		//		   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
-								var updateWidth = '<td>Width:</td><td id="xCorValue">'+(WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+'</td>';
+								var updateWidth = '<td>Width:</td><td id="xCorValue">'+(+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+'</td>';
 				   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
 		//		   				var updateTopLeftX = '<input type="text" id="xCor" name="xCor" value="'+(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
-				   				var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">'+(LEFT+((allAreas[i].topLeftX+allAreas[i].width)-x2)-2)+'</td>'; //(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2)-2)
+				   				var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">'+(+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +2)+'</td>'; //(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2)-2)
 				   				document.getElementById("update_tdX").innerHTML = updateTopLeftX;
-				   				currentX = (allAreas[i].topLeftX + allAreas[i].width);
-				   				finalWidth = (WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2));
-				   				finalX = (LEFT+((allAreas[i].topLeftX+allAreas[i].width)-x2)-2);
+				   				currentX = (+allAreas[i].topLeftX + +allAreas[i].width);
+				   				finalWidth = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2));
+				   				finalX = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +2);
 						 }
 		 			}
 		    		//draw from bottom to top 
-			    		else if(y1 >= allAreas[i].topLeftY && y2 <= allAreas[i].topLeftY){
-			    			if(currentX < Number.MAX_VALUE && currentX > (allAreas[i].topLeftX + allAreas[i].width)){
+			    		else if(y1 >= +allAreas[i].topLeftY && y2 <= +allAreas[i].topLeftY){
+			    			if(currentX < Number.MAX_VALUE && currentX > (+allAreas[i].topLeftX + +allAreas[i].width)){
 				 				//do nothing
 				 			}else{
 			   					//alert("8");
-				    			drawrect.style.width = (WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+"px";
-								drawrect.style.marginLeft = (LEFT+((allAreas[i].topLeftX+allAreas[i].width)-x2))+"px";
+				    			drawrect.style.width = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+"px";
+								drawrect.style.marginLeft = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+"px";
 		//		   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
-								var updateWidth = '<td>Width:</td><td id="xCorValue">'+(WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+'</td>';
+								var updateWidth = '<td>Width:</td><td id="xCorValue">'+(+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+'</td>';
 				   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
 		//		   				var updateTopLeftX = '<input type="text" id="xCor" name="xCor" value="'+(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
-				   				var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">'+(LEFT+((allAreas[i].topLeftX+allAreas[i].width)-x2)-2)+'</td>'; //  (x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))
+				   				var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">'+(+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +2)+'</td>'; //  (x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))
 				   				document.getElementById("update_tdX").innerHTML = updateTopLeftX;
-				   				currentX = (allAreas[i].topLeftX + allAreas[i].width);
-				   				finalWidth = (WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2));
-				   				finalX = (LEFT+((allAreas[i].topLeftX+allAreas[i].width)-x2)-2);
+				   				currentX = (+allAreas[i].topLeftX + +allAreas[i].width);
+				   				finalWidth = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2));
+				   				finalX = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +2);
 			    		}
 			    	}
 		    	}
@@ -573,9 +568,7 @@ function removeAreaViaPopup(data) {
 //function addArea(){
 $(document).on("submit", "#areaForm", function (event) {
     event.preventDefault();
-    //alert("drin 2");
     if(checkInp()){	//id is valid
-    	alert("drin drin");
 	    var id, xCor, yCor, width, height;
 	    id = $("#id").val();
 	    if (id != null && id != "") {
@@ -626,20 +619,15 @@ function drawAreas() {
                     // don't do anything --> University isn't been drawn
                 }
                 else {
-                	//alert("hui");
                     var x = data.object[i].topLeftX;
                     var y = data.object[i].topLeftY;
                     var width = data.object[i].width;
                     var height =data.object[i].height;
-                    //x = x + 2; //?????? ERROR
-                    //y = y + 2;	//?????? ERROR
-                    width = width - 4;
-                    height = height - 4;
-                    alert("x: "+x+" y: "+y+" w: "+width+" h: "+height);
+
 
                     var div = document.getElementById("map_png_div");
                     var clickedArea = "";
-                    clickedArea += '<div id="' + id + '" onClick="clickOnArea(' + id + ')" style=" cursor:pointer; background-color: #C2DFFF; border: 2px solid black; opacity: .5; filter: alpha(opacity=50); position:absolute; margin-top:' + (y) + 'px; margin-left: ' + (x) + 'px; width: ' + (width) + 'px; height: ' + (height) + 'px;"></div>';
+                    clickedArea += '<div id="' + id + '" onClick="clickOnArea(' + id + ')" style=" cursor:pointer; background-color: #C2DFFF; border: 2px solid black; opacity: .5; filter: alpha(opacity=50); position:absolute; margin-top:' + (+y + +2) + 'px; margin-left: ' + (+x + +2) + 'px; width: ' + (+width - +4) + 'px; height: ' + (+height - +4) + 'px;"></div>';
                     div.innerHTML = div.innerHTML + clickedArea;
 
                 }
@@ -781,8 +769,8 @@ function removeLocationViaPopup(data) {
  */
 function checkInp() {
     var x = document.getElementById("id").value;
-  if (x.match(/^[a-zA-Z0-9\-_]+$/)){		//--> problem with click method
-//    if (x.match(/^[0-9]+$/)) {
+  //if (x.match(/^[a-zA-Z0-9\-_]+$/)){		//--> problem with click method
+    if (x.match(/^[0-9]+$/)) {
         return true;
     }
 }
