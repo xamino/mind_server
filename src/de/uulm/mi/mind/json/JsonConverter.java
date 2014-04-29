@@ -362,7 +362,10 @@ public class JsonConverter<E> {
             } else {
                 jsonObject = jsonObject.substring(valueStop + 1);
             }
-            // System.out.println(key + ":" + value);
+            // check against ignoreField
+            if (ignoreFields.contains(key)) {
+                continue;
+            }
             // add key:value to hashmap
             tree.put(key, value);
         }
