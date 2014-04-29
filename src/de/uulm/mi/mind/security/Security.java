@@ -30,6 +30,7 @@ public class Security {
     /**
      * Session timeout in milliseconds. Cannot be changed during runtime!
      */
+    @SuppressWarnings("FieldCanBeLocal")
     private final long TIMEOUT = 15 * 60 * 1000;
     /**
      * Instance of log used for the output.
@@ -185,9 +186,8 @@ public class Security {
             firstFlag = true;
         }
         // try to update last access time
-        // TODO better error handling
         databaseSafe.setAccessDate(new Date());
-        if (!(database.update(sessionContainer, (Data) databaseSafe))) {
+        if (!(database.update(sessionContainer, databaseSafe))) {
             log.error(TAG, "Login failed for " + authenticated.readIdentification() + " due to error updating access time!");
             return null;
         }
