@@ -59,4 +59,8 @@ public class TimedQueue<E, F> {
         maintain();
         return keys.size();
     }
+    
+    public long getTime(E key) {
+        return time.get(key);
+    }
 }
