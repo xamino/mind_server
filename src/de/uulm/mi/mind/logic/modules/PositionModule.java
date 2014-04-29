@@ -28,7 +28,6 @@ public class PositionModule implements Module {
      * Timeout after which the position is reset to unknown for a user.
      */
     // TODO expose to admin?
-    private final long POSITION_VALID_TIMEOUT = 10 * 60 * 1000;
     private final String TAG = "PositionModule";
     private Messenger log;
     private TimedQueue<String, SensedDevice> sniffedDevices;
@@ -158,24 +157,17 @@ public class PositionModule implements Module {
             boolean isAtUniversity = position != null && position.equals("University"); //TODO set in find
             boolean isAtLocation = position != null && !position.equals("University");
             boolean isInvisible = us.getStatus() == null || us.getStatus() == Status.INVISIBLE;
-            boolean isTimedOut = timeSinceLastLogin == 0 || timeSinceLastLogin > POSITION_VALID_TIMEOUT;
 
             // Continue means is not added to output
             // removed inactive users
             if (isLoggedOut) {
+                //log.log(TAG,"Not logged in: " + us.getEmail());
                 continue;
-            }
-
-            // remove timed out users
-            if (isTimedOut) {
-                // if last update is longer gone, then ignore
-                continue;
-                // todo This is not the last position time – how do i do this better?
-                // todo Update lastPosition to null?
             }
 
             // remove invisible users
             if (isInvisible) {
+                //log.log(TAG,"Is invisible: " + us.getEmail());
                 continue;
             }
 
@@ -186,6 +178,7 @@ public class PositionModule implements Module {
             } else if (isAtLocation) {
                 // nothing to do?
             } else {
+                //log.log(TAG,"Position null: " + us.getEmail());
                 continue; // position was null
             }
 
