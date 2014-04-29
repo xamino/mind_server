@@ -34,7 +34,7 @@ public class PositionModule implements Module {
 
     public PositionModule() {
         log = Messenger.getInstance();
-        sniffedDevices = new TimedQueue<String, SensedDevice>(5*60*1000);
+        sniffedDevices = new TimedQueue<String, SensedDevice>(5 * 60 * 1000);
     }
 
     @Override

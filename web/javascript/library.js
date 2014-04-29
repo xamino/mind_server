@@ -180,10 +180,11 @@ function PublicDisplay(identification, token, location, coordinateX, coordinateY
     this.coordinateY = coordinateY;
 }
 
-function WifiSensor(position, tokenHash) {
+function WifiSensor(identification, tokenHash, position) {
     this.$type = "WifiSensor";
-    this.position = position;
+    this.identification = identification;
     this.tokenHash = tokenHash;
+    this.area = position;
 }
 
 function SensedDevice(sensor, ipAddress, levelValue) {

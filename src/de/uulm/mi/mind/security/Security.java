@@ -57,7 +57,7 @@ public class Security {
         this.database = DatabaseController.getInstance();
         this.random = new SecureRandom();
         this.actives = new TimedQueue<>(TIMEOUT);
-        log.log(TAG, "Created.");
+        log.log(TAG, "Created new instance.");
     }
 
     /**
@@ -252,7 +252,7 @@ public class Security {
         } else if (authenticated instanceof PublicDisplay) {
             data = database.read(sessionContainer, new PublicDisplay(authenticated.readIdentification(), null, null, 0, 0));
         } else if (authenticated instanceof WifiSensor) {
-            data = database.read(sessionContainer, new WifiSensor(authenticated.readIdentification(), null));
+            data = database.read(sessionContainer, new WifiSensor(authenticated.readIdentification(), null, null));
         } else {
             log.error(TAG, "Read from DB failed because of wrong object given!");
             return null;

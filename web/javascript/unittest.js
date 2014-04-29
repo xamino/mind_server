@@ -600,8 +600,8 @@ function sensorAlgoFusionTest() {
     cleanDB();
 
     var adminSession = getAdminSession();
-    unitTest("sensor_add", new WifiSensor("Somewhere", "blub"), Success, adminSession);
-    unitTest("sensor_add", new WifiSensor("Elsewhere", "blub"), Success, adminSession);
+    unitTest("sensor_add", new WifiSensor("Somewhere", "blub", "Somewhere"), Success, adminSession);
+    unitTest("sensor_add", new WifiSensor("Elsewhere", "blub", "Elsewhere"), Success, adminSession);
     var sessionOne = unitTest("login", new WifiSensor("Somewhere", "blub"), Success, null).description;
     var sessionTwo = unitTest("login", new WifiSensor("Elsewhere", "blub"), Success, null).description;
     // sensing abilities
