@@ -91,12 +91,18 @@ $(document).on("mousedown", "#map_png_div", function (e) {
     y1 = e.pageY - this.offsetTop;
     for (var i = 0; i < allAreas.length; i++) {	//all existing areas
         var id = allAreas[i].ID;
+        
         if (id != "universe" && id != "University") {	//not in University
-            if (x1 >= allAreas[i].topLeftX && x1 <= (allAreas[i].topLeftX + allAreas[i].width)) {	    	//in x-values of existing area
-                if (y1 >= allAreas[i].topLeftY && y1 <= (allAreas[i].topLeftY + allAreas[i].height)) { 	//in y-values of existing area
-                    alert("false")
+            if ((x1 >= allAreas[i].topLeftX) && (x1 <= (+allAreas[i].topLeftX + +allAreas[i].width)) &&
+            		(y1 >= allAreas[i].topLeftY) && (y1 <= (+allAreas[i].topLeftY + +allAreas[i].height))) {	    	//in x-values of existing area
+//               alert("in area "+allAreas[i].ID+":"+(x1 >= allAreas[i].topLeftX) && (x1 <= (allAreas[i].topLeftX + allAreas[i].width)));
+//                alert("in_area "+allAreas[i].ID); 
+//            	if (y1 >= allAreas[i].topLeftY && y1 <= (allAreas[i].topLeftY + allAreas[i].height)) { 	//in y-values of existing area
+                    alert((allAreas[i].topLeftX + +allAreas[i].width)+","+(allAreas[i].topLeftY + +allAreas[i].height)+
+                    "click is:"+x1+","+y1+"\nfalse - you're in area "+id+" values:"+allAreas[i].topLeftX+","+
+                    		allAreas[i].topLeftY+","+allAreas[i].width+","+allAreas[i].height);
                 	selection = false;
-                }
+//                }
             }
         }
     }
