@@ -5,6 +5,7 @@
 package de.uulm.mi.mind.servlet;
 
 import de.uulm.mi.mind.json.JsonConverter;
+import de.uulm.mi.mind.json.JsonWrapper;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
@@ -35,7 +36,7 @@ public class Servlet extends HttpServlet {
     /**
      * JSON library.
      */
-    private JsonConverter<Data> json;
+    private JsonWrapper json;
     /**
      * Class for logging stuff.
      */
@@ -47,20 +48,8 @@ public class Servlet extends HttpServlet {
         // init all
         super.init();
         log = Messenger.getInstance();
-        json = new JsonConverter();
+        json = JsonWrapper.getInstance();
         functions = ServletFunctions.getInstance();
-        // register JSONator types
-        json.registerType(Area.class);
-        json.registerType(Arrival.class);
-        json.registerType(Departure.class);
-        json.registerType(Error.class);
-        json.registerType(Location.class);
-        json.registerType(PublicDisplay.class);
-        json.registerType(Success.class);
-        json.registerType(SensedDevice.class);
-        json.registerType(User.class);
-        json.registerType(WifiMorsel.class);
-        json.registerType(WifiSensor.class);
         log.log(TAG, "Created.");
     }
 

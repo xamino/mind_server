@@ -69,10 +69,23 @@ public class JsonConverter<E> {
     }
 
     /**
-     * @param object
-     * @return
+     * Method that, given a registered object, creates the corresponding JSON string.
+     *
+     * @param object The object to convert.
+     * @param <S>    The registered type.
+     * @return The String containing the object, or null if failed.
      */
-    public <S extends E> String toJson(S object) throws IOException {
+    public <S extends E> String toJson(S object) {
+        try {
+            return objectJson(object);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.error(TAG, "Failed to create JSON!");
+            return null;
+        }
+    }
+
+    private <S extends E> String objectJson(S object) throws IOException {
         if (object == null) {
             throw new IOException(TAG + ": Null object passed!");
         }
@@ -127,7 +140,7 @@ public class JsonConverter<E> {
                 }
                 // recursively solve
                 for (Object collectionObject : array) {
-                    jsonObject.append(toJson(((E) collectionObject)) + ",");
+                    jsonObject.append(objectJson(((E) collectionObject)) + ",");
                 }
                 // remove last comma if placed
                 if (jsonObject.charAt(jsonObject.length() - 1) == ',') {
@@ -151,7 +164,7 @@ public class JsonConverter<E> {
             }
             // probably object (if not registered it will throw an IOException on recursion)
             else {
-                jsonObject.append(ESCAPE + fieldName + ESCAPE + ":" + toJson(((E) value)));
+                jsonObject.append(ESCAPE + fieldName + ESCAPE + ":" + objectJson(((E) value)));
             }
         }
         // finish object
