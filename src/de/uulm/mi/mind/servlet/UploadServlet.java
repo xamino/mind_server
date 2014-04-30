@@ -4,6 +4,7 @@ import de.uulm.mi.mind.json.JsonWrapper;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.Data;
 import de.uulm.mi.mind.objects.Departure;
+import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
@@ -14,7 +15,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,7 +26,6 @@ import java.util.List;
  * Servlet implementation class UploadServlet
  * uploads image to the 'image' folder of the deployed server - as 'map.'extension
  */
-@WebServlet("/UploadServlet")
 public class UploadServlet extends HttpServlet {
     private final String TAG = "UploadServlet";
     private final int maxFileSize = 5000 * 1024;
@@ -51,32 +50,47 @@ public class UploadServlet extends HttpServlet {
         // 2nd cookie contains our session hash that we can check
         String session = request.getCookies()[1].getValue();
         Active active = Security.begin(null, session);
-        Data answer = null;
         if (active == null) {
             log.error(TAG, "Session invalid!");
-            answer = new Error(Error.Type.SECURITY, "Invalid Session!");
+        } else if (!(active.getAuthenticated() instanceof User)) {
+            log.error(TAG, "Only users may upload images!");
         } else {
-            answer = uploadLogic(request);
+            // switch based on action
+            String action = request.getPathInfo().substring(1);
+            // upload map
+            if (action.equals("map")) {
+                User user = ((User) active.getAuthenticated());
+                // check that admin
+                if (user.isAdmin()) {
+                    uploadMap(request);
+                } else {
+                    log.error(TAG, "Non-admin " + user.readIdentification() + " tried to upload new map!");
+                }
+            }
+            // upload user icon
+            else if (action.equals("icon")) {
+                log.error(TAG, "Icon upload not working yet!");
+            }
+            // unknown
+            else {
+                log.error(TAG, "Unknown action: " + action + "!");
+            }
         }
         Security.finish(active);
-        prepareDeparture(response, answer);
+        // make sure site is loaded all new to show new image:
+        response.setHeader("Cache-Control", "no-cache, must-revalidate");
+        // send redirect back to page
+        // todo make location dynamic based on request icon / map
+        response.sendRedirect("/admin_import_map_location.jsp");
     }
 
-    public void doGet(HttpServletRequest request,
-                      HttpServletResponse response)
-            throws ServletException, java.io.IOException {
-
-        throw new ServletException("GET method used with " +
-                getClass().getName() + ": POST method required.");
-    }
-
-    private Data uploadLogic(HttpServletRequest request) {
+    private void uploadMap(HttpServletRequest request) {
         filePath = request.getSession().getServletContext().getRealPath("/") + "images" + System.getProperty("file.separator");
-
         // Check that we have a file upload request
         boolean isMultipart = ServletFileUpload.isMultipartContent(request);
         if (!isMultipart) {
-            return new Error(Error.Type.WRONG_OBJECT, "Not a multipart upload!");
+            log.error(TAG, "Request not multipart!");
+            return;
         }
 
         DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -117,9 +131,8 @@ public class UploadServlet extends HttpServlet {
         } catch (Exception ex) {
             ex.printStackTrace();
             log.error(TAG, "Upload failed!");
-            return new Error(Error.Type.ILLEGAL_VALUE, "Upload failed!");
         }
-        return new Success("Upload successful.");
+        log.log(TAG, "New map uploaded.");
     }
 
     /**

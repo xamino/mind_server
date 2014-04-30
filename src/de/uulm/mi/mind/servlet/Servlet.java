@@ -25,8 +25,6 @@ import java.io.IOException;
 /**
  * Main REST API servlet class of the server. All requests go through here, are validated, parsed, and processed.
  */
-
-@WebServlet("/Servlet")
 public class Servlet extends HttpServlet {
 
     /**

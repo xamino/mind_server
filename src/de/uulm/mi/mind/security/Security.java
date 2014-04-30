@@ -3,7 +3,10 @@ package de.uulm.mi.mind.security;
 import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.DataList;
+import de.uulm.mi.mind.objects.PublicDisplay;
+import de.uulm.mi.mind.objects.User;
+import de.uulm.mi.mind.objects.WifiSensor;
 import de.uulm.mi.mind.objects.unsendable.TimedQueue;
 
 import java.math.BigInteger;
@@ -95,6 +98,9 @@ public class Security {
      * for the next call if still secure.
      */
     public static synchronized void finish(final Active active) {
+        if (active == null) {
+            return;
+        }
         getInstance().update(active);
     }
 
