@@ -292,17 +292,17 @@ $(document).on("mouseup", "#map_png_div", function (e) {
 				 			//do nothing
 				 		}else{
 			 				//alert("2");
-			 				drawrect.style.height = (+HEIGHT - (+(allAreas[i].topLeftY + +allAreas[i].height) - +y2))+"px";
-							drawrect.style.marginTop = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2)+"px";
+			 				drawrect.style.height = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1)+"px";
+							drawrect.style.marginTop = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1)+"px";
 	//			   				var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-							var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2))+'</td>';
+							var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2)- +1)+'</td>';
 			   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
 	//			   				var updateTopLeftY = '<input type="text" id="yCor" name="yCor" value="'+(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-			   				var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">'+ (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2)+'</td>';	//(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
+			   				var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">'+ (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1)+'</td>';	//(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
 			   				document.getElementById("update_tdY").innerHTML = updateTopLeftY;
 			   				currentY = (+allAreas[i].topLeftY + +allAreas[i].height);
-			   				finalY = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2);
-		            		finalHeight = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2));
+			   				finalY = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1);
+		            		finalHeight = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2)- +1);
 			   			 }
 			 		}
 		 			 
@@ -364,18 +364,18 @@ $(document).on("mouseup", "#map_png_div", function (e) {
 				 		}else{
 			   				//alert("6");
 //			   				if(!(y2<allAreas[i].topLeftY)){
-			   				drawrect.style.height = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2))+"px";
-							drawrect.style.marginTop = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2)+"px";
+			   				drawrect.style.height = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1)+"px";
+							drawrect.style.marginTop = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1)+"px";
 	//			   				var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-							var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2))+'</td>';
+							var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2)- +1)+'</td>';
 			   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
 	//			   				var updateTopLeftY = '<input type="text" id="yCor" name="yCor" value="'+(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-			   				var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">'+(+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2)+'</td>'; //(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
+			   				var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">'+(+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1)+'</td>'; //(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
 			   				document.getElementById("update_tdY").innerHTML = updateTopLeftY;
 			   				currentY = (+allAreas[i].topLeftY + +allAreas[i].height);
 			   				
-			   				finalHeight = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2));
-			   				finalY = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +2);
+			   				finalHeight = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1);
+			   				finalY = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1);
 			   			 }
 			   		}
 		   			
@@ -389,17 +389,17 @@ $(document).on("mouseup", "#map_png_div", function (e) {
 				 			}
 				 			else{
 			   					//alert("7");
-				    			drawrect.style.width = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+"px";
-								drawrect.style.marginLeft = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +2)+"px";
+				    			drawrect.style.width = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +1)+"px";
+								drawrect.style.marginLeft = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) + +1)+"px";
 		//		   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
-								var updateWidth = '<td>Width:</td><td id="xCorValue">'+(+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+'</td>';
+								var updateWidth = '<td>Width:</td><td id="xCorValue">'+(+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2)- +1)+'</td>';
 				   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
 		//		   				var updateTopLeftX = '<input type="text" id="xCor" name="xCor" value="'+(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
-				   				var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">'+(+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +2)+'</td>'; //(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2)-2)
+				   				var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">'+(+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) + +1)+'</td>'; //(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2)-2)
 				   				document.getElementById("update_tdX").innerHTML = updateTopLeftX;
 				   				currentX = (+allAreas[i].topLeftX + +allAreas[i].width);
-				   				finalWidth = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2));
-				   				finalX = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +2);
+				   				finalWidth = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2)- +1);
+				   				finalX = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) + +1);
 						 }
 		 			}
 		    		//draw from bottom to top 
@@ -414,11 +414,11 @@ $(document).on("mouseup", "#map_png_div", function (e) {
 								var updateWidth = '<td>Width:</td><td id="xCorValue">'+(+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+'</td>';
 				   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
 		//		   				var updateTopLeftX = '<input type="text" id="xCor" name="xCor" value="'+(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
-				   				var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">'+(+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +2)+'</td>'; //  (x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))
+				   				var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">'+(+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+'</td>'; //  (x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))
 				   				document.getElementById("update_tdX").innerHTML = updateTopLeftX;
 				   				currentX = (+allAreas[i].topLeftX + +allAreas[i].width);
 				   				finalWidth = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2));
-				   				finalX = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +2);
+				   				finalX = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2));
 			    		}
 			    	}
 		    	}
