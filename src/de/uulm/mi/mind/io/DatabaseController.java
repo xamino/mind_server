@@ -101,7 +101,7 @@ public class DatabaseController implements ServletContextListener {
                     query.descend("identification").constrain(requestFilter.getKey());
                     queryResult = query.execute();
                 } else if (requestFilter instanceof WifiSensor) {
-                    query.descend("position").constrain(requestFilter.getKey());
+                    query.descend("identification").constrain(requestFilter.getKey());
                     queryResult = query.execute();
                 } else {
                     log.log(TAG, "Object Type " + requestFilter.getClass().getSimpleName() + " reading could be optimized.");
@@ -215,7 +215,7 @@ public class DatabaseController implements ServletContextListener {
         dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
         dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
         dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
-        dbconfig.common().objectClass(WifiSensor.class).objectField("position").indexed(true);
+        dbconfig.common().objectClass(WifiSensor.class).objectField("identification").indexed(true);
         rootContainer = Db4oEmbedded.openFile(dbconfig, dbFilePath);
 
         log.log(TAG, "db4o startup on " + dbFilePath);

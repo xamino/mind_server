@@ -9,10 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Tamino Hartmann
@@ -32,6 +29,8 @@ public class JsonConverter<E> {
     private HashMap<Class<? extends E>, String> typesClassString;
     private HashMap<String, Class<? extends E>> typesStringClass;
 
+    private Set<String> ignoreFields;
+
     public JsonConverter() {
         this("$type");
     }
@@ -41,6 +40,7 @@ public class JsonConverter<E> {
         this.TYPE_KEY = typeKey;
         typesClassString = new HashMap<>();
         typesStringClass = new HashMap<>();
+        ignoreFields = new HashSet<>();
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         log.log(TAG, "Created.");
     }
@@ -60,10 +60,32 @@ public class JsonConverter<E> {
     }
 
     /**
-     * @param object
-     * @return
+     * Method for telling the converter to ignore special fields when converting to JSON.
+     *
+     * @param fieldName The exact name of the field.
      */
-    public <S extends E> String toJson(S object) throws IOException {
+    public void ignoreField(String fieldName) {
+        ignoreFields.add(fieldName);
+    }
+
+    /**
+     * Method that, given a registered object, creates the corresponding JSON string.
+     *
+     * @param object The object to convert.
+     * @param <S>    The registered type.
+     * @return The String containing the object, or null if failed.
+     */
+    public <S extends E> String toJson(S object) {
+        try {
+            return objectJson(object);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.error(TAG, "Failed to create JSON!");
+            return null;
+        }
+    }
+
+    private <S extends E> String objectJson(S object) throws IOException {
         if (object == null) {
             throw new IOException(TAG + ": Null object passed!");
         }
@@ -71,12 +93,17 @@ public class JsonConverter<E> {
         // Check if registered TYPE_KEY
         if (!typesClassString.containsKey(objectClass)) {
             throw new IOException("Unregistered TYPE_KEY! Unable to parse to JSON. Register "
-                    + object.getClass().getSimpleName() + "!");
+                    + object.getClass().getCanonicalName() + "!");
         }
         // Get all fields and values recursively
         HashMap<Field, Object> fieldValueList = new HashMap<>();
         for (Class c = objectClass; c != null; c = c.getSuperclass()) {
             for (Field field : c.getDeclaredFields()) {
+                // ignore fields listed
+                if (ignoreFields.contains(field.getName())) {
+                    continue;
+                }
+                // otherwise try to make the field accessible and set it
                 try {
                     field.setAccessible(true);  // otherwise private won't work
                     fieldValueList.put(field, field.get(object));
@@ -94,7 +121,7 @@ public class JsonConverter<E> {
             // add comma
             jsonObject.append(",");
             Field field = entry.getKey();
-            String fieldName = fieldName(field);
+            String fieldName = field.getName();
             Object value = entry.getValue();
             // null value
             if (value == null) {
@@ -113,7 +140,7 @@ public class JsonConverter<E> {
                 }
                 // recursively solve
                 for (Object collectionObject : array) {
-                    jsonObject.append(toJson(((E) collectionObject)) + ",");
+                    jsonObject.append(objectJson(((E) collectionObject)) + ",");
                 }
                 // remove last comma if placed
                 if (jsonObject.charAt(jsonObject.length() - 1) == ',') {
@@ -137,7 +164,7 @@ public class JsonConverter<E> {
             }
             // probably object (if not registered it will throw an IOException on recursion)
             else {
-                jsonObject.append(ESCAPE + fieldName + ESCAPE + ":" + toJson(((E) value)));
+                jsonObject.append(ESCAPE + fieldName + ESCAPE + ":" + objectJson(((E) value)));
             }
         }
         // finish object
@@ -145,6 +172,12 @@ public class JsonConverter<E> {
         return jsonObject.toString();
     }
 
+    /**
+     * Given a JSON formatted data string returns the object if registered represented by the data.
+     *
+     * @param json The string.
+     * @return The object with all fields correctly set.
+     */
     public E fromJson(String json) {
         try {
             return writeObject(json);
@@ -156,6 +189,8 @@ public class JsonConverter<E> {
     }
 
     private E writeObject(String jsonObject) throws IOException {
+        // todo check why android app requires this
+        // jsonObject = jsonObject.trim();
         // sanity: string starts and ends with {}
         if (!jsonObject.startsWith("{") || !jsonObject.endsWith("}")) {
             throw new IOException("String is not bracketed by {}!");
@@ -181,7 +216,7 @@ public class JsonConverter<E> {
             constructor.setAccessible(true);
             object = (E) constructor.newInstance(new Class[]{});
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            e.printStackTrace();
+            log.error(TAG, "Default constructor missing for " + objectClass.toString() + "!");
             throw new IOException(TAG + ": Objects must have default constructor! May be private though.");
         }
         // apply all fields, leaving those we have no value for at their default value
@@ -310,10 +345,6 @@ public class JsonConverter<E> {
         return ESCAPE + key + ESCAPE + ":" + ESCAPE + value + ESCAPE;
     }
 
-    private String fieldName(Field field) {
-        return field.toString().substring(field.toString().lastIndexOf(".") + 1);
-    }
-
     private HashMap<String, String> jsonValues(String jsonObject) throws IOException {
         HashMap<String, String> tree = new HashMap<>();
         // remove object brackets at start and end
@@ -344,7 +375,10 @@ public class JsonConverter<E> {
             } else {
                 jsonObject = jsonObject.substring(valueStop + 1);
             }
-            // System.out.println(key + ":" + value);
+            // check against ignoreField
+            if (ignoreFields.contains(key)) {
+                continue;
+            }
             // add key:value to hashmap
             tree.put(key, value);
         }

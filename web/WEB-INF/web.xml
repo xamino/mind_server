@@ -8,6 +8,14 @@
    	<servlet-name>UploadServlet</servlet-name>
 	<servlet-class>de.uulm.mi.mind.servlet.UploadServlet</servlet-class>
   </servlet>
+    <servlet-mapping>
+        <servlet-name>Servlet</servlet-name>
+        <url-pattern>/main</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UploadServlet</servlet-name>
+        <url-pattern>/upload/*</url-pattern>
+    </servlet-mapping>
   <listener>
     <listener-class>de.uulm.mi.mind.io.DatabaseController</listener-class>
   </listener>

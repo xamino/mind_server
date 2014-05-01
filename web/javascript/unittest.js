@@ -600,8 +600,8 @@ function sensorAlgoFusionTest() {
     cleanDB();
 
     var adminSession = getAdminSession();
-    unitTest("sensor_add", new WifiSensor("Somewhere", "blub"), Success, adminSession);
-    unitTest("sensor_add", new WifiSensor("Elsewhere", "blub"), Success, adminSession);
+    unitTest("sensor_add", new WifiSensor("Somewhere", "blub", "Somewhere"), Success, adminSession);
+    unitTest("sensor_add", new WifiSensor("Elsewhere", "blub", "Elsewhere"), Success, adminSession);
     var sessionOne = unitTest("login", new WifiSensor("Somewhere", "blub"), Success, null).description;
     var sessionTwo = unitTest("login", new WifiSensor("Elsewhere", "blub"), Success, null).description;
     // sensing abilities
@@ -641,6 +641,7 @@ function sensorAlgoFusionTest() {
     if (area == null || area.ID != "Elsewhere") {
         alert("Fusioned position not where expected!\n" + JSON.stringify(area));
     }
+    // todo test failed algo & sensor match
 
     // todo more
 

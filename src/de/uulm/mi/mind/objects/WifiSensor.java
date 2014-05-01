@@ -11,10 +11,13 @@ import java.util.Date;
 public class WifiSensor implements Authenticated, Data {
 
     /**
-     * Unique string that identifies this WifiSensor and its location. Identifier for Area.
+     * Unique string that identifies this WifiSensor.
      */
-    // todo: split position from identification of sensor... :P
-    private String position;
+    private String identification;
+    /**
+     * The Area ID of the area it is responsible for.
+     */
+    private String area;
     /**
      * The token with which the WifiSensor authenticates itself to the server.
      */
@@ -22,19 +25,23 @@ public class WifiSensor implements Authenticated, Data {
     /**
      * Last time the sensor logged in.
      */
-
     private Date lastAccess;
 
     private WifiSensor() {
     }
 
-    public WifiSensor(String position, String tokenHash) {
-        this.position = position;
+    public WifiSensor(String identification, String tokenHash, String area) {
+        this.identification = identification;
+        this.area = area;
         this.tokenHash = tokenHash;
     }
 
-    public String getPosition() {
-        return position;
+    public String getArea() {
+        return area;
+    }
+
+    public void setArea(String area) {
+        this.area = area;
     }
 
     public String getTokenHash() {
@@ -47,12 +54,21 @@ public class WifiSensor implements Authenticated, Data {
 
     @Override
     public String readIdentification() {
-        return this.position;
+        return this.identification;
     }
 
     @Override
     public String readAuthentication() {
         return this.tokenHash;
+    }
+
+    @Override
+    public String toString() {
+        return "WifiSensor{" +
+                "identification='" + identification + '\'' +
+                ", area='" + area + '\'' +
+                ", lastAccess=" + lastAccess +
+                '}';
     }
 
     @Override
@@ -67,15 +83,6 @@ public class WifiSensor implements Authenticated, Data {
 
     @Override
     public String getKey() {
-        return this.position;
-    }
-
-    @Override
-    public String toString() {
-        return "WifiSensor{" +
-                "position='" + position + '\'' +
-                // ", tokenHash='" + tokenHash + '\'' +
-                ", lastAccess=" + lastAccess +
-                '}';
+        return this.identification;
     }
 }
