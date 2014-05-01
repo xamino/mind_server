@@ -8,7 +8,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FilenameUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -22,6 +21,8 @@ import java.util.List;
  * uploads image to the 'image' folder of the deployed server - as 'map.'extension
  */
 // original source: http://www.tutorialspoint.com/servlets/servlets-file-uploading.htm
+// todo: create folders for image paths if they don't exist!
+// todo ignore image ending for naming (simplifies a lot :P)
 public class UploadServlet extends HttpServlet {
     private final String TAG = "UploadServlet";
     private final int maxFileSize = 5000 * 1024;
@@ -29,6 +30,7 @@ public class UploadServlet extends HttpServlet {
 
     private Messenger log;
     private String filePath;
+    private String SEP = System.getProperty("file.separator");
     private ServletFileUpload upload;
 
     @Override
@@ -37,15 +39,11 @@ public class UploadServlet extends HttpServlet {
         log = Messenger.getInstance();
 
         // set base directory for files to be stored in
-        filePath = this.getServletContext().getRealPath("/") + "images" + System.getProperty("file.separator");
-        // Create factory
-        DiskFileItemFactory factory = new DiskFileItemFactory();
-        // maximum size that will be stored in memory
-        factory.setSizeThreshold(maxMemSize);
-        // Location to save data that is larger than maxMemSize.
-        factory.setRepository(new File(filePath));
-        // Create a new file upload handler
-        upload = new ServletFileUpload(factory);
+        filePath = this.getServletContext().getRealPath("/") + "images" + SEP;
+        // Create factory with file size and path
+        // DiskFileItemFactory factory = new DiskFileItemFactory(maxMemSize, new File(filePath));
+        // Create a new file upload handler for map
+        upload = new ServletFileUpload(new DiskFileItemFactory());
         // maximum file size to be uploaded.
         upload.setSizeMax(maxFileSize);
 
@@ -102,10 +100,12 @@ public class UploadServlet extends HttpServlet {
         }
         // now check if we have some value we can work with
         Active active;
-        if (session != null) {
-            active = Security.begin(null, session);
-        } else if (email != null && password != null) {
+        if (email != null && password != null) {
+            // MUST first check these values, sometimes old sessions are still floating around!!!
+            // todo check why cookies are never cleaned!
             active = Security.begin(new User(email, password), null);
+        } else if (session != null) {
+            active = Security.begin(null, session);
         } else {
             log.error(TAG, "Failed to find authentication!");
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -140,7 +140,7 @@ public class UploadServlet extends HttpServlet {
                     return;
                 }
                 // now write image
-                if (writeImage(image, "map")) {
+                if (writeImage(image, "map", filePath)) {
                     log.log(TAG, "New map uploaded.");
                 } else {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -149,7 +149,7 @@ public class UploadServlet extends HttpServlet {
 
                 break;
             case "icon":
-                if (writeImage(image, "icon_" + user.readIdentification())) {
+                if (writeImage(image, "icon_" + user.readIdentification(), filePath + "custom_icons" + SEP)) {
                     log.log(TAG, "User " + user.readIdentification() + " uploaded new icon.");
                 } else {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -175,18 +175,18 @@ public class UploadServlet extends HttpServlet {
      * @param imageName The name of the image.
      * @return True if it worked, false elsewise.
      */
-    private boolean writeImage(FileItem item, String imageName) {
-        String fileName = imageName + "." + FilenameUtils.getExtension(item.getName());
+    private boolean writeImage(FileItem item, String imageName, String path) {
         // Write the file
         File file;
-        if (fileName.lastIndexOf("\\") >= 0) {
-            file = new File(filePath +
-                    fileName.substring(fileName.lastIndexOf("\\")));
+        if (imageName.lastIndexOf("\\") >= 0) {
+            file = new File(path +
+                    imageName.substring(imageName.lastIndexOf("\\")));
         } else {
-            file = new File(filePath +
-                    fileName.substring(fileName.lastIndexOf("\\") + 1));
+            file = new File(path +
+                    imageName.substring(imageName.lastIndexOf("\\") + 1));
         }
         try {
+            new File(path).mkdir();
             item.write(file);
         } catch (Exception e) {
             e.printStackTrace();
