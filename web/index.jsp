@@ -81,5 +81,17 @@ Click here to run a unit test of the API. WARNING: while the test is running, th
 <br>
 <br>
 <input type="button" name="cleandb" value="WARNING: Clean DB" onclick="cleanDB();alert('Done');">
+<br>
+<br>
+<br>
+<br>
+<br>
+Test user icon upload:
+<form action="upload/icon" method="post" enctype="multipart/form-data">
+    Email: <input type="email" name="email"/><br>
+    Password: <input type="password" name="password"/> <br>
+    <input type="file" name="file" size="50"/><br>
+    <input type="submit" value="Upload File"/>
+</form>
 </body>
 </html>
