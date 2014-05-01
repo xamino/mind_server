@@ -17,16 +17,16 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Servlet implementation class UploadServlet
- * uploads image to the 'image' folder of the deployed server - as 'map.'extension
+ * @author Patryk Boczon, Tamino Hartmann
+ *         <p/>
+ *         Servlet for image upload requests. Admins may upload maps via upload/map, all users may upload icons via
+ *         upload/icon. The images can, if successful, be found under images/map for the map, or
+ *         images/custom_icons/icon_user@user, where user@user is the unique user email address.
  */
 // original source: http://www.tutorialspoint.com/servlets/servlets-file-uploading.htm
-// todo: create folders for image paths if they don't exist!
-// todo ignore image ending for naming (simplifies a lot :P)
 public class UploadServlet extends HttpServlet {
     private final String TAG = "UploadServlet";
     private final int maxFileSize = 5000 * 1024;
-    private final int maxMemSize = 5000 * 1024;
 
     private Messenger log;
     private String filePath;
@@ -40,8 +40,6 @@ public class UploadServlet extends HttpServlet {
 
         // set base directory for files to be stored in
         filePath = this.getServletContext().getRealPath("/") + "images" + SEP;
-        // Create factory with file size and path
-        // DiskFileItemFactory factory = new DiskFileItemFactory(maxMemSize, new File(filePath));
         // Create a new file upload handler for map
         upload = new ServletFileUpload(new DiskFileItemFactory());
         // maximum file size to be uploaded.
