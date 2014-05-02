@@ -26,13 +26,14 @@ public class User implements Data, Authenticated {
         this.email = email;
     }
 
-    public User(String email, String name) {
-        this(email);
-        this.name = name;
+    public User(String email, String pwdHash) {
+        this.pwdHash = pwdHash;
+        this.email = email;
     }
 
     public User(String email, String name, boolean admin) {
-        this(email, name);
+        this.email = email;
+        this.name = name;
         this.admin = admin;
     }
 

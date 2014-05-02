@@ -1,159 +1,197 @@
 package de.uulm.mi.mind.servlet;
 
-import de.uulm.mi.mind.json.JsonWrapper;
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.Data;
-import de.uulm.mi.mind.objects.Departure;
 import de.uulm.mi.mind.objects.User;
-import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.Security;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FilenameUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
- * Servlet implementation class UploadServlet
- * uploads image to the 'image' folder of the deployed server - as 'map.'extension
+ * @author Patryk Boczon, Tamino Hartmann
+ *         <p/>
+ *         Servlet for image upload requests. Admins may upload maps via upload/map, all users may upload icons via
+ *         upload/icon. The images can, if successful, be found under images/map for the map, or
+ *         images/custom_icons/icon_user@user, where user@user is the unique user email address.
  */
+// original source: http://www.tutorialspoint.com/servlets/servlets-file-uploading.htm
 public class UploadServlet extends HttpServlet {
     private final String TAG = "UploadServlet";
     private final int maxFileSize = 5000 * 1024;
-    private final int maxMemSize = 5000 * 1024;
+
     private Messenger log;
-    private JsonWrapper json;
     private String filePath;
-    private File file;
+    private String SEP = System.getProperty("file.separator");
+    private ServletFileUpload upload;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        json = JsonWrapper.getInstance();
         log = Messenger.getInstance();
+
+        // set base directory for files to be stored in
+        filePath = this.getServletContext().getRealPath("/") + "images" + SEP;
+        // Create a new file upload handler for map
+        upload = new ServletFileUpload(new DiskFileItemFactory());
+        // maximum file size to be uploaded.
+        upload.setSizeMax(maxFileSize);
+
         log.log(TAG, "Created.");
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, java.io.IOException {
 
-        // check if valid
-        // 2nd cookie contains our session hash that we can check
-        String session = request.getCookies()[1].getValue();
-        Active active = Security.begin(null, session);
-        if (active == null) {
-            log.error(TAG, "Session invalid!");
-        } else if (!(active.getAuthenticated() instanceof User)) {
-            log.error(TAG, "Only users may upload images!");
-        } else {
-            // switch based on action
-            String action = request.getPathInfo().substring(1);
-            // upload map
-            if (action.equals("map")) {
-                User user = ((User) active.getAuthenticated());
-                // check that admin
-                if (user.isAdmin()) {
-                    uploadMap(request);
-                } else {
-                    log.error(TAG, "Non-admin " + user.readIdentification() + " tried to upload new map!");
-                }
-            }
-            // upload user icon
-            else if (action.equals("icon")) {
-                log.error(TAG, "Icon upload not working yet!");
-            }
-            // unknown
-            else {
-                log.error(TAG, "Unknown action: " + action + "!");
-            }
-        }
-        Security.finish(active);
-        // make sure site is loaded all new to show new image:
-        response.setHeader("Cache-Control", "no-cache, must-revalidate");
-        // send redirect back to page
-        // todo make location dynamic based on request icon / map
-        response.sendRedirect("/admin_import_map_location.jsp");
-    }
-
-    private void uploadMap(HttpServletRequest request) {
-        filePath = request.getSession().getServletContext().getRealPath("/") + "images" + System.getProperty("file.separator");
-        // Check that we have a file upload request
-        boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-        if (!isMultipart) {
-            log.error(TAG, "Request not multipart!");
+        // must be multipart
+        if (!(ServletFileUpload.isMultipartContent(request))) {
+            log.error(TAG, "Request was not a multipart content!");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-
-        DiskFileItemFactory factory = new DiskFileItemFactory();
-        // maximum size that will be stored in memory
-        factory.setSizeThreshold(maxMemSize);
-        // Location to save data that is larger than maxMemSize.
-        factory.setRepository(new File(filePath));
-
-        // Create a new file upload handler
-        ServletFileUpload upload = new ServletFileUpload(factory);
-        // maximum file size to be uploaded.
-        upload.setSizeMax(maxFileSize);
-
+        // read form
+        List<FileItem> fileItems;
         try {
-            // Parse the request to get file items.
-            List<FileItem> fileItems = upload.parseRequest(request);
-
-            // Process the uploaded file items
-
-            for (FileItem fi : fileItems) {
-                if (!fi.isFormField()) {
-                    // Get the uploaded file parameters
-                    String fileName = fi.getName();
-                    String ext = "." + FilenameUtils.getExtension(fileName);
-                    fileName = "map" + ext;
-
-                    // Write the file
-                    if (fileName.lastIndexOf("\\") >= 0) {
-                        file = new File(filePath +
-                                fileName.substring(fileName.lastIndexOf("\\")));
-                    } else {
-                        file = new File(filePath +
-                                fileName.substring(fileName.lastIndexOf("\\") + 1));
-                    }
-                    fi.write(file);
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error(TAG, "Upload failed!");
+            fileItems = upload.parseRequest(request);
+        } catch (FileUploadException e) {
+            e.printStackTrace();
+            log.error(TAG, "Failed to parse request!");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
         }
-        log.log(TAG, "New map uploaded.");
+        // now get some form of authentication
+        String email = null, password = null, session = null;
+        FileItem image = null;
+        for (FileItem item : fileItems) {
+            // catch image
+            if (!(item.isFormField())) {
+                image = item;
+                continue;
+            }
+            // handle extra data
+            switch (item.getFieldName()) {
+                case "email":
+                    email = item.getString();
+                    break;
+                case "password":
+                    password = item.getString();
+                    break;
+                case "session":
+                    session = item.getString();
+                    break;
+                default:
+                    log.error(TAG, "Unknown upload form data submitted, ignoring!");
+                    break;
+            }
+        }
+        // check if session might be in cookie if session hasn't been set yet
+        if (session == null && request.getCookies().length > 1) {
+            session = request.getCookies()[1].getValue();
+        }
+        // now check if we have some value we can work with
+        Active active;
+        if (email != null && password != null) {
+            // MUST first check these values, sometimes old sessions are still floating around!!!
+            // todo check why cookies are never cleaned!
+            active = Security.begin(new User(email, password), null);
+        } else if (session != null) {
+            active = Security.begin(null, session);
+        } else {
+            log.error(TAG, "Failed to find authentication!");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        // check active
+        if (active == null) {
+            log.error(TAG, "Failed authentication!");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+        // make sure we have a user
+        if (!(active.getAuthenticated() instanceof User)) {
+            log.error(TAG, "Wrong authenticated type tried image upload!");
+            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            return;
+        }
+        // make sure we have an image
+        if (image == null) {
+            log.error(TAG, "No image found to upload!");
+            response.sendError(HttpServletResponse.SC_NO_CONTENT);
+            return;
+        }
+        // now get and check action
+        String action = request.getPathInfo().substring(1);
+        User user = ((User) active.getAuthenticated());
+        switch (action) {
+            case "map":
+                if (!(user.isAdmin())) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    log.error(TAG, "Nonadmin " + user.readIdentification() + "tried to upload new map!");
+                    return;
+                }
+                // now write image
+                if (writeImage(image, "map", filePath)) {
+                    log.log(TAG, "New map uploaded.");
+                } else {
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    return;
+                }
+
+                break;
+            case "icon":
+                if (writeImage(image, "icon_" + user.readIdentification(), filePath + "custom_icons" + SEP)) {
+                    log.log(TAG, "User " + user.readIdentification() + " uploaded new icon.");
+                } else {
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    return;
+                }
+                break;
+            default:
+                log.error(TAG, "Unknown action!");
+                response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                return;
+        }
+
+        Security.finish(active);
+        // todo what do we send back here?
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 
     /**
-     * Creates JSON object out of answer and encapsulates it in the type object.
+     * Given a FileItem and a name, tries to write the image. Will override if an image of the same name already
+     * exists!
      *
-     * @param response The response where the data will be written.
-     * @param answer   The object to attach.
-     * @throws java.io.IOException
+     * @param item      The FileItem containing the image.
+     * @param imageName The name of the image.
+     * @return True if it worked, false elsewise.
      */
-    private void prepareDeparture(HttpServletResponse response, Data answer) throws IOException {
-        // Must be done before write:
-        response.setCharacterEncoding("UTF-8");
-        // If this happens, send back a standard error message.
-        if (answer == null) {
-            log.error(TAG, "Empty ANSWER! Should never happen!");
-            answer = new Error(Error.Type.WRONG_OBJECT, "Answer does not contain an object! Make sure your request is valid!");
+    private boolean writeImage(FileItem item, String imageName, String path) {
+        // Write the file
+        File file;
+        if (imageName.lastIndexOf("\\") >= 0) {
+            file = new File(path +
+                    imageName.substring(imageName.lastIndexOf("\\")));
+        } else {
+            file = new File(path +
+                    imageName.substring(imageName.lastIndexOf("\\") + 1));
         }
-        Departure dep = new Departure(answer);
-        String jsonBack = json.toJson(dep);
-        response.getWriter().write(jsonBack);
-        response.setContentType("application/json");
+        try {
+            new File(path).mkdir();
+            item.write(file);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(TAG, "Failed to write image!");
+            return false;
+        }
+        return true;
     }
 }
 

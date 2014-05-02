@@ -4,12 +4,12 @@
  * loads map if it exists (in admin_import_map_location.jsp)
  * displays information if no map exists
  */
-var url_png = doesFileExist("images/map.png");
+var url_png = doesFileExist("images/map");
 if (url_png == true) {
     var imgWidth;
     var imgHeight;
     var imgLoad = $("<img />");
-    imgLoad.attr("src", "images/map.png");
+    imgLoad.attr("src", "images/map");
     imgLoad.unbind("load");
     imgLoad.bind("load", function () {
         imgWidth = this.width;
@@ -17,7 +17,7 @@ if (url_png == true) {
 
         var input = "";
         input = "Current Map:<br>";
-        input += "<div id='map_png_div' style='overflow:auto; margin-top:0px; width:" + imgWidth + "px; height:" + imgHeight + "px; background-size:auto; background-image:url(images/map.png); background-repeat:no-repeat;'><div id='draw_rect_div'></div></div>";
+        input += "<div id='map_png_div' style='overflow:auto; margin-top:0px; width:" + imgWidth + "px; height:" + imgHeight + "px; background-size:auto; background-image:url(images/map); background-repeat:no-repeat;'><div id='draw_rect_div'></div></div>";
         document.getElementById("map_container_div").innerHTML = input;
     });
 } else {
@@ -91,7 +91,8 @@ $(document).on("mousedown", "#map_png_div", function (e) {
     y1 = e.pageY - this.offsetTop;
     for (var i = 0; i < allAreas.length; i++) {	//all existing areas
         var id = allAreas[i].ID;
-        if (id != "universe" && id != "University") {	//not in University
+        
+        if (id != "universe" && id != "University") {	//not in University     
             //alert(allAreas[i].topLeftY+" - "+allAreas[i].height);
         	if (x1 >= +allAreas[i].topLeftX && x1 <= (+allAreas[i].topLeftX + +allAreas[i].width)) {	    	//in x-values of existing area
                 if (y1 >= +allAreas[i].topLeftY && y1 <= (+allAreas[i].topLeftY + +allAreas[i].height)) { 	//in y-values of existing area

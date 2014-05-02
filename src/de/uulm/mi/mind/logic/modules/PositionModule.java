@@ -184,7 +184,8 @@ public class PositionModule implements Module {
             }
 
             // Filter user object to only give name + position
-            User toSend = new User(us.getEmail(), us.getName());
+            User toSend = new User(us.getEmail());
+            toSend.setName(us.getName());
             toSend.setPosition(position);
             toSend.setStatus(status);
             sendUsers.add(toSend);

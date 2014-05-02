@@ -4,8 +4,13 @@ var displayedWidth; //the current width of the displayed map-image in pixels
 var displayedHeight; //the current height of the map-image in pixels
 var displayedIconSize=0; //the native size of the icon in pixels
 var iconByAreaFactor = 0.45; //the factor by which the icon size is set -> (smallest area width or height)*iconByAreaFactor
+var iconByMapWidthFactor = 0.06; //the factor by which the icon size is set -> displayedWidth*iconByAreaFactor
 var defaultIconSize = 110; //if something goes wrong when setting the icon size - defaultIconSize will be applied
 var factor=1; //the size-factor by which the displayed image deviates from the original image
+
+var refreshRate = 30; //the refresh rate for locating - in seconds
+var interval; //the interval of location refreshing
+var balloonClosingTime = 4;
 //var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
 //var heigthFactor=1; //the factor by which the height of the displayed image deviates from the original image height
 //var zoomValue = 30; //holds the width value for each zoom-step in pixels
@@ -13,7 +18,6 @@ var factor=1; //the size-factor by which the displayed image deviates from the o
 var users; //the current (to be) displayed users;
 var areas; //an array of areas - contains all areas that have already been used/needed
 
-//TODO call refreshUserData() considering refresh rate of display
 
 /*NOT IN USE
 var slider; //the slider element */
@@ -79,6 +83,8 @@ function initPublicDisplayStuff(allusers){
     			//TODO remove
     			updateUserListOnReceive(allusers);
     			//instead: refreshUserData();
+    			interval = setInterval(function(){refreshUserData();},refreshRate*+1000);
+
     		});
     	
     	});
@@ -87,22 +93,31 @@ function initPublicDisplayStuff(allusers){
 }
 
 /**
+ * This function resets the interval - should be called after the refreshRate was changed
+ */
+function resetInterval(){
+	clearInterval(interval);
+	interval = setInterval(function(){refreshUserData();},refreshRate*+1000);
+}
+
+/**
  * This funciton computes the icon size by considering the smalles area height or width
  */
 function computeIconSize(){
-	var smallest = 99999999;
-	for ( var i = 0; i < areas.length; i++) {
-		if(areas[i].width<smallest){smallest = areas[i].width;}
-		if(areas[i].hegiht<smallest){smallest = areas[i].height;}
-	}
-	
-	if(smallest<9999999){
-		displayedIconSize = Math.round(iconByAreaFactor*smallest*factor);
-	}
-	if(displayedIconSize==0){
-		displayedIconSize = defaultIconSize;
-	}
-	alert("iconsize: "+displayedIconSize);
+//	var smallest = 99999999;
+//	for ( var i = 0; i < areas.length; i++) {
+//		if(areas[i].width<smallest){smallest = areas[i].width;}
+//		if(areas[i].hegiht<smallest){smallest = areas[i].height;}
+//	}
+//	
+//	if(smallest<9999999){
+//		displayedIconSize = Math.round(iconByAreaFactor*smallest*factor);
+//	}
+//	if(displayedIconSize==0){
+//		displayedIconSize = defaultIconSize;
+//	}
+	displayedIconSize = Math.round(displayedWidth*iconByMapWidthFactor);
+//	alert("iconsize: "+displayedIconSize);
 }
 
 /**
@@ -124,6 +139,53 @@ function retriveBackgroundImageSizeMetricsAndFactor(){
 	
 //	alert('width =' + displayedWidth + ', height = ' + displayedHeight); 
 }
+
+
+//$(document).on("resize", "#mapscroll", function () {
+//	
+//	alert("resize");
+//
+//});
+
+
+//document.onresize = mapResize();
+$("#mapscroll").onresize=mapResize();
+
+function mapResize(){
+
+	//if resize is called on startup -> no resize necessary
+	if(displayedWidth==null){
+//		alert("don't resizey");
+		return;
+	}
+	
+	oldDisplayedWidth = displayedWidth;
+	oldDisplayedHeight = displayedHeight;
+	
+	//compute map & icon metrics
+	retriveBackgroundImageSizeMetricsAndFactor();
+	computeIconSize();
+	
+	//update user placement
+	if(users != null){
+		changeFactor = +displayedWidth/+oldDisplayedWidth;
+		for ( var i = 0; i < users.length; i++) {
+			users[i].x = Math.round(+changeFactor*+users[i].x);
+			users[i].y = Math.round(+changeFactor*+users[i].y);
+			placeUserIcon(users[i]);
+		}
+	}
+	
+	alert("resize by factor "+changeFactor);
+}
+
+//$('#mapscroll').bind('resize', function(){
+//    alert('resized');
+//});
+//
+//$(window).resize(function(){
+//$('#mapscroll').resize();
+//});
 
 /**
  * This function computes the scale factor of the image
@@ -196,7 +258,7 @@ function addUserIcon(user){
 	var divToAugment = document.getElementById("mapscroll");
 	var icon=document.createElement("img");
 	icon.className="micon";
-	icon.src="images/micons/"+user.iconRef;
+	icon.src="/images/custom_icons/icon_"+user.email+".png";
 	icon.id="icon_"+user.email;
 	icon.onclick=function () {
 	    displayUserInfo(user.email);
@@ -218,13 +280,15 @@ function placeUserIcon(user){
 //	var scale = 0; //the scaled size of the current icon
 	var icon = document.getElementById("icon_"+user.email);
 	if(icon!=null){
-//		scale = getScale(displayedIconSize);
 		icon.style.width=displayedIconSize+"px";
-//		icon.style.left=getX(user.x,scale)+"px";
-//		icon.style.top=getX(user.y,scale)+"px";
 		icon.style.left=Math.round(user.x-displayedIconSize/2)+"px";
 		icon.style.top=Math.round(user.y-displayedIconSize/2)+"px";
 		//TODO apply visual effect regarding user status
+		
+		icon.style.shadowCSS = "{ box-shadow: 12px 12px 7px rgba(0,0,0,0.5); }"
+		icon.style.shadowfilter = "{ -webkit-filter: drop-shadow(12px 12px 7px rgba(0,0,0,0.5)); filter: url(shadow.svg#drop-shadow); }";
+		icon.style.filter = "url(shadow.svg#drop-shadow)";
+		
 		icon = null;
 	}
 }
@@ -407,6 +471,10 @@ function userExistsInUserarray(user,userarray){
  * This function should be called periodically to refresh the users location visually
  */
 function refreshUserData(){
+	if(balloonIsOpen()){
+		return;
+	}
+//	alert("refreshy");
 	send(new Arrival("read_all_positions", session), updateUserListOnReceive);
 }
 
@@ -416,28 +484,26 @@ function refreshUserData(){
 function loadTestUser(){
 	var user1 = new User("a@a.a",null,"a",false);
 	user1.lastPosition = 3304;
-	user1.iconRef = "crab.png";
+//	user1.iconRef = "crab.png";
 //	user1.x = 400;
 //	user1.y = 300;
 	var user2 = new User("c@c.c",null,"c",false);
 	user2.lastPosition = 3301;
-	user2.iconRef = "cow.png";
+//	user2.iconRef = "cow.png";
 //	user2.x = 450;
 //	user2.y = 400;
 	var user3 = new User("d@d.d",null,"d",false);
 	user3.lastPosition = 3304;
-	user3.iconRef = "rabbit.png";
+//	user3.iconRef = "rabbit.png";
 //	user3.x = 450;
 //	user3.y = 600;
 	var user4 = new User("e@e.e",null,"e",false);
 	user4.lastPosition = 3304;
-	user4.iconRef = "sheep.png";
+//	user4.iconRef = "sheep.png";
 	var user5 = new User("f@f.f",null,"f",false);
 	user5.lastPosition = 3304;
-	user5.iconRef = "deer.png";
-	var user6 = new User("g@g.g",null,"g",false);
-	user6.lastPosition = 3301;
-	user6.iconRef = "crab.png";
+//	user5.iconRef = "deer.png";
+
 	
 	var testusers = new Array();
 	testusers[0] = user1;
@@ -445,7 +511,6 @@ function loadTestUser(){
 	testusers[2] = user3;
 	testusers[3] = user4;
 	testusers[4] = user5;
-	testusers[5] = user6;
 	updateUserListOnReceive(testusers);
 }
 
@@ -459,7 +524,7 @@ function getAreaById(id){
 			return areas[i]; //area has already benn worked with
 		}
 	}
-	alert("not in array");
+	alert("area "+id+" does not exist in array");
 
 	//TODO remove static test-data
 	//TODO if area not found (should not happen) - don't display or put to away-area or ...
@@ -494,7 +559,7 @@ function getAreaById(id){
 //END TEST STUFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 /**
- * This functio returns the user object of the email
+ * This function returns the user object by email
  * @param email the user's email
  */
 function getUserByEmail(email){
@@ -512,13 +577,14 @@ function getUserByEmail(email){
 function displayUserInfo(email){
 	var user = getUserByEmail(email);
 	if(user!=null){
-		balloonify(user);
-		//alert("email:"+user.email+" ; name:"+user.name+" x:"+user.x+" y:"+user.y);		
+		balloonify(user);	
 	}
 }
 
 //the modified id (for closing purposes) of the current opened balloon, null if no balloon is open 
 var openBalloonUserID = null;
+
+var idleInterval;
 
 /**
  * This function displays or removes a user balloon
@@ -532,8 +598,7 @@ function balloonify(user){
 	mod_id = mod_id.replace(/\@/g, '\\@');
 	
 	
-	if(openBalloonUserID!=null){ //some balloon is open -> close balloon
-//		$(openBalloonUserID).hideBalloon();
+	if(balloonIsOpen()){ //some balloon is open -> close balloon
 		removeBalloon();
 		if(mod_id===openBalloonUserID){//clicked on icon of just hid balloon -> do not open it again
 			openBalloonUserID=null;
@@ -541,13 +606,12 @@ function balloonify(user){
 		}
 	}
 
-	//SHOW BALLOON
+	//CREATE BALLOON
 		openBalloonUserID = mod_id;
 		
-		//TODO dynamitise
 		var horizontalpos;
 		var verticalpos;
-		if((user.x*factor)<(displayedWidth/2)){ //half of 1440 - width of our map
+		if((user.x*factor)<(displayedWidth/2)){
 			horizontalpos = "right"; }else{ horizontalpos = "left"; }
 		if((user.y*factor)<(displayedHeight/2)){
 			verticalpos = "bottom"; }else{ verticalpos = "top"; }
@@ -557,7 +621,7 @@ function balloonify(user){
 		    //TODO possibly check for user status - alter balloon
 			position: positioning,
 			showDuration: 250,
-			contents: '<strong>'+user.name+'</strong>'
+			contents: '<strong>'+user.name+' in Raum '+user.lastPosition+'</strong>'
 			+'<p>Send me a message!</p>'
 			//+'<input type="hidden" value="'+user.email+'" id="userBalloonID" />'
 			+'<form id="messageForm">'
@@ -582,13 +646,73 @@ function balloonify(user){
 			+'</form>'
 		});		
 		document.getElementById("messageForm").parentNode.id = "userBalloon";
+		
+	    //Increment the idle time counter every second
+		if(idleInterval==null){
+			idleInterval = setInterval(timerIncrement, 1000);			
+		}
 }
 
-
+/**
+ * This function removes the opened balloon
+ */
 function removeBalloon(){
+	if(!balloonIsOpen()){
+		openBalloonUserID=null;
+		return;
+	}
+	clearInterval(interval);
+	balloonIdleTime = 0;
+	if(document.getElementById("balloonIdle")!=null){
+		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
+	}
 	$(openBalloonUserID).hideBalloon();
 	var balloonElement = document.getElementById("userBalloon");
 	balloonElement.parentNode.removeChild(balloonElement);
+}
+
+//reset balloonIdleTime with mousemove & keypress
+$(document).on("mousemove", function (e) {
+//	alert("mousemove");
+	balloonIdleTime = 0;
+	if(document.getElementById("balloonIdle")!=null){
+		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
+	}
+});
+$(document).on("keypress", function (e) {
+//	alert("keypress");
+	balloonIdleTime = 0;
+	if(document.getElementById("balloonIdle")!=null){
+		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
+	}
+});
+
+/**
+ * This function increments the balloonIdleTime & calls removeBalloon() in case of
+ * balloonClosingTime was reached
+ */
+function timerIncrement() {
+	if(balloonIsOpen()){
+		balloonIdleTime = +balloonIdleTime + 1;
+		if(document.getElementById("balloonIdle")!=null){
+			document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
+		}
+		if (balloonIdleTime >= balloonClosingTime) {
+			removeBalloon();
+		}
+	}
+}
+
+/**
+ * This function checks, if a balloon is open
+ * @returns {Boolean} true if open, else false
+ */
+function balloonIsOpen(){
+	if(document.getElementById("userBalloon")==null){
+		return false;
+	}else{
+		return true;
+	}
 }
 
 /**
@@ -604,6 +728,8 @@ $(document).on("mousedown", "#mapscroll", function (event) {
 	  }
 	  
 });
+
+
 
 
 /**
