@@ -11,6 +11,7 @@ import de.uulm.mi.mind.objects.enums.Status;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
+import de.uulm.mi.mind.objects.unsendable.TimedQueue;
 import de.uulm.mi.mind.security.Security;
 import de.uulm.mi.mind.servlet.ServletFunctions;
 
@@ -27,14 +28,13 @@ public class PositionModule implements Module {
      * Timeout after which the position is reset to unknown for a user.
      */
     // TODO expose to admin?
-    private final long POSITION_VALID_TIMEOUT = 10 * 60 * 1000;
     private final String TAG = "PositionModule";
     private Messenger log;
-    private HashMap<String, SensedDevice> sensedDevices;
+    private TimedQueue<String, SensedDevice> sniffedDevices;
 
     public PositionModule() {
         log = Messenger.getInstance();
-        sensedDevices = new HashMap<>();
+        sniffedDevices = new TimedQueue<String, SensedDevice>(5 * 60 * 1000);
     }
 
     @Override
@@ -52,22 +52,21 @@ public class PositionModule implements Module {
                 if (!(request instanceof DataList)) {
                     return new Error(Error.Type.WRONG_OBJECT, "SensorWrite was called with the wrong object type!");
                 }
-                // todo implement timeout, otherwise devices are never removed and we'll have unnecessary collisions
                 DataList<SensedDevice> receivedDevices = (DataList<SensedDevice>) request;
                 for (SensedDevice device : receivedDevices) {
-                    if (!sensedDevices.containsKey(device.getIpAddress())) {
+                    if (!sniffedDevices.contains(device.getIpAddress())) {
                         // not sensed before, so just add it and continue
                         log.log(TAG, "Found new device to track: " + device.getIpAddress());
-                        sensedDevices.put(device.getIpAddress(), device);
+                        sniffedDevices.add(device.getIpAddress(), device);
                         continue;
                     }
                     // already in list, so check if to update if level is higher
                     // todo: we should also check for update of location with a threshold
                     // so that lvl40 but new room is taken over lvl41 old room
-                    int oldLevel = sensedDevices.get(device.getIpAddress()).getLevelValue();
+                    int oldLevel = sniffedDevices.get(device.getIpAddress()).getLevelValue();
                     if (oldLevel <= device.getLevelValue()) {
                         log.log(TAG, "Updated location of " + device.getIpAddress() + " to " + device.getSensor() + ".");
-                        sensedDevices.put(device.getIpAddress(), device);
+                        sniffedDevices.add(device.getIpAddress(), device);
                     }
                 }
                 return new Success("Updated lists.");
@@ -118,12 +117,13 @@ public class PositionModule implements Module {
             return new Success(Success.Type.NOTE, "Your position could not be found.");
         }
         // check location against available sensor data
-        if (sensedDevices.containsKey(ip)) {
-            SensedDevice device = sensedDevices.get(ip);
+        if (sniffedDevices.contains(ip)) {
+            SensedDevice device = sniffedDevices.get(ip);
             if (!device.getPosition().equals(area.getID())) {
                 log.error(TAG, "Sensor and algorithm see different positions!");
                 // todo resolve conflict -- how?
             } else {
+                // todo remove this once the merge works
                 log.log(TAG, "Sensor and algo are synced.");
             }
         }
@@ -158,24 +158,17 @@ public class PositionModule implements Module {
             boolean isAtUniversity = position != null && position.equals("University"); //TODO set in find
             boolean isAtLocation = position != null && !position.equals("University");
             boolean isInvisible = us.getStatus() == null || us.getStatus() == Status.INVISIBLE;
-            boolean isTimedOut = timeSinceLastLogin == 0 || timeSinceLastLogin > POSITION_VALID_TIMEOUT;
 
             // Continue means is not added to output
             // removed inactive users
             if (isLoggedOut) {
+                //log.log(TAG,"Not logged in: " + us.getEmail());
                 continue;
-            }
-
-            // remove timed out users
-            if (isTimedOut) {
-                // if last update is longer gone, then ignore
-                continue;
-                // todo This is not the last position time – how do i do this better?
-                // todo Update lastPosition to null?
             }
 
             // remove invisible users
             if (isInvisible) {
+                //log.log(TAG,"Is invisible: " + us.getEmail());
                 continue;
             }
 
@@ -186,11 +179,13 @@ public class PositionModule implements Module {
             } else if (isAtLocation) {
                 // nothing to do?
             } else {
+                //log.log(TAG,"Position null: " + us.getEmail());
                 continue; // position was null
             }
 
             // Filter user object to only give name + position
-            User toSend = new User(us.getEmail(), us.getName());
+            User toSend = new User(us.getEmail());
+            toSend.setName(us.getName());
             toSend.setPosition(position);
             toSend.setStatus(status);
             sendUsers.add(toSend);

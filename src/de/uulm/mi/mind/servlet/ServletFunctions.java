@@ -218,7 +218,7 @@ public class ServletFunctions {
                 return (Data) activeUser.readData(REAL_POSITION);
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
-                System.out.println("TOGGLED ADMIN");
+                log.error(TAG, "Toggled admin! DANGEROUS OPERATION!");
                 user.setAdmin(!user.isAdmin());
                 return moduleManager.handleTask(Task.User.UPDATE, user);
             case READ_ALL_POSITIONS:
@@ -340,7 +340,6 @@ public class ServletFunctions {
                 // and update
                 return moduleManager.handleTask(Task.User.UPDATE, originalUser);
             case ADMIN_USER_DELETE:
-                log.log("DELETE", arrival.getObject().toString());
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error(Error.Type.WRONG_OBJECT);
                 }
@@ -503,7 +502,7 @@ public class ServletFunctions {
                 if (!safeString(sensor.readIdentification())) {
                     return new Error(Error.Type.ILLEGAL_VALUE, "Identification must not be empty!");
                 }
-                data = moduleManager.handleTask(Task.Sensor.READ, new WifiSensor(sensor.readIdentification(), null));
+                data = moduleManager.handleTask(Task.Sensor.READ, new WifiSensor(sensor.readIdentification(), null, null));
                 message = checkDataMessage(data, DataList.class);
                 if (message != null) {
                     return message;
@@ -516,6 +515,9 @@ public class ServletFunctions {
                 // check password
                 if (safeString(sensor.getTokenHash())) {
                     originalSensor.setTokenHash(BCrypt.hashpw(sensor.getTokenHash(), BCrypt.gensalt(12)));
+                }
+                if (safeString(sensor.getArea())) {
+                    originalSensor.setArea(sensor.getArea());
                 }
                 // update
                 return moduleManager.handleTask(Task.Sensor.UPDATE, originalSensor);
@@ -534,6 +536,8 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.Area.ANNIHILATE, null);
             case ADMIN_ANNIHILATE_USER:
                 log.log(TAG, "Removing all users!");
+                // purge sessions
+                Security.clear();
                 return moduleManager.handleTask(Task.User.ANNIHILATE, null);
             // Read all positions (as publicly seen)
             case READ_ALL_POSITIONS:
@@ -591,6 +595,12 @@ public class ServletFunctions {
                 if (!(arrival.getObject() instanceof DataList)) {
                     return new Error(Error.Type.WRONG_OBJECT);
                 }
+                // check to make sure the sensor has a registered position
+                if (sensor.getArea() == null || sensor.getArea().isEmpty()) {
+                    log.error(TAG, "WifiSensor " + sensor.readIdentification() + " has no area registered to it!");
+                    return new Error(Error.Type.ILLEGAL_VALUE, "WifiSensor " + sensor.readIdentification() + " " +
+                            "has no area registered to it! Ignoring devices.");
+                }
                 DataList<SensedDevice> devices = ((DataList) arrival.getObject());
                 // no need to continue if empty
                 if (devices.isEmpty()) {
@@ -603,7 +613,7 @@ public class ServletFunctions {
                         return new Error(Error.Type.ILLEGAL_VALUE, "Sensor device injection is illegal!");
                     }
                     // store position of sensor for easy access later on
-                    device.setPosition(sensor.getPosition());
+                    device.setPosition(sensor.getArea());
                 }
                 // pass tasks down
                 return moduleManager.handleTask(Task.Position.SENSOR_WRITE, devices);

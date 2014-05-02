@@ -32,7 +32,7 @@ public class SensorModule implements Module {
     @Override
     public Data run(Task task, Data request) {
         if (request == null) {
-            request = new WifiSensor(null, null);
+            request = new WifiSensor(null, null, null);
         } else if (!(request instanceof WifiSensor)) {
             return new Error(Error.Type.WRONG_OBJECT, "Sensor tasks always require a WifiSensor object!");
         }
