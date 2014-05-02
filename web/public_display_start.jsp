@@ -16,7 +16,8 @@
 
 
 <!-- MAP DISPLAY STUFF -->
-<div id="mapscroll" >
+<div id="mapscroll">
+
 		<!-- <img id="mapimg" class="mapcontent" src="images/map.png"/>-->
 		<!-- <img class="micon" src="images/micons/crab.png"/> -->
 </div>
@@ -42,6 +43,7 @@
 		</div>
 	</div>
 	<div id="content_popup">
+		<p id="balloonIdle">closed</p>
 		TODO: CSS
 	</div>
 	<div id="login_location">
