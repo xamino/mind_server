@@ -105,6 +105,14 @@ function doTask(task, object, callback) {
 }
 
 /**
+ * Logout on button click
+ */
+$(document).on("submit", "#logout", function (event) {
+    logout();
+    //session bleibt bestehen - wieso????
+});
+
+/**
  * Checks weather the user (who intends to log-in) is an admin
  */
 function isAdmin(data) {
@@ -742,6 +750,75 @@ function removeDisplayViaPopup(data) {
         });
     }
 }
+
+/****************Admin - Sensor Management****************/
+
+
+/**
+ * loads all sensors on load of page admin_sensor_management.jsp
+ */
+function loadSensors() {
+    var sensors = new WifiSensor(null, null, null);
+    doTask("SENSOR_READ,", sensors, writeSensors);
+}
+
+function writeSensors(data) {
+	alert(data.object.length);
+    if (data.object.length == 0) {
+    	alert("1");
+        var noSensorsInDatabase = "There are currently no sensors in the database.<br> Use the button 'Add Sensors' to add sensors to the system.";
+        document.getElementById("table_space").innerHTML = noSensorsInDatabase;
+    }
+    else {
+    	alert("2");
+        var tablecontents = "";
+        tablecontents = "<table border ='1'>";
+        tablecontents += "<tr>";
+        tablecontents += "<td>WifiSensor - ID: </td>";
+        tablecontents += "<td>Area: </td>";
+        tablecontents += "<td>tokenHash: </td>";
+        //tablecontents += "<td>Edit Sensor: </td>";
+        tablecontents += "<td>Remove Sensor: </td>";
+        tablecontents += "</tr>";
+
+        for (var i = 0; i < data.object.length; i++) {
+        	alert(i);
+            tablecontents += "<tr>";
+            tablecontents += "<td>" + data.object[i].identification + "</td>";
+            tablecontents += "<td>" + data.object[i].area + "</td>";
+            tablecontents += "<td>" + data.object[i].tokenHash + "</td>";
+            //tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen_editUser(this.id)' id='editUser" +i+ "'/></td>";
+            //tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen_removeUser(this.id)' id='removeUser" +i+ "'/></td>";
+            //tablecontents += "<td><input type='submit' value='Edit User' onClick='editUserViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
+            tablecontents += "<td><input type='submit' value='Remove User' onClick='removeUserViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
+            tablecontents += "</tr>";
+        }
+        tablecontents += "</table>";
+        document.getElementById("table_space").innerHTML = tablecontents;
+
+    }
+
+}
+
+/**
+ * Creates a popup, enabling the admin to delete the sensor
+ * @param data
+ * the sensor data that can be deleted (JSON.stringified)
+ */
+function removeUserViaPopup(data) {
+    var r = confirm("Do you want to remove the user with the identification'" + data.identification + "' ?");
+    if (r == true) {
+        var sensortodelete = new WifiSensor(data.identification, null, null);
+        doTask("SENSOR_REMOVE", sensortodelete, function (event) {
+            alert("The following sensor has been deleted:\n" +
+                "Identification: " + data.identification +
+                "\nArea: " + data.area);
+            window.location.reload();
+
+        });
+    }
+}
+
 
 
 /******************** session/cookie*****************/

@@ -37,7 +37,7 @@ html, body {
 	/*width: 25%;*/
     margin: 0; 
     padding: 0; 
-	width: 170px;
+	width: 200px;
 	border: solid 1px #7d9aaa; 	/*dark blue (uni color)*/
    	background: #cbd7dd;	/*light blue (uni color)*/
    	float: left;
@@ -86,7 +86,7 @@ html, body {
 #navigation ul ul {
 	display: none;
 	position:absolute;
-	left: 170px; 
+	left: 200px; 
 	top:0;
 	min-width:250px;	/*enlarge if space is not enough*/
 	background-color: #97aebb; 	/*middle blue (uni color)*/
@@ -131,7 +131,7 @@ html, body {
 /************** div with logout- button (more can be added) ******************/
 #logout{
 	float: right;
-	width: 100px;
+	width: 70px;
 	padding-right: 10px;
 	text-align:right;
 	

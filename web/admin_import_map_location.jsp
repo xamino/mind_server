@@ -31,6 +31,7 @@
                         <li><a href="admin_public_displays.jsp" class="adminlink">Administrate Public Displays</a></li>
                     </ul>
                 </li>
+                <li><a href="admin_sensor_management.jsp" class="adminlink">Wifi Sensor Management</a></li>
             </ul>
         </div>
         <div id="text-content">

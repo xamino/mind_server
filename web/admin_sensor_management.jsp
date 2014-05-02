@@ -11,7 +11,7 @@
 <title>Admin - User Management</title>
 </head>
 
-<body onload="onLoadOfAdminPage();loadUsers();">
+<body onload="onLoadOfAdminPage();loadSensors();">
 <div id="container">
 <div id="banner">
 <!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
@@ -33,39 +33,10 @@
 	</ul>
 </div>
 <div id="text-content">
-	<!-- <script type="text/javascript">
-	//////////////// old function -> leave because of the popup example //////////////////
-	    function popupOpen_addUser() {
-	      //window.open('about:blank');
-	      var leftPosition = (window.screen.width / 2) - ((400 / 2));
-	      var topPosition = (window.screen.height / 2) - ((200 / 2));
-	      var newwindow = window.open('admin_popup_addUser.jsp', 'Add User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
-	      if (window.focus) {newwindow.focus();}
-	    }
-
-    	function popupOpen_editUser(id) {
-	      //window.open('about:blank');
-	      var leftPosition = (window.screen.width / 2) - ((400 / 2));
-	      var topPosition = (window.screen.height / 2) - ((200 / 2));
-	      var id_number = +id.replace('editUser','');
-	      var newwindow = window.open('admin_popup_editUser.jsp?id='+id_number+"", 'Edit User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
-	      if (window.focus) {newwindow.focus();}
-	    }
-	    
-	    function popupOpen_removeUser(id,data) {
-	      //window.open('about:blank');
-	      var leftPosition = (window.screen.width / 2) - ((400 / 2));
-	      var topPosition = (window.screen.height / 2) - ((200 / 2));
-	      var id_number = +id.replace('removeUser','');
-	      //requestScope.put("id", "id");
-	      var newwindow = window.open('admin_popup_removeUser.jsp?id='+id_number+'', 'Remove User', 'height=200,width=400, left=' + leftPosition + ",top=" + topPosition);
-	      if (window.focus) {newwindow.focus();}
-	    }
-  	 </script>-->
-	 <input type="submit" value="Add User" onClick="addUserViaPopup()" /> <!-- javascript:popupOpen_addUser()" />-->
-	 <br>Info - Add User: You have to add a name, an email and a password. If you don't enter a password mind will generate one for you.
-	 <br>Info - Edit User: You can't edit a user's email. <br>If you want to change an email you have to add a new user with the desired email (and remove the user with the old email).
-	 <br>Info - Remove User: You can't remove yourself. Another admin has to remove you if necessary.
+	 <!-- <input type="submit" value="Add User" onClick="addUserViaPopup()" /> <!-- javascript:popupOpen_addUser()" />-->
+	 <br>Info - Add Sensor: You have to use the App for this.
+	 <!-- <br>Info - Edit User: You can't edit a user's email. <br>If you want to change an email you have to add a new user with the desired email (and remove the user with the old email).
+	 <br>Info - Remove User: You can't remove yourself. Another admin has to remove you if necessary.-->
 	 <div id="infoText"></div>
 	<!-- <table border ="1">
         <tr>
