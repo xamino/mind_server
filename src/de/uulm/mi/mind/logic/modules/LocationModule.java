@@ -370,7 +370,6 @@ public class LocationModule implements Module {
      * @param sessionContainer
      */
     private boolean updateMapping(ObjectContainer sessionContainer) {
-
         DataList<Location> locations = database.read(sessionContainer, new Location(0, 0, null));
         DataList<Area> areas = database.read(sessionContainer, new Area(null));
 

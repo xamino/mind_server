@@ -6,6 +6,7 @@ package de.uulm.mi.mind.servlet;
 
 import de.uulm.mi.mind.json.JsonWrapper;
 import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.logger.TimerResult;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
@@ -58,10 +59,8 @@ public class Servlet extends HttpServlet {
      */
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response) throws ServletException, IOException {
-        /*
         // Start timer
         log.pushTimer(this, "INCOMING");
-        */
         // Get arrival object
         // Watch out, arrival.getData() might be NULL!
         Arrival arrival = getRequest(request);
@@ -78,10 +77,8 @@ public class Servlet extends HttpServlet {
 
         // Encapsulate answer:
         prepareDeparture(response, answer);
-        /*
         TimerResult timerResult = log.popTimer(this);
         log.error(TAG, "Request " + arrival.getTask() + " took " + timerResult.time + " ms.");
-        */
     }
 
     /**
