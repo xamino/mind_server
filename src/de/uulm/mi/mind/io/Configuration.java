@@ -6,6 +6,8 @@ import de.uulm.mi.mind.logger.Messenger;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -23,10 +25,10 @@ public class Configuration {
     private String adminEmail;
     private String adminPassword;
     private String universitySSID;
+    private ArrayList<String> wifiNameFilter;
 
 
     private Configuration() {
-
         log = Messenger.getInstance();
     }
 
@@ -45,6 +47,9 @@ public class Configuration {
                 this.adminEmail = config.getProperty("ADMIN_EMAIL");
                 this.adminPassword = config.getProperty("ADMIN_PASSWORD");
                 this.universitySSID = config.getProperty("UNIVERSITY_SSID");
+
+                String wifiNames = config.getProperty("UNIVERSITY_SSID_FILTER");
+                this.wifiNameFilter = new ArrayList<>(Arrays.asList(wifiNames.split(",")));
 
 
             } catch (IOException e) {
@@ -67,6 +72,10 @@ public class Configuration {
                 this.adminPassword = config.getProperty("ADMIN_PASSWORD");
             if (this.universitySSID == null)
                 this.universitySSID = config.getProperty("UNIVERSITY_SSID");
+            if (this.wifiNameFilter == null) {
+                String wifiNames = config.getProperty("UNIVERSITY_SSID_FILTER");
+                this.wifiNameFilter = new ArrayList<>(Arrays.asList(wifiNames.split(",")));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,4 +114,7 @@ public class Configuration {
         return this.universitySSID;
     }
 
+    public ArrayList<String> getWifiNameFilter() {
+        return this.wifiNameFilter;
+    }
 }

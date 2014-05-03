@@ -1,6 +1,7 @@
 package de.uulm.mi.mind.logic.modules;
 
 import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Configuration;
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
@@ -24,14 +25,7 @@ public class LocationModule implements Module {
     private ArrayList<String> wifiNameFilter;
 
     public LocationModule() {
-        wifiNameFilter = new ArrayList<>();
-        wifiNameFilter.add("eduroam");
-        wifiNameFilter.add("welcome");
-        wifiNameFilter.add("welcome-mi");
-        wifiNameFilter.add("Lab332");
-        wifiNameFilter.add("mi-ubicomp");
-        wifiNameFilter.add("cloudtrax");
-        wifiNameFilter.add("cloudtrax-secure");
+        wifiNameFilter = Configuration.getInstance().getWifiNameFilter();
         database = DatabaseController.getInstance();
         log = Messenger.getInstance();
     }
