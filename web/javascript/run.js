@@ -875,10 +875,12 @@ function handleAllUsersPositionData(){
 	//User(email, password, name, admin) {
 	var user1 = new User("a@a.a",null,"a",false);
 	user1.lastPosition = 3304;
-	user1.iconRef = "crab.png";
+	user1.status = "AVAILABLE";
+//	user1.iconRef = "crab.png";
 	var user2 = new User("b@b.b",null,"b",false);
 	user2.lastPosition = 3304;
-	user2.iconRef = "lion.png";
+	user2.status = "OCCUPIED";
+//	user2.iconRef = "lion.png";
 	
 	var users = new Array();
 	users[0] = user1;
