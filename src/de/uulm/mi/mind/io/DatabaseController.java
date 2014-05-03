@@ -54,7 +54,7 @@ public class DatabaseController implements ServletContextListener {
      */
     public boolean create(ObjectContainer sessionContainer, Data data) {
         // Sanitize input on DB, only allow Data objects implementing a unique key
-        if (data == null || data.getKey() == null || data.getKey().equals("0/0")) {
+        if (data == null || data.getKey() == null) {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
@@ -84,9 +84,7 @@ public class DatabaseController implements ServletContextListener {
             List queryResult;
             // When unique key is empty, directly use the filter.
             if (requestFilter == null
-                    || requestFilter.getKey() == null
-                    || requestFilter.getKey().equals("")
-                    || requestFilter.getKey().equals("0/0")) { //TODO better location key
+                    || requestFilter.getKey() == null) { //TODO better location key
                 queryResult = sessionContainer.queryByExample(requestFilter);
             } else {
                 Query query = sessionContainer.query();
@@ -102,6 +100,9 @@ public class DatabaseController implements ServletContextListener {
                     queryResult = query.execute();
                 } else if (requestFilter instanceof WifiSensor) {
                     query.descend("identification").constrain(requestFilter.getKey());
+                    queryResult = query.execute();
+                } else if (requestFilter instanceof Location) {
+                    query.descend("key").constrain(requestFilter.getKey());
                     queryResult = query.execute();
                 } else {
                     log.log(TAG, "Object Type " + requestFilter.getClass().getSimpleName() + " reading could be optimized.");
@@ -180,7 +181,7 @@ public class DatabaseController implements ServletContextListener {
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
                 return false;
-            } else if (data != null && (data.getKey() == null || data.getKey().equals("0/0")) && dataList.isEmpty()) { // removal of multiple
+            } else if (data != null && data.getKey() == null && dataList.isEmpty()) { // removal of multiple
                 return true;
             } else if (data != null && data.getKey() != null && dataList.isEmpty()) { // removal of specific instance
                 return false;
@@ -216,14 +217,22 @@ public class DatabaseController implements ServletContextListener {
         dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
         dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
         dbconfig.common().objectClass(WifiSensor.class).objectField("identification").indexed(true);
+        dbconfig.common().objectClass(Location.class).objectField("key").indexed(true);
         rootContainer = Db4oEmbedded.openFile(dbconfig, dbFilePath);
 
         log.log(TAG, "db4o startup on " + dbFilePath);
+
+        /*ObjectSet<Location> locs = rootContainer.query(Location.class);
+        for (Location loc : locs){
+            loc.setCoordinateX(loc.getCoordinateX());
+            rootContainer.store(loc);
+        }*/
 
         if (reinitialize) {
             reinit(rootContainer);
             rootContainer.commit();
         }
+
     }
 
     /**
