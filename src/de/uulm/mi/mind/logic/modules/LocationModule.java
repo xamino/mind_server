@@ -266,7 +266,7 @@ public class LocationModule implements Module {
         }
 
         // get filtered locations
-        if (location.getKey() == null || location.getKey().equals("0/0")) {
+        if (location.getKey() == null) {
             return read;
         }
         // from here on only objects with a valid key == single ones are queried
