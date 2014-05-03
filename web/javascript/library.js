@@ -83,7 +83,7 @@ function writeCookie(name, value) {
     var date, expires;
 //    if (days) {
     date = new Date();
-    date.setTime(date.getTime() + (60 * 60 * 1000));
+    date.setTime(date.getTime() + (15 * 60 * 1000));
     expires = "; expires=" + date.toGMTString();
 //            }else{
 //        expires = "";
