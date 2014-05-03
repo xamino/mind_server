@@ -7,8 +7,8 @@ var iconByAreaFactor = 0.45; //the factor by which the icon size is set -> (smal
 var iconByMapWidthFactor = 0.06; //the factor by which the icon size is set -> displayedWidth*iconByAreaFactor
 var defaultIconSize = 110; //if something goes wrong when setting the icon size - defaultIconSize will be applied
 var factor=1; //the size-factor by which the displayed image deviates from the original image
-
-var refreshRate = 30; //the refresh rate for locating - in seconds
+//TODO read from server
+var refreshRate = 10; //the refresh rate for locating - in seconds
 var interval; //the interval of location refreshing
 var balloonClosingTime = 4;
 //var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
@@ -51,7 +51,10 @@ function retriveOriginalMetrics(allusers){
  */
 function initPublicDisplayStuff(allusers){
 	
-	//TODO remove parameter
+	//TODO remove parameter allusers
+	
+	var elem = document.body; // Make the body go full screen.
+	requestFullScreen(elem);
 
 	users = new Array();
 
@@ -90,6 +93,20 @@ function initPublicDisplayStuff(allusers){
     	});
 //    });
     
+}
+
+function requestFullScreen(element) {
+    // Supports most browsers and their versions.
+    var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
+
+    if (requestMethod) { // Native full screen.
+        requestMethod.call(element);
+    } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+        var wscript = new ActiveXObject("WScript.Shell");
+        if (wscript !== null) {
+            wscript.SendKeys("{F11}");
+        }
+    }
 }
 
 /**
@@ -149,16 +166,18 @@ function retriveBackgroundImageSizeMetricsAndFactor(){
 
 
 //document.onresize = mapResize();
-$("#mapscroll").onresize=mapResize();
+$( document ).ready(function() {
+	$("#mapscroll").onresize=mapResize;
+});
 
 function mapResize(){
 
 	//if resize is called on startup -> no resize necessary
 	if(displayedWidth==null){
-//		alert("don't resizey");
+		alert("don't resize");
 		return;
 	}
-	
+	alert("resize");
 	oldDisplayedWidth = displayedWidth;
 	oldDisplayedHeight = displayedHeight;
 	
@@ -258,7 +277,7 @@ function addUserIcon(user){
 	var divToAugment = document.getElementById("mapscroll");
 	var icon=document.createElement("img");
 	icon.className="micon";
-	icon.src="/images/custom_icons/icon_"+user.email+".png";
+	icon.src="/images/custom_icons/icon_"+user.email;
 	icon.id="icon_"+user.email;
 	icon.onclick=function () {
 	    displayUserInfo(user.email);
