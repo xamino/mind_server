@@ -308,6 +308,14 @@ function placeUserIcon(user){
 		icon.style.width=displayedIconSize+"px";
 		icon.style.left=Math.round(user.x-displayedIconSize/2)+"px";
 		icon.style.top=Math.round(user.y-displayedIconSize/2)+"px";
+		
+		
+//		icon.style.boxShadow = "9px 9px 7px rgba(0,0,0,0.3)";
+		
+//		icon.style.filter.dropShadow = "9px 9px 9px rgba(0,0,0,0.3)";
+//		icon.style.mozBoxShadow = "3px 3px 4px #000";
+//		icon.style.webkitBoxShadow = "3px 3px 4px #000";
+
 		//TODO apply visual effect regarding user status
 		
 //		icon.style.shadowCSS = "{ box-shadow: 12px 12px 7px rgba(0,0,0,0.5); }"
@@ -635,7 +643,7 @@ function balloonify(user){
 
 	//CREATE BALLOON
 		//bring selected user-icon to front
-		bringUserToFront(user);
+		bringUserToFront(mod_id);
 	
 		openBalloonUserID = mod_id;
 		
@@ -683,12 +691,19 @@ function balloonify(user){
 		}
 }
 
-function bringUserToFront(user){
-	var id = '#icon_'+user.email;
-	//modifying the id by escaping '.' & '@'
-	var mod_id = id.replace(/\./g, '\\.');
-	mod_id = mod_id.replace(/\@/g, '\\@');
+/**
+ * This function is to be called when a user-icon is selected
+ * @param user
+ */
+function bringUserToFront(mod_id){
+//	var id = '#icon_'+user.email;
+//	//modifying the id by escaping '.' & '@'
+//	var mod_id = id.replace(/\./g, '\\.');
+//	mod_id = mod_id.replace(/\@/g, '\\@');
 	$(mod_id).appendTo("#mapscroll");
+	
+	//DO GLOW
+	
 }
 
 /**
@@ -707,6 +722,14 @@ function removeBalloon(){
 	$(openBalloonUserID).hideBalloon();
 	var balloonElement = document.getElementById("userBalloon");
 	balloonElement.parentNode.removeChild(balloonElement);
+	
+	//REMOVE GLOW
+//	alert(openBalloonUserID);
+//	var id = '#icon_'+openBalloonUserID;
+//	//modifying the id by escaping '.' & '@'
+//	var mod_id = id.replace(/\./g, '\\.');
+//	mod_id = mod_id.replace(/\@/g, '\\@');
+//	$(openBalloonUserID).glow({ disable:true });
 }
 
 //reset balloonIdleTime with mousemove & keypress
