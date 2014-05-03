@@ -309,19 +309,10 @@ function placeUserIcon(user){
 		icon.style.left=Math.round(user.x-displayedIconSize/2)+"px";
 		icon.style.top=Math.round(user.y-displayedIconSize/2)+"px";
 		
+		//apply visual effect regarding user status
 		
-//		icon.style.boxShadow = "9px 9px 7px rgba(0,0,0,0.3)";
-		
-//		icon.style.filter.dropShadow = "9px 9px 9px rgba(0,0,0,0.3)";
-//		icon.style.mozBoxShadow = "3px 3px 4px #000";
-//		icon.style.webkitBoxShadow = "3px 3px 4px #000";
-
-		//TODO apply visual effect regarding user status
-		
-//		icon.style.shadowCSS = "{ box-shadow: 12px 12px 7px rgba(0,0,0,0.5); }"
-//		icon.style.shadowfilter = "{ -webkit-filter: drop-shadow(12px 12px 7px rgba(0,0,0,0.5)); filter: url(shadow.svg#drop-shadow); }";
-//		icon.style.filter = "url(shadow.svg#drop-shadow)";
-		
+		var statusinfo = getInfoByStatus(user.status);
+		icon.className = 'micon '+statusinfo.classname;
 		icon = null;
 	}
 }
@@ -517,25 +508,30 @@ function refreshUserData(){
 
 function loadTestUser(){
 	var user1 = new User("a@a.a",null,"a",false);
+	user1.status = "OCCUPIED";
 	user1.lastPosition = 3301;
 //	user1.iconRef = "crab.png";
 //	user1.x = 400;
 //	user1.y = 300;
 	var user2 = new User("c@c.c",null,"c",false);
 	user2.lastPosition = 3301;
+	user2.status = "OCCUPIED";
 //	user2.iconRef = "cow.png";
 //	user2.x = 450;
 //	user2.y = 400;
 	var user3 = new User("d@d.d",null,"d",false);
 	user3.lastPosition = 3302;
+	user3.status = "AVAILABLE";
 //	user3.iconRef = "rabbit.png";
 //	user3.x = 450;
 //	user3.y = 600;
 	var user4 = new User("e@e.e",null,"e",false);
 	user4.lastPosition = 3301;
+	user4.status = "AWAY";
 //	user4.iconRef = "sheep.png";
 	var user5 = new User("f@f.f",null,"f",false);
 	user5.lastPosition = 3301;
+	user5.status = "DO_NOT_DISTURB";
 //	user5.iconRef = "deer.png";
 
 	
@@ -593,6 +589,54 @@ function getAreaById(id){
 
 //END TEST STUFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
+function StatusInfo(color,txt,classname){
+	this.color = color;
+	this.txt = txt;
+	this.classname = classname;
+}
+
+function getInfoByStatus(status){
+	var statusInfo;
+	switch (status) {
+	case 'AVAILABLE':
+		statusInfo = new StatusInfo('#6AFF50','Verfügbar','miconAvailable');
+		break;
+	case 'OCCUPIED':
+		statusInfo = new StatusInfo('#5CB9FF','Beschäftigt','miconOccupied');
+		break;
+	case 'DO_NOT_DISTURB':
+		statusInfo = new StatusInfo('#FF5543','Bitte nicht stören','miconDnD');
+		break;
+	case 'AWAY':
+		statusInfo = new StatusInfo('#DDDDDD','Nicht da','miconAway');
+		break;
+	default:
+		statusInfo = new StatusInfo('#DDDDDD','','');
+		break;
+	}
+	return statusInfo;
+}
+
+function getStatusByStatus(status){
+	switch (status) {
+	case 'AVAILABLE':
+		return 'Verfügbar';
+		break;
+	case 'OCCUPIED':
+		return 'Beschäftigt';
+		break;
+	case 'DO_NOT_DISTURB':
+		return 'Bitte nicht stören';
+		break;
+	case 'AWAY':
+		return 'Nicht da';
+		break;
+	default:
+		return '';
+		break;
+	}
+}
+
 /**
  * This function returns the user object by email
  * @param email the user's email
@@ -631,12 +675,11 @@ function balloonify(user){
 	//modifying the id by escaping '.' & '@'
 	var mod_id = id.replace(/\./g, '\\.');
 	mod_id = mod_id.replace(/\@/g, '\\@');
-	
-	
-	if(balloonIsOpen()){ //some balloon is open -> close balloon
+
+	if(openBalloonUserID!=null){ //some balloon is open -> close balloon
+		var previousBalloonifiedID = openBalloonUserID;
 		removeBalloon();
-		if(mod_id===openBalloonUserID){//clicked on icon of just hid balloon -> do not open it again
-			openBalloonUserID=null;
+		if(mod_id===previousBalloonifiedID){//clicked on icon of just hid balloon -> do not open it again
 			return;
 		}
 	}
@@ -654,12 +697,15 @@ function balloonify(user){
 		if((+user.y)<(+displayedHeight/+2)){
 			verticalpos = "bottom"; }else{ verticalpos = "top"; }
 		var positioning = verticalpos+" "+horizontalpos;
-		
+		var statusInfo = getInfoByStatus(user.status);
 		$(mod_id).showBalloon({
 		    //TODO possibly check for user status - alter balloon
 			position: positioning,
 			showDuration: 250,
-			contents: '<strong>'+user.name+' in Raum '+user.lastPosition+'</strong>'
+			contents: '<p id="balloonParagraph" style="background-color:'+statusInfo.color+';">'
+				+'<strong>'+user.name+' in '+user.lastPosition+'</strong>'
+				+'<br>'+statusInfo.txt+'</p>'
+				/*
 			+'<p>Send me a message!</p>'
 			//+'<input type="hidden" value="'+user.email+'" id="userBalloonID" />'
 			+'<form id="messageForm">'
@@ -681,9 +727,9 @@ function balloonify(user){
 			+'<p>Call me!</p>'
 			+'<form id="callForm">'
 			+'<input type="submit" value="Call '+user.name+'"/>'
-			+'</form>'
+			+'</form>'*/
 		});		
-		document.getElementById("messageForm").parentNode.id = "userBalloon";
+		document.getElementById("balloonParagraph").parentNode.id = "userBalloon";
 		
 	    //Increment the idle time counter every second
 		if(idleInterval==null){
@@ -693,7 +739,7 @@ function balloonify(user){
 
 /**
  * This function is to be called when a user-icon is selected
- * @param user
+ * @param mod_id the modified id of the icon-img for jquery-selection
  */
 function bringUserToFront(mod_id){
 //	var id = '#icon_'+user.email;
@@ -703,33 +749,45 @@ function bringUserToFront(mod_id){
 	$(mod_id).appendTo("#mapscroll");
 	
 	//DO GLOW
-	
+//	var icon=document.createElement("img");
+//	icon.className="micon";
+//	$(mod_id).className = "miconSelected";
+//	$(mod_id).removeClass();
+	$(mod_id).addClass('miconSelected');
 }
+
+
 
 /**
  * This function removes the opened balloon
  */
 function removeBalloon(){
-	if(!balloonIsOpen()){
+	if(!balloonIsOpen()){ //if no balloon is open -> no need to remove
 		openBalloonUserID=null;
+//		alert("removeBalloon - no balloon open");
 		return;
 	}
+	//reset balloon idle counter stuff
 	clearInterval(interval);
 	balloonIdleTime = 0;
+	//debug stuff TODO: remove
 	if(document.getElementById("balloonIdle")!=null){
 		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
 	}
+	//hide...
 	$(openBalloonUserID).hideBalloon();
+	//& delete balloon
 	var balloonElement = document.getElementById("userBalloon");
 	balloonElement.parentNode.removeChild(balloonElement);
 	
 	//REMOVE GLOW
-//	alert(openBalloonUserID);
-//	var id = '#icon_'+openBalloonUserID;
-//	//modifying the id by escaping '.' & '@'
-//	var mod_id = id.replace(/\./g, '\\.');
-//	mod_id = mod_id.replace(/\@/g, '\\@');
-//	$(openBalloonUserID).glow({ disable:true });
+	//TODO set class by status or rather remove selected-class
+//	$(openBalloonUserID).className="micon";
+	$(openBalloonUserID).removeClass('miconSelected');
+//	$(openBalloonUserID).addClass('micon');
+
+	openBalloonUserID=null;
+
 }
 
 //reset balloonIdleTime with mousemove & keypress
@@ -782,7 +840,7 @@ function balloonIsOpen(){
  */
 $(document).on("mousedown", "#mapscroll", function (event) {
 	  if (!$(event.target).hasClass('micon')) { //if !(click on icon)
-		  if(openBalloonUserID!=null){ //if balloon is open -> hide balloon
+		  if(balloonIsOpen()){ //if balloon is open -> hide balloon
 			  removeBalloon();
 			  openBalloonUserID = null;
 		  }		  
