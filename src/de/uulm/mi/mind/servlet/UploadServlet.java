@@ -10,6 +10,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -94,7 +95,11 @@ public class UploadServlet extends HttpServlet {
         }
         // check if session might be in cookie if session hasn't been set yet
         if (session == null && request.getCookies().length > 1) {
-            session = request.getCookies()[1].getValue();
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("MIND_Admin_C_session")) {
+                    session = cookie.getValue();
+                }
+            }
         }
         // now check if we have some value we can work with
         Active active;
