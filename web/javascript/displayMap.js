@@ -10,7 +10,7 @@ var factor=1; //the size-factor by which the displayed image deviates from the o
 //TODO read from server
 var refreshRate = 10; //the refresh rate for locating - in seconds
 var interval; //the interval of location refreshing
-var balloonClosingTime = 4;
+var balloonClosingTime = 5;
 //var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
 //var heigthFactor=1; //the factor by which the height of the displayed image deviates from the original image height
 //var zoomValue = 30; //holds the width value for each zoom-step in pixels
@@ -165,24 +165,30 @@ function retriveBackgroundImageSizeMetricsAndFactor(){
 //});
 
 
-//document.onresize = mapResize();
+
 $( document ).ready(function() {
-	$("#mapscroll").onresize=mapResize;
+//	$("#mapscroll").onresize=mapResize;
+	window.onresize=function(){mapResize();};
 });
 
 function mapResize(){
 
 	//if resize is called on startup -> no resize necessary
 	if(displayedWidth==null){
-		alert("don't resize");
+//		alert("don't resize_");
 		return;
 	}
-	alert("resize");
+
 	oldDisplayedWidth = displayedWidth;
 	oldDisplayedHeight = displayedHeight;
 	
 	//compute map & icon metrics
 	retriveBackgroundImageSizeMetricsAndFactor();
+	
+	if(oldDisplayedWidth==displayedWidth){
+//		alert("no resize");
+		return;
+	}
 	computeIconSize();
 	
 	//update user placement
@@ -195,7 +201,7 @@ function mapResize(){
 		}
 	}
 	
-	alert("resize by factor "+changeFactor);
+//	alert("resize by factor "+changeFactor);
 }
 
 //$('#mapscroll').bind('resize', function(){
@@ -304,9 +310,9 @@ function placeUserIcon(user){
 		icon.style.top=Math.round(user.y-displayedIconSize/2)+"px";
 		//TODO apply visual effect regarding user status
 		
-		icon.style.shadowCSS = "{ box-shadow: 12px 12px 7px rgba(0,0,0,0.5); }"
-		icon.style.shadowfilter = "{ -webkit-filter: drop-shadow(12px 12px 7px rgba(0,0,0,0.5)); filter: url(shadow.svg#drop-shadow); }";
-		icon.style.filter = "url(shadow.svg#drop-shadow)";
+//		icon.style.shadowCSS = "{ box-shadow: 12px 12px 7px rgba(0,0,0,0.5); }"
+//		icon.style.shadowfilter = "{ -webkit-filter: drop-shadow(12px 12px 7px rgba(0,0,0,0.5)); filter: url(shadow.svg#drop-shadow); }";
+//		icon.style.filter = "url(shadow.svg#drop-shadow)";
 		
 		icon = null;
 	}
@@ -342,6 +348,7 @@ function setUserIconCoordsByArea(){
 			area = getAreaById(users[i].lastPosition);
 			//alert("area: "+Math.round(area.topLeftX*factor)+","+Math.round(area.topLeftY*factor)+
 			//		","+Math.round(area.width*factor)+","+Math.round(area.height*factor));
+			//TODO handle area==null;
 			currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
 			currenty = Math.round(area.topLeftY*factor+Math.round(displayedIconSize/2));
 			firstinrow = true;
@@ -502,7 +509,7 @@ function refreshUserData(){
 
 function loadTestUser(){
 	var user1 = new User("a@a.a",null,"a",false);
-	user1.lastPosition = 3304;
+	user1.lastPosition = 3301;
 //	user1.iconRef = "crab.png";
 //	user1.x = 400;
 //	user1.y = 300;
@@ -512,15 +519,15 @@ function loadTestUser(){
 //	user2.x = 450;
 //	user2.y = 400;
 	var user3 = new User("d@d.d",null,"d",false);
-	user3.lastPosition = 3304;
+	user3.lastPosition = 3302;
 //	user3.iconRef = "rabbit.png";
 //	user3.x = 450;
 //	user3.y = 600;
 	var user4 = new User("e@e.e",null,"e",false);
-	user4.lastPosition = 3304;
+	user4.lastPosition = 3301;
 //	user4.iconRef = "sheep.png";
 	var user5 = new User("f@f.f",null,"f",false);
-	user5.lastPosition = 3304;
+	user5.lastPosition = 3301;
 //	user5.iconRef = "deer.png";
 
 	
@@ -545,33 +552,34 @@ function getAreaById(id){
 	}
 	alert("area "+id+" does not exist in array");
 
-	//TODO remove static test-data
-	//TODO if area not found (should not happen) - don't display or put to away-area or ...
-	var area = null;
-	switch (id) {
-	case 3304:
-		area = new Area(3304, null, 0, 0, 223, 297);
-		break;
-	case 3305:
-		area = new Area(3305, null, 233, 0, 223, 297);
-		break;
-	case 336:
-		area = new Area(336, null, 465, 0, 223, 297);
-		break;
-	case 3303:
-		area = new Area(3303, null, 0, 462, 301, 299);
-		break;
-	case 3301:
-		area = new Area(3301, null, 311, 462, 147, 299);
-		break;
-	case 3302:
-		area = new Area(3302, null, 0, 770, 458, 219);
-		break;
-	case 333:
-		area = new Area(333, null, 465, 462, 220, 529);
-		break;
-	}
-	return area;
+	return null;
+//	//TODO remove static test-data
+//	//TODO if area not found (should not happen) - don't display or put to away-area or ...
+//	var area = null;
+//	switch (id) {
+//	case 3304:
+//		area = new Area(3304, null, 0, 0, 223, 297);
+//		break;
+//	case 3305:
+//		area = new Area(3305, null, 233, 0, 223, 297);
+//		break;
+//	case 336:
+//		area = new Area(336, null, 465, 0, 223, 297);
+//		break;
+//	case 3303:
+//		area = new Area(3303, null, 0, 462, 301, 299);
+//		break;
+//	case 3301:
+//		area = new Area(3301, null, 311, 462, 147, 299);
+//		break;
+//	case 3302:
+//		area = new Area(3302, null, 0, 770, 458, 219);
+//		break;
+//	case 333:
+//		area = new Area(333, null, 465, 462, 220, 529);
+//		break;
+//	}
+//	return area;
 }
 
 
@@ -626,13 +634,16 @@ function balloonify(user){
 	}
 
 	//CREATE BALLOON
+		//bring selected user-icon to front
+		bringUserToFront(user);
+	
 		openBalloonUserID = mod_id;
 		
 		var horizontalpos;
 		var verticalpos;
-		if((user.x*factor)<(displayedWidth/2)){
+		if((+user.x)<(+displayedWidth/+2)){
 			horizontalpos = "right"; }else{ horizontalpos = "left"; }
-		if((user.y*factor)<(displayedHeight/2)){
+		if((+user.y)<(+displayedHeight/+2)){
 			verticalpos = "bottom"; }else{ verticalpos = "top"; }
 		var positioning = verticalpos+" "+horizontalpos;
 		
@@ -670,6 +681,14 @@ function balloonify(user){
 		if(idleInterval==null){
 			idleInterval = setInterval(timerIncrement, 1000);			
 		}
+}
+
+function bringUserToFront(user){
+	var id = '#icon_'+user.email;
+	//modifying the id by escaping '.' & '@'
+	var mod_id = id.replace(/\./g, '\\.');
+	mod_id = mod_id.replace(/\@/g, '\\@');
+	$(mod_id).appendTo("#mapscroll");
 }
 
 /**
@@ -761,7 +780,7 @@ $(document).on("submit", "form[id^='callForm']", function (event) {
     recipient = recipient.substring(6, recipient.length);
     alert("call "+recipient);
 
-    //TODO obvious
+    //TODO obvious - init call - call server
 
 });
 

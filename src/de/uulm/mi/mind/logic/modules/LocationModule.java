@@ -27,6 +27,11 @@ public class LocationModule implements Module {
         wifiNameFilter = new ArrayList<>();
         wifiNameFilter.add("eduroam");
         wifiNameFilter.add("welcome");
+        wifiNameFilter.add("welcome-mi");
+        wifiNameFilter.add("Lab332");
+        wifiNameFilter.add("mi-ubicomp");
+        wifiNameFilter.add("cloudtrax");
+        wifiNameFilter.add("cloudtrax-secure");
         database = DatabaseController.getInstance();
         log = Messenger.getInstance();
     }

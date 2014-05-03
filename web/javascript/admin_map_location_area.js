@@ -533,6 +533,7 @@ function writeAreas(data) {
             }
             tablecontents += "</tr>";
         }
+
         tablecontents += "</table>";
         document.getElementById("table_space_areas").innerHTML = tablecontents;
         drawAreas();
@@ -560,6 +561,7 @@ function removeAreaViaPopup(data) {
         });
     }
 }
+
 
 /**
  * on Button click 'Add Area' in admin_import_map_location.jsp
@@ -733,6 +735,11 @@ function writeLocations(data) {
             tablecontents += "<td><input type='submit' value='Remove Location' onClick='removeLocationViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
             tablecontents += "</tr>";
         }
+        if(data.object.length>=1){
+        	tablecontents += "<tr>";
+        	tablecontents += "<td><input type='submit' value='Remove All Locations' onClick='removeAllLocationsViaPopup()'/></td>";
+        	tablecontents += "<tr>";
+        }
         tablecontents += "</table>";
         document.getElementById("table_space_locations").innerHTML = tablecontents;
 
@@ -758,6 +765,22 @@ function removeLocationViaPopup(data) {
             window.location.reload();
 
         });
+    }
+}
+
+function removeAllLocationsViaPopup(data) {
+    var r = confirm("Do you want to REMOVE ALL LOCATIONS?");
+    if (r == true) {
+    	var rr = confirm("REALLY??");
+    	if(rr==true){
+    		var locationtodelete = new Location(null, null, null);
+    		doTask("LOCATION_REMOVE", locationtodelete, function (event) {
+    			
+    			alert("All locations have been deleted");
+    			window.location.reload();
+    			
+    		});    		
+    	}
     }
 }
 
