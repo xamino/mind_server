@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
+    <script src="/javascript/library.js"></script>
+    <script src="admin_db.js"></script>
+    <link href="/css/admin.css" rel="stylesheet" type="text/css">
+    <title>MIND | Database Dump</title>
+    <style type="text/css"> table {
+        text-align: center;
+    }</style>
+</head>
+<body>
+<div id="container">
+    <div id="banner">
+        <!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
+        <h2>MIND</h2>
+    </div>
+
+    <div id="content">
+        <div id="navigation">
+            <ul>
+                <li><a href="/admin_home.jsp" class="adminlink">Home</a></li>
+                <li><a href="/admin_user_management.jsp" class="adminlink">User Management</a></li>
+                <li><a href="/admin_system_management.jsp" class="adminlink">System Management</a>
+                    <ul>
+                        <li><a href="/admin_import_map_location.jsp" class="adminlink">Import Map and Location Data</a>
+                        </li>
+                        <li><a href="/admin_public_displays.jsp" class="adminlink">Administrate Public Displays</a></li>
+                    </ul>
+                </li>
+                <li><a href="/admin_sensor_management.jsp" class="adminlink">Wifi Sensor Management</a></li>
+            </ul>
+        </div>
+        <div id="text-content">
+            This page is a simple database dump, completely reflective and dynamic. Some fields are ignored (such as
+            most password or token fields and the $type field). All object arrays are not shown, but the amount of
+            objects is calculated and displayed (marked by '*').
+            <br>
+            <input id="update" type="button" value="Update"/>
+            <br><br>
+            User dump:
+            <br>
+
+            <table id="users"></table>
+            <br>
+            Public Display dump:
+            <br>
+            <table id="displays"></table>
+
+            <br>
+            Wifi Sensor dump:
+            <br>
+
+            <table id="sensors"></table>
+
+            <br>
+            Area dump:
+            <br>
+            <table id="areas"></table>
+
+            <br>
+            Location dump:
+            <br>
+            <table id="locations"></table>
+        </div>
+        <div id="logout">
+            <input type="submit" value="Logout" onClick="logout; window.location='index.jsp'"/>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <div id="footer">
+        <!-- TODO: nice Footer -->
+    </div>
+</div>
+</body>
+</html>

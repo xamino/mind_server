@@ -4,7 +4,7 @@
 
 // Setup some general AJAX stuff (always executed)
 $.ajaxSetup({
-    url: 'main',
+    url: '/main',
     type: 'POST',
     contentType: 'application/json; charset=utf-8',
     dataType: 'json'
