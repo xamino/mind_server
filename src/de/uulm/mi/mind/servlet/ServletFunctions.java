@@ -13,6 +13,8 @@ import de.uulm.mi.mind.security.Authenticated;
 import de.uulm.mi.mind.security.BCrypt;
 import de.uulm.mi.mind.security.Security;
 
+import javax.servlet.ServletContext;
+import java.io.File;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Date;
@@ -34,18 +36,42 @@ public class ServletFunctions {
     private Messenger log;
     private EventModuleManager moduleManager;
     private SecureRandom random;
+    private FilePath filePath;
 
-    private ServletFunctions() {
+    private ServletFunctions(ServletContext context) {
         log = Messenger.getInstance();
         moduleManager = EventModuleManager.getInstance();
         random = new SecureRandom();
+        filePath = new FilePath(context);
+        log.log(TAG, "Created.");
     }
 
-    public static ServletFunctions getInstance() {
+    public static ServletFunctions getInstance(ServletContext context) {
         if (INSTANCE == null) {
-            INSTANCE = new ServletFunctions();
+            INSTANCE = new ServletFunctions(context);
         }
         return INSTANCE;
+    }
+
+    /**
+     * Method that checks data returned from a module. The method returns null except when: data is an Information
+     * interface type class, data is null, or data is not of type class.
+     *
+     * @param data  The data to check.
+     * @param clazz The class type against which to check.
+     * @return An Information object if data is such, else null.
+     */
+    public static Information checkDataMessage(Data data, Class clazz) {
+        if (data == null) {
+            return new Error(Error.Type.NULL, "Data requested returned NULL, should NOT HAPPEN!");
+        } else if (data instanceof Information) {
+            return (Information) data;
+        } else if (data.getClass() != clazz && !clazz.isAssignableFrom(data.getClass())) {
+            return new Error(Error.Type.CAST, "Returned data failed class test!");
+        } else {
+            // This means everything was okay
+            return null;
+        }
     }
 
     /**
@@ -225,6 +251,18 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.Position.READ, null);
             case READ_ALL_AREAS:
                 return moduleManager.handleTask(Task.Area.READ, new Area(null));
+            case ICON_DELETE:
+                String icon = "icon_" + user.readIdentification();
+                File file = new File(filePath.iconPath() + icon);
+                if (!file.exists()) {
+                    return new Success(Success.Type.NOTE, "No icon to remove.");
+                }
+                if (!file.delete()) {
+                    log.error(TAG, "Failed to remove icon for " + user.readIdentification() + "!");
+                    return new Error(Error.Type.SERVER, "Failed to delete icon!");
+                }
+                log.log(TAG, "User " + user.readIdentification() + " deleted icon.");
+                return new Success("Icon removed.");
             default:
                 return null;
         }
@@ -619,27 +657,6 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.Position.SENSOR_WRITE, devices);
             default:
                 return null;
-        }
-    }
-
-    /**
-     * Method that checks data returned from a module. The method returns null except when: data is an Information
-     * interface type class, data is null, or data is not of type class.
-     *
-     * @param data  The data to check.
-     * @param clazz The class type against which to check.
-     * @return An Information object if data is such, else null.
-     */
-    public Information checkDataMessage(Data data, Class clazz) {
-        if (data == null) {
-            return new Error(Error.Type.NULL, "Data requested returned NULL, should NOT HAPPEN!");
-        } else if (data instanceof Information) {
-            return (Information) data;
-        } else if (data.getClass() != clazz && !clazz.isAssignableFrom(data.getClass())) {
-            return new Error(Error.Type.CAST, "Returned data failed class test!");
-        } else {
-            // This means everything was okay
-            return null;
         }
     }
 

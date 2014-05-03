@@ -87,6 +87,10 @@ public enum API implements Task {
      */
     WIFI_SENSOR_UPDATE,
     /**
+     * Deletes a users icon from the system.
+     */
+    ICON_DELETE,
+    /**
      * General error, especially when casting to a task doesn't work.
      */
     ERROR;

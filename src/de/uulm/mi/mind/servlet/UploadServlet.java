@@ -28,24 +28,19 @@ import java.util.List;
 public class UploadServlet extends HttpServlet {
     private final String TAG = "UploadServlet";
     private final int maxFileSize = 5000 * 1024;
-
     private Messenger log;
-    private String filePath;
-    private String SEP = System.getProperty("file.separator");
     private ServletFileUpload upload;
+    private FilePath filePath;
 
     @Override
     public void init() throws ServletException {
         super.init();
         log = Messenger.getInstance();
-
-        // set base directory for files to be stored in
-        filePath = this.getServletContext().getRealPath("/") + "images" + SEP;
         // Create a new file upload handler for map
         upload = new ServletFileUpload(new DiskFileItemFactory());
         // maximum file size to be uploaded.
         upload.setSizeMax(maxFileSize);
-
+        filePath = new FilePath(this.getServletContext());
         log.log(TAG, "Created.");
     }
 
@@ -143,7 +138,7 @@ public class UploadServlet extends HttpServlet {
                     return;
                 }
                 // now write image
-                if (writeImage(image, "map", filePath)) {
+                if (writeImage(image, "map", filePath.mapPath())) {
                     log.log(TAG, "New map uploaded.");
                 } else {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -152,7 +147,7 @@ public class UploadServlet extends HttpServlet {
 
                 break;
             case "icon":
-                if (writeImage(image, "icon_" + user.readIdentification(), filePath + "custom_icons" + SEP)) {
+                if (writeImage(image, "icon_" + user.readIdentification(), filePath.iconPath())) {
                     log.log(TAG, "User " + user.readIdentification() + " uploaded new icon.");
                 } else {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -199,5 +194,3 @@ public class UploadServlet extends HttpServlet {
         return true;
     }
 }
-
-

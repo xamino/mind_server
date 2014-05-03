@@ -141,7 +141,7 @@ public class PositionModule implements Module {
         ObjectContainer sessionContainer = DatabaseController.getInstance().getSessionContainer();
         Data evtlUserList = DatabaseController.getInstance().read(sessionContainer, new User(null));
         sessionContainer.close();
-        Data msg = ServletFunctions.getInstance().checkDataMessage(evtlUserList, DataList.class);
+        Data msg = ServletFunctions.checkDataMessage(evtlUserList, DataList.class);
         if (msg != null) {
             return msg;
         }
