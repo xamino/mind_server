@@ -19,11 +19,6 @@ $.ajaxSetup({
  */
 function send(data, callback) {
     $.ajax({data: JSON.stringify(data)}).done(function (data) {
-        // Check for logout
-        var test = data.object;
-        if (test.$type == "Error" && test.type == "SECURITY" && test.description == "Session invalid!") {
-            window.location = "index.jsp";
-        }
         callback(data);
     });
 }

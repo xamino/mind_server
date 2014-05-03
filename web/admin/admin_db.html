@@ -12,6 +12,7 @@
             border: 1px solid gray;
             padding: 5px;
         }
+
         table {
             text-align: center;
             border: 2px solid #cbd7dd;
@@ -40,6 +41,7 @@
                 </li>
                 <li><a href="/admin_sensor_management.jsp" class="adminlink">Wifi Sensor Management</a></li>
             </ul>
+            <input type="button" value="Logout" id="logout"/>
         </div>
         <div id="text-content">
             This page is a simple database dump, completely reflective and dynamic. Some fields are ignored (such as
@@ -71,16 +73,27 @@
             <br>
             Location dump:
             <br>
-            <table id="locations"></table>
-        </div>
-        <div id="logout">
-            <input type="submit" value="Logout" onClick="logout; window.location='index.jsp'"/>
-        </div>
-        <div class="clear"></div>
-    </div>
 
-    <div id="footer">
-        <!-- TODO: nice Footer -->
+            <div style="float: left">
+                <table id="locations_1"></table>
+            </div>
+            <div style="float: right">
+                <table id="locations_2"></table>
+            </div>
+            <div style="clear: both"/>
+
+            <br>
+            WifiMorsel dump:
+            <br>
+
+            <div style="float: left">
+                <table id="morsels_1"></table>
+            </div>
+            <div style="float: right">
+                <table id="morsels_2"></table>
+            </div>
+            <div style="clear: both"/>
+        </div>
     </div>
 </div>
 </body>

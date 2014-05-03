@@ -9,6 +9,7 @@ $(document).ready(function () {
     check();
     // register button
     $('#update').click(build);
+    $('#logout').click(private_logout);
 });
 
 /**
@@ -41,7 +42,21 @@ function build() {
         b_table('areas', data.object);
     });
     send(new Arrival("location_read", session, new Location()), function (data) {
-        b_table('locations', data.object);
+        var arr = data.object;
+        b_table('locations_1', arr.slice(0, arr.length / 2));
+        b_table('locations_2', arr.slice(1 + arr.length / 2, arr.length - 1));
+    });
+    send(new Arrival("area_read", session, new Area("University")), function (data) {
+        var locs = data.object[0].locations;
+        var morsels = [];
+        $.each(locs, function (index, item) {
+            $.each(item.wifiMorsels, function (i, mor) {
+                morsels.push(mor);
+            });
+        });
+        // because they are so many, divide into two tables
+        b_table('morsels_1', morsels.slice(0, morsels.length / 2));
+        b_table('morsels_2', morsels.slice(1 + morsels.length / 2, morsels.length - 1));
     });
 }
 
@@ -61,7 +76,6 @@ function b_table(table_name, array) {
         table += '<th>' + item + '</th>';
     });
     table += '</tr>';
-    console.log(table.innerHTML);
     // build body
     $.each(array, function (index, object) {
         table += '<tr>';
@@ -88,4 +102,12 @@ var Reflector = function (obj) {
         }
         return properties;
     };
+}
+
+function private_logout() {
+    // remove session
+    deleteCookie("MIND_Admin_C_session");
+    send(new Arrival("logout", session, null), function(data) {
+        window.location = "/login.jsp";
+    });
 }
