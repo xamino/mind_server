@@ -199,7 +199,7 @@ function areaTest() {
         new WifiMorsel("00:19:07:00:66:02", "welcome", -12)
     ];
     var wifiUpdate = [
-        new WifiMorsel("00:01:02:03:04:05", "mind", -45)
+        new WifiMorsel("00:01:02:03:04:05", "eduoram", -45)
     ];
     // test adding a new area
     unitTest("area_add", new Area("Office Prof. Gott", null, 34, 56, 3, 4), Success, adminSession);

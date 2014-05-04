@@ -1,6 +1,7 @@
 package de.uulm.mi.mind.logic.modules;
 
 import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Configuration;
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
@@ -8,6 +9,8 @@ import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
+
+import java.util.ArrayList;
 
 /**
  * @author Tamino Hartmann
@@ -19,8 +22,10 @@ public class LocationModule implements Module {
     private final DatabaseController database;
     private final Messenger log;
     private final String TAG = "LocationModule";
+    private ArrayList<String> wifiNameFilter;
 
     public LocationModule() {
+        wifiNameFilter = Configuration.getInstance().getWifiNameFilter();
         database = DatabaseController.getInstance();
         log = Messenger.getInstance();
     }
@@ -193,6 +198,9 @@ public class LocationModule implements Module {
         DataList<Location> read = database.read(sessionContainer, new Location(location.getCoordinateX(), location.getCoordinateY()));
         if (read.isEmpty()) {
             // this probably means that no location was found for the given location
+            // so filter
+            location = filterMorsels(location);
+            // and create
             boolean success1 = database.create(sessionContainer, location);
             // area has changed, so redo mapping
             boolean success2 = updateMapping(sessionContainer);
@@ -218,6 +226,8 @@ public class LocationModule implements Module {
             // If a location already exists, we simply add the wifimorsels of the given one
             Location exist = read.get(0);
             exist.getWifiMorsels().addAll(location.getWifiMorsels());
+            // filter
+            exist = filterMorsels(exist);
             boolean success1 = database.update(sessionContainer, exist);
             // area has changed, so redo mapping
             boolean success2 = updateMapping(sessionContainer);
@@ -250,7 +260,7 @@ public class LocationModule implements Module {
         }
 
         // get filtered locations
-        if (location.getKey() == null || location.getKey().equals("0/0")) {
+        if (location.getKey() == null) {
             return read;
         }
         // from here on only objects with a valid key == single ones are queried
@@ -269,6 +279,8 @@ public class LocationModule implements Module {
 
         ObjectContainer sessionContainer = database.getSessionContainer();
 
+        // filter
+        location = filterMorsels(location);
         // run all operations
         boolean success1 = database.update(sessionContainer, location);
         // area has changed, so redo mapping
@@ -357,7 +369,6 @@ public class LocationModule implements Module {
      * @param sessionContainer
      */
     private boolean updateMapping(ObjectContainer sessionContainer) {
-
         DataList<Location> locations = database.read(sessionContainer, new Location(0, 0, null));
         DataList<Area> areas = database.read(sessionContainer, new Area(null));
 
@@ -439,5 +450,23 @@ public class LocationModule implements Module {
             return ((DataList<Location>) read).get(0).getWifiMorsels();
         } else
             return new Error(Error.Type.DATABASE, "Reading of " + loc + " Morsels failed!");
+    }
+
+    /**
+     * Function that filters the WifiMorsels of a Location against the given list to filter out unwanted wifi hotspots
+     * (for example temporary ones or ones we don't want messing with the algorithm).
+     *
+     * @param location The Location object to filter.
+     * @return The location object with the filtered morsels.
+     */
+    private Location filterMorsels(Location location) {
+        DataList<WifiMorsel> morsels = new DataList<>();
+        for (WifiMorsel morsel : location.getWifiMorsels()) {
+            if (wifiNameFilter.contains(morsel.getWifiName())) {
+                morsels.add(morsel);
+            }
+        }
+        location.setWifiMorsels(morsels);
+        return location;
     }
 }

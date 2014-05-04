@@ -7,10 +7,10 @@ var iconByAreaFactor = 0.45; //the factor by which the icon size is set -> (smal
 var iconByMapWidthFactor = 0.06; //the factor by which the icon size is set -> displayedWidth*iconByAreaFactor
 var defaultIconSize = 110; //if something goes wrong when setting the icon size - defaultIconSize will be applied
 var factor=1; //the size-factor by which the displayed image deviates from the original image
-
-var refreshRate = 30; //the refresh rate for locating - in seconds
+//TODO read from server
+var refreshRate = 10; //the refresh rate for locating - in seconds
 var interval; //the interval of location refreshing
-var balloonClosingTime = 4;
+var balloonClosingTime = 5;
 //var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
 //var heigthFactor=1; //the factor by which the height of the displayed image deviates from the original image height
 //var zoomValue = 30; //holds the width value for each zoom-step in pixels
@@ -51,7 +51,10 @@ function retriveOriginalMetrics(allusers){
  */
 function initPublicDisplayStuff(allusers){
 	
-	//TODO remove parameter
+	//TODO remove parameter allusers
+	
+	var elem = document.body; // Make the body go full screen.
+	requestFullScreen(elem);
 
 	users = new Array();
 
@@ -90,6 +93,20 @@ function initPublicDisplayStuff(allusers){
     	});
 //    });
     
+}
+
+function requestFullScreen(element) {
+    // Supports most browsers and their versions.
+    var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
+
+    if (requestMethod) { // Native full screen.
+        requestMethod.call(element);
+    } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+        var wscript = new ActiveXObject("WScript.Shell");
+        if (wscript !== null) {
+            wscript.SendKeys("{F11}");
+        }
+    }
 }
 
 /**
@@ -148,22 +165,30 @@ function retriveBackgroundImageSizeMetricsAndFactor(){
 //});
 
 
-//document.onresize = mapResize();
-$("#mapscroll").onresize=mapResize();
+
+$( document ).ready(function() {
+//	$("#mapscroll").onresize=mapResize;
+	window.onresize=function(){mapResize();};
+});
 
 function mapResize(){
 
 	//if resize is called on startup -> no resize necessary
 	if(displayedWidth==null){
-//		alert("don't resizey");
+//		alert("don't resize_");
 		return;
 	}
-	
+
 	oldDisplayedWidth = displayedWidth;
 	oldDisplayedHeight = displayedHeight;
 	
 	//compute map & icon metrics
 	retriveBackgroundImageSizeMetricsAndFactor();
+	
+	if(oldDisplayedWidth==displayedWidth){
+//		alert("no resize");
+		return;
+	}
 	computeIconSize();
 	
 	//update user placement
@@ -176,7 +201,7 @@ function mapResize(){
 		}
 	}
 	
-	alert("resize by factor "+changeFactor);
+//	alert("resize by factor "+changeFactor);
 }
 
 //$('#mapscroll').bind('resize', function(){
@@ -258,7 +283,7 @@ function addUserIcon(user){
 	var divToAugment = document.getElementById("mapscroll");
 	var icon=document.createElement("img");
 	icon.className="micon";
-	icon.src="/images/custom_icons/icon_"+user.email+".png";
+	icon.src="/images/custom_icons/icon_"+user.email;
 	icon.id="icon_"+user.email;
 	icon.onclick=function () {
 	    displayUserInfo(user.email);
@@ -283,12 +308,11 @@ function placeUserIcon(user){
 		icon.style.width=displayedIconSize+"px";
 		icon.style.left=Math.round(user.x-displayedIconSize/2)+"px";
 		icon.style.top=Math.round(user.y-displayedIconSize/2)+"px";
-		//TODO apply visual effect regarding user status
 		
-		icon.style.shadowCSS = "{ box-shadow: 12px 12px 7px rgba(0,0,0,0.5); }"
-		icon.style.shadowfilter = "{ -webkit-filter: drop-shadow(12px 12px 7px rgba(0,0,0,0.5)); filter: url(shadow.svg#drop-shadow); }";
-		icon.style.filter = "url(shadow.svg#drop-shadow)";
+		//apply visual effect regarding user status
 		
+		var statusinfo = getInfoByStatus(user.status);
+		icon.className = 'micon '+statusinfo.classname;
 		icon = null;
 	}
 }
@@ -323,6 +347,7 @@ function setUserIconCoordsByArea(){
 			area = getAreaById(users[i].lastPosition);
 			//alert("area: "+Math.round(area.topLeftX*factor)+","+Math.round(area.topLeftY*factor)+
 			//		","+Math.round(area.width*factor)+","+Math.round(area.height*factor));
+			//TODO handle area==null;
 			currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
 			currenty = Math.round(area.topLeftY*factor+Math.round(displayedIconSize/2));
 			firstinrow = true;
@@ -483,25 +508,30 @@ function refreshUserData(){
 
 function loadTestUser(){
 	var user1 = new User("a@a.a",null,"a",false);
-	user1.lastPosition = 3304;
+	user1.status = "OCCUPIED";
+	user1.lastPosition = 3301;
 //	user1.iconRef = "crab.png";
 //	user1.x = 400;
 //	user1.y = 300;
 	var user2 = new User("c@c.c",null,"c",false);
 	user2.lastPosition = 3301;
+	user2.status = "OCCUPIED";
 //	user2.iconRef = "cow.png";
 //	user2.x = 450;
 //	user2.y = 400;
 	var user3 = new User("d@d.d",null,"d",false);
-	user3.lastPosition = 3304;
+	user3.lastPosition = 3302;
+	user3.status = "AVAILABLE";
 //	user3.iconRef = "rabbit.png";
 //	user3.x = 450;
 //	user3.y = 600;
 	var user4 = new User("e@e.e",null,"e",false);
-	user4.lastPosition = 3304;
+	user4.lastPosition = 3301;
+	user4.status = "AWAY";
 //	user4.iconRef = "sheep.png";
 	var user5 = new User("f@f.f",null,"f",false);
-	user5.lastPosition = 3304;
+	user5.lastPosition = 3301;
+	user5.status = "DO_NOT_DISTURB";
 //	user5.iconRef = "deer.png";
 
 	
@@ -526,37 +556,86 @@ function getAreaById(id){
 	}
 	alert("area "+id+" does not exist in array");
 
-	//TODO remove static test-data
-	//TODO if area not found (should not happen) - don't display or put to away-area or ...
-	var area = null;
-	switch (id) {
-	case 3304:
-		area = new Area(3304, null, 0, 0, 223, 297);
-		break;
-	case 3305:
-		area = new Area(3305, null, 233, 0, 223, 297);
-		break;
-	case 336:
-		area = new Area(336, null, 465, 0, 223, 297);
-		break;
-	case 3303:
-		area = new Area(3303, null, 0, 462, 301, 299);
-		break;
-	case 3301:
-		area = new Area(3301, null, 311, 462, 147, 299);
-		break;
-	case 3302:
-		area = new Area(3302, null, 0, 770, 458, 219);
-		break;
-	case 333:
-		area = new Area(333, null, 465, 462, 220, 529);
-		break;
-	}
-	return area;
+	return null;
+//	//TODO remove static test-data
+//	//TODO if area not found (should not happen) - don't display or put to away-area or ...
+//	var area = null;
+//	switch (id) {
+//	case 3304:
+//		area = new Area(3304, null, 0, 0, 223, 297);
+//		break;
+//	case 3305:
+//		area = new Area(3305, null, 233, 0, 223, 297);
+//		break;
+//	case 336:
+//		area = new Area(336, null, 465, 0, 223, 297);
+//		break;
+//	case 3303:
+//		area = new Area(3303, null, 0, 462, 301, 299);
+//		break;
+//	case 3301:
+//		area = new Area(3301, null, 311, 462, 147, 299);
+//		break;
+//	case 3302:
+//		area = new Area(3302, null, 0, 770, 458, 219);
+//		break;
+//	case 333:
+//		area = new Area(333, null, 465, 462, 220, 529);
+//		break;
+//	}
+//	return area;
 }
 
 
 //END TEST STUFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+
+function StatusInfo(color,txt,classname){
+	this.color = color;
+	this.txt = txt;
+	this.classname = classname;
+}
+
+function getInfoByStatus(status){
+	var statusInfo;
+	switch (status) {
+	case 'AVAILABLE':
+		statusInfo = new StatusInfo('#6AFF50','Verfügbar','miconAvailable');
+		break;
+	case 'OCCUPIED':
+		statusInfo = new StatusInfo('#5CB9FF','Beschäftigt','miconOccupied');
+		break;
+	case 'DO_NOT_DISTURB':
+		statusInfo = new StatusInfo('#FF5543','Bitte nicht stören','miconDnD');
+		break;
+	case 'AWAY':
+		statusInfo = new StatusInfo('#DDDDDD','Nicht da','miconAway');
+		break;
+	default:
+		statusInfo = new StatusInfo('#DDDDDD','','');
+		break;
+	}
+	return statusInfo;
+}
+
+function getStatusByStatus(status){
+	switch (status) {
+	case 'AVAILABLE':
+		return 'Verfügbar';
+		break;
+	case 'OCCUPIED':
+		return 'Beschäftigt';
+		break;
+	case 'DO_NOT_DISTURB':
+		return 'Bitte nicht stören';
+		break;
+	case 'AWAY':
+		return 'Nicht da';
+		break;
+	default:
+		return '';
+		break;
+	}
+}
 
 /**
  * This function returns the user object by email
@@ -596,32 +675,37 @@ function balloonify(user){
 	//modifying the id by escaping '.' & '@'
 	var mod_id = id.replace(/\./g, '\\.');
 	mod_id = mod_id.replace(/\@/g, '\\@');
-	
-	
-	if(balloonIsOpen()){ //some balloon is open -> close balloon
+
+	if(openBalloonUserID!=null){ //some balloon is open -> close balloon
+		var previousBalloonifiedID = openBalloonUserID;
 		removeBalloon();
-		if(mod_id===openBalloonUserID){//clicked on icon of just hid balloon -> do not open it again
-			openBalloonUserID=null;
+		if(mod_id===previousBalloonifiedID){//clicked on icon of just hid balloon -> do not open it again
 			return;
 		}
 	}
 
 	//CREATE BALLOON
+		//bring selected user-icon to front
+		bringUserToFront(mod_id);
+	
 		openBalloonUserID = mod_id;
 		
 		var horizontalpos;
 		var verticalpos;
-		if((user.x*factor)<(displayedWidth/2)){
+		if((+user.x)<(+displayedWidth/+2)){
 			horizontalpos = "right"; }else{ horizontalpos = "left"; }
-		if((user.y*factor)<(displayedHeight/2)){
+		if((+user.y)<(+displayedHeight/+2)){
 			verticalpos = "bottom"; }else{ verticalpos = "top"; }
 		var positioning = verticalpos+" "+horizontalpos;
-		
+		var statusInfo = getInfoByStatus(user.status);
 		$(mod_id).showBalloon({
 		    //TODO possibly check for user status - alter balloon
 			position: positioning,
 			showDuration: 250,
-			contents: '<strong>'+user.name+' in Raum '+user.lastPosition+'</strong>'
+			contents: '<p id="balloonParagraph" style="background-color:'+statusInfo.color+';">'
+				+'<strong>'+user.name+' in '+user.lastPosition+'</strong>'
+				+'<br>'+statusInfo.txt+'</p>'
+				/*
 			+'<p>Send me a message!</p>'
 			//+'<input type="hidden" value="'+user.email+'" id="userBalloonID" />'
 			+'<form id="messageForm">'
@@ -643,9 +727,9 @@ function balloonify(user){
 			+'<p>Call me!</p>'
 			+'<form id="callForm">'
 			+'<input type="submit" value="Call '+user.name+'"/>'
-			+'</form>'
+			+'</form>'*/
 		});		
-		document.getElementById("messageForm").parentNode.id = "userBalloon";
+		document.getElementById("balloonParagraph").parentNode.id = "userBalloon";
 		
 	    //Increment the idle time counter every second
 		if(idleInterval==null){
@@ -654,21 +738,56 @@ function balloonify(user){
 }
 
 /**
+ * This function is to be called when a user-icon is selected
+ * @param mod_id the modified id of the icon-img for jquery-selection
+ */
+function bringUserToFront(mod_id){
+//	var id = '#icon_'+user.email;
+//	//modifying the id by escaping '.' & '@'
+//	var mod_id = id.replace(/\./g, '\\.');
+//	mod_id = mod_id.replace(/\@/g, '\\@');
+	$(mod_id).appendTo("#mapscroll");
+	
+	//DO GLOW
+//	var icon=document.createElement("img");
+//	icon.className="micon";
+//	$(mod_id).className = "miconSelected";
+//	$(mod_id).removeClass();
+	$(mod_id).addClass('miconSelected');
+}
+
+
+
+/**
  * This function removes the opened balloon
  */
 function removeBalloon(){
-	if(!balloonIsOpen()){
+	if(!balloonIsOpen()){ //if no balloon is open -> no need to remove
 		openBalloonUserID=null;
+//		alert("removeBalloon - no balloon open");
 		return;
 	}
+	//reset balloon idle counter stuff
 	clearInterval(interval);
 	balloonIdleTime = 0;
+	//debug stuff TODO: remove
 	if(document.getElementById("balloonIdle")!=null){
 		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
 	}
+	//hide...
 	$(openBalloonUserID).hideBalloon();
+	//& delete balloon
 	var balloonElement = document.getElementById("userBalloon");
 	balloonElement.parentNode.removeChild(balloonElement);
+	
+	//REMOVE GLOW
+	//TODO set class by status or rather remove selected-class
+//	$(openBalloonUserID).className="micon";
+	$(openBalloonUserID).removeClass('miconSelected');
+//	$(openBalloonUserID).addClass('micon');
+
+	openBalloonUserID=null;
+
 }
 
 //reset balloonIdleTime with mousemove & keypress
@@ -721,7 +840,7 @@ function balloonIsOpen(){
  */
 $(document).on("mousedown", "#mapscroll", function (event) {
 	  if (!$(event.target).hasClass('micon')) { //if !(click on icon)
-		  if(openBalloonUserID!=null){ //if balloon is open -> hide balloon
+		  if(balloonIsOpen()){ //if balloon is open -> hide balloon
 			  removeBalloon();
 			  openBalloonUserID = null;
 		  }		  
@@ -742,7 +861,7 @@ $(document).on("submit", "form[id^='callForm']", function (event) {
     recipient = recipient.substring(6, recipient.length);
     alert("call "+recipient);
 
-    //TODO obvious
+    //TODO obvious - init call - call server
 
 });
 

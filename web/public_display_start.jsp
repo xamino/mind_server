@@ -2,6 +2,7 @@
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
+
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
@@ -10,10 +11,25 @@
 <script src="javascript/displayMap.js"></script>
 <script src="javascript/jquery.balloon.js"></script>
 <link href="${pageContext.request.contextPath}/css/public_display.css" rel="stylesheet" type="text/css">
+
+
+
 <title>Public Display</title>
 </head>
 <body onload="onLoadOfPdPage()">
 
+<svg height="0" xmlns="http://www.w3.org/2000/svg">
+    <filter id="drop-shadow">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+        <feOffset dx="12" dy="12" result="offsetblur"/>
+        <feFlood flood-color="rgba(0,0,0,0.5)"/>
+        <feComposite in2="offsetblur" operator="in"/>
+        <feMerge>
+            <feMergeNode/>
+            <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+    </filter>
+</svg>
 
 <!-- MAP DISPLAY STUFF -->
 <div id="mapscroll">

@@ -4,7 +4,7 @@
 
 // Setup some general AJAX stuff (always executed)
 $.ajaxSetup({
-    url: 'main',
+    url: '/main',
     type: 'POST',
     contentType: 'application/json; charset=utf-8',
     dataType: 'json'
@@ -19,11 +19,6 @@ $.ajaxSetup({
  */
 function send(data, callback) {
     $.ajax({data: JSON.stringify(data)}).done(function (data) {
-        // Check for logout
-        var test = data.object;
-        if (test.$type == "Error" && test.type == "SECURITY" && test.description == "Session invalid!") {
-            window.location = "index.jsp";
-        }
         callback(data);
     });
 }
@@ -83,7 +78,7 @@ function writeCookie(name, value) {
     var date, expires;
 //    if (days) {
     date = new Date();
-    date.setTime(date.getTime() + (60 * 60 * 1000));
+    date.setTime(date.getTime() + (15 * 60 * 1000));
     expires = "; expires=" + date.toGMTString();
 //            }else{
 //        expires = "";

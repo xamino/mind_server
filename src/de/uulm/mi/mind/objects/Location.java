@@ -6,17 +6,20 @@ package de.uulm.mi.mind.objects;
  */
 public class Location implements Data {
     private int coordinateX, coordinateY;
+    private String key;
     /**
      * Contains WifiMorsel
      */
     private DataList<WifiMorsel> wifiMorsels;
 
     private Location() {
+        key = null;
     }
 
     public Location(int coordinateX, int coordinateY) {
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
+        makeKey();
     }
 
     public Location(int coordinateX, int coordinateY, DataList<WifiMorsel> wifiMorsels) {
@@ -30,6 +33,14 @@ public class Location implements Data {
 
     public void setCoordinateX(int coordinateX) {
         this.coordinateX = coordinateX;
+        makeKey();
+    }
+
+    private void makeKey() {
+        if (getCoordinateX() == 0 && getCoordinateY() == 0) {
+            key = null;
+        } else
+            key = getCoordinateX() + "/" + getCoordinateY();
     }
 
     public int getCoordinateY() {
@@ -38,6 +49,7 @@ public class Location implements Data {
 
     public void setCoordinateY(int coordinateY) {
         this.coordinateY = coordinateY;
+        makeKey();
     }
 
     public DataList<WifiMorsel> getWifiMorsels() {
@@ -52,12 +64,14 @@ public class Location implements Data {
     public String toString() {
         return "Location{" +
                 "coordinateX=" + coordinateX +
-                ", coordinateY=" + coordinateY + ", morsels=" + wifiMorsels +
+                ", coordinateY=" + coordinateY +
+                ", morsels=" + wifiMorsels +
+                ", key=" + key +
                 '}';
     }
 
     @Override
     public String getKey() {
-        return String.valueOf(getCoordinateX()) + "/" + String.valueOf(getCoordinateY());
+        return key;
     }
 }
