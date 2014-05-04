@@ -763,7 +763,7 @@ function loadSensors() {
 }
 
 function writeSensors(data) {
-	alert(data.object.length);
+	alert(JSON.stringify(data.object));	//???
     if (data.object.length == 0) {
     	alert("1");
         var noSensorsInDatabase = "There are currently no sensors in the database.<br> Use the button 'Add Sensors' to add sensors to the system.";
