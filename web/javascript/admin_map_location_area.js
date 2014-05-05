@@ -792,8 +792,8 @@ function removeAllLocationsViaPopup(data) {
  */
 function checkInp() {
     var x = document.getElementById("id").value;
-  //if (x.match(/^[a-zA-Z0-9\-_]+$/)){		//--> problem with click method
-    if (x.match(/^[0-9]+$/)) {
+    if (x.match(/^[a-zA-Z0-9\-_]+$/)){		//--> problem with click method
+  //  if (x.match(/^[0-9]+$/)) {
         return true;
     }
 }

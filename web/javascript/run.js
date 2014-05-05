@@ -975,6 +975,6 @@ function toggleAppSettings(){
     loadTestUser();
 }*/
 
-function settingsBackButton() {
+/*function settingsBackButton() {
     document.getElementById("content_popup").innerHTML = "";
-}
+}*/
