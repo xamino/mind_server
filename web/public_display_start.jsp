@@ -59,7 +59,8 @@
 		</div>
 	</div>
 	<div id="content_popup">
-		<p id="balloonIdle">closed</p>
+		<p id="balloonIdle">0</p>
+		<p id="userInfoOnUpdate">info</p>
 		TODO: CSS
 	</div>
 	<div id ="test_show" style="display:none; overflow: auto;">
