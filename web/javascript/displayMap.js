@@ -71,7 +71,7 @@ function initPublicDisplayStuff(){
     		
     		//get map metrics
     		var mapImgLoad = $("<img />");
-    		mapImgLoad.attr("src", "images/map.png");
+    		mapImgLoad.attr("src", "images/map");
     		mapImgLoad.unbind("load");
     		mapImgLoad.bind("load", function () {
     			originalWidth = this.width;
@@ -610,13 +610,13 @@ function getInfoByStatus(status){
 	var statusInfo;
 	switch (status) {
 	case 'AVAILABLE':
-		statusInfo = new StatusInfo('#6AFF50','Verfügbar','miconAvailable');
+		statusInfo = new StatusInfo('#6AFF50','Verfï¿½gbar','miconAvailable');
 		break;
 	case 'OCCUPIED':
-		statusInfo = new StatusInfo('#5CB9FF','Beschäftigt','miconOccupied');
+		statusInfo = new StatusInfo('#5CB9FF','Beschï¿½ftigt','miconOccupied');
 		break;
 	case 'DO_NOT_DISTURB':
-		statusInfo = new StatusInfo('#FF5543','Bitte nicht stören','miconDnD');
+		statusInfo = new StatusInfo('#FF5543','Bitte nicht stï¿½ren','miconDnD');
 		break;
 	case 'AWAY':
 		statusInfo = new StatusInfo('#DDDDDD','Nicht da','miconAway');
@@ -631,13 +631,13 @@ function getInfoByStatus(status){
 function getStatusByStatus(status){
 	switch (status) {
 	case 'AVAILABLE':
-		return 'Verfügbar';
+		return 'Verfï¿½gbar';
 		break;
 	case 'OCCUPIED':
-		return 'Beschäftigt';
+		return 'Beschï¿½ftigt';
 		break;
 	case 'DO_NOT_DISTURB':
-		return 'Bitte nicht stören';
+		return 'Bitte nicht stï¿½ren';
 		break;
 	case 'AWAY':
 		return 'Nicht da';
