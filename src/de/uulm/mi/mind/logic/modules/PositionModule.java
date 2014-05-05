@@ -218,10 +218,11 @@ public class PositionModule implements Module {
         for (Location databaseLocation : dataBaseLocations) {
             DataList<WifiMorsel> averageMorsels = new DataList<>();
             for (WifiMorsel morsel : databaseLocation.getWifiMorsels()) {
-                if (!sameDeviceClass(requestDeviceModel, morsel.getDeviceModel()) && !DeviceClass.isSimulatedClass(requestDeviceModel)) {
+                // if the morsel mac already exists, skip (contains calls equals)
+                if (averageMorsels.contains(morsel)) {
                     continue;
                 }
-                if (averageMorsels.contains(morsel)) {
+                if (!sameDeviceClass(requestDeviceModel, morsel.getDeviceModel()) && !DeviceClass.isSimulatedClass(requestDeviceModel)) {
                     continue;
                 }
                 // this is the first occurrence of this morsel
