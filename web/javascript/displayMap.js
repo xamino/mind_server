@@ -49,9 +49,7 @@ function retriveOriginalMetrics(allusers){
  * This function retrives the original metrics (width & height) of one icon image
  * @param allusers
  */
-function initPublicDisplayStuff(allusers){
-	
-	//TODO remove parameter allusers
+function initPublicDisplayStuff(){
 	
 	var elem = document.body; // Make the body go full screen.
 	requestFullScreen(elem);
@@ -82,10 +80,8 @@ function initPublicDisplayStuff(allusers){
     			retriveBackgroundImageSizeMetricsAndFactor();
 
     			computeIconSize();
-    			
-    			//TODO remove
-    			updateUserListOnReceive(allusers);
-    			//instead: refreshUserData();
+
+    			refreshUserData();
     			interval = setInterval(function(){refreshUserData();},refreshRate*+1000);
 
     		});
@@ -114,7 +110,9 @@ function requestFullScreen(element) {
  */
 function resetInterval(){
 	clearInterval(interval);
-	interval = setInterval(function(){refreshUserData();},refreshRate*+1000);
+	if(interval==null){
+		interval = setInterval(function(){refreshUserData();},refreshRate*+1000);		
+	}
 }
 
 /**
@@ -282,9 +280,16 @@ function initUsersPlacement(){
 function addUserIcon(user){
 	var divToAugment = document.getElementById("mapscroll");
 	var icon=document.createElement("img");
-	icon.className="micon";
-	icon.src="/images/custom_icons/icon_"+user.email;
 	icon.id="icon_"+user.email;
+	icon.className="micon";
+
+	icon.src="/images/custom_icons/icon_"+user.email;
+	icon.onerror = function () {
+	  this.src = '/images/custom_icons/defaulticon.png'; //Defualt icon
+	};
+	
+//	icon.onError="this.src = '/images/custom_icons/defaulticon'";
+//	icon.src="/images/custom_icons/defaulticon";
 	icon.onclick=function () {
 	    displayUserInfo(user.email);
 	};
@@ -313,21 +318,26 @@ function placeUserIcon(user){
 		
 		var statusinfo = getInfoByStatus(user.status);
 		icon.className = 'micon '+statusinfo.classname;
+		if(user.name==="Patryk"){
+			alert(Math.round(user.x-displayedIconSize/2)+","+Math.round(user.y-displayedIconSize/2));
+		}
 		icon = null;
 	}
 }
 
 /**
  * This function sets the x,y coordinates of each user
- * according to the area as lastPosition.
+ * according to the area as position.
  * Keep in mind: the x and y values are intended to for the center of the icon
  */
 function setUserIconCoordsByArea(){
+
+	
 	users.sort(compareByArea); //sort users by area
 
 //	var areastring = "";
 //	for ( var i = 0; i < users.length; i++) {
-//		areastring += users[i].lastPosition+",";
+//		areastring += users[i].position+",";
 //	}
 //	alert("sorted"+areastring);
 	var area=null;
@@ -338,15 +348,13 @@ function setUserIconCoordsByArea(){
 	var iconsinarea = 0;
 	var iconsperrow = 0;
 	for ( var i = 0; i < users.length+1; ) {
-		if(area==null || users[i]==null || area.ID != users[i].lastPosition){//if new area to solve
+		if(area==null || users[i]==null || area.ID != users[i].position){//if new area to solve
 			if(iconsinarea>1){
 				checkHeight(area,iconsinarea,iconsperrow,(i-iconsinarea));
 				if(i==users.length){break;} //if last user finished
 			}
 			if(users[i]==null){break;}
-			area = getAreaById(users[i].lastPosition);
-			//alert("area: "+Math.round(area.topLeftX*factor)+","+Math.round(area.topLeftY*factor)+
-			//		","+Math.round(area.width*factor)+","+Math.round(area.height*factor));
+			area = getAreaById(users[i].position);
 			//TODO handle area==null;
 			currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
 			currenty = Math.round(area.topLeftY*factor+Math.round(displayedIconSize/2));
@@ -384,6 +392,11 @@ function setUserIconCoordsByArea(){
 //		alert(users[i].x+","+users[i].y);	
 	}//end for each user
 	
+//	var texty = "";
+//	for(var i = 0; i < users.length; i++){
+//		texty += users[i].email+":"+users[i].x+","+users[i].y+"\n";
+//	}
+//	alert(texty);
 }
 
 /**
@@ -420,9 +433,9 @@ function checkHeight(area,iconsInArea,iconsPerRow,i){
 }
 
 function compareByArea(user1,user2) {
-	  if (user1.lastPosition < user2.lastPosition)
+	  if (user1.position < user2.position)
 	     return -1;
-	  if (user1.lastPosition > user2.lastPosition)
+	  if (user1.position > user2.position)
 	    return 1;
 	  return 0;
 }
@@ -443,18 +456,24 @@ function updateUserIconPlacement(){
  * This function should be utilized for callback when requesting
  * updated user data
  */
-function updateUserListOnReceive(updatedUsers){
+function updateUserListOnReceive(data){
+	var updatedUsers = data.object;
+	
+	document.getElementById("userInfoOnUpdate").innerHTML = JSON.stringify(data);
+	
+	
 	var index;
 
 	//update or remove old user
 	for (var i=users.length-1; i >= 0; i--) { //for each old user
 		index = userExistsInUserarray(users[i],updatedUsers); //the index of updatedUsers in which current (old) user exists
 		if(index >= 0){ //current user exists in new user array - update user position
-			if(users[i].lastPosition != updatedUsers[index].lastPosition){ //user's position has changed
-				users[i].lastPosition  = updatedUsers[index].lastPosition;
+//			if(users[i].position != updatedUsers[index].position){ //user's position has changed
+//				users[i].position  = updatedUsers[index].position;
+				users[i] = updatedUsers[index];
 				users[i].x = null;
 				users[i].y = null;
-			}
+//			}
 			updatedUsers.splice(index,1); //remove new user since already handled
 		}else{ //current user is no longer tracked - remove user from list
 			var element = document.getElementById("icon_"+users[i].email);
@@ -463,12 +482,25 @@ function updateUserListOnReceive(updatedUsers){
 		}
 	}
 
-	//add completely new users (who weren't tracked in the previous request/response)
-	for ( var i = 0; i < updatedUsers.length; i++) {
-		users.push(updatedUsers[i]);
-		addUserIcon(updatedUsers[i]);
+	if(updatedUsers !=null){
+		//add completely new users (who weren't tracked in the previous request/response)
+		for ( var i = 0; i < updatedUsers.length; i++) {
+			users.push(updatedUsers[i]);
+			addUserIcon(updatedUsers[i]);
+		}		
+	}
+	
+//	texty = "";
+	//check for AWAY status and set position to "1" for Away-Area
+	for ( var i = 0; i < users.length; i++) {
+		if(users[i].status==="AWAY"){
+			users[i].position = "1";
+		}
+//		texty += users[i].email+":"+users[i].position+",";
 	}
 
+//	alert(texty);
+	
 	//set individual user icon coordinates considering area
 	setUserIconCoordsByArea();
 	//display all currently tracked users
@@ -492,12 +524,18 @@ function userExistsInUserarray(user,userarray){
 	return -1;
 }
 
+var refreshCounter = 0;
 /**
  * This function should be called periodically to refresh the users location visually
  */
 function refreshUserData(){
 	if(balloonIsOpen()){
 		return;
+	}
+	
+	refreshCounter = +refreshCounter+1;
+	if(document.getElementById("balloonIdle")!=null){
+		document.getElementById("balloonIdle").innerHTML = refreshCounter;		
 	}
 //	alert("refreshy");
 	send(new Arrival("read_all_positions", session), updateUserListOnReceive);
@@ -509,28 +547,28 @@ function refreshUserData(){
 function loadTestUser(){
 	var user1 = new User("a@a.a",null,"a",false);
 	user1.status = "OCCUPIED";
-	user1.lastPosition = 3301;
+	user1.position = 3301;
 //	user1.iconRef = "crab.png";
 //	user1.x = 400;
 //	user1.y = 300;
 	var user2 = new User("c@c.c",null,"c",false);
-	user2.lastPosition = 3301;
+	user2.position = 3301;
 	user2.status = "OCCUPIED";
 //	user2.iconRef = "cow.png";
 //	user2.x = 450;
 //	user2.y = 400;
 	var user3 = new User("d@d.d",null,"d",false);
-	user3.lastPosition = 3302;
+	user3.position = 3302;
 	user3.status = "AVAILABLE";
 //	user3.iconRef = "rabbit.png";
 //	user3.x = 450;
 //	user3.y = 600;
 	var user4 = new User("e@e.e",null,"e",false);
-	user4.lastPosition = 3301;
+	user4.position = 3301;
 	user4.status = "AWAY";
 //	user4.iconRef = "sheep.png";
 	var user5 = new User("f@f.f",null,"f",false);
-	user5.lastPosition = 3301;
+	user5.position = 3301;
 	user5.status = "DO_NOT_DISTURB";
 //	user5.iconRef = "deer.png";
 
@@ -554,36 +592,9 @@ function getAreaById(id){
 			return areas[i]; //area has already benn worked with
 		}
 	}
-	alert("area "+id+" does not exist in array");
+//	alert("area "+id+" does not exist in array");
 
 	return null;
-//	//TODO remove static test-data
-//	//TODO if area not found (should not happen) - don't display or put to away-area or ...
-//	var area = null;
-//	switch (id) {
-//	case 3304:
-//		area = new Area(3304, null, 0, 0, 223, 297);
-//		break;
-//	case 3305:
-//		area = new Area(3305, null, 233, 0, 223, 297);
-//		break;
-//	case 336:
-//		area = new Area(336, null, 465, 0, 223, 297);
-//		break;
-//	case 3303:
-//		area = new Area(3303, null, 0, 462, 301, 299);
-//		break;
-//	case 3301:
-//		area = new Area(3301, null, 311, 462, 147, 299);
-//		break;
-//	case 3302:
-//		area = new Area(3302, null, 0, 770, 458, 219);
-//		break;
-//	case 333:
-//		area = new Area(333, null, 465, 462, 220, 529);
-//		break;
-//	}
-//	return area;
 }
 
 
@@ -699,11 +710,10 @@ function balloonify(user){
 		var positioning = verticalpos+" "+horizontalpos;
 		var statusInfo = getInfoByStatus(user.status);
 		$(mod_id).showBalloon({
-		    //TODO possibly check for user status - alter balloon
 			position: positioning,
 			showDuration: 250,
 			contents: '<p id="balloonParagraph" style="background-color:'+statusInfo.color+';">'
-				+'<strong>'+user.name+' in '+user.lastPosition+'</strong>'
+				+'<strong>'+user.name+' in '+user.position+'</strong>'
 				+'<br>'+statusInfo.txt+'</p>'
 				/*
 			+'<p>Send me a message!</p>'
@@ -768,12 +778,9 @@ function removeBalloon(){
 		return;
 	}
 	//reset balloon idle counter stuff
-	clearInterval(interval);
+//	clearInterval(interval);
+//	resetInterval();
 	balloonIdleTime = 0;
-	//debug stuff TODO: remove
-	if(document.getElementById("balloonIdle")!=null){
-		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
-	}
 	//hide...
 	$(openBalloonUserID).hideBalloon();
 	//& delete balloon
@@ -781,10 +788,7 @@ function removeBalloon(){
 	balloonElement.parentNode.removeChild(balloonElement);
 	
 	//REMOVE GLOW
-	//TODO set class by status or rather remove selected-class
-//	$(openBalloonUserID).className="micon";
 	$(openBalloonUserID).removeClass('miconSelected');
-//	$(openBalloonUserID).addClass('micon');
 
 	openBalloonUserID=null;
 
@@ -794,16 +798,16 @@ function removeBalloon(){
 $(document).on("mousemove", function (e) {
 //	alert("mousemove");
 	balloonIdleTime = 0;
-	if(document.getElementById("balloonIdle")!=null){
-		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
-	}
+//	if(document.getElementById("balloonIdle")!=null){
+//		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
+//	}
 });
 $(document).on("keypress", function (e) {
 //	alert("keypress");
 	balloonIdleTime = 0;
-	if(document.getElementById("balloonIdle")!=null){
-		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
-	}
+//	if(document.getElementById("balloonIdle")!=null){
+//		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
+//	}
 });
 
 /**
@@ -813,9 +817,9 @@ $(document).on("keypress", function (e) {
 function timerIncrement() {
 	if(balloonIsOpen()){
 		balloonIdleTime = +balloonIdleTime + 1;
-		if(document.getElementById("balloonIdle")!=null){
-			document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
-		}
+//		if(document.getElementById("balloonIdle")!=null){
+//			document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
+//		}
 		if (balloonIdleTime >= balloonClosingTime) {
 			removeBalloon();
 		}

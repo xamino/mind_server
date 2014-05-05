@@ -58,7 +58,8 @@
 		</div>
 	</div>
 	<div id="content_popup">
-		<p id="balloonIdle">closed</p>
+		<p id="balloonIdle">0</p>
+		<p id="userInfoOnUpdate">info</p>
 
 		<div id ="show_display_settings" style="display:none;">
 		 	<!-- <div id='settingsBrightness'>
