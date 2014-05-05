@@ -817,7 +817,7 @@ function addSensorViaPopup() {
             //	if(password != null){	// if Cancel Button isn't clicked
 
             if (identification != "" && area != "" /*&& password != ""*/) {	//everything is given
-                newSensor = new User(identification, area, password);
+                newSensor = new User(identification, area, tokenHash);
                 doTask("SENSOR_ADD", newSensor, function (data) {
                     if (tokenHash == "" || tokenHash == null) {
                         alert("The following sensor has been added:\n" +

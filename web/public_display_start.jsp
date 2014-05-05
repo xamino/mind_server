@@ -62,7 +62,6 @@
 		<p id="balloonIdle">closed</p>
 		TODO: CSS
 	</div>
-	<div class="clear" style="clear:both;"></div>
 	<div id ="test_show" style="display:none; overflow: auto;">
 		<div id='settingsBrightness'>
 	    <h3>Display Brightness</h3><br>TODO: Brightness Stuff.</div>
