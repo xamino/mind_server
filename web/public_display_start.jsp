@@ -54,7 +54,7 @@
 		<p>App Settings</p>
 		</div>
 		<div id="display_settings">
-		<a href="#" id="display_settings_img" onclick="displaySettingsClicked()"></a>
+		<a href="#" id="display_settings_img" onclick=""></a> 	<!-- displaySettingsClicked() -->
 		<p>Display Settings</p>
 		</div>
 	</div>
@@ -62,13 +62,24 @@
 		<p id="balloonIdle">closed</p>
 		TODO: CSS
 	</div>
+	<div id ="test_show" style="display:none; overflow: auto;">
+		<div id='settingsBrightness'>
+	    <h3>Display Brightness</h3><br>TODO: Brightness Stuff.</div>
+	    <div id='settingsRefresh'>
+	    <hr><br><h3>Refresh Rate</h3><br>TODO: Refresh Stuff.</div>
+	    <a href='#' id='mute_img' onclick='mute()'></a><br>
+	    <hr><br><button type='button' id='displaySettingsBack' onclick='settingsBackButton()'>Back</button>
+	    <button type='button' id='displayLogoutButton' onclick='logoutDisplay()'>Logout Display</button>
+	    </div>
+    </div>
+	
 	<div id="login_location">
-		<div id="location">
+		<!-- <div id="location">
 		<a href="http://ran.ge/" title="Professional WordPress Development" id="location_img" class="pd_link"></a>
 		<p>Location Force</p>
-		</div>
+		</div>-->
 		<div id="login">
-		<a href="http://ran.ge/" title="Professional WordPress Development" id="login_img" class="pd_link"></a>
+		<a href="http://ran.ge/" title="user_login" id="login_img" class="pd_link"></a>
 		<p>Login</p>
 		</div>
 		<div id="privacy">

@@ -79,7 +79,7 @@ public class JsonConverter<E> {
         try {
             return objectJson(object);
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             log.error(TAG, "Failed to create JSON!");
             return null;
         }
@@ -182,7 +182,7 @@ public class JsonConverter<E> {
         try {
             return writeObject(json);
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             log.error(TAG, "Failed!");
             return null;
         }
@@ -305,7 +305,7 @@ public class JsonConverter<E> {
             try {
                 return sdf.parse(value);
             } catch (ParseException e) {
-                e.printStackTrace();
+                // e.printStackTrace();
                 throw new IOException(TAG + ": JsonConverter failed to convert java.util.Date back! Format required " +
                         "is yyyy-MM-dd HH:mm:ss");
             }
