@@ -191,7 +191,7 @@ public class DatabaseController implements ServletContextListener {
                 for (Data d : dataList) {
                     sessionContainer.delete(d);
                 }
-                log.log(TAG, "Deleted "+ size +" objects from DB: " + dataList.toString());
+                log.log(TAG, "Deleted " + size + " objects from DB: " + dataList.toString());
                 return true;
             }
         } catch (Exception e) {
@@ -225,7 +225,7 @@ public class DatabaseController implements ServletContextListener {
 
         log.log(TAG, "db4o startup on " + dbFilePath);
 
-        //runMaintenance(rootContainer);
+        runMaintenance(rootContainer);
 
         if (reinitialize) {
             reinit(rootContainer);
@@ -235,66 +235,123 @@ public class DatabaseController implements ServletContextListener {
     }
 
     private void runMaintenance(ObjectContainer rootContainer) {
-        ObjectSet<WifiMorsel> set =rootContainer.query(new Predicate<WifiMorsel>() {
-            @Override
-            public boolean match(WifiMorsel o) {
-                return true;
-            }
-        });
-        log.log(TAG,"Morsels: " + set.size());
-        ObjectSet<Location> set1 =rootContainer.query(new Predicate<Location>() {
-            @Override
-            public boolean match(Location o) {
-                return true;
-            }
-        });
-        log.log(TAG,"Locations: " + set1.size());
-        ObjectSet<Area> set2 =rootContainer.query(new Predicate<Area>() {
+        log.log(TAG, "In DB Stats:");
+
+        ObjectSet<Area> set2 = rootContainer.query(new Predicate<Area>() {
             @Override
             public boolean match(Area o) {
                 return true;
             }
         });
-        log.log(TAG,"Areas: " + set2.size());
+        log.log(TAG, "Areas: " + set2.size());
+        ObjectSet<Location> set1 = rootContainer.query(new Predicate<Location>() {
+            @Override
+            public boolean match(Location o) {
+                return true;
+            }
+        });
+        log.log(TAG, "Locations: " + set1.size());
+        ObjectSet<WifiMorsel> set = rootContainer.query(new Predicate<WifiMorsel>() {
+            @Override
+            public boolean match(WifiMorsel o) {
+                return true;
+            }
+        });
+        log.log(TAG, "Morsels: " + set.size());
 
-
-        ObjectSet<Area> set3 =rootContainer.query(new Predicate<Area>() {
+        log.log(TAG, "In Universe:");
+        ObjectSet<Area> set3 = rootContainer.query(new Predicate<Area>() {
             @Override
             public boolean match(Area o) {
                 return o.getKey().equals("University");
             }
         });
-
-        int counter = 0;
-        for (Location location : set1) {
-            if(!set3.get(0).getLocations().contains(location)){
-                rootContainer.delete(location);
-                counter++;
-            }
+        Area university = set3.get(0);
+        log.log(TAG, "Locations: " + university.getLocations().size());
+        int morselCounter = 0;
+        for (Location location : university.getLocations()) {
+            morselCounter += location.getWifiMorsels().size();
         }
-        log.log(TAG,"Orphaned Locations removed: " + counter);
-
-        set =rootContainer.query(new Predicate<WifiMorsel>() {
-            @Override
-            public boolean match(WifiMorsel o) {
-                return true;
-            }
-        });
-        log.log(TAG,"New Morsels: " + set.size());
-        set1 =rootContainer.query(new Predicate<Location>() {
-            @Override
-            public boolean match(Location o) {
-                return true;
-            }
-        });
-        log.log(TAG,"New Locations: " + set1.size());
+        log.log(TAG, "Morsels: " + morselCounter);
 
 
+        //cleanOrphans(rootContainer);
+
+        /*for (WifiMorsel wifiMorsel : set) {
+            if (wifiMorsel.getWifiName().equals("eduroam") || wifiMorsel.getWifiName().equals("welcome"))
+                rootContainer.delete(wifiMorsel);
+        }
+*/
         /*ObjectSet<Location> locs = rootContainer.query(Location.class);
         for (Location loc : locs){
             loc.setCoordinateX(loc.getCoordinateX());
             rootContainer.store(loc);
         }*/
+    }
+
+    private void cleanOrphans(ObjectContainer rootContainer) {
+        ObjectSet<Location> set1 = rootContainer.query(new Predicate<Location>() {
+            @Override
+            public boolean match(Location o) {
+                return true;
+            }
+        });
+        ObjectSet<WifiMorsel> allDBMorsels = rootContainer.query(new Predicate<WifiMorsel>() {
+            @Override
+            public boolean match(WifiMorsel o) {
+                return true;
+            }
+        });
+        ObjectSet<Area> set3 = rootContainer.query(new Predicate<Area>() {
+            @Override
+            public boolean match(Area o) {
+                return o.getKey().equals("University");
+            }
+        });
+        Area university = set3.get(0);
+
+        int counter = 0;
+        for (Location location : set1) {
+            if (!university.getLocations().contains(location)) {
+                rootContainer.delete(location);
+                counter++;
+            }
+        }
+        log.log(TAG, "Orphaned Locations removed: " + counter);
+
+        int mCounter = 0;
+        int c = 0;
+        for (WifiMorsel dbMorsel : allDBMorsels) {
+            log.log(TAG, ++c + ": " + dbMorsel.toString());
+            boolean isOrphan = true;
+            for (Location location : university.getLocations()) {
+                for (WifiMorsel morsel : location.getWifiMorsels()) {
+                    if (morsel.getWifiMac().equals(dbMorsel.getWifiMac())
+                            && (morsel.getWifiLevel() == dbMorsel.getWifiLevel())
+                            && (morsel.getWifiChannel() == dbMorsel.getWifiChannel())
+                            && bothNullOrEqual(morsel.getDeviceModel(), dbMorsel.getDeviceModel())
+                            && (morsel.getWifiName().equals(dbMorsel.getWifiName()))) {
+                        isOrphan = false;
+                        //break;
+                    }
+                }
+                //if (!isOrphan) break;
+            }
+            if (isOrphan) {
+                rootContainer.delete(dbMorsel);
+                mCounter++;
+            }
+        }
+
+        log.log(TAG, "Orphaned Morsels removed: " + mCounter);
+
+    }
+
+    private boolean bothNullOrEqual(String deviceModel, String deviceModel1) {
+        if (deviceModel == null && deviceModel1 == null) return true;
+        else if (deviceModel != null && deviceModel1 != null) {
+            return deviceModel.equals(deviceModel1);
+        } else return false;
     }
 
     /**
