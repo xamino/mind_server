@@ -225,7 +225,7 @@ public class PositionModule implements Module {
                     }
                 }
                 int average = summedLevel / counter;
-                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel()));
+                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel()));
             }
             databaseLocation.setWifiMorsels(averageMorsels);
         }

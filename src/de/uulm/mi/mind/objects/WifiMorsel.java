@@ -20,14 +20,17 @@ public class WifiMorsel implements Data, Comparable {
 
     private int wifiChannel;
 
+    private String deviceModel;
+
     private WifiMorsel() {
     }
 
-    public WifiMorsel(String wifiMac, String wifiName, int wifiLevel, int wifiChannel) {
+    public WifiMorsel(String wifiMac, String wifiName, int wifiLevel, int wifiChannel, String deviceModel) {
         this.wifiMac = wifiMac;
         this.wifiName = wifiName;
         this.wifiLevel = wifiLevel;
         this.wifiChannel = wifiChannel;
+        this.deviceModel = deviceModel;
     }
 
     public String getWifiMac() {
@@ -60,6 +63,8 @@ public class WifiMorsel implements Data, Comparable {
                 "wifiMac='" + wifiMac + '\'' +
                 ", wifiName='" + wifiName + '\'' +
                 ", wifiLevel=" + wifiLevel +
+                ", wifiChannel=" + wifiChannel +
+                ", deviceModel='" + deviceModel + '\'' +
                 '}';
     }
 
@@ -100,5 +105,13 @@ public class WifiMorsel implements Data, Comparable {
     @Override
     public String getKey() {
         return null;
+    }
+
+    public String getDeviceModel() {
+        return deviceModel;
+    }
+
+    public void setDeviceModel(String deviceModel) {
+        this.deviceModel = deviceModel;
     }
 }
