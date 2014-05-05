@@ -198,39 +198,7 @@ $(document).on("submit", "#loginDisplayForm", function (event) {
 });
 
 
-/**
- * on link 'App Settings' clicked in public_display_start.jsp
- */
-function appSettingsClicked() {
-    var appContents = "";
-    appContents = "<div id='appOne'>";
-    appContents += "Settings of app one.</div>";
-    appContents += "</div><div id='appTwo'>";
-    appContents += "Settings of app two.";
-    appContents += "</div>";
-    appContents += "<button type='button' id='appSettingsBack' onclick='settingsBackButton()'>Back</button>";
-    document.getElementById("content_popup").innerHTML = appContents;
 
-}
-
-
-/*function displaySettingsClicked() {
-    var settingsContents = "";
-    settingsContents = "<div id='settingsBrightness'>";
-    settingsContents += "<h3>Display Brightness</h3><br>TODO: Brightness Stuff.</div>";
-    settingsContents += "</div><div id='settingsRefresh'>";
-    settingsContents += "<hr><br><h3>Refresh Rate</h3><br>TODO: Refresh Stuff.</div>";
-    settingsContents += "</div><a href='#' id='mute_img' onclick='mute()'></a><br>";
-    settingsContents += "<hr><br><button type='button' id='displaySettingsBack' onclick='settingsBackButton()'>Back</button>";
-    settingsContents += "<button type='button' id='displayLogoutButton' onclick='logoutDisplay()'>Logout Display</button>";
-    document.getElementById("content_popup").innerHTML = settingsContents;
-    
-    loadTestUser();
-}*/
-
-function settingsBackButton() {
-    document.getElementById("content_popup").innerHTML = "";
-}
 
 function mute() {
     alert("TODO: mute");
@@ -817,7 +785,7 @@ function addSensorViaPopup() {
             //	if(password != null){	// if Cancel Button isn't clicked
 
             if (identification != "" && area != "" /*&& password != ""*/) {	//everything is given
-                newSensor = new User(identification, area, tokenHash);
+                var newSensor = new WifiSensor(identification, tokenHash, area);
                 doTask("SENSOR_ADD", newSensor, function (data) {
                     if (tokenHash == "" || tokenHash == null) {
                         alert("The following sensor has been added:\n" +
@@ -935,15 +903,78 @@ function handleAllUsersPositionData(){
 	initPublicDisplayStuff();
 }
 
+/*********************** public display - toggle settings **************************/
 
-$( "#display_settings_img" ).click(function() {
-	  /*$( "#test_show" ).toggle( "slow", function() {
-	    // Animation complete.
-	  });*/
-	  /*if ($('#test_show').css('visibility')=='hidden'){
-        $('#test_show').css('visibility', 'visible');
-    } else {
-        $('#test_show').css('visibility', 'hidden');
-    }*/
-	$( "#test_show" ).toggle();
+/**
+ * toggle the slide effect on the public displays for the display settings
+ */
+function toggleDisplaySettings(){
+	if($('#show_app_settings').css('display') != 'none'){	//check wether app settings are still open
+		$( "#show_app_settings" ).toggle("slow", function() {
+				$('#app_settings_img').css('background-image', 'url(../images/pd_icons/settings_default_350px.png)');
+		});
+	}
+	$( "#show_display_settings" ).toggle("slow", function() {
+		if($('#show_display_settings').css('display') != 'none'){
+			$('#display_settings_img').css('background-image', 'url(../images/pd_icons/settings_clicked_350px.png)');
+		}
+		if($('#show_display_settings').css('display') != 'block'){
+			$('#display_settings_img').css('background-image', 'url(../images/pd_icons/settings_default_350px.png)');
+		}
 	});
+
+}
+
+/**
+ * toggle the slide effect on the public displays for the app settings
+ */
+function toggleAppSettings(){
+	if($('#show_display_settings').css('display') != 'none'){ //check wether app settings are still open
+		$( "#show_display_settings" ).toggle("slow", function() {
+			$('#display_settings_img').css('background-image', 'url(../images/pd_icons/settings_default_350px.png)');
+		});
+	}
+	$( "#show_app_settings" ).toggle("slow", function() {
+		if($('#show_app_settings').css('display') != 'none'){
+			$('#app_settings_img').css('background-image', 'url(../images/pd_icons/settings_clicked_350px.png)');
+		}
+		if($('#show_app_settings').css('display') != 'block'){
+			$('#app_settings_img').css('background-image', 'url(../images/pd_icons/settings_default_350px.png)');
+		}
+	});
+
+}
+
+/**
+ * on link 'App Settings' clicked in public_display_start.jsp
+ */
+/*function appSettingsClicked() {
+    var appContents = "";
+    appContents = "<div id='appOne'>";
+    appContents += "Settings of app one.</div>";
+    appContents += "</div><div id='appTwo'>";
+    appContents += "Settings of app two.";
+    appContents += "</div>";
+    appContents += "<button type='button' id='appSettingsBack' onclick='settingsBackButton()'>Back</button>";
+    document.getElementById("content_popup").innerHTML = appContents;
+
+}*/
+
+
+/*function displaySettingsClicked() {
+    var settingsContents = "";
+    settingsContents = "<div id='settingsBrightness'>";
+    settingsContents += "<h3>Display Brightness</h3><br>TODO: Brightness Stuff.</div>";
+    settingsContents += "</div><div id='settingsRefresh'>";
+    settingsContents += "<hr><br><h3>Refresh Rate</h3><br>TODO: Refresh Stuff.</div>";
+    settingsContents += "</div><a href='#' id='mute_img' onclick='mute()'></a><br>";
+    settingsContents += "<hr><br><button type='button' id='displaySettingsBack' onclick='settingsBackButton()'>Back</button>";
+    settingsContents += "<button type='button' id='displayLogoutButton' onclick='logoutDisplay()'>Logout Display</button>";
+    document.getElementById("content_popup").innerHTML = settingsContents;
+    
+    loadTestUser();
+}*/
+
+function settingsBackButton() {
+    document.getElementById("content_popup").innerHTML = "";
+}
