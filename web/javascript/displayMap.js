@@ -960,3 +960,35 @@ function doScale(value){
 	previousScaleValue = value;
 	
 }*/
+
+function changeRefreshRate(value){
+
+	if(value == 1){
+		refreshRate = 5;
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 1 (every 5 sec)';
+	}
+	if(value == 2){
+		refreshRate = 10;
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 2 (every 10 sec)';
+	}
+	if(value == 3){
+		refreshRate = 15;
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 3 (every 15 sec)';
+	}
+	if(value == 4){
+		refreshRate = 30;
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 4 (every 30 sec)';
+	}
+	if(value == 5){
+		refreshRate = 60;
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 5 (every 60 sec)';
+	}
+	resetIntervall();
+}
+
+/*
+function changeBrightness(value){
+
+	document.getElementById("slidertext_brightness").innerHTML = "Brightness: "+value;
+	
+}*/
