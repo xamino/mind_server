@@ -214,7 +214,7 @@ function appSettingsClicked() {
 }
 
 
-function displaySettingsClicked() {
+/*function displaySettingsClicked() {
     var settingsContents = "";
     settingsContents = "<div id='settingsBrightness'>";
     settingsContents += "<h3>Display Brightness</h3><br>TODO: Brightness Stuff.</div>";
@@ -226,7 +226,7 @@ function displaySettingsClicked() {
     document.getElementById("content_popup").innerHTML = settingsContents;
     
     loadTestUser();
-}
+}*/
 
 function settingsBackButton() {
     document.getElementById("content_popup").innerHTML = "";
@@ -759,18 +759,15 @@ function removeDisplayViaPopup(data) {
  */
 function loadSensors() {
     var sensors = new WifiSensor(null, null, null);
-    doTask("SENSOR_READ,", sensors, writeSensors);
+    doTask("SENSOR_READ", sensors, writeSensors);
 }
 
 function writeSensors(data) {
-	alert(JSON.stringify(data.object));	//???
     if (data.object.length == 0) {
-    	alert("1");
         var noSensorsInDatabase = "There are currently no sensors in the database.<br> Use the button 'Add Sensors' to add sensors to the system.";
         document.getElementById("table_space").innerHTML = noSensorsInDatabase;
     }
     else {
-    	alert("2");
         var tablecontents = "";
         tablecontents = "<table border ='1'>";
         tablecontents += "<tr>";
@@ -790,7 +787,7 @@ function writeSensors(data) {
             //tablecontents += "<td><input type='submit' value='Edit User' onClick='javascript:popupOpen_editUser(this.id)' id='editUser" +i+ "'/></td>";
             //tablecontents += "<td><input type='submit' value='Remove User' onClick='javascript:popupOpen_removeUser(this.id)' id='removeUser" +i+ "'/></td>";
             //tablecontents += "<td><input type='submit' value='Edit User' onClick='editUserViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
-            tablecontents += "<td><input type='submit' value='Remove User' onClick='removeUserViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
+            tablecontents += "<td><input type='submit' value='Remove Sensor Data' onClick='removeSensorViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
             tablecontents += "</tr>";
         }
         tablecontents += "</table>";
@@ -801,12 +798,55 @@ function writeSensors(data) {
 }
 
 /**
+ * on Button click 'Add Sensor' in admin_sensor_management.jsp
+ * adds a new sensor with the given identification, area and popup
+ */
+function addSensorViaPopup() {
+
+
+    var identification = prompt("Please enter the identification of the sensor you want to add:");
+
+    if (identification != null) {	// if Cancel Button isn't clicked
+
+        var area = prompt("Please enter the area of the sensor you want to add:");
+
+        if (area != null) {	// if Cancel Button isn't clicked
+
+            var tokenHash = prompt("Please enter the password of the sensor you want to add:");
+
+            //	if(password != null){	// if Cancel Button isn't clicked
+
+            if (identification != "" && area != "" /*&& password != ""*/) {	//everything is given
+                newSensor = new User(identification, area, password);
+                doTask("SENSOR_ADD", newSensor, function (data) {
+                    if (tokenHash == "" || tokenHash == null) {
+                        alert("The following sensor has been added:\n" +
+                            "Identification: " + identification + "\n" +
+                            "Area: " + area + "\n" +
+                            "Generated Password: " + data.object.description);
+                    } else {
+                        alert("The following sensor has been added:\n" +
+                            "Identification: " + identification + "\n" +
+                            "Area: " + area + "\n" +
+                            "Password: " + tokenHash);
+                    }
+                    window.location.reload();
+                });
+
+            }
+
+        }
+    }
+}
+
+
+/**
  * Creates a popup, enabling the admin to delete the sensor
  * @param data
  * the sensor data that can be deleted (JSON.stringified)
  */
-function removeUserViaPopup(data) {
-    var r = confirm("Do you want to remove the user with the identification'" + data.identification + "' ?");
+function removeSensorViaPopup(data) {
+    var r = confirm("Do you want to remove the sensor with the identification'" + data.identification + "' ?");
     if (r == true) {
         var sensortodelete = new WifiSensor(data.identification, null, null);
         doTask("SENSOR_REMOVE", sensortodelete, function (event) {
@@ -817,6 +857,11 @@ function removeUserViaPopup(data) {
 
         });
     }
+}
+
+
+if($('#settingsBrightness').is(':visible')) {
+    alert("da");
 }
 
 
@@ -890,3 +935,14 @@ function handleAllUsersPositionData(){
 }
 
 
+$( "#display_settings_img" ).click(function() {
+	  /*$( "#test_show" ).toggle( "slow", function() {
+	    // Animation complete.
+	  });*/
+	  /*if ($('#test_show').css('visibility')=='hidden'){
+        $('#test_show').css('visibility', 'visible');
+    } else {
+        $('#test_show').css('visibility', 'hidden');
+    }*/
+	$( "#test_show" ).toggle();
+	});
