@@ -43,8 +43,9 @@ function build() {
     });
     send(new Arrival("location_read", session, new Location()), function (data) {
         var arr = data.object;
-        b_table('locations_1', arr.slice(0, arr.length / 2));
-        b_table('locations_2', arr.slice(1 + arr.length / 2, arr.length - 1));
+        var lengthHalf = Math.floor(arr.length / 2);
+        b_table('locations_1', arr.slice(0, lengthHalf));
+        b_table('locations_2', arr.slice(1 + lengthHalf, arr.length - 1));
     });
     send(new Arrival("area_read", session, new Area("University")), function (data) {
         var locs = data.object[0].locations;
@@ -54,9 +55,10 @@ function build() {
                 morsels.push(mor);
             });
         });
+        var lengthHalf = Math.floor(morsels.length / 2);
         // because they are so many, divide into two tables
-        b_table('morsels_1', morsels.slice(0, morsels.length / 2));
-        b_table('morsels_2', morsels.slice(1 + morsels.length / 2, morsels.length - 1));
+        b_table('morsels_1', morsels.slice(0, lengthHalf));
+        b_table('morsels_2', morsels.slice(1 + lengthHalf, morsels.length - 1));
     });
 }
 
@@ -107,7 +109,7 @@ var Reflector = function (obj) {
 function private_logout() {
     // remove session
     deleteCookie("MIND_Admin_C_session");
-    send(new Arrival("logout", session, null), function(data) {
+    send(new Arrival("logout", session, null), function (data) {
         window.location = "/login.jsp";
     });
 }
