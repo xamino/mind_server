@@ -110,13 +110,10 @@ function requestFullScreen(element) {
  * This function resets the interval - should be called after the refreshRate was changed
  */
 function initInterval(){
-	alert("reset interval to "+refreshRate);
 	if(interval!=null){
 		clearInterval(interval);		
 	}
-//	if(interval==null){
-		interval = setInterval(function(){refreshUserData();},refreshRate*+1000);		
-//	}
+	interval = setInterval(function(){refreshUserData();},refreshRate*+1000);		
 }
 
 /**
