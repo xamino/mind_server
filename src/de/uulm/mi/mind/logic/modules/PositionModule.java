@@ -206,6 +206,9 @@ public class PositionModule implements Module {
         // Morsels from the current request which are to be compared to the database values
         DataList<WifiMorsel> requestWifiMorsels = request.getWifiMorsels();
 
+        // Should exists because we checked for existing uni wifi morsel before
+        String requestDeviceModel = requestWifiMorsels.get(0).getDeviceModel();
+
         // Get University Area containing all locations from database
         Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("University"))).get(0);
         DataList<Location> dataBaseLocations = uniArea.getLocations();
@@ -214,6 +217,9 @@ public class PositionModule implements Module {
         for (Location databaseLocation : dataBaseLocations) {
             DataList<WifiMorsel> averageMorsels = new DataList<>();
             for (WifiMorsel morsel : databaseLocation.getWifiMorsels()) {
+                if(!sameDevice(requestDeviceModel, morsel.getDeviceModel())){
+                    continue;
+                }
                 if (averageMorsels.contains(morsel)) {
                     continue;
                 }
@@ -228,7 +234,7 @@ public class PositionModule implements Module {
                         counter++;
                     }
                 }
-                int average = summedLevel / counter;
+                int average = (int) (((float)summedLevel) / ((float)counter));
                 averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel()));
             }
             databaseLocation.setWifiMorsels(averageMorsels);
@@ -270,6 +276,15 @@ public class PositionModule implements Module {
             }
         }
         return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap);
+    }
+
+    private boolean sameDevice(String deviceModel, String deviceModel1) {
+        boolean sameDevice;
+        if (deviceModel == null && deviceModel1 == null) sameDevice = true;
+        else if (deviceModel != null && deviceModel1 != null) {
+            sameDevice = deviceModel.equals(deviceModel1);
+        } else sameDevice = false;
+        return sameDevice;
     }
 
     /**
