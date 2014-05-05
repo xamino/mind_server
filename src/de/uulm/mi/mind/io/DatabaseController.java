@@ -2,6 +2,7 @@ package de.uulm.mi.mind.io;
 
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
+import com.db4o.ObjectSet;
 import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.query.Predicate;
 import com.db4o.query.Query;
@@ -186,10 +187,11 @@ public class DatabaseController implements ServletContextListener {
             } else if (data != null && data.getKey() != null && dataList.isEmpty()) { // removal of specific instance
                 return false;
             } else {
+                int size = dataList.size();
                 for (Data d : dataList) {
                     sessionContainer.delete(d);
                 }
-                log.log(TAG, "Deleted from DB: " + dataList.toString());
+                log.log(TAG, "Deleted "+ size +" objects from DB: " + dataList.toString());
                 return true;
             }
         } catch (Exception e) {
@@ -212,6 +214,7 @@ public class DatabaseController implements ServletContextListener {
         //dbconfig.common().diagnostic().addListener(new DiagnosticToConsole());
         dbconfig.common().objectClass(Area.class).cascadeOnUpdate(true);
         dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);
+        dbconfig.common().objectClass(Location.class).cascadeOnDelete(true);
         //dbconfig.common().optimizeNativeQueries(true);
         dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
         dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
@@ -222,17 +225,76 @@ public class DatabaseController implements ServletContextListener {
 
         log.log(TAG, "db4o startup on " + dbFilePath);
 
-        /*ObjectSet<Location> locs = rootContainer.query(Location.class);
-        for (Location loc : locs){
-            loc.setCoordinateX(loc.getCoordinateX());
-            rootContainer.store(loc);
-        }*/
+        //runMaintenance(rootContainer);
 
         if (reinitialize) {
             reinit(rootContainer);
             rootContainer.commit();
         }
 
+    }
+
+    private void runMaintenance(ObjectContainer rootContainer) {
+        ObjectSet<WifiMorsel> set =rootContainer.query(new Predicate<WifiMorsel>() {
+            @Override
+            public boolean match(WifiMorsel o) {
+                return true;
+            }
+        });
+        log.log(TAG,"Morsels: " + set.size());
+        ObjectSet<Location> set1 =rootContainer.query(new Predicate<Location>() {
+            @Override
+            public boolean match(Location o) {
+                return true;
+            }
+        });
+        log.log(TAG,"Locations: " + set1.size());
+        ObjectSet<Area> set2 =rootContainer.query(new Predicate<Area>() {
+            @Override
+            public boolean match(Area o) {
+                return true;
+            }
+        });
+        log.log(TAG,"Areas: " + set2.size());
+
+
+        ObjectSet<Area> set3 =rootContainer.query(new Predicate<Area>() {
+            @Override
+            public boolean match(Area o) {
+                return o.getKey().equals("University");
+            }
+        });
+
+        int counter = 0;
+        for (Location location : set1) {
+            if(!set3.get(0).getLocations().contains(location)){
+                rootContainer.delete(location);
+                counter++;
+            }
+        }
+        log.log(TAG,"Orphaned Locations removed: " + counter);
+
+        set =rootContainer.query(new Predicate<WifiMorsel>() {
+            @Override
+            public boolean match(WifiMorsel o) {
+                return true;
+            }
+        });
+        log.log(TAG,"New Morsels: " + set.size());
+        set1 =rootContainer.query(new Predicate<Location>() {
+            @Override
+            public boolean match(Location o) {
+                return true;
+            }
+        });
+        log.log(TAG,"New Locations: " + set1.size());
+
+
+        /*ObjectSet<Location> locs = rootContainer.query(Location.class);
+        for (Location loc : locs){
+            loc.setCoordinateX(loc.getCoordinateX());
+            rootContainer.store(loc);
+        }*/
     }
 
     /**

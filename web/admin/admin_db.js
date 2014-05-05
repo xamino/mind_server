@@ -59,6 +59,7 @@ function build() {
         // because they are so many, divide into two tables
         b_table('morsels_1', morsels.slice(0, lengthHalf));
         b_table('morsels_2', morsels.slice(1 + lengthHalf, morsels.length - 1));
+        $('#morsel_amount').text(morsels.length);
     });
 }
 

@@ -303,9 +303,12 @@ public class ServletFunctions {
                 data = moduleManager.handleTask(Task.User.READ, arrival.getObject());
                 message = checkDataMessage(data, DataList.class);
                 if (message == null) {
-                    // todo how to strip password from all users?
-                    // return ((User) data).safeClone();
-                    return data;
+                    DataList<User> users = new DataList<>();
+                    DataList<User> fromDB = ((DataList<User>) data);
+                    for (User bum : fromDB) {
+                        users.add(bum.safeClone());
+                    }
+                    return users;
                 }
                 return nullMessageCatch(message);
             case ADMIN_USER_ADD:

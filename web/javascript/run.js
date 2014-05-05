@@ -785,7 +785,7 @@ function addSensorViaPopup() {
             //	if(password != null){	// if Cancel Button isn't clicked
 
             if (identification != "" && area != "" /*&& password != ""*/) {	//everything is given
-                newSensor = new User(identification, area, tokenHash);
+                var newSensor = new WifiSensor(identification, tokenHash, area);
                 doTask("SENSOR_ADD", newSensor, function (data) {
                     if (tokenHash == "" || tokenHash == null) {
                         alert("The following sensor has been added:\n" +

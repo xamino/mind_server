@@ -118,6 +118,8 @@ public class PositionModule implements Module {
         }
         // check location against available sensor data
         if (sniffedDevices.contains(ip)) {
+            log.log(TAG, "Sensors see device at " + sniffedDevices.get(ip).getPosition() + ".");
+            /*
             SensedDevice device = sniffedDevices.get(ip);
             if (!device.getPosition().equals(area.getID())) {
                 log.error(TAG, "Sensor and algorithm see different positions!");
@@ -126,7 +128,9 @@ public class PositionModule implements Module {
                 // todo remove this once the merge works
                 log.log(TAG, "Sensor and algo are synced.");
             }
+            */
         }
+        log.log(TAG, "Algo sees device at " + area.getID() + ".");
 
         // send back the location that the server thinks you're at with the area
         DataList<Location> loca = new DataList<>();
@@ -225,7 +229,7 @@ public class PositionModule implements Module {
                     }
                 }
                 int average = summedLevel / counter;
-                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel()));
+                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel()));
             }
             databaseLocation.setWifiMorsels(averageMorsels);
         }
