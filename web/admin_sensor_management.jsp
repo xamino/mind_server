@@ -34,7 +34,7 @@
 </div>
 <div id="text-content">
 	 <input type="submit" value="Add Sensor" onClick="addSensorViaPopup()" />
-	 <br>Info - Add Sensor: You have to use the App for this.
+	 <br>Info - Add Sensor: You have to add identification, area and password for the sensor. If you don't enter a password mind will generate one for you.
 	 <!-- <br>Info - Edit User: You can't edit a user's email. <br>If you want to change an email you have to add a new user with the desired email (and remove the user with the old email).
 	 <br>Info - Remove User: You can't remove yourself. Another admin has to remove you if necessary.-->
 	 <div id="infoText"></div>
