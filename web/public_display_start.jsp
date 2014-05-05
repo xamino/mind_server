@@ -46,47 +46,49 @@
 
 
 <!-- END MAP DISPLAY STUFF -->
-
 <div id="content">
 	<div id="settings">
 		<div id="app_settings">
-		<a href="#" id="app_settings_img" onclick="appSettingsClicked()"></a>
+		<a href="#" id="app_settings_img" onclick="toggleAppSettings()"></a>	<!-- appSettingsClicked() -->
 		<p>App Settings</p>
 		</div>
 		<div id="display_settings">
-		<a href="#" id="display_settings_img" onclick=""></a> 	<!-- displaySettingsClicked() -->
+		<a href="#" id="display_settings_img" onclick="toggleDisplaySettings()"></a> 	<!-- displaySettingsClicked() -->
 		<p>Display Settings</p>
 		</div>
 	</div>
 	<div id="content_popup">
 		<p id="balloonIdle">closed</p>
-		TODO: CSS
-	</div>
-	<div id ="test_show" style="display:none; overflow: auto;">
-		<div id='settingsBrightness'>
-	    <h3>Display Brightness</h3><br>TODO: Brightness Stuff.</div>
-	    <div id='settingsRefresh'>
-	    <hr><br><h3>Refresh Rate</h3><br>TODO: Refresh Stuff.</div>
-	    <a href='#' id='mute_img' onclick='mute()'></a><br>
-	    <hr><br><button type='button' id='displaySettingsBack' onclick='settingsBackButton()'>Back</button>
-	    <button type='button' id='displayLogoutButton' onclick='logoutDisplay()'>Logout Display</button>
+
+		<div id ="show_display_settings" style="display:none;">
+		 	<div id='settingsBrightness'>
+		    <h3>Display Brightness</h3><br>TODO: Brightness Stuff.</div>
+		    <div id='settingsRefresh'>
+		    <hr><br><h3>Refresh Rate</h3><br>TODO: Refresh Stuff.</div>
+		    <a href='#' id='mute_img' onclick='mute()'></a><br>
+		    <hr><br><button type='button' id='displaySettingsBack' class="shadow" onclick='toggleDisplaySettings()'>Back</button> <!-- settingsBackButton() -->
+		    <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display</button>
 	    </div>
-    </div>
-	
-	<div id="login_location">
-		<!-- <div id="location">
-		<a href="http://ran.ge/" title="Professional WordPress Development" id="location_img" class="pd_link"></a>
-		<p>Location Force</p>
-		</div>-->
-		<div id="login">
-		<a href="http://ran.ge/" title="user_login" id="login_img" class="pd_link"></a>
-		<p>Login</p>
+	    <div id ="show_app_settings" style="display:none;">
+	    	There are currently no apps on your system.
+	    	<hr><br><button type='button' id='appSettingsBack' class="shadow" onclick='toogleAppSettings()'>Back</button>
+	    </div>
+	  </div>
+    	<div id="login_location">
+			<!-- <div id="location">
+			<a href="http://ran.ge/" title="Professional WordPress Development" id="location_img" class="pd_link"></a>
+			<p>Location Force</p>
+			</div>-->
+			<div id="login">
+			<a href="#" title="user_login" id="login_img" class="pd_link"></a>
+			<p>Login</p>
+			</div>
+			<div id="privacy">
+			<a href="#" title="Professional WordPress Development" id="privacy_img" class="pd_link"></a>
+			<p>Privacy Setting</p>
+			</div>
 		</div>
-		<div id="privacy">
-		<a href="http://ran.ge/" title="Professional WordPress Development" id="privacy_img" class="pd_link"></a>
-		<p>Privacy Setting</p>
-		</div>
-	</div>
+
 </div>
 </body>
 </html>
