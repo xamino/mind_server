@@ -7,6 +7,7 @@ import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.enums.DeviceClass;
 import de.uulm.mi.mind.objects.enums.Status;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
@@ -206,6 +207,9 @@ public class PositionModule implements Module {
         // Morsels from the current request which are to be compared to the database values
         DataList<WifiMorsel> requestWifiMorsels = request.getWifiMorsels();
 
+        // Should exists because we checked for existing uni wifi morsel before
+        String requestDeviceModel = requestWifiMorsels.get(0).getDeviceModel();
+
         // Get University Area containing all locations from database
         Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("University"))).get(0);
         DataList<Location> dataBaseLocations = uniArea.getLocations();
@@ -214,6 +218,9 @@ public class PositionModule implements Module {
         for (Location databaseLocation : dataBaseLocations) {
             DataList<WifiMorsel> averageMorsels = new DataList<>();
             for (WifiMorsel morsel : databaseLocation.getWifiMorsels()) {
+                if (!sameDeviceClass(requestDeviceModel, morsel.getDeviceModel()) && !DeviceClass.isSimulatedClass(requestDeviceModel)) {
+                    continue;
+                }
                 if (averageMorsels.contains(morsel)) {
                     continue;
                 }
@@ -228,7 +235,10 @@ public class PositionModule implements Module {
                         counter++;
                     }
                 }
-                int average = summedLevel / counter;
+                int average = (int) (((float) summedLevel) / ((float) counter));
+                if (DeviceClass.isSimulatedClass(requestDeviceModel)) {
+                    average -= 15;
+                }
                 averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel()));
             }
             databaseLocation.setWifiMorsels(averageMorsels);
@@ -270,6 +280,15 @@ public class PositionModule implements Module {
             }
         }
         return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap);
+    }
+
+    private boolean sameDeviceClass(String requestDeviceModel, String dbDeviceModel1) {
+        boolean sameDevice;
+        if (requestDeviceModel == null && dbDeviceModel1 == null) sameDevice = true;
+        else if (requestDeviceModel != null && dbDeviceModel1 != null) {
+            sameDevice = DeviceClass.getClass(dbDeviceModel1) == DeviceClass.getClass(requestDeviceModel);
+        } else sameDevice = false;
+        return sameDevice;
     }
 
     /**

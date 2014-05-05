@@ -268,8 +268,6 @@ public class LocationModule implements Module {
             return new Error(Error.Type.DATABASE, "Location could not be found!");
         }
         return read;
-
-
     }
 
     private Data updateLocation(Location location) {
