@@ -82,7 +82,8 @@ function initPublicDisplayStuff(){
     			computeIconSize();
 
     			refreshUserData();
-    			interval = setInterval(function(){refreshUserData();},refreshRate*+1000);
+//    			interval = setInterval(function(){refreshUserData();},refreshRate*+1000);
+    			initInterval();
 
     		});
     	
@@ -108,11 +109,14 @@ function requestFullScreen(element) {
 /**
  * This function resets the interval - should be called after the refreshRate was changed
  */
-function resetInterval(){
-	clearInterval(interval);
-	if(interval==null){
-		interval = setInterval(function(){refreshUserData();},refreshRate*+1000);		
+function initInterval(){
+	alert("reset interval to "+refreshRate);
+	if(interval!=null){
+		clearInterval(interval);		
 	}
+//	if(interval==null){
+		interval = setInterval(function(){refreshUserData();},refreshRate*+1000);		
+//	}
 }
 
 /**
@@ -1008,7 +1012,7 @@ function changeRefreshRate(value){
 		refreshRate = 60;
 		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 5 (every 60 sec)';
 	}
-	resetInterval();
+	initInterval();
 }
 
 /*
