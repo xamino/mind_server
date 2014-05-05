@@ -1008,7 +1008,7 @@ function changeRefreshRate(value){
 		refreshRate = 60;
 		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 5 (every 60 sec)';
 	}
-	resetIntervall();
+	resetInterval();
 }
 
 /*
