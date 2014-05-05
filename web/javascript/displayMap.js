@@ -992,9 +992,33 @@ function doScale(value){
 
 function changeRefreshRate(value){
 
-	if(value == 1){
+	alert("drin2");
+	switch (value) {
+	case 1:
 		refreshRate = 5;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 1 (every 5 sec)';
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 5 sec';
+		break;
+	case 2:
+		refreshRate = 10;
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 10 sec';
+		break;
+	case 3:
+		refreshRate = 15;
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 15 sec';
+		break;
+	case 4:
+		refreshRate = 30;
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 30 sec';
+		break;
+	case 5:
+		refreshRate = 60;
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 60 sec';
+		break;
+	default:
+		break;
+	}
+	/*if(value == 1){
+		
 	}
 	if(value == 2){
 		refreshRate = 10;
@@ -1011,7 +1035,7 @@ function changeRefreshRate(value){
 	if(value == 5){
 		refreshRate = 60;
 		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 5 (every 60 sec)';
-	}
+	}*/
 	initInterval();
 }
 
