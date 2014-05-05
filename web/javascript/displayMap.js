@@ -989,50 +989,30 @@ function doScale(value){
 
 function changeRefreshRate(value){
 
-	alert("drin2");
 	switch (value) {
-	case 1:
+	case '1':{
 		refreshRate = 5;
 		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 5 sec';
-		break;
-	case 2:
+		break;}
+	case '2':
 		refreshRate = 10;
 		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 10 sec';
 		break;
-	case 3:
+	case '3':
 		refreshRate = 15;
 		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 15 sec';
 		break;
-	case 4:
+	case '4':
 		refreshRate = 30;
 		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 30 sec';
 		break;
-	case 5:
+	case '5':
 		refreshRate = 60;
 		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 60 sec';
 		break;
 	default:
 		break;
 	}
-	/*if(value == 1){
-		
-	}
-	if(value == 2){
-		refreshRate = 10;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 2 (every 10 sec)';
-	}
-	if(value == 3){
-		refreshRate = 15;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 3 (every 15 sec)';
-	}
-	if(value == 4){
-		refreshRate = 30;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 4 (every 30 sec)';
-	}
-	if(value == 5){
-		refreshRate = 60;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 5 (every 60 sec)';
-	}*/
 	initInterval();
 }
 
