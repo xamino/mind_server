@@ -11,8 +11,8 @@ html, body {
 	height:100%;
 	/*border:1px solid green;*/
 	/*float:left;*/
-	display: inline-block;
-    vertical-align: left;
+	/*display: inline-block;
+    vertical-align: left;*/
 	background-image:url(../images/map.png);
 	background-repeat:no-repeat;
 	background-size: contain;
