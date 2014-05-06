@@ -51,8 +51,9 @@ function retriveOriginalMetrics(allusers){
  */
 function initPublicDisplayStuff(){
 	
-	var elem = document.body; // Make the body go full screen.
+//	var elem = document; // Make the body go full screen.
 	requestFullScreen(elem);
+//	vollbild();
 
 	users = new Array();
 
@@ -97,6 +98,7 @@ function requestFullScreen(element) {
     var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
 
     if (requestMethod) { // Native full screen.
+    	alert("call native fullscreen");
         requestMethod.call(element);
     } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
         var wscript = new ActiveXObject("WScript.Shell");
@@ -105,6 +107,39 @@ function requestFullScreen(element) {
         }
     }
 }
+
+function vollbild() {
+	 
+	 var element = document.getElementsByTagName("body");
+	 
+	if (element.requestFullScreen) {
+	 
+	if (!document.fullScreen) {
+	element.requestFullscreen();
+	} else {
+	document.exitFullScreen();
+	}
+	 
+	} else if (element.mozRequestFullScreen) {
+	 
+	if (!document.mozFullScreen) {
+	element.mozRequestFullScreen();
+	} else {
+	document.mozCancelFullScreen();
+	}
+	 
+	} else if (element.webkitRequestFullScreen) {
+	 
+	if (!document.webkitIsFullScreen) {
+	element.webkitRequestFullScreen();
+	} else {
+	document.webkitCancelFullScreen();
+	}
+	 
+	}
+	 
+}
+
 
 /**
  * This function resets the interval - should be called after the refreshRate was changed
