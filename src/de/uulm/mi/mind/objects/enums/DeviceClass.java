@@ -14,6 +14,7 @@ public enum DeviceClass {
     private static final String[] simulated = new String[]{};
 
     public static DeviceClass getClass(String requestDeviceModel) {
+        if (requestDeviceModel == null) return UNKNOWN;
         if (Arrays.asList(class1).contains(requestDeviceModel.toUpperCase())) return CLASS1;
         else if (Arrays.asList(class2).contains(requestDeviceModel.toUpperCase())) return CLASS2;
         else return UNKNOWN;
