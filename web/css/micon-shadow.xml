@@ -4,8 +4,8 @@
 
 <svg height="0" xmlns="http://www.w3.org/2000/svg">
     <filter id="drop-shadow_micon">
-        <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-        <feOffset dx="12" dy="12" result="offsetblur"/>
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+        <feOffset dx="0" dy="0" result="offsetblur"/>
         <feFlood flood-color="rgba(0,0,0,0.5)"/>
         <feComposite in2="offsetblur" operator="in"/>
         <feMerge>
@@ -14,8 +14,8 @@
         </feMerge>
     </filter>
     <filter id="drop-shadow_miconAvailable">
-        <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-        <feOffset dx="12" dy="12" result="offsetblur"/>
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+        <feOffset dx="0" dy="0" result="offsetblur"/>
         <feFlood flood-color="rgba(0,225,0,1.0)"/>
         <feComposite in2="offsetblur" operator="in"/>
         <feMerge>
@@ -24,8 +24,8 @@
         </feMerge>
     </filter>
      <filter id="drop-shadow_miconOccupied">
-        <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-        <feOffset dx="12" dy="12" result="offsetblur"/>
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+        <feOffset dx="0" dy="0" result="offsetblur"/>
         <feFlood flood-color="rgba(30,35,225,1.0)"/>
         <feComposite in2="offsetblur" operator="in"/>
         <feMerge>
@@ -34,8 +34,8 @@
         </feMerge>
     </filter>
      <filter id="drop-shadow_miconDnD">
-        <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-        <feOffset dx="12" dy="12" result="offsetblur"/>
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+        <feOffset dx="0" dy="0" result="offsetblur"/>
         <feFlood flood-color="rgba(225,0,0,1.0)"/>
         <feComposite in2="offsetblur" operator="in"/>
         <feMerge>
@@ -44,8 +44,8 @@
         </feMerge>
     </filter>
     <filter id="drop-shadow_miconAway">
-        <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-        <feOffset dx="12" dy="12" result="offsetblur"/>
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+        <feOffset dx="0" dy="0" result="offsetblur"/>
         <feFlood flood-color="rgba(206,206,206,1.0)"/>
         <feComposite in2="offsetblur" operator="in"/>
         <feMerge>
@@ -54,8 +54,8 @@
         </feMerge>
     </filter>
     <filter id="drop-shadow_miconSelected">
-        <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-        <feOffset dx="12" dy="12" result="offsetblur"/>
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+        <feOffset dx="0" dy="0" result="offsetblur"/>
         <feFlood flood-color="rgba(255,255,0,1.0)"/>
         <feComposite in2="offsetblur" operator="in"/>
         <feMerge>

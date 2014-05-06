@@ -197,42 +197,42 @@ html, body {
 
 .micon {
     -webkit-filter: drop-shadow(0px 0px 6px rgba(0,0,0,0.5));
-    filter: url(../micon-shadow.xml#drop-shadow_micon);
+    filter: url(micon-shadow.xml#drop-shadow_micon);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }
 
 .miconAvailable {
     -webkit-filter: drop-shadow(0px 0px 6px rgba(0,225,0,1.0));
-    filter: url(../micon-shadow.xml#drop-shadow_miconAvailable);
+    filter: url(micon-shadow.xml#drop-shadow_miconAvailable);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }
 
 .miconOccupied {
     -webkit-filter: drop-shadow(0px 0px 6px rgba(30,35,225,1.0));
-    filter: url(../micon-shadow.xml#drop-shadow_miconOccupied);
+    filter: url(micon-shadow.xml#drop-shadow_miconOccupied);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }
 
 .miconDnD {
     -webkit-filter: drop-shadow(0px 0px 6px rgba(225,0,0,1.0));
-    filter: url(../micon-shadow.xml#drop-shadow_miconDnD);
+    filter: url(micon-shadow.xml#drop-shadow_miconDnD);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
 }
 
 .miconAway {
     -webkit-filter: drop-shadow(0px 0px 6px rgba(206,206,206,1.0));
-    filter: url(../micon-shadow.xml#drop-shadow_miconAway);
+    filter: url(micon-shadow.xml#drop-shadow_miconAway);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=12, Color='#444')";
 }
 
 .miconSelected {
     -webkit-filter: drop-shadow(0px 0px 6px rgba(255,255,0,1.0));
-    filter: url(../micon-shadow.xml#drop-shadow_miconSelected);
+    filter: url(micon-shadow.xml#drop-shadow_miconSelected);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }
