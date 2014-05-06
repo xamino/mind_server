@@ -390,11 +390,14 @@ function updateUserListOnReceive(data){
 	}
 
 	//check for AWAY status and set position to "Away" for Away-Area
-	for ( var i = 0; i < users.length; i++) {
+	for (var i = users.length-1; i>=0; i--) {
 		if(users[i].status==="AWAY"){
 			users[i].position = "Away";
 		}
-		//TODO remove users with position not in areas
+		//if area does not exist
+		if(!areaExists(users[i].position)){
+			users.splice(i,1);
+		}
 	}
 	
 	//set individual user icon coordinates considering area
@@ -503,6 +506,15 @@ function getAreaById(id){
 	}
 
 	return null;
+}
+
+function areaExists(id){
+	for ( var i = 0; i < areas.length; i++) {
+		if(areas[i].ID==id){
+			return true; //area has already benn worked with
+		}
+	}
+	return false;
 }
 
 
