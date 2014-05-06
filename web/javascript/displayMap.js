@@ -86,17 +86,31 @@ function closeFullscreen() {
 document.addEventListener("click",function (event){
 //	alert("click");
 	if(event.target.id === 'toggleFullscreen'){
+
 		var docElm = document.getElementsByTagName("html")[0];
 //		docElm.webkitRequestFullScreen();
-		if(document.mozFullScreenElement && document.mozFullScreenElement.nodeName == 'HTML'){
+		var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+		alert(fullscreenElement);
+		if(fullscreenelement){
+//		if(isDocumentInFullScreenMode()){
+//		if(!(!document.fullscreenElement && !document.mozFullScreenElement &&
+//				!document.webkitFullscreenElement && !document.msFullscreenElement )){
+//		if(docElm.fullscreenEnabled || docElm.mozFullScreenEnabled || docElm.webkitFullscreenEnabled){
 			alert("close_fullscreen");
 //			closeFullscreen();
 		}else{
-			alert("open_fullscreen");
+			alert("open fullscreen");
 //			doFullscreen();
 		}			
 	}
 });
+
+function isDocumentInFullScreenMode() {
+	  // Note that the browser fullscreen (triggered by short keys) might
+	  // be considered different from content fullscreen when expecting a boolean
+	  return ((document.fullScreenElement && document.fullScreenElement !== null) ||    // alternative standard methods
+	      (!document.mozFullScreen && !document.webkitIsFullScreen));                   // current working methods
+	}
 
 //$(document).on("click","#toggleFullscreen", function (){
 ////	alert("click");
