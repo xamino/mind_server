@@ -460,8 +460,20 @@ public class LocationModule implements Module {
     private Location filterMorsels(Location location) {
         DataList<WifiMorsel> morsels = new DataList<>();
         for (WifiMorsel morsel : location.getWifiMorsels()) {
-            if (wifiNameFilter.contains(morsel.getWifiName())) {
-                morsels.add(morsel);
+            for (String s : wifiNameFilter) {
+                String[] nameChannel = s.split("\\|");
+                String name = nameChannel[0];
+
+                boolean sameChannel = true;
+                if (nameChannel.length > 1) {
+                    String channel = nameChannel[1];
+                    if (!channel.equals("*") && !channel.equals(String.valueOf(morsel.getWifiChannel()))) {
+                        sameChannel = false;
+                    }
+                }
+                if (name.equals(morsel.getWifiName()) && sameChannel) {
+                    morsels.add(morsel);
+                }
             }
         }
         location.setWifiMorsels(morsels);

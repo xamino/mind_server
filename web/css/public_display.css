@@ -13,7 +13,7 @@ html, body {
 	/*float:left;*/
 	/*display: inline-block;
     vertical-align: left;*/
-	background-image:url(../images/map.png);
+	background-image:url(../images/map);
 	background-repeat:no-repeat;
 	background-size: contain;
 }
@@ -196,50 +196,43 @@ html, body {
 }
 
 .micon {
-    -webkit-filter: drop-shadow(4px 4px 4px rgba(0,0,0,0.5));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(0,0,0,0.5));
     filter: url(#drop-shadow);
-    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
-    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
+    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
+    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }
 
 .miconAvailable {
-    -webkit-filter: drop-shadow(4px 4px 4px rgba(94,255,49,0.8));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(0,225,0,1.0));
     filter: url(#drop-shadow);
-    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
-    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
-}
-
-.miconAvailable {
-    -webkit-filter: drop-shadow(4px 4px 4px rgba(94,255,49,0.8));
-    filter: url(#drop-shadow);
-    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
-    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
+    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
+    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }
 
 .miconOccupied {
-    -webkit-filter: drop-shadow(4px 4px 4px rgba(16,147,255,0.8));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(30,35,225,1.0));
     filter: url(#drop-shadow);
-    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
-    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
+    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
+    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }
 
 .miconDnD {
-    -webkit-filter: drop-shadow(4px 4px 4px rgba(255,45,29,0.8));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(225,0,0,1.0));
     filter: url(#drop-shadow);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
 }
 
 .miconAway {
-    -webkit-filter: drop-shadow(4px 4px 4px rgba(206,206,206,0.8));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(206,206,206,1.0));
     filter: url(#drop-shadow);
-    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
-    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
+    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
+    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=12, Color='#444')";
 }
 
 .miconSelected {
-    -webkit-filter: drop-shadow(0px 0px 3px rgba(255,255,0,1));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(255,255,0,1.0));
     filter: url(#drop-shadow);
-    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
-    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
+    -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
+    filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }

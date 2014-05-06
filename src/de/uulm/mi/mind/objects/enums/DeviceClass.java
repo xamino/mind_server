@@ -10,7 +10,7 @@ public enum DeviceClass {
     CLASS1, CLASS2, UNKNOWN;
 
     private static final String[] class1 = new String[]{"SONY LT25I", "LGE LG-D802"};
-    private static final String[] class2 = new String[]{"SAMSUNG GT-I8190"};
+    private static final String[] class2 = new String[]{"SAMSUNG GT-I8190", "LGE NEXUS 5"};
     private static final String[] simulated = new String[]{};
 
     public static DeviceClass getClass(String requestDeviceModel) {

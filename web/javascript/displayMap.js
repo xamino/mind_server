@@ -51,8 +51,9 @@ function retriveOriginalMetrics(allusers){
  */
 function initPublicDisplayStuff(){
 	
-	var elem = document.body; // Make the body go full screen.
-	requestFullScreen(elem);
+//	var elem = document; // Make the body go full screen.
+//	requestFullScreen(elem);
+//	vollbild();
 
 	users = new Array();
 
@@ -71,7 +72,7 @@ function initPublicDisplayStuff(){
     		
     		//get map metrics
     		var mapImgLoad = $("<img />");
-    		mapImgLoad.attr("src", "images/map.png");
+    		mapImgLoad.attr("src", "images/map");
     		mapImgLoad.unbind("load");
     		mapImgLoad.bind("load", function () {
     			originalWidth = this.width;
@@ -97,6 +98,7 @@ function requestFullScreen(element) {
     var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
 
     if (requestMethod) { // Native full screen.
+    	alert("call native fullscreen");
         requestMethod.call(element);
     } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
         var wscript = new ActiveXObject("WScript.Shell");
@@ -105,6 +107,39 @@ function requestFullScreen(element) {
         }
     }
 }
+
+function vollbild() {
+	 
+	 var element = document.getElementsByTagName("body");
+	 
+	if (element.requestFullScreen) {
+	 
+	if (!document.fullScreen) {
+	element.requestFullscreen();
+	} else {
+	document.exitFullScreen();
+	}
+	 
+	} else if (element.mozRequestFullScreen) {
+	 
+	if (!document.mozFullScreen) {
+	element.mozRequestFullScreen();
+	} else {
+	document.mozCancelFullScreen();
+	}
+	 
+	} else if (element.webkitRequestFullScreen) {
+	 
+	if (!document.webkitIsFullScreen) {
+	element.webkitRequestFullScreen();
+	} else {
+	document.webkitCancelFullScreen();
+	}
+	 
+	}
+	 
+}
+
 
 /**
  * This function resets the interval - should be called after the refreshRate was changed
@@ -152,16 +187,8 @@ function retriveBackgroundImageSizeMetricsAndFactor(){
 		factor = displayedWidth/originalWidth;
 		displayedHeight = factor*originalHeight;
 	}
-	
-//	alert('width =' + displayedWidth + ', height = ' + displayedHeight); 
 }
 
-
-//$(document).on("resize", "#mapscroll", function () {
-//	
-//	alert("resize");
-//
-//});
 
 
 
@@ -199,32 +226,8 @@ function mapResize(){
 			placeUserIcon(users[i]);
 		}
 	}
-	
-//	alert("resize by factor "+changeFactor);
+
 }
-
-//$('#mapscroll').bind('resize', function(){
-//    alert('resized');
-//});
-//
-//$(window).resize(function(){
-//$('#mapscroll').resize();
-//});
-
-/**
- * This function computes the scale factor of the image
- * and should be called on startup as well as after/when scaling
- */
-/*
-function computeFactors(){
-	var mapimg = document.getElementById("mapimg");
-	if(originalHeight!=null&&originalHeight!=0){
-		heigthFactor = mapimg.clientHeight/originalHeight;
-	}
-	if(originalWidth!=null&&originalWidth!=0){
-		widthFactor = mapimg.clientWidth/originalWidth;
-	}
-}*/
 
 /**
  * This method converts the x (or y) value for displaying purposes (subtracting half the width)
@@ -236,15 +239,6 @@ function getX(raw_x,scale){
 	return Math.round((raw_x*factor-(scale/2)));
 }
 
-///**
-// * This method converts the y value for displaying purposes (subtracting half the height)
-// * @param raw_y the original y value (how it is retrieved from the server)
-// * @param the height of the element
-// * @returns the y value ready for displaying purposes
-// */
-//function getY(raw_y,scale){
-//	return Math.round((raw_y*heigthFactor-(scale/2)));
-//}
 
 /**
  * This method converts the scale value (width or height) for displaying purposes
@@ -256,23 +250,6 @@ function getScale(raw_scale){
 	return Math.round(raw_scale*factor);
 }
 
-
-/**
- * This function is called on startup of the page,
- * creating and placing all the icons of all users
- */
-/*
-function initUsersPlacement(){
-	//create <img/>s for each icon
-	for ( var i = 0; i < users.length; i++) {
-		addUserIcon(users[i]);		
-	}
-	
-	//set individual user icon coordinates considering area
-	setUserIconCoordsByArea();
-	//display all currently tracked users
-	updateUserIconPlacement();
-}*/
 
 /**
  * This function creates a user icon as an <img/>
@@ -379,17 +356,8 @@ function setUserIconCoordsByArea(){
 			}
 		}
 		
-//		users[i].x = area.topLeftX+Math.round(displayedIconSize/2);
-//		users[i].y = area.topLeftY+Math.round(displayedIconSize/2);
-		
-//		alert(users[i].x+","+users[i].y);	
 	}//end for each user
-	
-//	var texty = "";
-//	for(var i = 0; i < users.length; i++){
-//		texty += users[i].email+":"+users[i].x+","+users[i].y+"\n";
-//	}
-//	alert(texty);
+
 }
 
 /**
@@ -482,14 +450,12 @@ function updateUserListOnReceive(data){
 			addUserIcon(updatedUsers[i]);
 		}		
 	}
-	
-//	texty = "";
-	//check for AWAY status and set position to "1" for Away-Area
+
+	//check for AWAY status and set position to "Away" for Away-Area
 	for ( var i = 0; i < users.length; i++) {
 		if(users[i].status==="AWAY"){
-			users[i].position = "1";
+			users[i].position = "Away";
 		}
-//		texty += users[i].email+":"+users[i].position+",";
 	}
 	
 	//set individual user icon coordinates considering area
@@ -510,22 +476,6 @@ jQuery.fn.redraw = function() {
     });
 };
 
-/* see method call
- function redrawElement(element){
-
-    if (!element) { return; }
-
-    var n = document.createTextNode(' ');
-    var disp = element.style.display;  // don't worry about previous display style
-
-    element.appendChild(n);
-    element.style.display = 'none';
-
-    setTimeout(function(){
-        element.style.display = disp;
-        n.parentNode.removeChild(n);
-    },20); // you can play with this timeout to make it as short as possible
-}*/
 
 
 /**
@@ -554,13 +504,10 @@ function refreshUserData(){
 		return;
 	}
 	
-//	loadTestUser();
-//	updateUserListOnReceive(users);
 	refreshCounter = +refreshCounter+1;
 	if(document.getElementById("balloonIdle")!=null){
 		document.getElementById("balloonIdle").innerHTML = refreshCounter;		
 	}
-//	alert("refreshy");
 	send(new Arrival("read_all_positions", session), updateUserListOnReceive);
 }
 
@@ -615,7 +562,6 @@ function getAreaById(id){
 			return areas[i]; //area has already benn worked with
 		}
 	}
-//	alert("area "+id+" does not exist in array");
 
 	return null;
 }
@@ -633,13 +579,13 @@ function getInfoByStatus(status){
 	var statusInfo;
 	switch (status) {
 	case 'AVAILABLE':
-		statusInfo = new StatusInfo('#6AFF50','Verfügbar','miconAvailable');
+		statusInfo = new StatusInfo('#6AFF50','Verfuegbar','miconAvailable');
 		break;
 	case 'OCCUPIED':
-		statusInfo = new StatusInfo('#5CB9FF','Beschäftigt','miconOccupied');
+		statusInfo = new StatusInfo('#5CB9FF','Beschaeftigt','miconOccupied');
 		break;
 	case 'DO_NOT_DISTURB':
-		statusInfo = new StatusInfo('#FF5543','Bitte nicht stören','miconDnD');
+		statusInfo = new StatusInfo('#FF5543','Bitte nicht stoeren','miconDnD');
 		break;
 	case 'AWAY':
 		statusInfo = new StatusInfo('#DDDDDD','Nicht da','miconAway');
@@ -654,13 +600,13 @@ function getInfoByStatus(status){
 function getStatusByStatus(status){
 	switch (status) {
 	case 'AVAILABLE':
-		return 'Verfügbar';
+		return 'Verfï¿½gbar';
 		break;
 	case 'OCCUPIED':
-		return 'Beschäftigt';
+		return 'Beschï¿½ftigt';
 		break;
 	case 'DO_NOT_DISTURB':
-		return 'Bitte nicht stören';
+		return 'Bitte nicht stï¿½ren';
 		break;
 	case 'AWAY':
 		return 'Nicht da';

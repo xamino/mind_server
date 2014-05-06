@@ -209,6 +209,13 @@ public class PositionModule implements Module {
 
         // Should exists because we checked for existing uni wifi morsel before
         String requestDeviceModel = requestWifiMorsels.get(0).getDeviceModel();
+        DeviceClass requestDeviceClass = DeviceClass.getClass(requestDeviceModel);
+
+        // use default class if unknown
+        if (requestDeviceClass == DeviceClass.UNKNOWN) {
+            log.log(TAG, "Unknown Device: " + requestDeviceModel);
+            requestDeviceClass = DeviceClass.CLASS2;
+        }
 
         // Get University Area containing all locations from database
         Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("University"))).get(0);
@@ -218,10 +225,12 @@ public class PositionModule implements Module {
         for (Location databaseLocation : dataBaseLocations) {
             DataList<WifiMorsel> averageMorsels = new DataList<>();
             for (WifiMorsel morsel : databaseLocation.getWifiMorsels()) {
-                if (!sameDeviceClass(requestDeviceModel, morsel.getDeviceModel()) && !DeviceClass.isSimulatedClass(requestDeviceModel)) {
+                // if the morsel mac already exists, skip (contains calls equals)
+                if (averageMorsels.contains(morsel)) {
                     continue;
                 }
-                if (averageMorsels.contains(morsel)) {
+                // Morsel was not recorded with same device class, skip it
+                if (requestDeviceClass != DeviceClass.getClass(morsel.getDeviceModel())) {
                     continue;
                 }
                 // this is the first occurrence of this morsel
@@ -236,9 +245,9 @@ public class PositionModule implements Module {
                     }
                 }
                 int average = (int) (((float) summedLevel) / ((float) counter));
-                if (DeviceClass.isSimulatedClass(requestDeviceModel)) {
-                    average -= 15;
-                }
+                //if (DeviceClass.isSimulatedClass(requestDeviceModel)) {
+                //   average += DeviceClass.getSimulatedDifference(requestDeviceModel);
+                //}
                 averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel()));
             }
             databaseLocation.setWifiMorsels(averageMorsels);
@@ -279,6 +288,21 @@ public class PositionModule implements Module {
                 }
             }
         }
+        
+        
+        //FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
+        int leastMatches = 2;
+        List<Location> locationsToRemove = new LinkedList<Location>();
+        for (Location location : locationMatchesMap.keySet()) {
+			if(locationMatchesMap.get(location)<leastMatches){
+				locationsToRemove.add(location);
+			}
+		}
+        locationsToRemove.removeAll(locationsToRemove);
+        locationLevelDifferenceSumMap.remove(locationsToRemove);
+        //END FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
+        
+        
         return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap);
     }
 
