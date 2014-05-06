@@ -57,6 +57,7 @@
 				</div>
 		    </div> -->
 		    <div id='settingsRefresh'>
+		    <br><button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
 		    	<hr><br><h3>Refresh Rate</h3><br>
 		    	From 5 sec (fastest rate) to 60 sec (slowest rate).<br>
 		    	<br>
@@ -65,7 +66,6 @@
 					<p id="slidertext_refresh">Current Refresh Rate: every 10 sec</p>
 				</div>
 		    </div>
-		    <br><button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
 		    <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->
 		    <hr><br><button type='button' id='displaySettingsBack' class="shadow">Back</button> <!-- settingsBackButton() -->
 		    <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display</button>

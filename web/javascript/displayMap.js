@@ -81,8 +81,56 @@ function closeFullscreen() {
         document.webkitCancelFullScreen();
     }
 }
-	
-$('#toggleFullscreen').toggle( function(){ doFullscreen(); }, function(){ closeFullscreen(); });
+
+
+document.addEventListener("click",function (event){
+//	alert("click");
+	if(event.target.id === 'toggleFullscreen'){
+		var docElm = document.getElementsByTagName("html")[0];
+//		docElm.webkitRequestFullScreen();
+		if(document.mozFullScreenElement && document.mozFullScreenElement.nodeName == 'HTML'){
+			alert("close_fullscreen");
+//			closeFullscreen();
+		}else{
+			alert("open_fullscreen");
+//			doFullscreen();
+		}			
+	}
+});
+
+//$(document).on("click","#toggleFullscreen", function (){
+////	alert("click");
+//	if(document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled){
+////		alert("close_fullscreen");
+////		closeFullscreen();
+//		if (document.exitFullscreen) {
+//	        document.exitFullscreen();
+//	    }
+//	    else if (document.mozCancelFullScreen) {
+//	        document.mozCancelFullScreen();
+//	    }
+//	    else if (document.webkitCancelFullScreen) {
+//	        document.webkitCancelFullScreen();
+//	    }
+//	}else{
+////		alert("open_fullscreen");
+////		doFullscreen();
+//		var docElm = document.getElementsByTagName("body")[0];
+//		if (docElm.requestFullscreen) {
+//			docElm.requestFullscreen();
+//		}
+//		else if (docElm.mozRequestFullScreen) {
+//			docElm.mozRequestFullScreen();
+//		}
+//		else if (docElm.webkitRequestFullScreen) {
+//			docElm.webkitRequestFullScreen();
+//		}
+//		else if (docElm.msRequestFullscreen) {
+//			docElm.msRequestFullscreen();
+//		}
+//	}	
+//});
+
 
 
 /**
@@ -691,6 +739,40 @@ $(document).on("mousemove", function (e) {
 });
 $(document).on("keypress", function (e) {
 	balloonIdleTime = 0;
+//	if(document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled){
+////		alert("close_fullscreen");
+////		closeFullscreen();
+//		alert("close");
+//		if (document.exitFullscreen) {
+//	        document.exitFullscreen();
+//	    }
+//	    else if (document.mozCancelFullScreen) {
+//	        document.mozCancelFullScreen();
+//	    }
+//	    else if (document.webkitCancelFullScreen) {
+//	        document.webkitCancelFullScreen();
+//	    }
+//	}else{
+////		alert("open_fullscreen");
+////		doFullscreen();
+//		alert("open");
+//		var docElm = document.getElementsByTagName("body")[0];
+//		if (docElm.requestFullscreen) {
+//			docElm.requestFullscreen();
+//		}
+//		else 
+//		if (docElm.mozRequestFullScreen) {
+//			docElm.mozRequestFullScreen();
+//		}
+//		else if (docElm.webkitRequestFullScreen) {
+//			docElm.webkitRequestFullScreen();
+//		}
+//		else if (docElm.msRequestFullscreen) {
+//			docElm.msRequestFullscreen();
+//		}
+//	}	
+		
+		
 //	if(document.getElementById("balloonIdle")!=null){
 //	document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
 //}
