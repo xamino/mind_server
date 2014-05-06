@@ -280,6 +280,21 @@ public class PositionModule implements Module {
                 }
             }
         }
+        
+        
+        //FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
+        int leastMatches = 2;
+        List<Location> locationsToRemove = new LinkedList<Location>();
+        for (Location location : locationMatchesMap.keySet()) {
+			if(locationMatchesMap.get(location)<leastMatches){
+				locationsToRemove.add(location);
+			}
+		}
+        locationsToRemove.removeAll(locationsToRemove);
+        locationLevelDifferenceSumMap.remove(locationsToRemove);
+        //END FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
+        
+        
         return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap);
     }
 
