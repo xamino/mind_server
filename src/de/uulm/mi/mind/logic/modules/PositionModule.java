@@ -209,6 +209,13 @@ public class PositionModule implements Module {
 
         // Should exists because we checked for existing uni wifi morsel before
         String requestDeviceModel = requestWifiMorsels.get(0).getDeviceModel();
+        DeviceClass requestDeviceClass = DeviceClass.getClass(requestDeviceModel);
+
+        // use default class if unknown
+        if (requestDeviceClass == DeviceClass.UNKNOWN) {
+            log.log(TAG, "Unknown Device: " + requestDeviceModel);
+            requestDeviceClass = DeviceClass.CLASS2;
+        }
 
         // Get University Area containing all locations from database
         Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("University"))).get(0);
@@ -222,7 +229,8 @@ public class PositionModule implements Module {
                 if (averageMorsels.contains(morsel)) {
                     continue;
                 }
-                if (!sameDeviceClass(requestDeviceModel, morsel.getDeviceModel()) && !DeviceClass.isSimulatedClass(requestDeviceModel)) {
+                // Morsel was not recorded with same device class, skip it
+                if (requestDeviceClass != DeviceClass.getClass(morsel.getDeviceModel())) {
                     continue;
                 }
                 // this is the first occurrence of this morsel
@@ -237,9 +245,9 @@ public class PositionModule implements Module {
                     }
                 }
                 int average = (int) (((float) summedLevel) / ((float) counter));
-                if (DeviceClass.isSimulatedClass(requestDeviceModel)) {
-                    average -= 15;
-                }
+                //if (DeviceClass.isSimulatedClass(requestDeviceModel)) {
+                //   average += DeviceClass.getSimulatedDifference(requestDeviceModel);
+                //}
                 averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel()));
             }
             databaseLocation.setWifiMorsels(averageMorsels);
