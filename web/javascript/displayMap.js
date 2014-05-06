@@ -29,7 +29,7 @@ $(document).ready(function() {
 function initPublicDisplayStuff(){
 
 	users = new Array();
-
+	
     send(new Arrival("READ_ALL_AREAS", session), function (data) {
 
         areas = data.object;

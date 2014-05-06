@@ -914,6 +914,11 @@ function toggleDisplaySettings(){
 	$( "#show_display_settings" ).toggle("slow", function() {
 		if($('#show_display_settings').css('display') != 'none'){
 			$('#display_settings_img').css('background-image', 'url(../images/pd_icons/settings_clicked_350px.png)');
+			$("#toggleFullscreen").css('position', 'absolute');
+			$("#toggleFullscreen").css('right', '15px');
+			var buttonwidth = $("#toggleFullscreen").width();
+			$("#displayLogoutButton").css('position', 'absolute');
+			$("#displayLogoutButton").css('right', (+buttonwidth + +50)+'px');
 		}
 		if($('#show_display_settings').css('display') != 'block'){
 			$('#display_settings_img').css('background-image', 'url(../images/pd_icons/settings_default_350px.png)');
