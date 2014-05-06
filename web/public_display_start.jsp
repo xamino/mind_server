@@ -78,8 +78,9 @@
 					<p id="slidertext_refresh">Current Refresh Rate: every 10 sec</p>
 				</div>
 		    </div>
+		    <br><button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
 		    <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->
-		    <hr><br><button type='button' id='displaySettingsBack' class="shadow" onclick='toggleDisplaySettings()'>Back</button> <!-- settingsBackButton() -->
+		    <hr><br><button type='button' id='displaySettingsBack' class="shadow">Back</button> <!-- settingsBackButton() -->
 		    <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display</button>
 	    </div>
 	    <div id ="show_app_settings" style="display:none;">

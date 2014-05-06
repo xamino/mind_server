@@ -859,15 +859,12 @@ function onLoadOfAdminPage() {
 function onLoadOfPdPage() {
     session = readCookie("MIND_PD_C");
     send(new Arrival("check",session),function(data){
-//    	alert(JSON.stringify(data));
-//    	alert(data.object.description.$type);
     	if (instanceOf(data.object,Error)) {
     		alert("You have to be logged in.");
     		window.location.href = "public_display_login.jsp";
     		
-    	} else {
-    		//return session;
-    		displayUserLocations();
+    	}else{
+    		initPublicDisplayStuff();    		
     	}
     });
 }

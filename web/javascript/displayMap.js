@@ -18,127 +18,71 @@ var balloonClosingTime = 5;
 var users; //the current (to be) displayed users;
 var areas; //an array of areas - contains all areas that have already been used/needed
 
-
-/*NOT IN USE
-var slider; //the slider element */
-/**
- * This function retrives the original metrics (width & height) of the map image (map.png)
- * @param allusers
- */
-function retriveOriginalMetrics(allusers){
-	
-	//get initial slider value;
-	/* NOT IN USE
-	slider = document.getElementById("slider");
-	previousScaleValue = slider.value; 
-	
-	users = allusers;
-	var imgLoad = $("<img />");
-	imgLoad.attr("src", "images/map.png");
-	imgLoad.unbind("load");
-	imgLoad.bind("load", function () {
-		/*originalWidth = this.width;
-		originalHeight = this.height;
-		computeFactors();
-		retriveOriginalIconMetrics();
-	});
-	*/
-}
+$(document).ready(function() {
+	window.onresize=function(){mapResize();};
+});
 
 /**
  * This function retrives the original metrics (width & height) of one icon image
  * @param allusers
  */
 function initPublicDisplayStuff(){
-	
-//	var elem = document; // Make the body go full screen.
-//	requestFullScreen(elem);
-//	vollbild();
 
 	users = new Array();
 
     send(new Arrival("READ_ALL_AREAS", session), function (data) {
 
         areas = data.object;
-    	
-        //get Metrics
-        //get icon metrics
-//    	var imgLoad = $("<img />");
-//    	imgLoad.attr("src", "images/micons/crab.png");
-//    	imgLoad.unbind("load");
-//    	imgLoad.bind("load", function () {
-//    		displayedIconSize = this.width;
-//    		displayedIconSize = 110;
-    		
-    		//get map metrics
-    		var mapImgLoad = $("<img />");
-    		mapImgLoad.attr("src", "images/map");
-    		mapImgLoad.unbind("load");
-    		mapImgLoad.bind("load", function () {
-    			originalWidth = this.width;
-    			originalHeight = this.height;
-    			
-    			retriveBackgroundImageSizeMetricsAndFactor();
-
-    			computeIconSize();
-
-    			refreshUserData();
-//    			interval = setInterval(function(){refreshUserData();},refreshRate*+1000);
-    			initInterval();
-
-    		});
-    	
-    	});
-//    });
+        //TODO if no areas found -> ??
     
+		//get map metrics
+		var mapImgLoad = $("<img />");
+		mapImgLoad.attr("src", "images/map");
+		mapImgLoad.unbind("load");
+		mapImgLoad.bind("load", function () {
+			originalWidth = this.width;
+			originalHeight = this.height;
+			
+			retriveBackgroundImageSizeMetricsAndFactor();
+
+			computeIconSize();
+
+			refreshUserData();
+			initInterval();
+		});
+    });
 }
 
-function requestFullScreen(element) {
-    // Supports most browsers and their versions.
-    var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
 
-    if (requestMethod) { // Native full screen.
-    	alert("call native fullscreen");
-        requestMethod.call(element);
-    } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
-        var wscript = new ActiveXObject("WScript.Shell");
-        if (wscript !== null) {
-            wscript.SendKeys("{F11}");
-        }
+function doFullscreen() {
+	var docElm = document.getElementsByTagName("body")[0];
+	 if (docElm.requestFullscreen) {
+		 docElm.requestFullscreen();
+	 }
+	 else if (docElm.mozRequestFullScreen) {
+		 docElm.mozRequestFullScreen();
+	 }
+	 else if (docElm.webkitRequestFullScreen) {
+		 docElm.webkitRequestFullScreen();
+	 }
+	 else if (docElm.msRequestFullscreen) {
+		 docElm.msRequestFullscreen();
+	 }
+}
+
+function closeFullscreen() {
+	if (document.exitFullscreen) {
+        document.exitFullscreen();
+    }
+    else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+    }
+    else if (document.webkitCancelFullScreen) {
+        document.webkitCancelFullScreen();
     }
 }
-
-function vollbild() {
-	 
-	 var element = document.getElementsByTagName("body");
-	 
-	if (element.requestFullScreen) {
-	 
-	if (!document.fullScreen) {
-	element.requestFullscreen();
-	} else {
-	document.exitFullScreen();
-	}
-	 
-	} else if (element.mozRequestFullScreen) {
-	 
-	if (!document.mozFullScreen) {
-	element.mozRequestFullScreen();
-	} else {
-	document.mozCancelFullScreen();
-	}
-	 
-	} else if (element.webkitRequestFullScreen) {
-	 
-	if (!document.webkitIsFullScreen) {
-	element.webkitRequestFullScreen();
-	} else {
-	document.webkitCancelFullScreen();
-	}
-	 
-	}
-	 
-}
+	
+$('#toggleFullscreen').toggle( function(){ doFullscreen(); }, function(){ closeFullscreen(); });
 
 
 /**
@@ -189,13 +133,6 @@ function retriveBackgroundImageSizeMetricsAndFactor(){
 	}
 }
 
-
-
-
-$( document ).ready(function() {
-//	$("#mapscroll").onresize=mapResize;
-	window.onresize=function(){mapResize();};
-});
 
 function mapResize(){
 
@@ -262,6 +199,7 @@ function addUserIcon(user){
 	icon.className="micon";
 
 	icon.src="/images/custom_icons/icon_"+user.email;
+//	icon.src='/images/custom_icons/defaulticon.png';
 	icon.onerror = function () {
 	  this.src = '/images/custom_icons/defaulticon.png'; //Defualt icon
 	};
@@ -456,6 +394,7 @@ function updateUserListOnReceive(data){
 		if(users[i].status==="AWAY"){
 			users[i].position = "Away";
 		}
+		//TODO remove users with position not in areas
 	}
 	
 	//set individual user icon coordinates considering area
@@ -597,25 +536,6 @@ function getInfoByStatus(status){
 	return statusInfo;
 }
 
-function getStatusByStatus(status){
-	switch (status) {
-	case 'AVAILABLE':
-		return 'Verf�gbar';
-		break;
-	case 'OCCUPIED':
-		return 'Besch�ftigt';
-		break;
-	case 'DO_NOT_DISTURB':
-		return 'Bitte nicht st�ren';
-		break;
-	case 'AWAY':
-		return 'Nicht da';
-		break;
-	default:
-		return '';
-		break;
-	}
-}
 
 /**
  * This function returns the user object by email
@@ -764,18 +684,16 @@ function removeBalloon(){
 
 //reset balloonIdleTime with mousemove & keypress
 $(document).on("mousemove", function (e) {
-//	alert("mousemove");
 	balloonIdleTime = 0;
 //	if(document.getElementById("balloonIdle")!=null){
 //		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
 //	}
 });
 $(document).on("keypress", function (e) {
-//	alert("keypress");
 	balloonIdleTime = 0;
 //	if(document.getElementById("balloonIdle")!=null){
-//		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
-//	}
+//	document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
+//}
 });
 
 /**
@@ -854,16 +772,6 @@ $(document).on("submit", "form[id^='messageForm']", function (event) {
     //TODO possibly check for user status
 });
 
-
-/*
-$(document).ready(function(){
-	$('.micon').balloon({
-		position: "right",
-		  contents: '<a href="#">Any HTML!</a><br />'
-			    +'<input type="text" size="40" />'
-			    +'<input type="submit" value="Search" />'
-			});
-});*/
 
 
 
