@@ -82,7 +82,8 @@ function initPublicDisplayStuff(){
     			computeIconSize();
 
     			refreshUserData();
-    			interval = setInterval(function(){refreshUserData();},refreshRate*+1000);
+//    			interval = setInterval(function(){refreshUserData();},refreshRate*+1000);
+    			initInterval();
 
     		});
     	
@@ -108,11 +109,11 @@ function requestFullScreen(element) {
 /**
  * This function resets the interval - should be called after the refreshRate was changed
  */
-function resetInterval(){
-	clearInterval(interval);
-	if(interval==null){
-		interval = setInterval(function(){refreshUserData();},refreshRate*+1000);		
+function initInterval(){
+	if(interval!=null){
+		clearInterval(interval);		
 	}
+	interval = setInterval(function(){refreshUserData();},refreshRate*+1000);		
 }
 
 /**
@@ -288,8 +289,6 @@ function addUserIcon(user){
 	  this.src = '/images/custom_icons/defaulticon.png'; //Defualt icon
 	};
 	
-//	icon.onError="this.src = '/images/custom_icons/defaulticon'";
-//	icon.src="/images/custom_icons/defaulticon";
 	icon.onclick=function () {
 	    displayUserInfo(user.email);
 	};
@@ -307,21 +306,16 @@ function addUserIcon(user){
  * @param user the user
  */
 function placeUserIcon(user){
-//	var scale = 0; //the scaled size of the current icon
 	var icon = document.getElementById("icon_"+user.email);
 	if(icon!=null){
+
 		icon.style.width=displayedIconSize+"px";
 		icon.style.left=Math.round(user.x-displayedIconSize/2)+"px";
 		icon.style.top=Math.round(user.y-displayedIconSize/2)+"px";
 		
 		//apply visual effect regarding user status
-		
 		var statusinfo = getInfoByStatus(user.status);
 		icon.className = 'micon '+statusinfo.classname;
-		if(user.name==="Patryk"){
-			alert(Math.round(user.x-displayedIconSize/2)+","+Math.round(user.y-displayedIconSize/2));
-		}
-		icon = null;
 	}
 }
 
@@ -331,7 +325,6 @@ function placeUserIcon(user){
  * Keep in mind: the x and y values are intended to for the center of the icon
  */
 function setUserIconCoordsByArea(){
-
 	
 	users.sort(compareByArea); //sort users by area
 
@@ -498,14 +491,42 @@ function updateUserListOnReceive(data){
 		}
 //		texty += users[i].email+":"+users[i].position+",";
 	}
-
-//	alert(texty);
 	
 	//set individual user icon coordinates considering area
 	setUserIconCoordsByArea();
 	//display all currently tracked users
 	updateUserIconPlacement();
+	
+	
+	var element = document.getElementById("mapscroll");
+//	redrawElement(element); // currently not in use but it would work!
+	$(element).redraw();
+
 }
+
+jQuery.fn.redraw = function() {
+    return this.hide(0, function() {
+        $(this).show();
+    });
+};
+
+/* see method call
+ function redrawElement(element){
+
+    if (!element) { return; }
+
+    var n = document.createTextNode(' ');
+    var disp = element.style.display;  // don't worry about previous display style
+
+    element.appendChild(n);
+    element.style.display = 'none';
+
+    setTimeout(function(){
+        element.style.display = disp;
+        n.parentNode.removeChild(n);
+    },20); // you can play with this timeout to make it as short as possible
+}*/
+
 
 /**
  * This function checks if a user exists in an array and returns the corresponding index.
@@ -533,6 +554,8 @@ function refreshUserData(){
 		return;
 	}
 	
+//	loadTestUser();
+//	updateUserListOnReceive(users);
 	refreshCounter = +refreshCounter+1;
 	if(document.getElementById("balloonIdle")!=null){
 		document.getElementById("balloonIdle").innerHTML = refreshCounter;		
@@ -686,7 +709,6 @@ function balloonify(user){
 	//modifying the id by escaping '.' & '@'
 	var mod_id = id.replace(/\./g, '\\.');
 	mod_id = mod_id.replace(/\@/g, '\\@');
-
 	if(openBalloonUserID!=null){ //some balloon is open -> close balloon
 		var previousBalloonifiedID = openBalloonUserID;
 		removeBalloon();
@@ -967,27 +989,31 @@ function doScale(value){
 
 function changeRefreshRate(value){
 
-	if(value == 1){
+	switch (value) {
+	case '1':{
 		refreshRate = 5;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 1 (every 5 sec)';
-	}
-	if(value == 2){
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 5 sec';
+		break;}
+	case '2':
 		refreshRate = 10;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 2 (every 10 sec)';
-	}
-	if(value == 3){
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 10 sec';
+		break;
+	case '3':
 		refreshRate = 15;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 3 (every 15 sec)';
-	}
-	if(value == 4){
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 15 sec';
+		break;
+	case '4':
 		refreshRate = 30;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 4 (every 30 sec)';
-	}
-	if(value == 5){
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 30 sec';
+		break;
+	case '5':
 		refreshRate = 60;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: 5 (every 60 sec)';
+		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 60 sec';
+		break;
+	default:
+		break;
 	}
-	resetIntervall();
+	initInterval();
 }
 
 /*

@@ -75,7 +75,7 @@
 		    	<br>
 		    	<div id="sliderdiv_refresh">
 					<input id="slider_refresh" type="range" name="points" min="1" max="5" value="2" onchange="changeRefreshRate(this.value)"> <!--oninput,onchange="changeRefreshRate(this.value)"-->
-					<p id="slidertext_refresh">Current Refresh Rate: 2 (every 10 sec)</p>
+					<p id="slidertext_refresh">Current Refresh Rate: every 10 sec</p>
 				</div>
 		    </div>
 		    <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->

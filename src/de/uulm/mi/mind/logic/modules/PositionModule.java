@@ -7,6 +7,7 @@ import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.enums.DeviceClass;
 import de.uulm.mi.mind.objects.enums.Status;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
@@ -217,10 +218,11 @@ public class PositionModule implements Module {
         for (Location databaseLocation : dataBaseLocations) {
             DataList<WifiMorsel> averageMorsels = new DataList<>();
             for (WifiMorsel morsel : databaseLocation.getWifiMorsels()) {
-                if(!sameDevice(requestDeviceModel, morsel.getDeviceModel())){
+                // if the morsel mac already exists, skip (contains calls equals)
+                if (averageMorsels.contains(morsel)) {
                     continue;
                 }
-                if (averageMorsels.contains(morsel)) {
+                if (!sameDeviceClass(requestDeviceModel, morsel.getDeviceModel()) && !DeviceClass.isSimulatedClass(requestDeviceModel)) {
                     continue;
                 }
                 // this is the first occurrence of this morsel
@@ -234,7 +236,10 @@ public class PositionModule implements Module {
                         counter++;
                     }
                 }
-                int average = (int) (((float)summedLevel) / ((float)counter));
+                int average = (int) (((float) summedLevel) / ((float) counter));
+                if (DeviceClass.isSimulatedClass(requestDeviceModel)) {
+                    average -= 15;
+                }
                 averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel()));
             }
             databaseLocation.setWifiMorsels(averageMorsels);
@@ -278,11 +283,11 @@ public class PositionModule implements Module {
         return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap);
     }
 
-    private boolean sameDevice(String deviceModel, String deviceModel1) {
+    private boolean sameDeviceClass(String requestDeviceModel, String dbDeviceModel1) {
         boolean sameDevice;
-        if (deviceModel == null && deviceModel1 == null) sameDevice = true;
-        else if (deviceModel != null && deviceModel1 != null) {
-            sameDevice = deviceModel.equals(deviceModel1);
+        if (requestDeviceModel == null && dbDeviceModel1 == null) sameDevice = true;
+        else if (requestDeviceModel != null && dbDeviceModel1 != null) {
+            sameDevice = DeviceClass.getClass(dbDeviceModel1) == DeviceClass.getClass(requestDeviceModel);
         } else sameDevice = false;
         return sameDevice;
     }
