@@ -44,8 +44,8 @@ function build() {
     send(new Arrival("location_read", session, new Location()), function (data) {
         var arr = data.object;
         var lengthHalf = Math.floor(arr.length / 2);
-        b_table('locations_1', arr.slice(0, lengthHalf));
-        b_table('locations_2', arr.slice(1 + lengthHalf, arr.length - 1));
+        b_table('locations_1', arr.slice(0, lengthHalf + 1));
+        b_table('locations_2', arr.slice(lengthHalf, arr.length));
     });
     send(new Arrival("area_read", session, new Area("University")), function (data) {
         var locs = data.object[0].locations;
@@ -57,8 +57,8 @@ function build() {
         });
         var lengthHalf = Math.floor(morsels.length / 2);
         // because they are so many, divide into two tables
-        b_table('morsels_1', morsels.slice(0, lengthHalf));
-        b_table('morsels_2', morsels.slice(1 + lengthHalf, morsels.length - 1));
+        b_table('morsels_1', morsels.slice(0, lengthHalf + 1));
+        b_table('morsels_2', morsels.slice(lengthHalf, morsels.length));
         $('#morsel_amount').text(morsels.length);
     });
 }
