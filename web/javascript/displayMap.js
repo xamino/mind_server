@@ -54,97 +54,35 @@ function initPublicDisplayStuff(){
 }
 
 
-function doFullscreen() {
-	var docElm = document.getElementsByTagName("body")[0];
-	 if (docElm.requestFullscreen) {
-		 docElm.requestFullscreen();
-	 }
-	 else if (docElm.mozRequestFullScreen) {
-		 docElm.mozRequestFullScreen();
-	 }
-	 else if (docElm.webkitRequestFullScreen) {
-		 docElm.webkitRequestFullScreen();
-	 }
-	 else if (docElm.msRequestFullscreen) {
-		 docElm.msRequestFullscreen();
-	 }
-}
-
-function closeFullscreen() {
-	if (document.exitFullscreen) {
-        document.exitFullscreen();
-    }
-    else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-    }
-    else if (document.webkitCancelFullScreen) {
-        document.webkitCancelFullScreen();
-    }
-}
-
-
 document.addEventListener("click",function (event){
-//	alert("click");
+	
+	var element = document.getElementsByTagName("html")[0];
+	
 	if(event.target.id === 'toggleFullscreen'){
-
-		var docElm = document.getElementsByTagName("html")[0];
-//		docElm.webkitRequestFullScreen();
-		var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
-		alert(fullscreenElement);
-		if(fullscreenelement){
-//		if(isDocumentInFullScreenMode()){
-//		if(!(!document.fullscreenElement && !document.mozFullScreenElement &&
-//				!document.webkitFullscreenElement && !document.msFullscreenElement )){
-//		if(docElm.fullscreenEnabled || docElm.mozFullScreenEnabled || docElm.webkitFullscreenEnabled){
-			alert("close_fullscreen");
-//			closeFullscreen();
-		}else{
-			alert("open fullscreen");
-//			doFullscreen();
-		}			
+		if (element.requestFullScreen){
+		 
+			if (!document.fullScreen){
+				element.requestFullscreen();
+			}else{
+				document.exitFullScreen();
+			}
+		}else if(element.mozRequestFullScreen){
+			if(!document.mozFullScreen){
+				element.mozRequestFullScreen();
+			}else{
+				document.mozCancelFullScreen();
+			}
+		}else if(element.webkitRequestFullScreen){
+			 
+			if (!document.webkitIsFullScreen){
+				element.webkitRequestFullScreen();
+			}else{
+				document.webkitCancelFullScreen();
+			}
+		}
 	}
+	
 });
-
-function isDocumentInFullScreenMode() {
-	  // Note that the browser fullscreen (triggered by short keys) might
-	  // be considered different from content fullscreen when expecting a boolean
-	  return ((document.fullScreenElement && document.fullScreenElement !== null) ||    // alternative standard methods
-	      (!document.mozFullScreen && !document.webkitIsFullScreen));                   // current working methods
-	}
-
-//$(document).on("click","#toggleFullscreen", function (){
-////	alert("click");
-//	if(document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled){
-////		alert("close_fullscreen");
-////		closeFullscreen();
-//		if (document.exitFullscreen) {
-//	        document.exitFullscreen();
-//	    }
-//	    else if (document.mozCancelFullScreen) {
-//	        document.mozCancelFullScreen();
-//	    }
-//	    else if (document.webkitCancelFullScreen) {
-//	        document.webkitCancelFullScreen();
-//	    }
-//	}else{
-////		alert("open_fullscreen");
-////		doFullscreen();
-//		var docElm = document.getElementsByTagName("body")[0];
-//		if (docElm.requestFullscreen) {
-//			docElm.requestFullscreen();
-//		}
-//		else if (docElm.mozRequestFullScreen) {
-//			docElm.mozRequestFullScreen();
-//		}
-//		else if (docElm.webkitRequestFullScreen) {
-//			docElm.webkitRequestFullScreen();
-//		}
-//		else if (docElm.msRequestFullscreen) {
-//			docElm.msRequestFullscreen();
-//		}
-//	}	
-//});
-
 
 
 /**
