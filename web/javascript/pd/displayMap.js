@@ -17,6 +17,7 @@ var balloonClosingTime = 5;
 
 var users; //the current (to be) displayed users;
 var areas; //an array of areas - contains all areas that have already been used/needed
+var awayAreaExists = true;
 
 $(document).ready(function() {
 	window.onresize=function(){mapResize();};
@@ -33,9 +34,14 @@ function initPublicDisplayStuff(){
     send(new Arrival("READ_ALL_AREAS", session), function (data) {
 
         areas = data.object;
+        
         //TODO if no areas found -> ??
-    
-		//get map metrics
+        
+        if(!areaExists("Away")){
+        	//TODO display no away area        	
+        }
+		
+        //get map metrics
 		var mapImgLoad = $("<img />");
 		mapImgLoad.attr("src", "images/map");
 		mapImgLoad.unbind("load");
@@ -215,6 +221,15 @@ function addUserIcon(user){
    icon = null;
 }
 
+function removeUserIcon(index){
+	var id = '#icon_'+users[index].email;
+	//modifying the id by escaping '.' & '@'
+	var mod_id = id.replace(/\./g, '\\.').replace(/\@/g, '\\@');
+	var iconElement = document.getElementById(mod_id);
+	iconElement.parentNode.removeChild(iconElement);
+	users.splice(index,1);
+}
+
 /**
  * This function sets a user icon's position and size
  * in consideration of the scale factor
@@ -391,12 +406,13 @@ function updateUserListOnReceive(data){
 
 	//check for AWAY status and set position to "Away" for Away-Area
 	for (var i = users.length-1; i>=0; i--) {
-		if(users[i].status==="AWAY"){
-			users[i].position = "Away";
-		}
 		//if area does not exist
 		if(!areaExists(users[i].position)){
-			users.splice(i,1);
+			alert(users[i].email + " - "+users[i].position);
+			removeUserIcon(i);
+		}
+		if(users[i].status==="AWAY"){
+			users[i].position = "Away";
 		}
 	}
 	
@@ -510,7 +526,7 @@ function getAreaById(id){
 
 function areaExists(id){
 	for ( var i = 0; i < areas.length; i++) {
-		if(areas[i].ID==id){
+		if(areas[i].ID===id){
 			return true; //area has already benn worked with
 		}
 	}
@@ -697,49 +713,9 @@ function removeBalloon(){
 //reset balloonIdleTime with mousemove & keypress
 $(document).on("mousemove", function (e) {
 	balloonIdleTime = 0;
-//	if(document.getElementById("balloonIdle")!=null){
-//		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
-//	}
 });
 $(document).on("keypress", function (e) {
 	balloonIdleTime = 0;
-//	if(document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled){
-////		alert("close_fullscreen");
-////		closeFullscreen();
-//		alert("close");
-//		if (document.exitFullscreen) {
-//	        document.exitFullscreen();
-//	    }
-//	    else if (document.mozCancelFullScreen) {
-//	        document.mozCancelFullScreen();
-//	    }
-//	    else if (document.webkitCancelFullScreen) {
-//	        document.webkitCancelFullScreen();
-//	    }
-//	}else{
-////		alert("open_fullscreen");
-////		doFullscreen();
-//		alert("open");
-//		var docElm = document.getElementsByTagName("body")[0];
-//		if (docElm.requestFullscreen) {
-//			docElm.requestFullscreen();
-//		}
-//		else 
-//		if (docElm.mozRequestFullScreen) {
-//			docElm.mozRequestFullScreen();
-//		}
-//		else if (docElm.webkitRequestFullScreen) {
-//			docElm.webkitRequestFullScreen();
-//		}
-//		else if (docElm.msRequestFullscreen) {
-//			docElm.msRequestFullscreen();
-//		}
-//	}	
-		
-		
-//	if(document.getElementById("balloonIdle")!=null){
-//	document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
-//}
 });
 
 /**
