@@ -91,6 +91,10 @@ public enum API implements Task {
      */
     ICON_DELETE,
     /**
+     * Kills all sessions.
+     */
+    KILL_SESSIONS,
+    /**
      * General error, especially when casting to a task doesn't work.
      */
     ERROR;

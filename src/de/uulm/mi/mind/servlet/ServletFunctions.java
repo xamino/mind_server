@@ -585,6 +585,9 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.Position.READ, null);
             case ADMIN_READ_SESSIONS:
                 return Security.readActives();
+            case KILL_SESSIONS:
+                Security.clear();
+                return new Success(Success.Type.NOTE, "Note that your session has been killed too.");
             default:
                 return null;
         }
