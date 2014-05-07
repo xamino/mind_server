@@ -7,12 +7,7 @@
     <script language="JavaScript" src="javascript/jquery-2.1.0.min.js"></script>
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
-<script src="javascript/admin/admin_display_management.js"></script>
-<script src="javascript/admin/admin_map_location.js"></script>
 <script src="javascript/admin/admin_sensor_management.js"></script>
-<script src="javascript/admin/admin_user_management.js"></script>
-<script src="javascript/pd/displayMap.js"></script>
-<script src="javascript/pd/pd_general.js"></script>
 <link href="${pageContext.request.contextPath}/css/admin.css" rel="stylesheet" type="text/css">
 <title>Admin - User Management</title>
 </head>
