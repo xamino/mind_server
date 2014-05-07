@@ -68,9 +68,12 @@
 				</div>
 		    </div>
 		    <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->
-		    <hr><br><button type='button' id='displaySettingsBack' class="shadow">Back</button> <!-- settingsBackButton() -->
-		    <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display</button>
-		    <button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
+		    <hr><br>
+		    <div id="buttonsDiv">
+			    <button type='button' id='displaySettingsBack' class="shadow">Back</button> <!-- settingsBackButton() -->
+			    <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display</button>
+			    <button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
+		    </div>
 	    </div>
 	    <div id ="show_app_settings" style="display:none;">
 	    	There are currently no apps on your system.
