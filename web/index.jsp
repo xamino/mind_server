@@ -6,6 +6,12 @@
     <script language="JavaScript" type="text/javascript" src="javascript/library.js"></script>
     <script language="JavaScript" type="text/javascript" src="javascript/run.js"></script>
     <script language="JavaScript" type="text/javascript" src="javascript/unittest.js"></script>
+    <script src="javascript/admin/admin_display_management.js"></script>
+	<script src="javascript/admin/admin_map_location.js"></script>
+	<script src="javascript/admin/admin_sensor_management.js"></script>
+	<script src="javascript/admin/admin_user_management.js"></script>
+	<script src="javascript/pd/displayMap.js"></script>
+	<script src="javascript/pd/pd_general.js"></script>
 </head>
 <body>
 button - only till we know whats on index.jsp <br>
