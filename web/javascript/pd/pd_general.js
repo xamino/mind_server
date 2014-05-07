@@ -91,3 +91,20 @@ function toggleAppSettings(){
 	});
 
 }
+
+/**
+ * checks wether the away area exists (if not --> Infotext)
+ */
+function checkAwayArea(){
+	var awayArea = new Area('Away', null, 0, 0, 0, 0);
+	doTask("AREA_READ", awayArea, writeInfo);
+}
+
+function writeInfo(data){
+	alert(data.object.length);
+	if(data.object.length == 0){
+		 var noAwayArea = "There is currently no away area (ID: 'Away') in the database. Add this area to see all necessary information.";
+	        document.getElementById("awayArea_info").innerHTML = noAwayArea;
+	}
+}
+
