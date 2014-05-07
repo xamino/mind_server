@@ -587,7 +587,7 @@ public class ServletFunctions {
                 return Security.readActives();
             case KILL_SESSIONS:
                 Security.clear();
-                return new Success(Success.Type.NOTE, "Note that your session has been killed too.");
+                return new Success("All active sessions have been killed.");
             default:
                 return null;
         }
