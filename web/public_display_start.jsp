@@ -8,10 +8,6 @@
 <script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
-<script src="javascript/admin/admin_display_management.js"></script>
-<script src="javascript/admin/admin_map_location.js"></script>
-<script src="javascript/admin/admin_sensor_management.js"></script>
-<script src="javascript/admin/admin_user_management.js"></script>
 <script src="javascript/pd/displayMap.js"></script>
 <script src="javascript/pd/pd_general.js"></script>
 <script src="javascript/jquery.balloon.js"></script>
@@ -21,7 +17,7 @@
 
 <title>Public Display</title>
 </head>
-<body onload="onLoadOfPdPage()">
+<body onload="onLoadOfPdPage(), checkAwayArea()">
 
 <!-- MAP DISPLAY STUFF -->
 <div id="mapscroll">
@@ -52,6 +48,7 @@
 	<div id="content_popup">
 		<p id="balloonIdle">0</p>
 		<p id="userInfoOnUpdate">info</p>
+		<div id="awayArea_info"></div>
 
 		<div id ="show_display_settings" style="display:none;">
 		 	<!-- <div id='settingsBrightness'>
@@ -71,9 +68,12 @@
 				</div>
 		    </div>
 		    <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->
-		    <hr><br><button type='button' id='displaySettingsBack' class="shadow">Back</button> <!-- settingsBackButton() -->
-		    <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display</button>
-		    <button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
+		    <hr><br>
+		    <div id="buttonsDiv">
+			    <button type='button' id='displaySettingsBack' class="shadow">Back</button> <!-- settingsBackButton() -->
+			    <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display</button>
+			    <button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
+		    </div>
 	    </div>
 	    <div id ="show_app_settings" style="display:none;">
 	    	There are currently no apps on your system.
