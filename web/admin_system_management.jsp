@@ -38,7 +38,7 @@ You can <a href="admin_import_map_location.jsp" class="adminlink">Import Map and
 You can <a href="admin_public_displays.jsp" class="adminlink">Administrate Public Dicplays</a>
 </div>
 <div id="logout">
-       <input type="submit" value="Logout" onClick="logout; window.location='index.jsp'"/>
+       <input type="submit" value="Logout" onClick="userLogout()"/>
 </div>
 <div class="clear"></div>
 </div>

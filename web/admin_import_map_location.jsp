@@ -73,7 +73,7 @@
 
         </div>
         <div id="logout">
-            <input type="submit" value="Logout" onClick="logout; window.location='index.jsp'"/>
+            <input type="submit" value="Logout" onClick="userLogout()"/>
         </div>
         <div class="clear"></div>
     </div>

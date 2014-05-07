@@ -107,10 +107,13 @@ function doTask(task, object, callback) {
 /**
  * Logout on button click
  */
-$(document).on("submit", "#logout", function (event) {
-    logout();
-    //session bleibt bestehen - wieso????
-});
+//$(document).on("submit", "#logout", function (event) {
+function userLogout(){
+	doTask("LOGOUT", null, function (event) {
+        alert("Your have been successfully logged out.");
+        window.location='index.jsp';
+    });
+}
 
 /**
  * Checks weather the user (who intends to log-in) is an admin
@@ -463,6 +466,7 @@ function editUserViaPopup(data) {
     } else {
         newuserstatus = "user";
     }
+    alert(newuserstatus);
 
     var name = prompt("EDIT NAME - If you want to change the name: '" + data.name + "' simply enter the new name. If you don't want to change anything, leave it empty.");
 
@@ -475,7 +479,7 @@ function editUserViaPopup(data) {
         if (password != null) {	// if Cancel Button isn't clicked
 
             //nothing has been changed
-            if (name == "" && password == "") {
+            if (prevuserstatus == newuserstatus && name == "" && password == "") {
                 var element;
                 element = document.getElementById("infoText");
                 if (element) {
@@ -532,6 +536,24 @@ function removeUserViaPopup(data) {
         });
     }
 }
+
+/**
+ * on Button click 'Kill all user-sessions' in admin_user_management.jsp
+ * kills all sessions, also the admin-session
+ */
+function killUserSessions() {
+	
+	 var r = confirm("Do you want to remove all active user sessions (not your session)?");
+	    if (r == true) {
+	        doTask("KILL_SESSIONS", null, function (event) {
+	            alert("All sessions have been successfully deleted.");
+	            window.location.reload();
+
+	        });
+	    }
+}
+
+
 
 
 /****************** Admin - Display Management *****************/
