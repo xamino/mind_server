@@ -228,8 +228,8 @@ function removeUserWithIcon(index){
 	var iconElement = document.getElementById('icon_'+users[index].email);
 	if(iconElement!=null){
 		iconElement.parentNode.removeChild(iconElement);		
-		users.splice(index,1);
 	}
+	users.splice(index,1);
 }
 
 /**
@@ -262,7 +262,8 @@ function placeUserIcon(user){
  */
 function setUserIconCoordsByArea(){
 	
-	if(users.length==0){
+	if(users.length===0){
+//		alert("no users in setUserIconCoordsByArea");
 		return;
 	}
 	
@@ -289,9 +290,10 @@ function setUserIconCoordsByArea(){
 			if(users[i]==null){break;}
 			area = getAreaById(users[i].position);
 			//TODO handle area==null;
-//			if(area==null){
-//				continue;
-//			}
+			if(area==null){
+				i++;
+				continue;
+			}
 			currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
 			currenty = Math.round(area.topLeftY*factor+Math.round(displayedIconSize/2));
 			firstinrow = true;
@@ -398,8 +400,8 @@ function updateUserListOnReceive(data){
 //			if(users[i].position != updatedUsers[index].position){ //user's position has changed
 //				users[i].position  = updatedUsers[index].position;
 				users[i] = updatedUsers[index];
-				users[i].x = null;
-				users[i].y = null;
+				users[i].x = 0;
+				users[i].y = 0;
 //			}
 			updatedUsers.splice(index,1); //remove new user since already handled
 		}else{ //current user is no longer tracked - remove user from list
@@ -422,7 +424,6 @@ function updateUserListOnReceive(data){
 			users[i].position = "Away";
 		}
 		if(!areaExists(users[i].position)){
-//			alert("remove user "+users[i].email);
 			removeUserWithIcon(i);
 		}
 	}
