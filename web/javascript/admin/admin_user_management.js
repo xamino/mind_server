@@ -128,20 +128,23 @@ function editUserViaPopup(data) {
     var willbeadmin = false;
     var prevuserstatus;
     var newuserstatus;
-    if (isadmin) {
-        prevuserstatus = "admin";
-        willbeadmin = confirm("Should the admin-status of the user '" + data.name + "' be remained?");
-    } else {
-        prevuserstatus = "user";
-        willbeadmin = confirm("Do you want to change the status of the user '" + data.name + "' to admin-status?");
-    }
-
-    if (willbeadmin) {
-        newuserstatus = "admin";
-    } else {
-        newuserstatus = "user";
-    }
-    alert(newuserstatus);
+	if (isadmin) {
+		prevuserstatus = "admin";
+		if (data.email == readCookie("MIND_Admin_C_mail")) {
+			willbeadmin = true;
+			alert("You can't change your own status. Another admin has to change it for you.");
+		}else{
+			willbeadmin = confirm("Should the admin-status of the user '" + data.name + "' be remained?");
+		}
+	} else {
+	    prevuserstatus = "user";
+	    willbeadmin = confirm("Do you want to change the status of the user '" + data.name + "' to admin-status?");
+	}
+	if (willbeadmin) {
+	    newuserstatus = "admin";
+	} else {
+	    newuserstatus = "user";
+	}
 
     var name = prompt("EDIT NAME - If you want to change the name: '" + data.name + "' simply enter the new name. If you don't want to change anything, leave it empty.");
 

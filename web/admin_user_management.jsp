@@ -71,6 +71,7 @@
 	 <input type="submit" value="Add User" onClick="addUserViaPopup()" /> <!-- javascript:popupOpen_addUser()" />-->
 	 <br>Info - Add User: You have to add a name, an email and a password. If you don't enter a password mind will generate one for you.
 	 <br>Info - Edit User: You can't edit a user's email. <br>If you want to change an email you have to add a new user with the desired email (and remove the user with the old email).
+	 <br>You can't change your own admin status (another admin has to do it for you).
 	 <br>Info - Remove User: You can't remove yourself. Another admin has to remove you if necessary.
 	 <br><br><hr>
 	 <input type="submit" value="Kill all active user-sessions" onClick="killUserSessions()" />
