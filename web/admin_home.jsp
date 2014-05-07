@@ -7,6 +7,12 @@
 <script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
+<script src="javascript/admin/admin_display_management.js"></script>
+<script src="javascript/admin/admin_map_location.js"></script>
+<script src="javascript/admin/admin_sensor_management.js"></script>
+<script src="javascript/admin/admin_user_management.js"></script>
+<script src="javascript/pd/displayMap.js"></script>
+<script src="javascript/pd/pd_general.js"></script>
 <link href="${pageContext.request.contextPath}/css/admin.css" rel="stylesheet" type="text/css">
 <title>Admin - Home</title>
 </head>
@@ -42,7 +48,7 @@ In the 'System Management' you can:<br>
 - 'Administrate Public Dicplays'
 </div>
 <div id="logout">
-       <input type="submit" value="Logout" onClick="logout; window.location='index.jsp'" />
+       <input type="submit" value="Logout" onClick="userLogout()" />
 </div>
 <div class="clear"></div>
 </div>
