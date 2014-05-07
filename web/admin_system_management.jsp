@@ -8,7 +8,7 @@
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
 <script src="javascript/admin/admin_display_management.js"></script>
-<script src="javascript/admin/admin_map_location.js"></script>
+<script src="javascript/admin/admin_map_location_area.js"></script>
 <script src="javascript/admin/admin_sensor_management.js"></script>
 <script src="javascript/admin/admin_user_management.js"></script>
 <script src="javascript/pd/displayMap.js"></script>
