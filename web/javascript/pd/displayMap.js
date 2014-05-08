@@ -11,6 +11,7 @@ var factor=1; //the size-factor by which the displayed image deviates from the o
 var refreshRate = 10; //the refresh rate for locating - in seconds
 var interval; //the interval of location refreshing
 var balloonClosingTime = 5;
+var mapDiv;
 //var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
 //var heigthFactor=1; //the factor by which the height of the displayed image deviates from the original image height
 //var zoomValue = 30; //holds the width value for each zoom-step in pixels
@@ -29,6 +30,8 @@ $(document).ready(function() {
  */
 function initPublicDisplayStuff(){
 
+	mapDiv = document.getElementById("mapscroll");
+	
 	users = new Array();
 	
     send(new Arrival("READ_ALL_AREAS", session), function (data) {
@@ -221,12 +224,11 @@ function addUserIcon(user){
    icon = null;
 }
 
-function removeUserIcon(index){
-	var id = '#icon_'+users[index].email;
-	//modifying the id by escaping '.' & '@'
-	var mod_id = id.replace(/\./g, '\\.').replace(/\@/g, '\\@');
-	var iconElement = document.getElementById(mod_id);
-	iconElement.parentNode.removeChild(iconElement);
+function removeUserWithIcon(index){
+	var iconElement = document.getElementById('icon_'+users[index].email);
+	if(iconElement!=null){
+		iconElement.parentNode.removeChild(iconElement);		
+	}
 	users.splice(index,1);
 }
 
@@ -236,6 +238,10 @@ function removeUserIcon(index){
  * @param user the user
  */
 function placeUserIcon(user){
+	var icon = document.getElementById("icon_"+user.email);
+	if(icon==null){
+		addUserIcon(user);
+	}
 	var icon = document.getElementById("icon_"+user.email);
 	if(icon!=null){
 
@@ -255,6 +261,11 @@ function placeUserIcon(user){
  * Keep in mind: the x and y values are intended to for the center of the icon
  */
 function setUserIconCoordsByArea(){
+	
+	if(users.length===0){
+//		alert("no users in setUserIconCoordsByArea");
+		return;
+	}
 	
 	users.sort(compareByArea); //sort users by area
 
@@ -279,6 +290,10 @@ function setUserIconCoordsByArea(){
 			if(users[i]==null){break;}
 			area = getAreaById(users[i].position);
 			//TODO handle area==null;
+			if(area==null){
+				i++;
+				continue;
+			}
 			currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
 			currenty = Math.round(area.topLeftY*factor+Math.round(displayedIconSize/2));
 			firstinrow = true;
@@ -385,14 +400,12 @@ function updateUserListOnReceive(data){
 //			if(users[i].position != updatedUsers[index].position){ //user's position has changed
 //				users[i].position  = updatedUsers[index].position;
 				users[i] = updatedUsers[index];
-				users[i].x = null;
-				users[i].y = null;
+				users[i].x = 0;
+				users[i].y = 0;
 //			}
 			updatedUsers.splice(index,1); //remove new user since already handled
 		}else{ //current user is no longer tracked - remove user from list
-			var element = document.getElementById("icon_"+users[i].email);
-			element.parentNode.removeChild(element);
-			users.splice(i,1);
+			removeUserWithIcon(i);
 		}
 	}
 
@@ -400,21 +413,26 @@ function updateUserListOnReceive(data){
 		//add completely new users (who weren't tracked in the previous request/response)
 		for ( var i = 0; i < updatedUsers.length; i++) {
 			users.push(updatedUsers[i]);
-			addUserIcon(updatedUsers[i]);
+//			addUserIcon(updatedUsers[i]);
 		}		
 	}
 
 	//check for AWAY status and set position to "Away" for Away-Area
 	for (var i = users.length-1; i>=0; i--) {
 		//if area does not exist
-		if(!areaExists(users[i].position)){
-			alert(users[i].email + " - "+users[i].position);
-			removeUserIcon(i);
-		}
 		if(users[i].status==="AWAY"){
 			users[i].position = "Away";
 		}
+		if(!areaExists(users[i].position)){
+			removeUserWithIcon(i);
+		}
 	}
+	
+//	var texty = "";
+//	for ( var i = 0; i < users.length; i++) {
+//		texty+=users[i].email+",";
+//	}
+//	alert("users: "+texty);
 	
 	//set individual user icon coordinates considering area
 	setUserIconCoordsByArea();
@@ -422,9 +440,9 @@ function updateUserListOnReceive(data){
 	updateUserIconPlacement();
 	
 	
-	var element = document.getElementById("mapscroll");
+//	var element = document.getElementById("mapscroll");
 //	redrawElement(element); // currently not in use but it would work!
-	$(element).redraw();
+	$(mapDiv).redraw();
 
 }
 
@@ -527,9 +545,11 @@ function getAreaById(id){
 function areaExists(id){
 	for ( var i = 0; i < areas.length; i++) {
 		if(areas[i].ID===id){
+//			alert(id+" equals "+areas[i].ID);
 			return true; //area has already benn worked with
 		}
 	}
+//	alert(id+" <- no match");
 	return false;
 }
 
@@ -771,7 +791,7 @@ $(document).on("submit", "form[id^='callForm']", function (event) {
   //get email of recipient
     var recipient = openBalloonUserID.replace(/\\/g, '');
     recipient = recipient.substring(6, recipient.length);
-    alert("call "+recipient);
+//    alert("call "+recipient);
 
     //TODO obvious - init call - call server
 
@@ -788,7 +808,7 @@ $(document).on("submit", "form[id^='messageForm']", function (event) {
 
     var predefMsg = $("#predefMsg").find(":selected").text();
     var customMsg = $("#customMsg").val();
-    alert("send message to "+recipient+":\nPredefMsg: "+predefMsg+"\nCustomMsg: "+customMsg);
+//    alert("send message to "+recipient+":\nPredefMsg: "+predefMsg+"\nCustomMsg: "+customMsg);
     
     //TODO if custommsg is empty - send predefmsg, else send custommsg
     //TODO possibly check for user status
