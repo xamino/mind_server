@@ -109,12 +109,22 @@ public class Security {
      *
      * @return ArrayList containing all authenticated user types.
      */
-    public static DataList<Authenticated> readActives() {
+    public static synchronized DataList<Authenticated> readActiveUsers() {
         DataList<Authenticated> list = new DataList<>();
         for (Active active : getInstance().actives.getValues()) {
             list.add(active.getAuthenticated());
         }
         return list;
+    }
+
+    /**
+     * Method that returns an ArrayList of all current Active objects. NOTE that this is NOT meant to be used outside
+     * of the server, so don't send it to the client!
+     *
+     * @return The ArrayList with all useable Active objects.
+     */
+    public static synchronized ArrayList<Active> readActives() {
+        return new ArrayList<>(getInstance().actives.getValues());
     }
 
     /**

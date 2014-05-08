@@ -584,7 +584,7 @@ public class ServletFunctions {
             case READ_ALL_POSITIONS:
                 return moduleManager.handleTask(Task.Position.READ, null);
             case ADMIN_READ_SESSIONS:
-                return Security.readActives();
+                return Security.readActiveUsers();
             case KILL_SESSIONS:
                 Security.clear();
                 return new Success("All active sessions have been killed.");
