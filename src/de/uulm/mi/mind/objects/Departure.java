@@ -1,10 +1,13 @@
 package de.uulm.mi.mind.objects;
 
+import de.uulm.mi.mind.objects.Interfaces.Data;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
+
 /**
  * @author Tamino Hartmann
  *         Wrapper object class for outgoing answers – required because lists for example can not simply be Jsonated.
  */
-public class Departure implements Data {
+public class Departure implements Sendable {
     /**
      * The data object that is sent.
      */
@@ -29,10 +32,5 @@ public class Departure implements Data {
 
     public void setObject(Data object) {
         this.object = object;
-    }
-
-    @Override
-    public String getKey() {
-        return null;
     }
 }

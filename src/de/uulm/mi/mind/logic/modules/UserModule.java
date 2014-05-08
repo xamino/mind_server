@@ -3,7 +3,7 @@ package de.uulm.mi.mind.logic.modules;
 import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.enums.Task;

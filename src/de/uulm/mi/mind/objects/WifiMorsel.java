@@ -1,10 +1,13 @@
 package de.uulm.mi.mind.objects;
 
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
+
 /**
  * @author Tamino Hartmann
  *         Data object for a single wifi data morsel on a location.
  */
-public class WifiMorsel implements Data, Comparable {
+public class WifiMorsel implements Sendable, Comparable, Saveable {
     /**
      * MAC-Address of the wifi access point.
      */

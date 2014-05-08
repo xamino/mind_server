@@ -1,9 +1,9 @@
-package de.uulm.mi.mind.objects;
+package de.uulm.mi.mind.objects.Interfaces;
 
 /**
- * Created by Cassio on 21.02.14.
+ * @author Tamino Hartmann
  */
-public interface Data {
+public interface Saveable extends Data {
     /**
      * Returns the objects unique identifier
      *

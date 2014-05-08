@@ -1,5 +1,7 @@
 package de.uulm.mi.mind.objects;
 
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.security.Authenticated;
 
 import java.util.Date;
@@ -7,7 +9,7 @@ import java.util.Date;
 /**
  * Public display user object.
  */
-public class PublicDisplay implements Data, Authenticated {
+public class PublicDisplay implements Sendable, Authenticated, Saveable {
 
     private String location;
     /**

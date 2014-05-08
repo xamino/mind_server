@@ -5,6 +5,7 @@ import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.enums.DeviceClass;
 import de.uulm.mi.mind.objects.enums.Status;
 import de.uulm.mi.mind.objects.enums.Task;
@@ -28,6 +29,7 @@ public class PositionModule implements Module {
      */
     // TODO expose to admin?
     private final String TAG = "PositionModule";
+    private final String REAL_POSITION = "realPosition";
     private Messenger log;
     private TimedQueue<String, SensedDevice> sniffedDevices;
 
@@ -150,9 +152,9 @@ public class PositionModule implements Module {
                 continue;
             }
             User us = ((User) active.getAuthenticated());
-            String position = us.getPosition();
+            Area area = ((Area) active.readData(REAL_POSITION));
+            String position = (area == null ? null : area.getID());
             Status status = us.getStatus();
-            Long timeSinceLastLogin = us.getAccessDate() == null ? 0 : System.currentTimeMillis() - us.getAccessDate().getTime();
 
             // Handle logic as to what should be output
             boolean isAtUniversity = position != null && position.equals("University"); //TODO set in find
@@ -277,21 +279,21 @@ public class PositionModule implements Module {
                 }
             }
         }
-        
-        
+
+
         //FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
         int leastMatches = 2;
         List<Location> locationsToRemove = new LinkedList<Location>();
         for (Location location : locationMatchesMap.keySet()) {
-			if(locationMatchesMap.get(location)<leastMatches){
-				locationsToRemove.add(location);
-			}
-		}
+            if (locationMatchesMap.get(location) < leastMatches) {
+                locationsToRemove.add(location);
+            }
+        }
         locationsToRemove.removeAll(locationsToRemove);
         locationLevelDifferenceSumMap.remove(locationsToRemove);
         //END FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
-        
-        
+
+
         return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap);
     }
 

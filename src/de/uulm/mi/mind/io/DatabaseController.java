@@ -8,6 +8,7 @@ import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.security.BCrypt;
 
 import javax.servlet.ServletContext;
@@ -53,13 +54,13 @@ public class DatabaseController implements ServletContextListener {
      * @param data The Object to be stored.
      * @return true if the operation was successful and false otherwise.
      */
-    public boolean create(ObjectContainer sessionContainer, Data data) {
+    public boolean create(ObjectContainer sessionContainer, Saveable data) {
         // Sanitize input on DB, only allow Data objects implementing a unique key
         if (data == null || data.getKey() == null) {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
-        DataList<Data> readData = read(sessionContainer, data);
+        DataList<Saveable> readData = read(sessionContainer, data);
         if (readData != null && !readData.isEmpty()) {
             return false;
         }
@@ -80,7 +81,7 @@ public class DatabaseController implements ServletContextListener {
      * @param <T>           A DataType extending Data.
      * @return A DataList of the specified filter parameter Type or null on error.
      */
-    public <T extends Data> DataList<T> read(ObjectContainer sessionContainer, final T requestFilter) {
+    public <T extends Saveable> DataList<T> read(ObjectContainer sessionContainer, final T requestFilter) {
         try {
             List queryResult;
             // When unique key is empty, directly use the filter.
@@ -152,10 +153,10 @@ public class DatabaseController implements ServletContextListener {
         return result;
     }
 
-    public boolean update(ObjectContainer sessionContainer, Data data) {
+    public boolean update(ObjectContainer sessionContainer, Saveable data) {
         if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
         try {
-            DataList<Data> dataList;
+            DataList<Saveable> dataList;
             if (!(dataList = read(sessionContainer, data)).isEmpty()) {
                 sessionContainer.delete(dataList.get(0));
                 sessionContainer.store(data);
@@ -175,9 +176,9 @@ public class DatabaseController implements ServletContextListener {
      * @param data the object to be deleted.
      * @return true if deletion was successful or the object does not exist, otherwise false
      */
-    public boolean delete(ObjectContainer sessionContainer, Data data) {
+    public boolean delete(ObjectContainer sessionContainer, Saveable data) {
         try {
-            DataList<Data> dataList = read(sessionContainer, data);
+            DataList<Saveable> dataList = read(sessionContainer, data);
 
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
@@ -188,7 +189,7 @@ public class DatabaseController implements ServletContextListener {
                 return false;
             } else {
                 int size = dataList.size();
-                for (Data d : dataList) {
+                for (Saveable d : dataList) {
                     sessionContainer.delete(d);
                 }
                 log.log(TAG, "Deleted " + size + " objects from DB: " + dataList.toString());

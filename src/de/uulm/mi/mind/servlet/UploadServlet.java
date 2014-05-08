@@ -101,7 +101,9 @@ public class UploadServlet extends HttpServlet {
         if (email != null && password != null) {
             // MUST first check these values, sometimes old sessions are still floating around!!!
             // todo check why cookies are never cleaned!
-            active = Security.begin(new User(email, password), null);
+            User user = new User(email);
+            user.setPwdHash(password);
+            active = Security.begin(user, null);
         } else if (session != null) {
             active = Security.begin(null, session);
         } else {

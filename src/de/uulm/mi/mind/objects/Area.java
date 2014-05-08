@@ -1,10 +1,13 @@
 package de.uulm.mi.mind.objects;
 
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
+
 /**
  * @author Tamino Hartmann
  *         Data object for a collection of Locations that are grouped into an area, for example a specific room.
  */
-public class Area implements Data {
+public class Area implements Sendable, Saveable {
     /**
      * The identifying value for this area.
      */

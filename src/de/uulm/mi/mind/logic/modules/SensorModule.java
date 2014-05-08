@@ -4,7 +4,7 @@ import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.WifiSensor;
 import de.uulm.mi.mind.objects.enums.Task;

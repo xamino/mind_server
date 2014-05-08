@@ -3,6 +3,7 @@ package de.uulm.mi.mind.servlet;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.enums.API;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
@@ -165,7 +166,9 @@ public class ServletFunctions {
             case USER_READ:
                 // NOTE: do NOT allow ANY USER TO BE READ HERE – SECURITY LEAK!
                 // Admin should use admin_user_read!
-                return user.safeClone();
+                User back = user.safeClone();
+                // todo write position here?
+                return back;
             case USER_UPDATE:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error(Error.Type.WRONG_OBJECT);
@@ -188,8 +191,6 @@ public class ServletFunctions {
                 if (safeString(sentUser.getName())) {
                     user.setName(sentUser.getName());
                 }
-                // status TODO remove log when working
-                log.log(TAG, "User update status set to: " + sentUser.getStatus());
                 user.setStatus(sentUser.getStatus());
                 // Note that the session user object now needs to be updated. This is done the next time the user
                 // sends a request through SecurityModule; it will always get the up to date object from the
@@ -213,35 +214,26 @@ public class ServletFunctions {
                     return msg;
                 }
                 Area area = ((Area) data);
-                boolean areaChanged = false;
-                // todo user should not save area again, could overwrite!!!
+                // pull these out here to make checking if they exist easier
+                Area last = ((Area) activeUser.readData(LAST_POSITION));
+                Area real = ((Area) activeUser.readData(REAL_POSITION));
                 // this implements server-side fuzziness to avoid fluttering of position_find
                 if (!(activeUser.readData(LAST_POSITION) instanceof Area)) {
                     // this means it is the first time in this session, so we don't apply fuzziness
                     activeUser.writeData(LAST_POSITION, area);
                     activeUser.writeData(REAL_POSITION, area);
                     user.setPosition(area.getID());
-                    areaChanged = true;
-                } else if (((Area) activeUser.readData(LAST_POSITION)).getID().equals(area.getID())
-                        && !user.getPosition().equals(area.getID())) {
+                } else if (last != null && last.getID().equals(area.getID())
+                        && !(real != null && real.getID().equals(area.getID()))) {
                     // update user for position, but only if last was already the same and the previous db entry is different
                     activeUser.writeData(REAL_POSITION, area);
                     user.setPosition(area.getID());
-                    areaChanged = true;
                 } else {
                     // this means the area is different than the one before, so change lastPosition but not User:
                     activeUser.writeData(LAST_POSITION, area);
                 }
-                // Only update user if location has actually changed.
-                if (areaChanged) {
-                    log.log(TAG, "Area changed update user!");
-                    msg = moduleManager.handleTask(Task.User.UPDATE, user);
-                    if (!(msg instanceof Success)) {
-                        return msg;
-                    }
-                }
                 // everything okay, return real position area
-                return (Data) activeUser.readData(REAL_POSITION);
+                return real;
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
                 log.error(TAG, "Toggled admin! DANGEROUS OPERATION!");
@@ -387,7 +379,6 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.User.DELETE, arrival.getObject());
             // LOCATION --------------------------------------------------------------------------
             // TODO sanitize and make sane!
-            // todo filter for eduroam and welcome
             case LOCATION_READ:
                 if (!(arrival.getObject() instanceof Location)) {
                     return new Error(Error.Type.WRONG_OBJECT);
