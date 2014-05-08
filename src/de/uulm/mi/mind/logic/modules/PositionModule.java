@@ -131,7 +131,7 @@ public class PositionModule implements Module {
             }
             */
         }
-        log.log(TAG, "Algo sees device at " + area.getID() + ".");
+        // log.log(TAG, "Algo sees device at " + area.getID() + ".");
 
         // send back the location that the server thinks you're at with the area
         DataList<Location> loca = new DataList<>();
