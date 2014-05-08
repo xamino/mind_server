@@ -117,4 +117,20 @@ public class Configuration {
     public ArrayList<String> getWifiNameFilter() {
         return this.wifiNameFilter;
     }
+
+    public String getDbURL() {
+        return null;
+    }
+
+    public String getDbPort() {
+        return null;
+    }
+
+    public String getDbUser() {
+        return null;
+    }
+
+    public String getDbPassword() {
+        return null;
+    }
 }
