@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * @author Andreas Köll, Tamino Hartmann
  */
-public class DatabaseController implements ServletContextListener {
+public class DatabaseController implements ServletContextListener, DatabaseAccess {
     /**
      * Variable for storing the instance of the class.
      */
@@ -400,5 +400,10 @@ public class DatabaseController implements ServletContextListener {
             rootContainer.close();
             log.log(TAG, "db4o shutdown");
         }
+    }
+
+    @Override
+    public Session open() {
+        return new Session(getSessionContainer());
     }
 }

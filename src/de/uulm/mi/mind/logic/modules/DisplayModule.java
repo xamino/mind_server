@@ -1,7 +1,10 @@
 package de.uulm.mi.mind.logic.modules;
 
 import com.db4o.ObjectContainer;
-import de.uulm.mi.mind.io.DatabaseController;
+import de.uulm.mi.mind.io.DatabaseAccess;
+import de.uulm.mi.mind.io.DatabaseManager;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.objects.Data;
@@ -17,7 +20,7 @@ import de.uulm.mi.mind.objects.messages.Success;
 public class DisplayModule implements Module {
 
     private final String TAG = "DisplayModule";
-    private final DatabaseController database;
+    private final DatabaseManager database;
     private Messenger log;
 
     /**
@@ -25,7 +28,7 @@ public class DisplayModule implements Module {
      */
     public DisplayModule() {
         log = Messenger.getInstance();
-        database = DatabaseController.getInstance();
+        database = DatabaseManager.getInstance();
     }
 
     @Override
@@ -56,85 +59,83 @@ public class DisplayModule implements Module {
     }
 
 
-    private Data createDisplay(PublicDisplay display) {
+    private Data createDisplay(final PublicDisplay display) {
         if (display.getKey() == null) {
             return new Error(Error.Type.WRONG_OBJECT, "PublicDisplay to be created was null!");
         }
 
-        ObjectContainer sessionContainer = database.getSessionContainer();
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                boolean success = session.create(display);
 
-        boolean success = database.create(sessionContainer, display);
-
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("PublicDisplay was created successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Creation of PublicDisplay resulted in an error.");
-        }
-    }
-
-    private Data readDisplay(PublicDisplay display) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<PublicDisplay> read = database.read(sessionContainer, display);
-        sessionContainer.close();
-        if (read == null) {
-            return new Error(Error.Type.DATABASE, "Reading of PublicDisplay resulted in an error.");
-        }
-
-        // get filtered locations
-        if (display.getKey() == null) {
-            return read;
-        }
-        // from here on only objects with a valid key == single ones are queried
-        else if (read.isEmpty()) {
-            return new Error(Error.Type.DATABASE, "PublicDisplay could not be found!");
-        }
-        return read;
-    }
-
-    private Data updateDisplay(PublicDisplay display) {
-        if (display.getKey() == null) {
-            return new Error(Error.Type.WRONG_OBJECT, "PublicDisplay to be created was null!");
-        }
-
-        ObjectContainer sessionContainer = database.getSessionContainer();
-
-        boolean success = database.update(sessionContainer, display);
-
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("PublicDisplay was created successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Creation of PublicDisplay resulted in an error.");
-        }
-
-    }
-
-    private Data deleteDisplay(PublicDisplay display) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-
-        boolean success = database.delete(sessionContainer, display);
-
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            if (display.getKey() == null) {
-                return new Success("All PublicDisplay were deleted successfully.");
+                if (success) {
+                    return new Success("PublicDisplay was created successfully.");
+                } else {
+                    return new Error(Error.Type.DATABASE, "Creation of PublicDisplay resulted in an error.");
+                }
             }
-            return new Success("PublicDisplay was deleted successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Deletion of PublicDisplay resulted in an error.");
+        });
+    }
+
+    private Data readDisplay(final PublicDisplay display) {
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session dba) {
+                DataList<PublicDisplay> read = dba.read(display);
+
+                if (read == null) {
+                    return new Error(Error.Type.DATABASE, "Reading of PublicDisplay resulted in an error.");
+                }
+
+                // get filtered locations
+                if (display.getKey() == null) {
+                    return read;
+                }
+                // from here on only objects with a valid key == single ones are queried
+                else if (read.isEmpty()) {
+                    return new Error(Error.Type.DATABASE, "PublicDisplay could not be found!");
+                }
+                return read;
+            }
+        });
+
+
+    }
+
+    private Data updateDisplay(final PublicDisplay display) {
+        if (display.getKey() == null) {
+            return new Error(Error.Type.WRONG_OBJECT, "PublicDisplay to be created was null!");
         }
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session dba) {
+                boolean success = dba.update(display);
+
+                if (success) {
+                    return new Success("PublicDisplay was created successfully.");
+                } else {
+                    return new Error(Error.Type.DATABASE, "Creation of PublicDisplay resulted in an error.");
+                }
+            }
+        });
+    }
+
+    private Data deleteDisplay(final PublicDisplay display) {
+       return database.open(new Transaction() {
+           @Override
+           public Data doOperations(Session dba) {
+               boolean success = dba.delete(display);
+               if (success) {
+                   if (display.getKey() == null) {
+                       return new Success("All PublicDisplay were deleted successfully.");
+                   }
+                   return new Success("PublicDisplay was deleted successfully.");
+               } else {
+                   return new Error(Error.Type.DATABASE, "Deletion of PublicDisplay resulted in an error.");
+               }
+           }
+       });
+
     }
 }
