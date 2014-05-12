@@ -5,7 +5,7 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
+    <script src="javascript/jquery-2.1.0.min.js"></script>
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
 <script src="javascript/pd/displayMap.js"></script>
