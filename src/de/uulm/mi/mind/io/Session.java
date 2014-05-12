@@ -7,40 +7,74 @@ import de.uulm.mi.mind.objects.DataList;
 /**
  * Created by Cassio on 10.05.2014.
  */
-public abstract class Session {
+public class Session {
+
+    public ObjectContainer getDb4oContainer() {
+        return db4oContainer;
+    }
+
+    public ObjectContainerSQL getSqlContainer() {
+        return sqlContainer;
+    }
 
     private final ObjectContainerSQL sqlContainer;
     private final ObjectContainer db4oContainer;
+    private final DatabaseAccess dba;
 
-    public Session(ObjectContainer container) {
+    public Session(ObjectContainer container, DatabaseAccess dba) {
         db4oContainer = container;
         sqlContainer = null;
+        this.dba = dba;
     }
 
-    public Session(ObjectContainerSQL container) {
+    public Session(ObjectContainerSQL container, DatabaseAccess dba) {
         sqlContainer = container;
         db4oContainer = null;
+        this.dba = dba;
     }
 
 
-    boolean create(Data data){
-        if(db4oContainer!=null){
-            db4oContainer.s
-        }
-        else{
+    public boolean create(Data data) {
+        return dba.create(this, data);
+    }
 
+    public <E extends Data> DataList<E> read(E data) {
+        return dba.read(this, data);
+    }
+
+    public boolean update(Data data) {
+        return dba.create(this, data);
+    }
+
+    public boolean delete(Data data) {
+        return dba.create(this, data);
+    }
+
+    void rollback() {
+        if (db4oContainer != null) {
+            db4oContainer.rollback();
+        } else {
+            sqlContainer.rollback();
         }
     }
 
-    <E extends Data> DataList<E> read(E data);
+    void commit() {
+        if (db4oContainer != null) {
+            db4oContainer.commit();
+        } else {
+            sqlContainer.commit();
+        }
+    }
 
-    boolean update(Data data);
+    void close() {
+        if (db4oContainer != null) {
+            db4oContainer.close();
+        } else {
+            sqlContainer.close();
+        }
+    }
 
-    boolean delete(Data data);
-
-    void rollback();
-
-    void commit();
-
-    void close();
+    public void reinit() {
+        dba.reinit(this);
+    }
 }

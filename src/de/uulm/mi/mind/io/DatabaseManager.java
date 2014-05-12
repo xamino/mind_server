@@ -48,11 +48,11 @@ public class DatabaseManager implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        dba.init();
+        dba.init(servletContextEvent);
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-        dba.destroy();
+        dba.destroy(servletContextEvent);
     }
 }

@@ -6,7 +6,6 @@ import de.uulm.mi.mind.security.BCrypt;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -16,7 +15,7 @@ import java.util.List;
 /**
  * @author Andreas Köll, Tamino Hartmann
  */
-public class DatabaseControllerSQL implements ServletContextListener, DatabaseAccess {
+public class DatabaseControllerSQL implements DatabaseAccess {
     /**
      * Variable for storing the instance of the class.
      */
@@ -51,13 +50,14 @@ public class DatabaseControllerSQL implements ServletContextListener, DatabaseAc
      * @param data The Object to be stored.
      * @return true if the operation was successful and false otherwise.
      */
-    public boolean create(ObjectContainerSQL sessionContainer, Data data) {
+    public boolean create(Session session, Data data) {
+        ObjectContainerSQL sessionContainer = session.getSqlContainer();
         // Sanitize input on DB, only allow Data objects implementing a unique key
         if (data == null || data.getKey() == null) {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
-        DataList<Data> readData = read(sessionContainer, data);
+        DataList<Data> readData = read(session, data);
         if (readData != null && !readData.isEmpty()) {
             return false;
         }
@@ -80,7 +80,8 @@ public class DatabaseControllerSQL implements ServletContextListener, DatabaseAc
      *                      Changing an object parameter filters the returned objects.
      * @return A DataList of the specified filter parameter Type or null on error.
      */
-    public <E extends Data> DataList<E> read(ObjectContainerSQL sessionContainer, final E requestFilter) {
+    public <E extends Data> DataList<E> read(Session session, final E requestFilter) {
+        ObjectContainerSQL sessionContainer = session.getSqlContainer();
         try {
             List queryResult;
             // When unique key is empty, directly use the filter.
@@ -131,11 +132,12 @@ public class DatabaseControllerSQL implements ServletContextListener, DatabaseAc
         }
     }
 
-    public boolean update(ObjectContainerSQL sessionContainer, Data data) {
+    public boolean update(Session session, Data data) {
+        ObjectContainerSQL sessionContainer = session.getSqlContainer();
         if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
         try {
             DataList<Data> dataList;
-            if (!(dataList = read(sessionContainer, data)).isEmpty()) {
+            if (!(dataList = read(session, data)).isEmpty()) {
                 sessionContainer.delete(dataList.get(0));
                 sessionContainer.store(data);
                 log.log(TAG, "Updated in DB: " + data.toString());
@@ -154,9 +156,10 @@ public class DatabaseControllerSQL implements ServletContextListener, DatabaseAc
      * @param data the object to be deleted.
      * @return true if deletion was successful or the object does not exist, otherwise false
      */
-    public boolean delete(ObjectContainerSQL sessionContainer, Data data) {
+    public boolean delete(Session session, Data data) {
+        ObjectContainerSQL sessionContainer = session.getSqlContainer();
         try {
-            DataList<Data> dataList = read(sessionContainer, data);
+            DataList<Data> dataList = read(session, data);
 
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
@@ -244,28 +247,29 @@ public class DatabaseControllerSQL implements ServletContextListener, DatabaseAc
     /**
      * Must not be called before the
      */
-    public void reinit(ObjectContainerSQL sessionContainer) {
+    public void reinit(Session session) {
+        ObjectContainerSQL sessionContainer = session.getSqlContainer();
         //
         Configuration config = Configuration.getInstance();
 
         // Initializing Database
         log.log(TAG, "Running DB init.");
-        DataList<Area> areaData = read(sessionContainer, new Area("University", null, 0, 0, 0, 0));
+        DataList<Area> areaData = read(session, new Area("University", null, 0, 0, 0, 0));
         if (areaData == null || areaData.isEmpty()) {
             log.log(TAG, "Universe not existing, creating it.");
-            create(sessionContainer, new Area("University", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            create(session, new Area("University", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
         }
 
         // Create default admin if no other admin exists
         User adminProto = new User(null);
         adminProto.setAdmin(true);
-        DataList<User> adminData = read(sessionContainer, adminProto);
+        DataList<User> adminData = read(session, adminProto);
         // test for existing single admin or list of admins
         if (adminData == null || adminData.isEmpty()) {
             log.log(TAG, "Admin not existing, creating one.");
             adminProto = new User(config.getAdminEmail(), config.getAdminName(), true);
             adminProto.setPwdHash(BCrypt.hashpw(config.getAdminPassword(), BCrypt.gensalt(12)));
-            create(sessionContainer, adminProto);
+            create(session, adminProto);
         }
     }
 
@@ -318,19 +322,19 @@ public class DatabaseControllerSQL implements ServletContextListener, DatabaseAc
 
 
     @Override
-    public void contextInitialized(ServletContextEvent event) {
+    public Session open() {
+        return new Session(new ObjectContainerSQL(createConnection()), getInstance());
+    }
+
+    @Override
+    public void init(ServletContextEvent event) {
         ServletContext context = event.getServletContext();
         String filePath = context.getRealPath("/");
         init(filePath, true);
     }
 
-
     @Override
-    public void contextDestroyed(ServletContextEvent event) {
-        close();
-    }
-
-    public void close() {
+    public void destroy(ServletContextEvent event) {
         if (rootContainer != null) {
             rootContainer.close();
             log.log(TAG, "db4o shutdown");

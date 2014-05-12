@@ -1,8 +1,9 @@
 package de.uulm.mi.mind.logic.modules;
 
-import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.io.Configuration;
-import de.uulm.mi.mind.io.DatabaseController;
+import de.uulm.mi.mind.io.DatabaseManager;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.objects.*;
@@ -19,14 +20,14 @@ import java.util.ArrayList;
  */
 public class LocationModule implements Module {
 
-    private final DatabaseController database;
+    private final DatabaseManager database;
     private final Messenger log;
     private final String TAG = "LocationModule";
     private ArrayList<String> wifiNameFilter;
 
     public LocationModule() {
         wifiNameFilter = Configuration.getInstance().getWifiNameFilter();
-        database = DatabaseController.getInstance();
+        database = DatabaseManager.getInstance();
         log = Messenger.getInstance();
     }
 
@@ -88,243 +89,234 @@ public class LocationModule implements Module {
         return new Error(Error.Type.TASK, "The Location Module is unable to perform the Task as it appears not to be implemented.");
     }
 
-    private Data createArea(Area area) {
+    private Data createArea(final Area area) {
         if (area.getKey() == null) {
             return new Error(Error.Type.WRONG_OBJECT, "Area to be created was null!");
         }
 
-        ObjectContainer sessionContainer = database.getSessionContainer();
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                boolean success1 = session.create(area);
+                boolean success2 = updateMapping(session);
 
-        boolean success1 = database.create(sessionContainer, area);
-        boolean success2 = updateMapping(sessionContainer);
+                if (success1 && success2) {
+                    return new Success("Area was created successfully.");
+                }
 
-        if (success1 && success2) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("Area was created successfully.");
-        }
-
-        // some kind of error occurred
-        sessionContainer.rollback();
-        sessionContainer.close();
-
-        // Evaluate Error
-        if (!success1) {
-            return new Error(Error.Type.DATABASE, "Creation of area resulted in an error.");
-        } else { //!success2
-            return new Error(Error.Type.DATABASE, "Creation of area resulted in an error: The mapping could not be updated.");
-        }
+                // Evaluate Error
+                if (!success1) {
+                    return new Error(Error.Type.DATABASE, "Creation of area resulted in an error.");
+                } else { //!success2
+                    return new Error(Error.Type.DATABASE, "Creation of area resulted in an error: The mapping could not be updated.");
+                }
+            }
+        });
     }
 
-    private Data readArea(Area area) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<Area> read = database.read(sessionContainer, area);
-        sessionContainer.close();
-        if (read == null) {
-            return new Error(Error.Type.DATABASE, "Reading of area resulted in an error.");
-        }
+    private Data readArea(final Area area) {
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                DataList<Area> read = session.read(area);
+                if (read == null) {
+                    return new Error(Error.Type.DATABASE, "Reading of area resulted in an error.");
+                }
 
-        // get filtered Areas
-        if (area.getKey() == null) {
-            return read;
-        }
-        // from here on only objects with a valid key == single ones are queried
-        else if (read.isEmpty()) {
-            return new Error(Error.Type.DATABASE, "Area could not be found!");
-        }
-        return read;
+                // get filtered Areas
+                if (area.getKey() == null) {
+                    return read;
+                }
+                // from here on only objects with a valid key == single ones are queried
+                else if (read.isEmpty()) {
+                    return new Error(Error.Type.DATABASE, "Area could not be found!");
+                }
+                return read;
+            }
+        });
+
+
     }
 
-    private Data updateArea(Area area) {
+    private Data updateArea(final Area area) {
         if (area.getKey() == null) {
             return new Error(Error.Type.WRONG_OBJECT, "Area to be updated was null!");
         }
 
-        ObjectContainer sessionContainer = database.getSessionContainer();
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
 
-        boolean success1 = database.update(sessionContainer, area);
-        boolean success2 = updateMapping(sessionContainer);
+                boolean success1 = session.update(area);
+                boolean success2 = updateMapping(session);
 
-        if (success1 && success2) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("Area was updated successfully.");
-        }
+                if (success1 && success2) {
+                    return new Success("Area was updated successfully.");
+                }
 
-        // some kind of error occurred
-        sessionContainer.rollback();
-        sessionContainer.close();
+                // Evaluate Error
+                if (!success1) {
+                    return new Error(Error.Type.DATABASE, "Update of area resulted in an error.");
+                } else { //!success2
+                    return new Error(Error.Type.DATABASE, "Update of area resulted in an error: The mapping could not be updated.");
+                }
+            }
+        });
 
-        // Evaluate Error
-        if (!success1) {
-            return new Error(Error.Type.DATABASE, "Update of area resulted in an error.");
-        } else { //!success2
-            return new Error(Error.Type.DATABASE, "Update of area resulted in an error: The mapping could not be updated.");
-        }
+
     }
 
-    private Data deleteArea(Area area) {
+    private Data deleteArea(final Area area) {
         // key is allowed to be null here to delete all
-        ObjectContainer sessionContainer = database.getSessionContainer();
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                boolean success1 = session.delete(area);
+                boolean success2 = updateMapping(session);
 
-        boolean success1 = database.delete(sessionContainer, area);
-        boolean success2 = updateMapping(sessionContainer);
+                if (success1 && success2) {
+                    return new Success("Area was deleted successfully.");
+                }
 
-        if (success1 && success2) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("Area was deleted successfully.");
-        }
+                // some kind of error occurred
+                // Evaluate Error
+                if (!success1) {
+                    return new Error(Error.Type.DATABASE, "Deletion of area resulted in an error.");
+                } else { //!success2
+                    return new Error(Error.Type.DATABASE, "Deletion of area resulted in an error: The mapping could not be updated.");
+                }
+            }
+        });
 
-        // some kind of error occurred
-        sessionContainer.rollback();
-        sessionContainer.close();
-
-        // Evaluate Error
-        if (!success1) {
-            return new Error(Error.Type.DATABASE, "Deletion of area resulted in an error.");
-        } else { //!success2
-            return new Error(Error.Type.DATABASE, "Deletion of area resulted in an error: The mapping could not be updated.");
-        }
     }
 
-    private Data createLocation(Location location) {
+    private Data createLocation(final Location location) {
         if (location.getKey() == null) {
             return new Error(Error.Type.WRONG_OBJECT, "Location to be created was null!");
         }
 
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        // If a location already exists we simply update it
-        DataList<Location> read = database.read(sessionContainer, new Location(location.getCoordinateX(), location.getCoordinateY()));
-        if (read.isEmpty()) {
-            // this probably means that no location was found for the given location
-            // so filter
-            location = filterMorsels(location);
-            // and create
-            boolean success1 = database.create(sessionContainer, location);
-            // area has changed, so redo mapping
-            boolean success2 = updateMapping(sessionContainer);
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                // If a location already exists we simply update it
+                DataList<Location> read = session.read(new Location(location.getCoordinateX(), location.getCoordinateY()));
+                if (read.isEmpty()) {
+                    // this probably means that no location was found for the given location
+                    // so filter
+                    Location filteredLocation = filterMorsels(location);
+                    // and create
+                    boolean success1 = session.create(filteredLocation);
+                    // area has changed, so redo mapping
+                    boolean success2 = updateMapping(session);
 
-            if (success1 && success2) {
-                sessionContainer.commit();
-                sessionContainer.close();
-                return new Success("Location was created successfully.");
+                    if (success1 && success2) {
+                        return new Success("Location was created successfully.");
+                    }
+
+                    // Evaluate Error
+                    if (!success1) {
+                        return new Error(Error.Type.DATABASE, "Creation of location resulted in an error.");
+                    } else { //!success2
+                        return new Error(Error.Type.DATABASE, "Creation of location resulted in an error: The mapping could not be updated.");
+                    }
+
+                } else {
+                    // If a location already exists, we simply add the wifimorsels of the given one
+                    Location exist = read.get(0);
+                    exist.getWifiMorsels().addAll(location.getWifiMorsels());
+                    // filter
+                    exist = filterMorsels(exist);
+                    boolean success1 = session.update(exist);
+                    // area has changed, so redo mapping
+                    boolean success2 = updateMapping(session);
+
+                    if (success1 && success2) {
+                        return new Success("Location was not created but updated successfully as it existed already.");
+                    }
+
+                    // Evaluate Error
+                    if (!success1) {
+                        return new Error(Error.Type.DATABASE, "Creation of location resulted in an error.");
+                    } else { //!success2
+                        return new Error(Error.Type.DATABASE, "Creation of location resulted in an error: The mapping could not be updated.");
+                    }
+                }
             }
-
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-
-            // Evaluate Error
-            if (!success1) {
-                return new Error(Error.Type.DATABASE, "Creation of location resulted in an error.");
-            } else { //!success2
-                return new Error(Error.Type.DATABASE, "Creation of location resulted in an error: The mapping could not be updated.");
-            }
-
-        } else {
-            // If a location already exists, we simply add the wifimorsels of the given one
-            Location exist = read.get(0);
-            exist.getWifiMorsels().addAll(location.getWifiMorsels());
-            // filter
-            exist = filterMorsels(exist);
-            boolean success1 = database.update(sessionContainer, exist);
-            // area has changed, so redo mapping
-            boolean success2 = updateMapping(sessionContainer);
-
-            if (success1 && success2) {
-                sessionContainer.commit();
-                sessionContainer.close();
-                return new Success("Location was not created but updated successfully as it existed already.");
-            }
-
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-
-            // Evaluate Error
-            if (!success1) {
-                return new Error(Error.Type.DATABASE, "Creation of location resulted in an error.");
-            } else { //!success2
-                return new Error(Error.Type.DATABASE, "Creation of location resulted in an error: The mapping could not be updated.");
-            }
-        }
+        });
     }
 
-    private Data readLocation(Location location) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<Location> read = database.read(sessionContainer, location);
-        sessionContainer.close();
-        if (read == null) {
-            return new Error(Error.Type.DATABASE, "Reading of location resulted in an error.");
-        }
+    private Data readLocation(final Location location) {
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                DataList<Location> read = session.read(location);
+                if (read == null) {
+                    return new Error(Error.Type.DATABASE, "Reading of location resulted in an error.");
+                }
 
-        // get filtered locations
-        if (location.getKey() == null) {
-            return read;
-        }
-        // from here on only objects with a valid key == single ones are queried
-        else if (read.isEmpty()) {
-            return new Error(Error.Type.DATABASE, "Location could not be found!");
-        }
-        return read;
+                // get filtered locations
+                if (location.getKey() == null) {
+                    return read;
+                }
+                // from here on only objects with a valid key == single ones are queried
+                else if (read.isEmpty()) {
+                    return new Error(Error.Type.DATABASE, "Location could not be found!");
+                }
+                return read;
+            }
+        });
     }
 
-    private Data updateLocation(Location location) {
+    private Data updateLocation(final Location location) {
         if (location.getKey() == null) {
             return new Error(Error.Type.WRONG_OBJECT, "Location to be updated was null!");
         }
 
-        ObjectContainer sessionContainer = database.getSessionContainer();
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                // filter
+                Location filteredLocation = filterMorsels(location);
+                // run all operations
+                boolean success1 = session.update(filteredLocation);
+                // area has changed, so redo mapping
+                boolean success2 = updateMapping(session);
 
-        // filter
-        location = filterMorsels(location);
-        // run all operations
-        boolean success1 = database.update(sessionContainer, location);
-        // area has changed, so redo mapping
-        boolean success2 = updateMapping(sessionContainer);
+                if (success1 && success2) {
+                    return new Success("Location was updated successfully.");
+                }
 
-        if (success1 && success2) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("Location was updated successfully.");
-        }
-
-        // some kind of error occurred
-        sessionContainer.rollback();
-        sessionContainer.close();
-
-        // Evaluate Error
-        if (!success1) {
-            return new Error(Error.Type.DATABASE, "Update of location resulted in an error.");
-        } else { //!success2
-            return new Error(Error.Type.DATABASE, "Update of location resulted in an error: The mapping could not be updated.");
-        }
+                // Evaluate Error
+                if (!success1) {
+                    return new Error(Error.Type.DATABASE, "Update of location resulted in an error.");
+                } else { //!success2
+                    return new Error(Error.Type.DATABASE, "Update of location resulted in an error: The mapping could not be updated.");
+                }
+            }
+        });
     }
 
-    private Data deleteLocation(Location location) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        // run all operations
-        boolean success1 = database.delete(sessionContainer, location);
-        // area has changed, so redo mapping
-        boolean success2 = updateMapping(sessionContainer);
+    private Data deleteLocation(final Location location) {
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                // run all operations
+                boolean success1 = session.delete(location);
+                // area has changed, so redo mapping
+                boolean success2 = updateMapping(session);
 
-        if (success1 && success2) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("Location was deleted successfully.");
-        }
+                if (success1 && success2) {
+                    return new Success("Location was deleted successfully.");
+                }
 
-        // some kind of error occurred
-        sessionContainer.rollback();
-        sessionContainer.close();
-
-        // Evaluate Error
-        if (!success1) {
-            return new Error(Error.Type.DATABASE, "Deletion of location resulted in an error.");
-        } else { //!success2
-            return new Error(Error.Type.DATABASE, "Deletion of location resulted in an error: The mapping could not be updated.");
-        }
+                // Evaluate Error
+                if (!success1) {
+                    return new Error(Error.Type.DATABASE, "Deletion of location resulted in an error.");
+                } else { //!success2
+                    return new Error(Error.Type.DATABASE, "Deletion of location resulted in an error: The mapping could not be updated.");
+                }
+            }
+        });
     }
 
     /**
@@ -334,41 +326,42 @@ public class LocationModule implements Module {
      * @return
      */
     private Area readAreaByLocation(final Location location) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        // Get all areas
-        DataList<Area> dbCall = database.read(sessionContainer, new Area(null));
-        if (dbCall == null) {
-            log.error(TAG, "All areas: dbCall == null – shouldn't happen, FIX!");
-            return null;
-        }
-        DataList<Area> all = dbCall;
-        dbCall = database.read(sessionContainer, new Area("University"));
-        if (dbCall == null) {
-            log.error(TAG, "University: dbCall == null – shouldn't happen, FIX!");
-            return null;
-        }
+        return (Area) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
 
-        sessionContainer.close();
+                // Get all areas
+                DataList<Area> dbCall = session.read(new Area(null));
+                if (dbCall == null) {
+                    log.error(TAG, "All areas: dbCall == null – shouldn't happen, FIX!");
+                    return null;
+                }
+                DataList<Area> all = dbCall;
+                dbCall = session.read(new Area("University"));
+                if (dbCall == null) {
+                    log.error(TAG, "University: dbCall == null – shouldn't happen, FIX!");
+                    return null;
+                }
 
-        Area finalArea = dbCall.get(0);
-        for (Area temp : all) {
-            if (temp.getArea() < finalArea.getArea()
-                    && temp.contains(location.getCoordinateX(), location.getCoordinateY())) {
-                finalArea = temp;
+                Area finalArea = dbCall.get(0);
+                for (Area temp : all) {
+                    if (temp.getArea() < finalArea.getArea()
+                            && temp.contains(location.getCoordinateX(), location.getCoordinateY())) {
+                        finalArea = temp;
+                    }
+                }
+
+                return finalArea;
             }
-        }
-
-        return finalArea;
+        });
     }
 
     /**
      * Method that updates the Location <--> Area mapping.
-     *
-     * @param sessionContainer
      */
-    private boolean updateMapping(ObjectContainer sessionContainer) {
-        DataList<Location> locations = database.read(sessionContainer, new Location(0, 0, null));
-        DataList<Area> areas = database.read(sessionContainer, new Area(null));
+    private boolean updateMapping(Session session) {
+        DataList<Location> locations = session.read(new Location(0, 0, null));
+        DataList<Area> areas = session.read(new Area(null));
 
         log.pushTimer(this, "");
         for (Area area : areas) {
@@ -379,7 +372,7 @@ public class LocationModule implements Module {
                 }
             }
             // must write data back to DB
-            if (!database.update(sessionContainer, area)) {
+            if (!session.update(area)) {
                 log.error(TAG, "Failed to update mapping in DB for " + area.getID() + "!");
                 return false;
             }
@@ -395,20 +388,20 @@ public class LocationModule implements Module {
      * @return Success or Error depending on DB action.
      */
     private Data annihilateAreas() {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        Boolean deleted = database.delete(sessionContainer, new Area(null));
-        // Delete these to be sure...
-        deleted &= database.delete(sessionContainer, new Location(0, 0, null));
-        deleted &= database.delete(sessionContainer, new WifiMorsel(null, null, 0, 0, null));
-        if (deleted) {
-            database.reinit(sessionContainer);
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("All areas were removed from Database.");
-        }
-        sessionContainer.rollback();
-        sessionContainer.close();
-        return new Error(Error.Type.DATABASE, "Removal of areas failed.");
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                Boolean deleted = session.delete(new Area(null));
+                // Delete these to be sure...
+                deleted &= session.delete(new Location(0, 0, null));
+                deleted &= session.delete(new WifiMorsel(null, null, 0, 0, null));
+                if (deleted) {
+                    session.reinit();
+                    return new Success("All areas were removed from Database.");
+                }
+                return new Error(Error.Type.DATABASE, "Removal of areas failed.");
+            }
+        });
     }
 
     private Data readLocations(Area area) {

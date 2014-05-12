@@ -74,4 +74,8 @@ public class ObjectContainerSQL {
 
         return q.execute();
     }
+
+    public void rollback() {
+
+    }
 }
