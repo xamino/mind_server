@@ -9,11 +9,11 @@ import de.uulm.mi.mind.objects.DataList;
  */
 public class Session {
 
-    public ObjectContainer getDb4oContainer() {
+    ObjectContainer getDb4oContainer() {
         return db4oContainer;
     }
 
-    public ObjectContainerSQL getSqlContainer() {
+    ObjectContainerSQL getSqlContainer() {
         return sqlContainer;
     }
 

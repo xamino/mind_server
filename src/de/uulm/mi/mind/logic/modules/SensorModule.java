@@ -2,6 +2,9 @@ package de.uulm.mi.mind.logic.modules;
 
 import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.io.DatabaseController;
+import de.uulm.mi.mind.io.DatabaseManager;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.objects.Data;
@@ -18,7 +21,7 @@ import de.uulm.mi.mind.objects.messages.Success;
 public class SensorModule implements Module {
 
     private final String TAG = "SensorModule";
-    private final DatabaseController database;
+    private final DatabaseManager database;
     private Messenger log;
 
     /**
@@ -26,7 +29,7 @@ public class SensorModule implements Module {
      */
     public SensorModule() {
         log = Messenger.getInstance();
-        database = DatabaseController.getInstance();
+        database = DatabaseManager.getInstance();
     }
 
     @Override
@@ -60,6 +63,15 @@ public class SensorModule implements Module {
         if (sensor.getKey() == null) {
             return new Error(Error.Type.WRONG_OBJECT, "WifiSensor to be created was null!");
         }
+
+        database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                session.
+                return null;
+            }
+        });
+
 
         ObjectContainer sessionContainer = database.getSessionContainer();
 
