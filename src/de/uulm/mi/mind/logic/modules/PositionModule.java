@@ -1,8 +1,6 @@
 package de.uulm.mi.mind.logic.modules;
 
-import com.db4o.ObjectContainer;
-import de.uulm.mi.mind.io.Configuration;
-import de.uulm.mi.mind.io.DatabaseController;
+import de.uulm.mi.mind.io.*;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
@@ -143,9 +141,13 @@ public class PositionModule implements Module {
 
     private Data readPositions() {
         // read all users
-        ObjectContainer sessionContainer = DatabaseController.getInstance().getSessionContainer();
-        Data evtlUserList = DatabaseController.getInstance().read(sessionContainer, new User(null));
-        sessionContainer.close();
+        Data evtlUserList = DatabaseManager.getInstance().open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                return DatabaseController.getInstance().read(session, new User(null));
+            }
+        });
+
         Data msg = ServletFunctions.checkDataMessage(evtlUserList, DataList.class);
         if (msg != null) {
             return msg;
@@ -288,21 +290,21 @@ public class PositionModule implements Module {
                 }
             }
         }
-        
-        
+
+
         //FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
         int leastMatches = 2;
         List<Location> locationsToRemove = new LinkedList<Location>();
         for (Location location : locationMatchesMap.keySet()) {
-			if(locationMatchesMap.get(location)<leastMatches){
-				locationsToRemove.add(location);
-			}
-		}
+            if (locationMatchesMap.get(location) < leastMatches) {
+                locationsToRemove.add(location);
+            }
+        }
         locationsToRemove.removeAll(locationsToRemove);
         locationLevelDifferenceSumMap.remove(locationsToRemove);
         //END FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
-        
-        
+
+
         return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap);
     }
 

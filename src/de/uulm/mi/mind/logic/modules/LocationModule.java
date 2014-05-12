@@ -115,26 +115,26 @@ public class LocationModule implements Module {
     }
 
     private Data readArea(final Area area) {
-        return database.open(new Transaction() {
+        DataList<Area> read = (DataList<Area>) database.open(new Transaction() {
             @Override
             public Data doOperations(Session session) {
-                DataList<Area> read = session.read(area);
-                if (read == null) {
-                    return new Error(Error.Type.DATABASE, "Reading of area resulted in an error.");
-                }
-
-                // get filtered Areas
-                if (area.getKey() == null) {
-                    return read;
-                }
-                // from here on only objects with a valid key == single ones are queried
-                else if (read.isEmpty()) {
-                    return new Error(Error.Type.DATABASE, "Area could not be found!");
-                }
-                return read;
+                return session.read(area);
             }
         });
 
+        if (read == null) {
+            return new Error(Error.Type.DATABASE, "Reading of area resulted in an error.");
+        }
+
+        // get filtered Areas
+        if (area.getKey() == null) {
+            return read;
+        }
+        // from here on only objects with a valid key == single ones are queried
+        else if (read.isEmpty()) {
+            return new Error(Error.Type.DATABASE, "Area could not be found!");
+        }
+        return read;
 
     }
 
@@ -246,25 +246,26 @@ public class LocationModule implements Module {
     }
 
     private Data readLocation(final Location location) {
-        return database.open(new Transaction() {
+        DataList<Location> read = (DataList<Location>) database.open(new Transaction() {
             @Override
             public Data doOperations(Session session) {
-                DataList<Location> read = session.read(location);
-                if (read == null) {
-                    return new Error(Error.Type.DATABASE, "Reading of location resulted in an error.");
-                }
-
-                // get filtered locations
-                if (location.getKey() == null) {
-                    return read;
-                }
-                // from here on only objects with a valid key == single ones are queried
-                else if (read.isEmpty()) {
-                    return new Error(Error.Type.DATABASE, "Location could not be found!");
-                }
-                return read;
+                return session.read(location);
             }
         });
+
+        if (read == null) {
+            return new Error(Error.Type.DATABASE, "Reading of location resulted in an error.");
+        }
+
+        // get filtered locations
+        if (location.getKey() == null) {
+            return read;
+        }
+        // from here on only objects with a valid key == single ones are queried
+        else if (read.isEmpty()) {
+            return new Error(Error.Type.DATABASE, "Location could not be found!");
+        }
+        return read;
     }
 
     private Data updateLocation(final Location location) {
