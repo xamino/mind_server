@@ -1,5 +1,6 @@
 package de.uulm.mi.mind.servlet;
 
+import de.uulm.mi.mind.io.Configuration;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.objects.*;
@@ -31,19 +32,23 @@ public class ServletFunctions {
     /**
      * This controls the length of the generated keys when adding users or displays without a preset password.
      */
-    private final int GENERATED_KEY_LENGTH = 6;
+    private final int GENERATED_KEY_LENGTH = 8;
     private final String LAST_POSITION = "lastPosition";
     private final String REAL_POSITION = "realPosition";
     private Messenger log;
     private EventModuleManager moduleManager;
     private SecureRandom random;
     private FilePath filePath;
+    private Configuration config;
 
     private ServletFunctions(ServletContext context) {
         log = Messenger.getInstance();
         moduleManager = EventModuleManager.getInstance();
         random = new SecureRandom();
         filePath = new FilePath(context);
+        config = Configuration.getInstance();
+        // print values we need for debug
+        log.log(TAG, "REGISTRATION_POLICY = " + config.getRegistration());
         log.log(TAG, "Created.");
     }
 
@@ -78,7 +83,7 @@ public class ServletFunctions {
     /**
      * Handles most public tasks, most importantly security functions.
      *
-     * @param arrival
+     * @param arrival The arrival object.
      * @return Null if no task here was done, otherwise the message to send back.
      */
     public Information handlePublicTask(Arrival arrival) {
@@ -119,12 +124,18 @@ public class ServletFunctions {
                 Security.finish(activeUser);
                 return new Success("Session is valid.");
             case REGISTRATION:
+                // if anything other than open is stated here, registration is considered closed
+                if (!"open".equals(config.getRegistration())) {
+                    return new Error(Error.Type.SECURITY, "Registration is not open! Please contact the admin.");
+                }
                 // Public registration is only available to normal users!
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error(Error.Type.WRONG_OBJECT, "Registration is only possible with User objects!");
                 }
+                // email and password should be okay
+                // note that we do not allow key generation for registration
                 User user = ((User) arrival.getObject());
-                if (user.readIdentification().isEmpty() || user.readAuthentication().isEmpty()) {
+                if (!safeString(user.readIdentification()) || !safeString(user.readAuthentication())) {
                     return new Error(Error.Type.ILLEGAL_VALUE, "Email and password may not be empty!");
                 }
                 // hash pwd
@@ -148,8 +159,8 @@ public class ServletFunctions {
     /**
      * Handles all generally accessible tasks that only require a valid user.
      *
-     * @param arrival
-     * @return
+     * @param arrival The arrival object.
+     * @return The return value.
      */
     public Data handleNormalTask(Arrival arrival, Active activeUser) {
         // better be safe
@@ -166,9 +177,7 @@ public class ServletFunctions {
             case USER_READ:
                 // NOTE: do NOT allow ANY USER TO BE READ HERE – SECURITY LEAK!
                 // Admin should use admin_user_read!
-                User back = user.safeClone();
-                // todo write position here?
-                return back;
+                return user.safeClone();
             case USER_UPDATE:
                 if (!(arrival.getObject() instanceof User)) {
                     return new Error(Error.Type.WRONG_OBJECT);
@@ -218,27 +227,28 @@ public class ServletFunctions {
                 Area last = ((Area) activeUser.readData(LAST_POSITION));
                 Area real = ((Area) activeUser.readData(REAL_POSITION));
                 // this implements server-side fuzziness to avoid fluttering of position_find
-                if (!(activeUser.readData(LAST_POSITION) instanceof Area)) {
+                if (last == null || real == null) {
                     // this means it is the first time in this session, so we don't apply fuzziness
                     activeUser.writeData(LAST_POSITION, area);
                     activeUser.writeData(REAL_POSITION, area);
                     user.setPosition(area.getID());
-                } else if (last != null && last.getID().equals(area.getID())
-                        && !(real != null && real.getID().equals(area.getID()))) {
+                } else if (last.getID().equals(area.getID())) {
                     // update user for position, but only if last was already the same and the previous db entry is different
                     activeUser.writeData(REAL_POSITION, area);
                     user.setPosition(area.getID());
                 } else {
-                    // this means the area is different than the one before, so change lastPosition but not User:
+                    // this means the area is different than the one before, so change last but not real:
                     activeUser.writeData(LAST_POSITION, area);
                 }
-                // everything okay, return real position area
-                return real;
+                // everything okay, return real position area (must be freshly read because we might have written to it)
+                return (Area) activeUser.readData(REAL_POSITION);
+            /*
             case TOGGLE_ADMIN:
                 // TODO remove this, only for test!
                 log.error(TAG, "Toggled admin! DANGEROUS OPERATION!");
                 user.setAdmin(!user.isAdmin());
                 return moduleManager.handleTask(Task.User.UPDATE, user);
+            */
             case READ_ALL_POSITIONS:
                 return moduleManager.handleTask(Task.Position.READ, null);
             case READ_ALL_AREAS:
@@ -263,8 +273,8 @@ public class ServletFunctions {
     /**
      * Handles tasks that are specifically only for the admin class user.
      *
-     * @param arrival
-     * @return
+     * @param arrival The arrival object.
+     * @return The value to return.
      */
     public Data handleAdminTask(Arrival arrival, Active activeUser) {
         // better be safe
@@ -603,7 +613,6 @@ public class ServletFunctions {
                 return moduleManager.handleTask(Task.Position.READ, null);
             case READ_ALL_AREAS:
                 Area filter = new Area(null);
-                // TODO filter these maybe?
                 return moduleManager.handleTask(Task.Area.READ, filter);
             default:
                 return null;
@@ -613,9 +622,9 @@ public class ServletFunctions {
     /**
      * Tasks for the WifiSensors.
      *
-     * @param arrival
-     * @param activeUser
-     * @return
+     * @param arrival The arrival object.
+     * @param activeUser The activeUser object.
+     * @return The value to return.
      */
     public Data handleWifiSensorTask(Arrival arrival, Active activeUser) {
         // better be safe

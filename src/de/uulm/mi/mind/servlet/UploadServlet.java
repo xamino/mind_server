@@ -25,6 +25,7 @@ import java.util.List;
  *         images/custom_icons/icon_user@user, where user@user is the unique user email address.
  */
 // original source: http://www.tutorialspoint.com/servlets/servlets-file-uploading.htm
+// todo check for image type and size
 public class UploadServlet extends HttpServlet {
     private final String TAG = "UploadServlet";
     private final int maxFileSize = 5000 * 1024;
