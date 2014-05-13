@@ -99,14 +99,14 @@ function checkAwayArea(){
 	
 //	users = new Array();
 	
-    send(new Arrival("READ_ALL_AREAS", session), function (data) {
-
-        areas = data.object;
+//    send(new Arrival("READ_ALL_AREAS", session), function (data) {
+//
+//        areas = data.object;
         
         if(!areaExists("Away")){
         	var noAwayArea = "There is currently no away area (ID: 'Away') in the database. Add this area to see all necessary information.<br>Please contact the admin.";
 	        document.getElementById("awayArea_info").innerHTML = noAwayArea;  
         }
-    });
+//    });
 }
 

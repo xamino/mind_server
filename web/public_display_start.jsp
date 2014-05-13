@@ -20,7 +20,7 @@
 
 <title>Public Display</title>
 </head>
-<body onload="onLoadOfPdPage(), checkAwayArea()">
+<body onload="onLoadOfPdPage()">
 
 <!-- MAP DISPLAY STUFF -->
 <div id="mapscroll">
