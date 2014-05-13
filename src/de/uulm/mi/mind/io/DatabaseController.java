@@ -267,6 +267,11 @@ public class DatabaseController implements ServletContextListener {
                 return o.getKey().equals("University");
             }
         });
+
+        if (set3.size() == 0) {
+            log.log(TAG, "Nothing, does not yet exist!");
+            return;
+        }
         Area university = set3.get(0);
         log.log(TAG, "Locations: " + university.getLocations().size());
         int morselCounter = 0;
