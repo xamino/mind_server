@@ -10,7 +10,7 @@ var factor=1; //the size-factor by which the displayed image deviates from the o
 //TODO read from server
 var refreshRate = 10; //the refresh rate for locating - in seconds
 var interval; //the interval of location refreshing
-var balloonClosingTime = 5;
+var balloonClosingTime = 7;
 var mapDiv;
 //var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
 //var heigthFactor=1; //the factor by which the height of the displayed image deviates from the original image height
@@ -239,12 +239,17 @@ function removeUserWithIcon(index){
  */
 function placeUserIcon(user){
 	var icon = document.getElementById("icon_"+user.email);
-	if(icon==null){
+	
+	if(icon==null){ //user has no icon image yet
 		addUserIcon(user);
+		icon = document.getElementById("icon_"+user.email);
 	}
-	var icon = document.getElementById("icon_"+user.email);
+	
 	if(icon!=null){
 
+		//refresh source (in case of icon swapping)
+		icon.src="/images/custom_icons/icon_"+user.email+"#"+ new Date().getTime();;
+		
 		icon.style.width=displayedIconSize+"px";
 		icon.style.left=Math.round(user.x-displayedIconSize/2)+"px";
 		icon.style.top=Math.round(user.y-displayedIconSize/2)+"px";
@@ -289,7 +294,7 @@ function setUserIconCoordsByArea(){
 			}
 			if(users[i]==null){break;}
 			area = getAreaById(users[i].position);
-			//TODO handle area==null;
+
 			if(area==null){
 				i++;
 				continue;
