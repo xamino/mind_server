@@ -13,7 +13,10 @@
 <script src="javascript/jquery.balloon.js"></script>
 <link href="${pageContext.request.contextPath}/css/public_display.css" rel="stylesheet" type="text/css">
 
-
+<%
+    response.setHeader("Cache-Control", "no-cache, must-revalidate");
+    response.setHeader("Cache-Control", "max-age=0, must-revalidate");
+%>  
 
 <title>Public Display</title>
 </head>
