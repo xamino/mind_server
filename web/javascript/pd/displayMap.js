@@ -638,7 +638,7 @@ function balloonify(user){
 
 	//CREATE BALLOON
 		//bring selected user-icon to front
-		bringUserToFront(mod_id);
+//		bringUserToFront(mod_id);
 	
 		openBalloonUserID = mod_id;
 		
