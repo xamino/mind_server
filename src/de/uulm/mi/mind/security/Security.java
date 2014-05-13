@@ -179,6 +179,10 @@ public class Security {
      * @return The Active object if legal, otherwise null.
      */
     private Active login(final Authenticated authenticated) {
+        if (authenticated == null || authenticated.readIdentification() == null || authenticated.readAuthentication() == null) {
+            log.log(TAG, "Unable to log in a NULL object or an object with NULL fields!");
+            return null;
+        }
         ObjectContainer sessionContainer = database.getSessionContainer();
         // get safe object
         Authenticated databaseSafe = readDB(sessionContainer, authenticated);

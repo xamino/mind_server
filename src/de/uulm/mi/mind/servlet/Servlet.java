@@ -115,11 +115,11 @@ public class Servlet extends HttpServlet {
             }
             // If answer is still null, the task wasn't found (or the rights weren't set):
             if (answer == null) {
-                log.log(TAG, "Illegal task sent: " + arrival.getTask());
                 String error = "Illegal task: " + arrival.getTask();
                 if (!currentUser.isAdmin()) {
                     error += ". You may not have the necessary rights!";
                 }
+                log.log(TAG, error);
                 answer = new Error(Error.Type.TASK, error);
             }
             // otherwise answer is valid
