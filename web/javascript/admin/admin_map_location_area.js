@@ -709,17 +709,22 @@ function editArea(id) {
  * loads all locations on load of page admin_import_map_location.jsp
  */
 function loadLocations() {
-    var locations = new Location(0, 0, null);
-    doTask("LOCATION_READ", locations, writeLocations);
+//    var locations = new Location(0, 0, null);
+    var area = new Area("University", null, null, null, null, null);
+    doTask("AREA_READ", area, writeLocations);
 }
 
 function writeLocations(data) {
-    if (data.object.length == 0) {
+//	alert(JSON.stringify(data.object[0].locations));
+	var locations = data.object[0].locations;
+//	alert(JSON.stringify(locs));
+    if (locations.length == 0) {
+//    	alert("no locations");
         var noLocationsInDatabase = "<br><br>There are currently no locations in the database. Add locations in the MIND-application.";
         document.getElementById("table_space_locations").innerHTML = noLocationsInDatabase;
     }
     else {
-
+//    	alert(data.object.length+" locations");
         var tablecontents = "";
         tablecontents = "<table border ='1'>";
         tablecontents += "<tr>";
@@ -728,10 +733,10 @@ function writeLocations(data) {
         tablecontents += "<td>Remove Location: </td>";
         tablecontents += "</tr>";
 
-        for (var i = 0; i < data.object.length; i++) {
+        for (var i = 0; i < locations.length; i++) {
             tablecontents += "<tr>";
-            tablecontents += "<td>" + data.object[i].coordinateX + "</td>";
-            tablecontents += "<td>" + data.object[i].coordinateY + "</td>";
+            tablecontents += "<td>" + locations[i].coordinateX + "</td>";
+            tablecontents += "<td>" + locations[i].coordinateY + "</td>";
             tablecontents += "<td><input type='submit' value='Remove Location' onClick='removeLocationViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
             tablecontents += "</tr>";
         }
