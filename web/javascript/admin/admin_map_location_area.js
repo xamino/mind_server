@@ -733,18 +733,17 @@ function writeLocations(data) {
         tablecontents += "<td>Remove Location: </td>";
         tablecontents += "</tr>";
 
-//        var mapdiv = document.getElementById("map_png_div");
-//        
-//        var loc;
+        var mapdiv = document.getElementById("map_png_div");
+        var loc;
         
         for (var i = 0; i < locations.length; i++) { //for each location
         	
 //        	//add point for location
-//        	loc = document.createElement("div");
-//        	loc.className = "locationCircle";
-//        	loc.style.marginLeft=locations[i].coordinateX+"px";
-//        	loc.style.marginTop =locations[i].coordinateY+"px";
-//        	mapdiv.appendChild(loc);
+        	loc = document.createElement("div");
+        	loc.className = "locationCircle";
+        	loc.style.marginLeft=locations[i].coordinateX+"px";
+        	loc.style.marginTop =locations[i].coordinateY+"px";
+        	mapdiv.appendChild(loc);
         	//end add point for location
         	
             tablecontents += "<tr>";
