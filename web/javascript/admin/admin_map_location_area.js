@@ -733,14 +733,27 @@ function writeLocations(data) {
         tablecontents += "<td>Remove Location: </td>";
         tablecontents += "</tr>";
 
-        for (var i = 0; i < locations.length; i++) {
+//        var mapdiv = document.getElementById("map_png_div");
+//        
+//        var loc;
+        
+        for (var i = 0; i < locations.length; i++) { //for each location
+        	
+//        	//add point for location
+//        	loc = document.createElement("div");
+//        	loc.className = "locationCircle";
+//        	loc.style.marginLeft=locations[i].coordinateX+"px";
+//        	loc.style.marginTop =locations[i].coordinateY+"px";
+//        	mapdiv.appendChild(loc);
+        	//end add point for location
+        	
             tablecontents += "<tr>";
             tablecontents += "<td>" + locations[i].coordinateX + "</td>";
             tablecontents += "<td>" + locations[i].coordinateY + "</td>";
-            tablecontents += "<td><input type='submit' value='Remove Location' onClick='removeLocationViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
+            tablecontents += "<td><input type='submit' value='Remove Location' onClick='removeLocationViaPopup(" + JSON.stringify(locations[i]) + ")'/></td>";
             tablecontents += "</tr>";
         }
-        if(data.object.length>=1){
+        if(locations.length>=1){
         	tablecontents += "<tr>";
         	tablecontents += "<td><input type='submit' value='Remove All Locations' onClick='removeAllLocationsViaPopup()'/></td>";
         	tablecontents += "<tr>";

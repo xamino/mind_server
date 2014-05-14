@@ -416,13 +416,15 @@ function updateUserIconPlacement(){
  * updated user data
  */
 function updateUserListOnReceive(data){
-	var updatedUsersArray = data.object;
-	users = new Array();
-	for ( var i = 0; i < updatedUsersArray.length; i++) {
-		users[updatedUsersArray[i].email] = updatedUsersArray[i];
-	}
 	
-	/* NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
+	var updatedUsersArray = data.object;
+	
+//	users = new Array();
+//	for ( var i = 0; i < updatedUsersArray.length; i++) {
+//		users[updatedUsersArray[i].email] = updatedUsersArray[i];
+//	}
+	
+	// NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
 	var updatedUsers = new Array();
 	for ( var i = 0; i < updatedUsersArray.length; i++) {
 		updatedUsers[updatedUsersArray[i].email] = updatedUsersArray[i];
@@ -430,7 +432,7 @@ function updateUserListOnReceive(data){
 //	var updatedUsers = data;
 	
 	//debug stuff
-	document.getElementById("userInfoOnUpdate").innerHTML = JSON.stringify(data);
+//	document.getElementById("userInfoOnUpdate").innerHTML = JSON.stringify(data);
 
 	//update or remove old user
 	for(var email in users) { //for each old user
@@ -446,7 +448,7 @@ function updateUserListOnReceive(data){
 		users[email] = updatedUsers[email];
 	}		
 	
-	*/ //END NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
+	 //END NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
 
 	//check for AWAY status and set position to "Away" for Away-Area
 	for(var email in users) {
