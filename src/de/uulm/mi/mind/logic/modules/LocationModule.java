@@ -400,7 +400,7 @@ public class LocationModule implements Module {
         Boolean deleted = database.delete(sessionContainer, new Area(null));
         // Delete these to be sure...
         deleted &= database.delete(sessionContainer, new Location(0, 0, null));
-        deleted &= database.delete(sessionContainer, new WifiMorsel(null, null, 0, 0, null));
+        deleted &= database.delete(sessionContainer, new WifiMorsel(null, null, 0, 0, null, null));
         if (deleted) {
             database.reinit(sessionContainer);
             sessionContainer.commit();
