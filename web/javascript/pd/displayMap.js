@@ -429,7 +429,7 @@ function updateUserListOnReceive(data){
 	}
 //	var updatedUsers = data;
 	
-	//TODO remove debug stuff
+	//debug stuff
 	document.getElementById("userInfoOnUpdate").innerHTML = JSON.stringify(data);
 
 	//update or remove old user
