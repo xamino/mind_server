@@ -205,7 +205,7 @@ public class JsonConverter<E> {
         // check that registered
         Class objectClass = typesStringClass.get(typeValue);
         if (objectClass == null) {
-            throw new IOException(TAG + ": Unregistered type found!");
+            throw new IOException(TAG + ": Unregistered type found: " + typeValue + "!");
         }
         // remove TYPE_KEY
         simplePairs.remove(TYPE_KEY);
