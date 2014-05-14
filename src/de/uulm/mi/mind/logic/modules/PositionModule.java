@@ -239,7 +239,7 @@ public class PositionModule implements Module {
                 //if (DeviceClass.isSimulatedClass(requestDeviceModel)) {
                 //   average += DeviceClass.getSimulatedDifference(requestDeviceModel);
                 //}
-                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel()));
+                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel(), morsel.getTimeStamp()));
             }
             databaseLocation.setWifiMorsels(averageMorsels);
         }
