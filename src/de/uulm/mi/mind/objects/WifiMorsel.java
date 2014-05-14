@@ -3,6 +3,8 @@ package de.uulm.mi.mind.objects;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 
+import java.util.Date;
+
 /**
  * @author Tamino Hartmann
  *         Data object for a single wifi data morsel on a location.
@@ -25,15 +27,18 @@ public class WifiMorsel implements Sendable, Comparable, Saveable {
 
     private String deviceModel;
 
+    private Date timeStamp;
+
     private WifiMorsel() {
     }
 
-    public WifiMorsel(String wifiMac, String wifiName, int wifiLevel, int wifiChannel, String deviceModel) {
+    public WifiMorsel(String wifiMac, String wifiName, int wifiLevel, int wifiChannel, String deviceModel, Date timeStamp) {
         this.wifiMac = wifiMac;
         this.wifiName = wifiName;
         this.wifiLevel = wifiLevel;
         this.wifiChannel = wifiChannel;
         this.deviceModel = deviceModel;
+        this.timeStamp = timeStamp;
     }
 
     public String getWifiMac() {
@@ -68,6 +73,7 @@ public class WifiMorsel implements Sendable, Comparable, Saveable {
                 ", wifiLevel=" + wifiLevel +
                 ", wifiChannel=" + wifiChannel +
                 ", deviceModel='" + deviceModel + '\'' +
+                ", timeStamp=" + timeStamp +
                 '}';
     }
 
@@ -116,5 +122,13 @@ public class WifiMorsel implements Sendable, Comparable, Saveable {
 
     public void setDeviceModel(String deviceModel) {
         this.deviceModel = deviceModel;
+    }
+
+    public Date getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(Date timeStamp) {
+        this.timeStamp = timeStamp;
     }
 }
