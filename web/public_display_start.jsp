@@ -50,7 +50,7 @@
 	</div>
 	<div id="content_popup">
 		<p id="balloonIdle">0</p>
-		<p id="userInfoOnUpdate">info</p>
+		<!-- <p id="userInfoOnUpdate">info</p>  -->
 		<div id="awayArea_info"></div>
 
 		<div id ="show_display_settings" style="display:none;">

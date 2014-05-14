@@ -4,7 +4,7 @@ var displayedWidth; //the current width of the displayed map-image in pixels
 var displayedHeight; //the current height of the map-image in pixels
 var displayedIconSize=0; //the native size of the icon in pixels
 var iconByAreaFactor = 0.45; //the factor by which the icon size is set -> (smallest area width or height)*iconByAreaFactor
-var iconByMapWidthFactor = 0.055; //the factor by which the icon size is set -> displayedWidth*iconByAreaFactor
+var iconByMapWidthFactor = 0.06; //the factor by which the icon size is set -> displayedWidth*iconByAreaFactor
 var defaultIconSize = 110; //if something goes wrong when setting the icon size - defaultIconSize will be applied
 var factor=1; //the size-factor by which the displayed image deviates from the original image
 //TODO read from server
@@ -417,6 +417,12 @@ function updateUserIconPlacement(){
  */
 function updateUserListOnReceive(data){
 	var updatedUsersArray = data.object;
+	users = new Array();
+	for ( var i = 0; i < updatedUsersArray.length; i++) {
+		users[updatedUsersArray[i].email] = updatedUsersArray[i];
+	}
+	
+	/* NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
 	var updatedUsers = new Array();
 	for ( var i = 0; i < updatedUsersArray.length; i++) {
 		updatedUsers[updatedUsersArray[i].email] = updatedUsersArray[i];
@@ -439,6 +445,8 @@ function updateUserListOnReceive(data){
 	for ( var email in updatedUsers) {
 		users[email] = updatedUsers[email];
 	}		
+	
+	*/ //END NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
 
 	//check for AWAY status and set position to "Away" for Away-Area
 	for(var email in users) {
