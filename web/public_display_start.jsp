@@ -73,7 +73,7 @@
 		    <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->
 		    <hr><br>
 		    <div id="buttonsDiv">
-			    <button type='button' id='displaySettingsBack' class="shadow">Back</button> <!-- settingsBackButton() -->
+			    <button type='button' id='displaySettingsBack' class="shadow" onclick='toggleDisplaySettings()'>Back</button> <!-- settingsBackButton() -->
 			    <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display</button>
 			    <button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
 		    </div>
