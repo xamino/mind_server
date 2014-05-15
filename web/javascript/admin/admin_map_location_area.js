@@ -594,7 +594,7 @@ $(document).on("submit", "#areaForm", function (event) {
 	    	alert("You have to set an id for your area!");
 	    }
     }else{
-    	alert("The id may only contain numbers");	//:A-Z, a-z, 0-9, - and _
+    	alert("The id may only contain numbers, A-Z, a-z and _. No umlauts.");	//:A-Z, a-z, 0-9, - and _
     }
 
 });
