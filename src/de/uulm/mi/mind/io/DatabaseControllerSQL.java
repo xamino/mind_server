@@ -2,7 +2,6 @@ package de.uulm.mi.mind.io;
 
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
-import de.uulm.mi.mind.objects.enums.Status;
 import de.uulm.mi.mind.security.BCrypt;
 
 import javax.servlet.ServletContext;
@@ -194,10 +193,10 @@ class DatabaseControllerSQL implements DatabaseAccess {
 
         //rootContainer.store(new WifiSensor("ident","sadasdasdasdasdsd","world"));
         //rootContainer.store(new WifiMorsel("mac","name",-21,5,"Model"));
-        User user = new User("blub@mail.de", "mypassword");
-        user.setStatus(Status.AVAILABLE);
-        rootContainer.store(user);
-        rootContainer.store(new User("blub@sss-de", "name", true));
+        //User user = new User("blub@mail.de", "mypassword");
+        //user.setStatus(Status.AVAILABLE);
+        //rootContainer.store(user);
+        //rootContainer.store(new User("blub@sss-de", "name", true));
         runMaintenance(rootContainer);
         rootContainer.close();
 
