@@ -6,13 +6,12 @@ package de.uulm.mi.mind.servlet;
 
 import de.uulm.mi.mind.json.JsonWrapper;
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Arrival;
+import de.uulm.mi.mind.objects.Departure;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.messages.Information;
-import de.uulm.mi.mind.security.Active;
-import de.uulm.mi.mind.security.Security;
+import de.uulm.mi.mind.task.TaskManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -66,14 +65,20 @@ public class Servlet extends HttpServlet {
         // Watch out, arrival.getData() might be NULL!
         Arrival arrival = getRequest(request);
 
-        Sendable answer;
+        Sendable answer = null;
         if (arrival == null) {
             answer = new Error(Error.Type.CAST, "Failed to read Arrival!");
         } else {
             // set IP address in case we need it (warning: can be IPv4 OR IPv6!!!)
             arrival.setIpAddress(request.getRemoteAddr());
+
+            answer = TaskManager.getInstance().run(arrival.getTask(), (Sendable) arrival.getObject());
+
+            /*
+            OLD
             // get the answer from the logic
             answer = runLogic(arrival);
+            */
         }
 
         // Encapsulate answer:
@@ -81,72 +86,6 @@ public class Servlet extends HttpServlet {
 
         // TimerResult timerResult = log.popTimer(this);
         // log.error(TAG, "Request " + arrival.getTask() + " took " + timerResult.time + " ms.");
-    }
-
-    /**
-     * Function for easier handling of running the user access logic.
-     *
-     * @param arrival The arrival with which to work.
-     * @return The data returned.
-     */
-    private Sendable runLogic(Arrival arrival) {
-        // check public tasks
-        Information inf = functions.handlePublicTask(arrival);
-        if (inf != null) {
-            // If a message is in there, we're done, so return
-            return inf;
-        }
-        // From here on out, all tasks are secured!
-        Active activeUser = Security.begin(null, arrival.getSessionHash());
-        if (activeUser == null) {
-            return new Error(Error.Type.SECURITY, "Invalid access tried!");
-        }
-        // Store reply (no return because we need to encapsulate all the following within Security)
-        Data answer;
-        // handle user tasks
-        if (activeUser.getAuthenticated() instanceof User) {
-            // Read user to differentiate admin rights
-            User currentUser = (User) activeUser.getAuthenticated();
-            // First check whether it is a normal task:
-            answer = functions.handleNormalTask(arrival, activeUser);
-            if (answer == null && currentUser.isAdmin()) {
-                // If yes, handle admin stuff:
-                answer = functions.handleAdminTask(arrival, activeUser);
-            }
-            // If answer is still null, the task wasn't found (or the rights weren't set):
-            if (answer == null) {
-                String error = "Illegal task: " + arrival.getTask();
-                if (!currentUser.isAdmin()) {
-                    error += ". You may not have the necessary rights!";
-                }
-                log.log(TAG, error);
-                answer = new Error(Error.Type.TASK, error);
-            }
-            // otherwise answer is valid
-        } else if (activeUser.getAuthenticated() instanceof PublicDisplay) {
-            answer = functions.handleDisplayTask(arrival, activeUser);
-            if (answer == null) {
-                log.log(TAG, "Illegal task sent: " + arrival.getTask());
-                answer = new Error(Error.Type.TASK, "Illegal task: " + arrival.getTask() + ".");
-            }
-            // otherwise answer is valid
-        } else if (activeUser.getAuthenticated() instanceof WifiSensor) {
-            answer = functions.handleWifiSensorTask(arrival, activeUser);
-            if (answer == null) {
-                log.log(TAG, "Illegal task sent: " + arrival.getTask());
-                answer = new Error(Error.Type.TASK, "Illegal task: " + arrival.getTask() + ".");
-            }
-        } else {
-            answer = new Error(Error.Type.WRONG_OBJECT, "No tasks have been implemented for this Authenticated!");
-        }
-        // Once we're here, finish the secure session
-        Security.finish(activeUser);
-        // ensure sendable
-        if (!(answer instanceof Sendable)) {
-            return new Error(Error.Type.SERVER, "Tried to send a non-sendable object!");
-        }
-        // and return the answer
-        return ((Sendable) answer);
     }
 
     /**
