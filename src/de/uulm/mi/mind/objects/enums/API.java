@@ -13,7 +13,6 @@ public enum API implements Task {
     // LOCATION_UPDATE,
     LOCATION_REMOVE,
     // AREA
-    AREA_READ,
     AREA_ADD,
     AREA_UPDATE,
     AREA_REMOVE,

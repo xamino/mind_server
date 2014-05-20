@@ -75,8 +75,6 @@ public class LocationModule implements Module {
             switch (areaTask) {
                 case CREATE:
                     return createArea(area);
-                case READ:
-                    return readArea(area);
                 case UPDATE:
                     return updateArea(area);
                 case DELETE:

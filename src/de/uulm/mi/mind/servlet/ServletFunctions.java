@@ -249,11 +249,6 @@ public class ServletFunctions {
 //                return moduleManager.handleTask(Task.Location.DELETE, arrival.getObject());
 //            // AREAS -----------------------------------------------------------------------------
 //            // TODO sanitize and make sane!
-//            case AREA_READ:
-//                if (!(arrival.getObject() instanceof Area)) {
-//                    return new Error(Error.Type.WRONG_OBJECT);
-//                }
-//                return moduleManager.handleTask(Task.Area.READ, arrival.getObject());
 //            case AREA_ADD:
 //                if (!(arrival.getObject() instanceof Area)) {
 //                    return new Error(Error.Type.WRONG_OBJECT);
