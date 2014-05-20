@@ -1,9 +1,6 @@
 package de.uulm.mi.mind.logic.modules;
 
 import de.uulm.mi.mind.io.Configuration;
-import de.uulm.mi.mind.io.DatabaseManager;
-import de.uulm.mi.mind.io.Session;
-import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;

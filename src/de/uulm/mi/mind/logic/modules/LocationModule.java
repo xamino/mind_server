@@ -6,10 +6,11 @@ import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Area;
+import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
-import de.uulm.mi.mind.objects.Interfaces.Saveable;
-import de.uulm.mi.mind.objects.Interfaces.Sendable;
+import de.uulm.mi.mind.objects.Location;
+import de.uulm.mi.mind.objects.WifiMorsel;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
@@ -398,7 +399,7 @@ public class LocationModule implements Module {
                 Boolean deleted = session.delete(new Area(null));
                 // Delete these to be sure...
                 deleted &= session.delete(new Location(0, 0, null));
-                deleted &= session.delete(new WifiMorsel(null, null, 0, 0, null,null));
+                deleted &= session.delete(new WifiMorsel(null, null, 0, 0, null, null));
                 if (deleted) {
                     session.reinit();
                     return new Success("All areas were removed from Database.");

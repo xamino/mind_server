@@ -622,7 +622,7 @@ public class ServletFunctions {
     /**
      * Tasks for the WifiSensors.
      *
-     * @param arrival The arrival object.
+     * @param arrival    The arrival object.
      * @param activeUser The activeUser object.
      * @return The value to return.
      */

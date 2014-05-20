@@ -91,13 +91,13 @@ $(document).on("mousedown", "#map_png_div", function (e) {
     y1 = e.pageY - this.offsetTop;
     for (var i = 0; i < allAreas.length; i++) {	//all existing areas
         var id = allAreas[i].ID;
-        
+
         if (id != "universe" && id != "University") {	//not in University     
             //alert(allAreas[i].topLeftY+" - "+allAreas[i].height);
-        	if (x1 >= +allAreas[i].topLeftX && x1 <= (+allAreas[i].topLeftX + +allAreas[i].width)) {	    	//in x-values of existing area
+            if (x1 >= +allAreas[i].topLeftX && x1 <= (+allAreas[i].topLeftX + +allAreas[i].width)) {	    	//in x-values of existing area
                 if (y1 >= +allAreas[i].topLeftY && y1 <= (+allAreas[i].topLeftY + +allAreas[i].height)) { 	//in y-values of existing area
                     //alert("false");
-                	selection = false;
+                    selection = false;
                 }
             }
         }
@@ -173,78 +173,79 @@ $(document).on("mousemove", "#map_png_div", function (e) {
 //            });
 //                $("#drawrect").show();
 
-            //output to simply add area
-            if(x1 > x2){ //from right to left
-            	if(y1 < y2){ //from top to bottom
-            		$('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
-                    	'<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
-                    	'<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(x1-WIDTH + -4)+'</td></tr>'+
-                    	'<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+y1+'</td></tr>'+
-                    	'<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+(WIDTH + +4)+'</td></tr>'+
-                    	'<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+HEIGHT+'</td></tr>'+
-                    	'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-            		finalX = (+x1 - +WIDTH + -4);
-            		finalY = y1;
-            		finalWidth = WIDTH + +4;
-            		finalHeight = HEIGHT;
-            	}else{ //from bottom to top
-            		$('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
-                        '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
-                        '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(+x1 - +WIDTH + -2)+'</td></tr>'+
-                        '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+y2+'</td></tr>'+
-                        '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+(WIDTH + +2)+'</td></tr>'+
-                        '<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+HEIGHT+'</td></tr>'+
-                        '<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-            		finalX = (+x1 - +WIDTH + -2);
-            		finalY = y2;
-            		finalWidth = WIDTH + +2;
-            		finalHeight = HEIGHT;
-            	}
-            }else{	//left to right
-            	if(y1 > y2){ //from bottom to top
-            		$('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
-                       '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
-                       '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(x1 + -2)+'</td></tr>'+
-                       '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+(y2 + -1)+'</td></tr>'+
-                       '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+(WIDTH + +2)+'</td></tr>'+
-                       '<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+(HEIGHT + +1)+'</td></tr>'+
-                       '<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-            		finalX = x1 + -2;
-            		finalY = y2 + -1;
-            		finalWidth = WIDTH + +2;
-            		finalHeight = HEIGHT + +1;
-            	}else{ //from top to bottom
-            		$('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
-                    	'<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
-                    	//a user has the possibility to modify the values --> error detection!
+                //output to simply add area
+                if (x1 > x2) { //from right to left
+                    if (y1 < y2) { //from top to bottom
+                        $('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">' +
+                            '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
+                            '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">' + (x1 - WIDTH + -4) + '</td></tr>' +
+                            '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">' + y1 + '</td></tr>' +
+                            '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">' + (WIDTH + +4) + '</td></tr>' +
+                            '<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">' + HEIGHT + '</td></tr>' +
+                            '<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
+                        finalX = (+x1 - +WIDTH + -4);
+                        finalY = y1;
+                        finalWidth = WIDTH + +4;
+                        finalHeight = HEIGHT;
+                    } else { //from bottom to top
+                        $('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">' +
+                            '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
+                            '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">' + (+x1 - +WIDTH + -2) + '</td></tr>' +
+                            '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">' + y2 + '</td></tr>' +
+                            '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">' + (WIDTH + +2) + '</td></tr>' +
+                            '<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">' + HEIGHT + '</td></tr>' +
+                            '<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
+                        finalX = (+x1 - +WIDTH + -2);
+                        finalY = y2;
+                        finalWidth = WIDTH + +2;
+                        finalHeight = HEIGHT;
+                    }
+                } else {	//left to right
+                    if (y1 > y2) { //from bottom to top
+                        $('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">' +
+                            '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
+                            '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">' + (x1 + -2) + '</td></tr>' +
+                            '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">' + (y2 + -1) + '</td></tr>' +
+                            '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">' + (WIDTH + +2) + '</td></tr>' +
+                            '<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">' + (HEIGHT + +1) + '</td></tr>' +
+                            '<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
+                        finalX = x1 + -2;
+                        finalY = y2 + -1;
+                        finalWidth = WIDTH + +2;
+                        finalHeight = HEIGHT + +1;
+                    } else { //from top to bottom
+                        $('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">' +
+                            '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
+                            //a user has the possibility to modify the values --> error detection!
 //                    	'<tr><td>X-Coordinate:</td><td id="update_tdX"><input type="text" id="xCor" name="xCor" value="'+x1+'"></td></tr>'+
 //                    	'<tr><td>Y-Coordinate:</td><td id="update_tdY"><input type="text" id="yCor" name="yCor" value="'+y1+'"></td></tr>'+
 //                    	'<tr><td>Width:</td><td id="update_tdWidth"><input type="text" id="width" name="width" value="'+WIDTH+'"></td></tr>'+
 //                    	'<tr><td>Height:</td><td id="update_tdHeight"><input type="text" id="height" name="height" value="'+HEIGHT+'"></td></tr>'+
 //                    	'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-                    	//so the user can't change the values --> no overlapping with over areas possible
-                    	'<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(x1 + -2)+'</td></tr>'+
-                    	'<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+(y1 + -2)+'</td></tr>'+
-                    	'<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+(WIDTH + +2)+'</td></tr>'+
-                    	'<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+(HEIGHT + +2)+'</td></tr>'+
-                    	//'<tr><td><input type="button" value="Edit Area" onClick="addArea()"></td></tr></table>');
-                    	'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-            		finalX = x1 + -2;
-            		finalY = y1 + -2;
-            		finalWidth = WIDTH + +2;
-            		finalHeight = HEIGHT + +2;
-            	}
+                            //so the user can't change the values --> no overlapping with over areas possible
+                            '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">' + (x1 + -2) + '</td></tr>' +
+                            '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">' + (y1 + -2) + '</td></tr>' +
+                            '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">' + (WIDTH + +2) + '</td></tr>' +
+                            '<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">' + (HEIGHT + +2) + '</td></tr>' +
+                            //'<tr><td><input type="button" value="Edit Area" onClick="addArea()"></td></tr></table>');
+                            '<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
+                        finalX = x1 + -2;
+                        finalY = y1 + -2;
+                        finalWidth = WIDTH + +2;
+                        finalHeight = HEIGHT + +2;
+                    }
+                }
+
             }
-            
-        }}
+        }
 
     }
 });
 
 /*var xAddArea x_to_add;
-var xAddArea y_to_add;
-var xAddArea width_to_add;
-var xAddArea height_to_add;*/
+ var xAddArea y_to_add;
+ var xAddArea width_to_add;
+ var xAddArea height_to_add;*/
 
 // Selection complete, hide the selection div (or fade it out)
 $(document).on("mouseup", "#map_png_div", function (e) {
@@ -270,202 +271,202 @@ $(document).on("mouseup", "#map_png_div", function (e) {
             var id = allAreas[i].ID;
             if (id != "universe" && id != "University") {	//not in University
 //	       		alert("id: "+id+";y1: "+y1+";y2: "+y2+";topLeftY: "+allAreas[i].topLeftY+";height: "+allAreas[i].height+";topLeftY+height: "+(allAreas[i].topLeftY + allAreas[i].height));
-	       		 //from right to left
-		 		 if(x2 <= allAreas[i].topLeftX && x1 >= allAreas[i].topLeftX){
-		 			//TopLeftX and TopLeftY are in the drawed rect --> add 2px because of border
-		 			if(y2 >= allAreas[i].topLeftY && y1 <= allAreas[i].topLeftY){
-		 				if(currentY < Number.MAX_VALUE && currentY < allAreas[i].topLeftY){
-		   					//do nothing
-		   				}
-		   				else{
-		   					//alert("1");
-			            	drawrect.style.height = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2)+"px";
-	//		            	var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-(y2-allAreas[i].topLeftY))+'">';
-			            	var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2)+'</td>';
-			            	document.getElementById("update_tdHeight").innerHTML = updateHeight;
-			            	currentY = allAreas[i].topLeftY;
-		            		finalHeight = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2);
-		   				}
-	   				}
-		 			//TopLeftX and (TopLeftY+height) are in the drawed rect 
-		 			else if(y1 >= (+allAreas[i].topLeftY + +allAreas[i].height) && y2 <= (+allAreas[i].topLeftY + +allAreas[i].height)){
-			 			if(currentY < Number.MAX_VALUE && currentY > (+allAreas[i].topLeftY + +allAreas[i].height)){
-				 			//do nothing
-				 		}else{
-			 				//alert("2");
-			 				drawrect.style.height = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1)+"px";
-							drawrect.style.marginTop = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1)+"px";
-	//			   				var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-							var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2)- +1)+'</td>';
-			   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
-	//			   				var updateTopLeftY = '<input type="text" id="yCor" name="yCor" value="'+(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-			   				var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">'+ (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1)+'</td>';	//(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
-			   				document.getElementById("update_tdY").innerHTML = updateTopLeftY;
-			   				currentY = (+allAreas[i].topLeftY + +allAreas[i].height);
-			   				finalY = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1);
-		            		finalHeight = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2)- +1);
-			   			 }
-			 		}
-		 			 
-		   		 }
-		 		
-		 		 else if(x1 <= +allAreas[i].topLeftX && x2 >= +allAreas[i].topLeftX){
-		 			//TopLeftX and TopLeftY are in the drawed rect
-		   			//drawing from left to right --> add 2px because of border || drawing from top to bottom --> add 2px because of border
-		   			if(y2 >= +allAreas[i].topLeftY && y1 <= +allAreas[i].topLeftY){
-			   			if(x2 > (+allAreas[i].topLeftX + +allAreas[i].width)){
-			   				if(currentY < Number.MAX_VALUE && currentY < +allAreas[i].topLeftY){
-				   				//do nothing
-				   			}
-				   			else{
-			   					//alert("3");
-			   					drawrect.style.height = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2)+"px";
-	//		   					var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-(y2-allAreas[i].topLeftY))+'">';
-			   					var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2)+'</td>';
-				   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
-				   				currentY = allAreas[i].topLeftY;
-			            		finalHeight = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2);
-			   				}
-		   				}
-			   			else if(x2 < (+allAreas[i].topLeftX + +allAreas[i].width)){
-			   				if(currentX < Number.MAX_VALUE && currentX < +allAreas[i].topLeftX){
-				   				//do nothing
-				   			}else{
-			   					//alert("4");
-			   					drawrect.style.width = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2)+"px";
-	//		   					var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-(x2-allAreas[i].topLeftX))+'">';
-			   					var updateWidth = '<td>Width:</td><td id="xCorValue">'+(+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2)+'</td>';
-				   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
-				   				currentX = +allAreas[i].topLeftX;
-				   				finalWidth = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2);
-			   				}
-			   			}
-		   			 }
-		   			//TopLeftX and TopLeftY are in the drawed rect
-		   			//drawing from bottom to top --> add 2px because of border
-		   			if(y1 >= +allAreas[i].topLeftY && y2 <= +allAreas[i].topLeftY){
-		   				if(currentX < Number.MAX_VALUE && currentX < +allAreas[i].topLeftX){
-		   					//do nothing
-		   				}else{
-			   				//alert("5");
-			   				drawrect.style.width = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2)+"px";
-			   				drawrect.style.height = HEIGHT+"px";
+                //from right to left
+                if (x2 <= allAreas[i].topLeftX && x1 >= allAreas[i].topLeftX) {
+                    //TopLeftX and TopLeftY are in the drawed rect --> add 2px because of border
+                    if (y2 >= allAreas[i].topLeftY && y1 <= allAreas[i].topLeftY) {
+                        if (currentY < Number.MAX_VALUE && currentY < allAreas[i].topLeftY) {
+                            //do nothing
+                        }
+                        else {
+                            //alert("1");
+                            drawrect.style.height = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2) + "px";
+                            //		            	var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-(y2-allAreas[i].topLeftY))+'">';
+                            var updateHeight = '<td>Height:</td><td id="heightValue">' + (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2) + '</td>';
+                            document.getElementById("update_tdHeight").innerHTML = updateHeight;
+                            currentY = allAreas[i].topLeftY;
+                            finalHeight = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2);
+                        }
+                    }
+                    //TopLeftX and (TopLeftY+height) are in the drawed rect
+                    else if (y1 >= (+allAreas[i].topLeftY + +allAreas[i].height) && y2 <= (+allAreas[i].topLeftY + +allAreas[i].height)) {
+                        if (currentY < Number.MAX_VALUE && currentY > (+allAreas[i].topLeftY + +allAreas[i].height)) {
+                            //do nothing
+                        } else {
+                            //alert("2");
+                            drawrect.style.height = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1) + "px";
+                            drawrect.style.marginTop = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1) + "px";
+                            //			   				var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
+                            var updateHeight = '<td>Height:</td><td id="heightValue">' + (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1) + '</td>';
+                            document.getElementById("update_tdHeight").innerHTML = updateHeight;
+                            //			   				var updateTopLeftY = '<input type="text" id="yCor" name="yCor" value="'+(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
+                            var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">' + (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1) + '</td>';	//(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
+                            document.getElementById("update_tdY").innerHTML = updateTopLeftY;
+                            currentY = (+allAreas[i].topLeftY + +allAreas[i].height);
+                            finalY = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1);
+                            finalHeight = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1);
+                        }
+                    }
+
+                }
+
+                else if (x1 <= +allAreas[i].topLeftX && x2 >= +allAreas[i].topLeftX) {
+                    //TopLeftX and TopLeftY are in the drawed rect
+                    //drawing from left to right --> add 2px because of border || drawing from top to bottom --> add 2px because of border
+                    if (y2 >= +allAreas[i].topLeftY && y1 <= +allAreas[i].topLeftY) {
+                        if (x2 > (+allAreas[i].topLeftX + +allAreas[i].width)) {
+                            if (currentY < Number.MAX_VALUE && currentY < +allAreas[i].topLeftY) {
+                                //do nothing
+                            }
+                            else {
+                                //alert("3");
+                                drawrect.style.height = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2) + "px";
+                                //		   					var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-(y2-allAreas[i].topLeftY))+'">';
+                                var updateHeight = '<td>Height:</td><td id="heightValue">' + (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2) + '</td>';
+                                document.getElementById("update_tdHeight").innerHTML = updateHeight;
+                                currentY = allAreas[i].topLeftY;
+                                finalHeight = (+HEIGHT - (+y2 - +allAreas[i].topLeftY) + +2);
+                            }
+                        }
+                        else if (x2 < (+allAreas[i].topLeftX + +allAreas[i].width)) {
+                            if (currentX < Number.MAX_VALUE && currentX < +allAreas[i].topLeftX) {
+                                //do nothing
+                            } else {
+                                //alert("4");
+                                drawrect.style.width = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2) + "px";
+                                //		   					var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-(x2-allAreas[i].topLeftX))+'">';
+                                var updateWidth = '<td>Width:</td><td id="xCorValue">' + (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2) + '</td>';
+                                document.getElementById("update_tdWidth").innerHTML = updateWidth;
+                                currentX = +allAreas[i].topLeftX;
+                                finalWidth = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2);
+                            }
+                        }
+                    }
+                    //TopLeftX and TopLeftY are in the drawed rect
+                    //drawing from bottom to top --> add 2px because of border
+                    if (y1 >= +allAreas[i].topLeftY && y2 <= +allAreas[i].topLeftY) {
+                        if (currentX < Number.MAX_VALUE && currentX < +allAreas[i].topLeftX) {
+                            //do nothing
+                        } else {
+                            //alert("5");
+                            drawrect.style.width = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2) + "px";
+                            drawrect.style.height = HEIGHT + "px";
 //			   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-(x2-allAreas[i].topLeftX))+'">';
-			   				var updateWidth = '<td>Width:</td><td id="xCorValue">'+(+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2)+'</td>';
-			   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
-			   				currentX = +allAreas[i].topLeftX;
-			   				finalWidth = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2);
-			   			}
-			   		}
-		   			//TopLeftX and (TopLeftY+height) are in the drawed rect
-		   			//from left to right
-		   			else if(y1 >= (+allAreas[i].topLeftY + +allAreas[i].height) && y2 <= (+allAreas[i].topLeftY + +allAreas[i].height)){
-			   			if(currentY < Number.MAX_VALUE && currentY > (+allAreas[i].topLeftY + +allAreas[i].height)){
-				 			//do nothing
-				 		}else{
-			   				//alert("6");
+                            var updateWidth = '<td>Width:</td><td id="xCorValue">' + (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2) + '</td>';
+                            document.getElementById("update_tdWidth").innerHTML = updateWidth;
+                            currentX = +allAreas[i].topLeftX;
+                            finalWidth = (+WIDTH - (+x2 - +allAreas[i].topLeftX) + +2);
+                        }
+                    }
+                    //TopLeftX and (TopLeftY+height) are in the drawed rect
+                    //from left to right
+                    else if (y1 >= (+allAreas[i].topLeftY + +allAreas[i].height) && y2 <= (+allAreas[i].topLeftY + +allAreas[i].height)) {
+                        if (currentY < Number.MAX_VALUE && currentY > (+allAreas[i].topLeftY + +allAreas[i].height)) {
+                            //do nothing
+                        } else {
+                            //alert("6");
 //			   				if(!(y2<allAreas[i].topLeftY)){
-			   				drawrect.style.height = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1)+"px";
-							drawrect.style.marginTop = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1)+"px";
-	//			   				var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-							var updateHeight = '<td>Height:</td><td id="heightValue">'+(+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2)- +1)+'</td>';
-			   				document.getElementById("update_tdHeight").innerHTML = updateHeight;
-	//			   				var updateTopLeftY = '<input type="text" id="yCor" name="yCor" value="'+(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
-			   				var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">'+(+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1)+'</td>'; //(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
-			   				document.getElementById("update_tdY").innerHTML = updateTopLeftY;
-			   				currentY = (+allAreas[i].topLeftY + +allAreas[i].height);
-			   				
-			   				finalHeight = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1);
-			   				finalY = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1);
-			   			 }
-			   		}
-		   			
-		   		 }
-	       		//(TopLeftX+width) and TopLeftY are in the drawed rect
-		 		 else if(x2 <= (+allAreas[i].topLeftX + +allAreas[i].width) && x1 >= (+allAreas[i].topLeftX + +allAreas[i].width)){	
-		 			 //draw from top to bottom 
-			    		if(y2 >= +allAreas[i].topLeftY && y1 <= +allAreas[i].topLeftY){ 
-			    			if(currentX < Number.MAX_VALUE && currentX > (+allAreas[i].topLeftX + +allAreas[i].width)){
-				 				//do nothing
-				 			}
-				 			else{
-			   					//alert("7");
-				    			drawrect.style.width = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +1)+"px";
-								drawrect.style.marginLeft = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) + +1)+"px";
-		//		   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
-								var updateWidth = '<td>Width:</td><td id="xCorValue">'+(+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2)- +1)+'</td>';
-				   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
-		//		   				var updateTopLeftX = '<input type="text" id="xCor" name="xCor" value="'+(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
-				   				var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">'+(+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) + +1)+'</td>'; //(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2)-2)
-				   				document.getElementById("update_tdX").innerHTML = updateTopLeftX;
-				   				currentX = (+allAreas[i].topLeftX + +allAreas[i].width);
-				   				finalWidth = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2)- +1);
-				   				finalX = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) + +1);
-						 }
-		 			}
-		    		//draw from bottom to top 
-			    		else if(y1 >= +allAreas[i].topLeftY && y2 <= +allAreas[i].topLeftY){
-			    			if(currentX < Number.MAX_VALUE && currentX > (+allAreas[i].topLeftX + +allAreas[i].width)){
-				 				//do nothing
-				 			}else{
-			   					//alert("8");
-				    			drawrect.style.width = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+"px";
-								drawrect.style.marginLeft = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+"px";
-		//		   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
-								var updateWidth = '<td>Width:</td><td id="xCorValue">'+(+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+'</td>';
-				   				document.getElementById("update_tdWidth").innerHTML = updateWidth;
-		//		   				var updateTopLeftX = '<input type="text" id="xCor" name="xCor" value="'+(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
-				   				var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">'+(+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2))+'</td>'; //  (x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))
-				   				document.getElementById("update_tdX").innerHTML = updateTopLeftX;
-				   				currentX = (+allAreas[i].topLeftX + +allAreas[i].width);
-				   				finalWidth = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2));
-				   				finalX = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2));
-			    		}
-			    	}
-		    	}
-	       		}
-	       	}
-	
-	/*alert("curX: " +x1);
-	alert("curY: " +y1);
-	alert("curWidth: " +WIDTH);
-	alert("curHeight: " +HEIGHT);*/
-	
-	/*var table = document.getElementById("addSomeStuff");
+                            drawrect.style.height = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1) + "px";
+                            drawrect.style.marginTop = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1) + "px";
+                            //			   				var updateHeight = '<input type="text" id="height" name="height" value="'+(HEIGHT-((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
+                            var updateHeight = '<td>Height:</td><td id="heightValue">' + (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1) + '</td>';
+                            document.getElementById("update_tdHeight").innerHTML = updateHeight;
+                            //			   				var updateTopLeftY = '<input type="text" id="yCor" name="yCor" value="'+(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))+'">';
+                            var updateTopLeftY = '<td>Y-Coordinate:</td><td id="yCorValue">' + (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1) + '</td>'; //(y1+((allAreas[i].topLeftY+allAreas[i].height)-y2))
+                            document.getElementById("update_tdY").innerHTML = updateTopLeftY;
+                            currentY = (+allAreas[i].topLeftY + +allAreas[i].height);
 
-	// Create an empty <tr> element and add it to the 1st position of the table:
-	var row = table.insertRow(0);
+                            finalHeight = (+HEIGHT - ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) - +1);
+                            finalY = (+TOP + ((+allAreas[i].topLeftY + +allAreas[i].height) - +y2) + +1);
+                        }
+                    }
 
-	// Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
-	var cell1 = row.insertCell(0);
-	var cell2 = row.insertCell(1);
+                }
+                //(TopLeftX+width) and TopLeftY are in the drawed rect
+                else if (x2 <= (+allAreas[i].topLeftX + +allAreas[i].width) && x1 >= (+allAreas[i].topLeftX + +allAreas[i].width)) {
+                    //draw from top to bottom
+                    if (y2 >= +allAreas[i].topLeftY && y1 <= +allAreas[i].topLeftY) {
+                        if (currentX < Number.MAX_VALUE && currentX > (+allAreas[i].topLeftX + +allAreas[i].width)) {
+                            //do nothing
+                        }
+                        else {
+                            //alert("7");
+                            drawrect.style.width = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +1) + "px";
+                            drawrect.style.marginLeft = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) + +1) + "px";
+                            //		   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
+                            var updateWidth = '<td>Width:</td><td id="xCorValue">' + (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +1) + '</td>';
+                            document.getElementById("update_tdWidth").innerHTML = updateWidth;
+                            //		   				var updateTopLeftX = '<input type="text" id="xCor" name="xCor" value="'+(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
+                            var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">' + (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) + +1) + '</td>'; //(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2)-2)
+                            document.getElementById("update_tdX").innerHTML = updateTopLeftX;
+                            currentX = (+allAreas[i].topLeftX + +allAreas[i].width);
+                            finalWidth = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) - +1);
+                            finalX = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2) + +1);
+                        }
+                    }
+                    //draw from bottom to top
+                    else if (y1 >= +allAreas[i].topLeftY && y2 <= +allAreas[i].topLeftY) {
+                        if (currentX < Number.MAX_VALUE && currentX > (+allAreas[i].topLeftX + +allAreas[i].width)) {
+                            //do nothing
+                        } else {
+                            //alert("8");
+                            drawrect.style.width = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2)) + "px";
+                            drawrect.style.marginLeft = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2)) + "px";
+                            //		   				var updateWidth = '<input type="text" id="width" name="width" value="'+(WIDTH-((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
+                            var updateWidth = '<td>Width:</td><td id="xCorValue">' + (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2)) + '</td>';
+                            document.getElementById("update_tdWidth").innerHTML = updateWidth;
+                            //		   				var updateTopLeftX = '<input type="text" id="xCor" name="xCor" value="'+(x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))+'">';
+                            var updateTopLeftX = '<td>X-Coordinate:</td><td id="xCorValue">' + (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2)) + '</td>'; //  (x1+((allAreas[i].topLeftX+allAreas[i].width)-x2))
+                            document.getElementById("update_tdX").innerHTML = updateTopLeftX;
+                            currentX = (+allAreas[i].topLeftX + +allAreas[i].width);
+                            finalWidth = (+WIDTH - ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2));
+                            finalX = (+LEFT + ((+allAreas[i].topLeftX + +allAreas[i].width) - +x2));
+                        }
+                    }
+                }
+            }
+        }
 
-	// Add some text to the new cells:
-	cell1.innerHTML = '<input type="submit" value="Add Area">';
-	cell2.innerHTML = " ";*/
-	//alert("kram: "+table.rows[1].cells[2].text());
-	//alert("X::: "+document.getElementById("xCorValue").innerText);
-	
-	//document.getElementById('addSomeStuff').appendChild('<tr><td><input type="submit" value="Add Area"></td><td></td></tr>');
-	
-	/* $('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
-     		'<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
-     		//a user has the possibility to modify the values --> error detection!
-//     		'<tr><td>X-Coordinate:</td><td id="update_tdX"><input type="text" id="xCor" name="xCor" value="'+x1+'"></td></tr>'+
-//     		'<tr><td>Y-Coordinate:</td><td id="update_tdY"><input type="text" id="yCor" name="yCor" value="'+y1+'"></td></tr>'+
-//     		'<tr><td>Width:</td><td id="update_tdWidth"><input type="text" id="width" name="width" value="'+WIDTH+'"></td></tr>'+
-//     		'<tr><td>Height:</td><td id="update_tdHeight"><input type="text" id="height" name="height" value="'+HEIGHT+'"></td></tr>'+
-//     		'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-     		//so the user can't change the values --> no overlapping with over areas possible
-     		'<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+x1+'</td></tr>'+
-     		'<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+y1+'</td></tr>'+
-     		'<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+WIDTH+'</td></tr>'+
-     		'<tr class="update_tdHeight"><td>Height:</td><td id="heightValue">'+HEIGHT+'</td></tr>'+
-     		//'<tr><td><input type="button" value="Edit Area" onClick="addArea()"></td></tr></table>');
-     		'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');*/
-	
-	}
-	
+        /*alert("curX: " +x1);
+         alert("curY: " +y1);
+         alert("curWidth: " +WIDTH);
+         alert("curHeight: " +HEIGHT);*/
+
+        /*var table = document.getElementById("addSomeStuff");
+
+         // Create an empty <tr> element and add it to the 1st position of the table:
+         var row = table.insertRow(0);
+
+         // Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
+         var cell1 = row.insertCell(0);
+         var cell2 = row.insertCell(1);
+
+         // Add some text to the new cells:
+         cell1.innerHTML = '<input type="submit" value="Add Area">';
+         cell2.innerHTML = " ";*/
+        //alert("kram: "+table.rows[1].cells[2].text());
+        //alert("X::: "+document.getElementById("xCorValue").innerText);
+
+        //document.getElementById('addSomeStuff').appendChild('<tr><td><input type="submit" value="Add Area"></td><td></td></tr>');
+
+        /* $('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
+         '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
+         //a user has the possibility to modify the values --> error detection!
+         //     		'<tr><td>X-Coordinate:</td><td id="update_tdX"><input type="text" id="xCor" name="xCor" value="'+x1+'"></td></tr>'+
+         //     		'<tr><td>Y-Coordinate:</td><td id="update_tdY"><input type="text" id="yCor" name="yCor" value="'+y1+'"></td></tr>'+
+         //     		'<tr><td>Width:</td><td id="update_tdWidth"><input type="text" id="width" name="width" value="'+WIDTH+'"></td></tr>'+
+         //     		'<tr><td>Height:</td><td id="update_tdHeight"><input type="text" id="height" name="height" value="'+HEIGHT+'"></td></tr>'+
+         //     		'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
+         //so the user can't change the values --> no overlapping with over areas possible
+         '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+x1+'</td></tr>'+
+         '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+y1+'</td></tr>'+
+         '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+WIDTH+'</td></tr>'+
+         '<tr class="update_tdHeight"><td>Height:</td><td id="heightValue">'+HEIGHT+'</td></tr>'+
+         //'<tr><td><input type="button" value="Edit Area" onClick="addArea()"></td></tr></table>');
+         '<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');*/
+
+    }
+
 
 //    $("#selection").hide();
 });
@@ -570,31 +571,31 @@ function removeAreaViaPopup(data) {
 //function addArea(){
 $(document).on("submit", "#areaForm", function (event) {
     event.preventDefault();
-    if(checkInp()){	//id is valid
-	    var id, xCor, yCor, width, height;
-	    id = $("#id").val();
-	    if (id != null && id != "") {
+    if (checkInp()) {	//id is valid
+        var id, xCor, yCor, width, height;
+        id = $("#id").val();
+        if (id != null && id != "") {
 
 
-	    xCor = finalX;
-	    yCor = finalY;
-	    width = finalWidth;
-	    height = finalHeight;
-	    //alert("x "+xCor+ " y "+ yCor +" w "+ width+" h "+height);
-	    /*xCor = document.getElementById("xCorValue").innerText -2;	//--> because of border
-	    yCor = document.getElementById("yCorValue").innerText -2;	//--> because of border
-	    width = document.getElementById("widthValue").innerText;
-	    height = document.getElementById("heightValue").innerText;*/
-	    newArea = new Area(id, null, xCor, yCor, width, height);
-	
-	    doTask("AREA_ADD", newArea, function(){
-	    	window.location.reload();
-	    });
-	    }else{
-	    	alert("You have to set an id for your area!");
-	    }
-    }else{
-    	alert("The id may only contain numbers, A-Z, a-z and _. No umlauts.");	//:A-Z, a-z, 0-9, - and _
+            xCor = finalX;
+            yCor = finalY;
+            width = finalWidth;
+            height = finalHeight;
+            //alert("x "+xCor+ " y "+ yCor +" w "+ width+" h "+height);
+            /*xCor = document.getElementById("xCorValue").innerText -2;	//--> because of border
+             yCor = document.getElementById("yCorValue").innerText -2;	//--> because of border
+             width = document.getElementById("widthValue").innerText;
+             height = document.getElementById("heightValue").innerText;*/
+            newArea = new Area(id, null, xCor, yCor, width, height);
+
+            doTask("AREA_ADD", newArea, function () {
+                window.location.reload();
+            });
+        } else {
+            alert("You have to set an id for your area!");
+        }
+    } else {
+        alert("The id may only contain numbers, A-Z, a-z and _. No umlauts.");	//:A-Z, a-z, 0-9, - and _
     }
 
 });
@@ -624,7 +625,7 @@ function drawAreas() {
                     var x = data.object[i].topLeftX;
                     var y = data.object[i].topLeftY;
                     var width = data.object[i].width;
-                    var height =data.object[i].height;
+                    var height = data.object[i].height;
 
 
                     var div = document.getElementById("map_png_div");
@@ -716,7 +717,7 @@ function loadLocations() {
 
 function writeLocations(data) {
 //	alert(JSON.stringify(data.object[0].locations));
-	var locations = data.object[0].locations;
+    var locations = data.object[0].locations;
 //	alert(JSON.stringify(locs));
     if (locations.length == 0) {
 //    	alert("no locations");
@@ -735,27 +736,27 @@ function writeLocations(data) {
 
         var mapdiv = document.getElementById("map_png_div");
         var loc;
-        
+
         for (var i = 0; i < locations.length; i++) { //for each location
-        	
+
 //        	//add point for location
-        	loc = document.createElement("div");
-        	loc.className = "locationCircle";
-        	loc.style.marginLeft=locations[i].coordinateX+"px";
-        	loc.style.marginTop =locations[i].coordinateY+"px";
-        	mapdiv.appendChild(loc);
-        	//end add point for location
-        	
+            loc = document.createElement("div");
+            loc.className = "locationCircle";
+            loc.style.marginLeft = locations[i].coordinateX + "px";
+            loc.style.marginTop = locations[i].coordinateY + "px";
+            mapdiv.appendChild(loc);
+            //end add point for location
+
             tablecontents += "<tr>";
             tablecontents += "<td>" + locations[i].coordinateX + "</td>";
             tablecontents += "<td>" + locations[i].coordinateY + "</td>";
             tablecontents += "<td><input type='submit' value='Remove Location' onClick='removeLocationViaPopup(" + JSON.stringify(locations[i]) + ")'/></td>";
             tablecontents += "</tr>";
         }
-        if(locations.length>=1){
-        	tablecontents += "<tr>";
-        	tablecontents += "<td><input type='submit' value='Remove All Locations' onClick='removeAllLocationsViaPopup()'/></td>";
-        	tablecontents += "<tr>";
+        if (locations.length >= 1) {
+            tablecontents += "<tr>";
+            tablecontents += "<td><input type='submit' value='Remove All Locations' onClick='removeAllLocationsViaPopup()'/></td>";
+            tablecontents += "<tr>";
         }
         tablecontents += "</table>";
         document.getElementById("table_space_locations").innerHTML = tablecontents;
@@ -788,16 +789,16 @@ function removeLocationViaPopup(data) {
 function removeAllLocationsViaPopup(data) {
     var r = confirm("Do you want to REMOVE ALL LOCATIONS?");
     if (r == true) {
-    	var rr = confirm("REALLY??");
-    	if(rr==true){
-    		var locationtodelete = new Location(null, null, null);
-    		doTask("LOCATION_REMOVE", locationtodelete, function (event) {
-    			
-    			alert("All locations have been deleted");
-    			window.location.reload();
-    			
-    		});    		
-    	}
+        var rr = confirm("REALLY??");
+        if (rr == true) {
+            var locationtodelete = new Location(null, null, null);
+            doTask("LOCATION_REMOVE", locationtodelete, function (event) {
+
+                alert("All locations have been deleted");
+                window.location.reload();
+
+            });
+        }
     }
 }
 
@@ -809,8 +810,8 @@ function removeAllLocationsViaPopup(data) {
  */
 function checkInp() {
     var x = document.getElementById("id").value;
-    if (x.match(/^[a-zA-Z0-9\-_]+$/)){		//--> problem with click method
-  //  if (x.match(/^[0-9]+$/)) {
+    if (x.match(/^[a-zA-Z0-9\-_]+$/)) {		//--> problem with click method
+        //  if (x.match(/^[0-9]+$/)) {
         return true;
     }
 }

@@ -1,6 +1,6 @@
 package de.uulm.mi.mind.io;
 
-import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;

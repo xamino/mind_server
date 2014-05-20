@@ -1,6 +1,6 @@
 package de.uulm.mi.mind.io;
 
-import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 
 /**
  * A Transaction is the interface between a module and a the access to a database.

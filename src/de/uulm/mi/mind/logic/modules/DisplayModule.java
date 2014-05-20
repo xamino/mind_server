@@ -1,14 +1,12 @@
 package de.uulm.mi.mind.logic.modules;
 
-import com.db4o.ObjectContainer;
-import de.uulm.mi.mind.io.DatabaseAccess;
 import de.uulm.mi.mind.io.DatabaseManager;
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.DataList;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.PublicDisplay;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
@@ -122,20 +120,20 @@ public class DisplayModule implements Module {
     }
 
     private Data deleteDisplay(final PublicDisplay display) {
-       return database.open(new Transaction() {
-           @Override
-           public Data doOperations(Session dba) {
-               boolean success = dba.delete(display);
-               if (success) {
-                   if (display.getKey() == null) {
-                       return new Success("All PublicDisplay were deleted successfully.");
-                   }
-                   return new Success("PublicDisplay was deleted successfully.");
-               } else {
-                   return new Error(Error.Type.DATABASE, "Deletion of PublicDisplay resulted in an error.");
-               }
-           }
-       });
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session dba) {
+                boolean success = dba.delete(display);
+                if (success) {
+                    if (display.getKey() == null) {
+                        return new Success("All PublicDisplay were deleted successfully.");
+                    }
+                    return new Success("PublicDisplay was deleted successfully.");
+                } else {
+                    return new Error(Error.Type.DATABASE, "Deletion of PublicDisplay resulted in an error.");
+                }
+            }
+        });
 
     }
 }

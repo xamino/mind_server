@@ -108,10 +108,10 @@ function doTask(task, object, callback) {
  * Logout on button click
  */
 //$(document).on("submit", "#logout", function (event) {
-function userLogout(){
-	doTask("LOGOUT", null, function (event) {
+function userLogout() {
+    doTask("LOGOUT", null, function (event) {
         alert("Your have been successfully logged out.");
-        window.location='index.html';
+        window.location = 'index.html';
     });
 }
 
@@ -201,8 +201,6 @@ $(document).on("submit", "#loginDisplayForm", function (event) {
 });
 
 
-
-
 function mute() {
     alert("TODO: mute");
 }
@@ -222,12 +220,12 @@ function logoutDisplay() {
  */
 function onLoadOfAdminPage() {
     session = readCookie("MIND_Admin_C_session");
-    send(new Arrival("check",session),function(data){
-    	if (instanceOf(data.object,Error)) {
-    		alert("You have to be logged in.");
-    		window.location.href = "login.jsp";
-    	} else {
-    		return session;
-    	}
+    send(new Arrival("check", session), function (data) {
+        if (instanceOf(data.object, Error)) {
+            alert("You have to be logged in.");
+            window.location.href = "login.jsp";
+        } else {
+            return session;
+        }
     });
 }

@@ -2,6 +2,7 @@ package de.uulm.mi.mind.io;
 
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.security.BCrypt;
 
 import javax.servlet.ServletContext;
@@ -50,14 +51,14 @@ class DatabaseControllerSQL implements DatabaseAccess {
      * @param data The Object to be stored.
      * @return true if the operation was successful and false otherwise.
      */
-    public boolean create(Session session, Data data) {
+    public boolean create(Session session, Saveable data) {
         ObjectContainerSQL sessionContainer = session.getSqlContainer();
         // Sanitize input on DB, only allow Data objects implementing a unique key
         if (data == null || data.getKey() == null) {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
-        DataList<Data> readData = read(session, data);
+        DataList<Saveable> readData = read(session, data);
         if (readData != null && !readData.isEmpty()) {
             return false;
         }
@@ -80,7 +81,7 @@ class DatabaseControllerSQL implements DatabaseAccess {
      *                      Changing an object parameter filters the returned objects.
      * @return A DataList of the specified filter parameter Type or null on error.
      */
-    public <E extends Data> DataList<E> read(Session session, final E requestFilter) {
+    public <E extends Saveable> DataList<E> read(Session session, final E requestFilter) {
         ObjectContainerSQL sessionContainer = session.getSqlContainer();
         try {
             List queryResult;
@@ -108,9 +109,9 @@ class DatabaseControllerSQL implements DatabaseAccess {
                     queryResult = query.execute();
                 } else {
                     log.log(TAG, "Object Type " + requestFilter.getClass().getSimpleName() + " reading could be optimized.");
-                    queryResult = sessionContainer.query(new Predicate<Data>(requestFilter.getClass()) {
+                    queryResult = sessionContainer.query(new Predicate<Saveable>(requestFilter.getClass()) {
                         @Override
-                        public boolean match(Data o) {
+                        public boolean match(Saveable o) {
                             return o.getKey().equals(requestFilter.getKey());
                         }
                     });
@@ -132,11 +133,11 @@ class DatabaseControllerSQL implements DatabaseAccess {
         }
     }
 
-    public boolean update(Session session, Data data) {
+    public boolean update(Session session, Saveable data) {
         ObjectContainerSQL sessionContainer = session.getSqlContainer();
         if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
         try {
-            DataList<Data> dataList;
+            DataList<Saveable> dataList;
             if (!(dataList = read(session, data)).isEmpty()) {
                 sessionContainer.delete(dataList.get(0));
                 sessionContainer.store(data);
@@ -156,10 +157,10 @@ class DatabaseControllerSQL implements DatabaseAccess {
      * @param data the object to be deleted.
      * @return true if deletion was successful or the object does not exist, otherwise false
      */
-    public boolean delete(Session session, Data data) {
+    public boolean delete(Session session, Saveable data) {
         ObjectContainerSQL sessionContainer = session.getSqlContainer();
         try {
-            DataList<Data> dataList = read(session, data);
+            DataList<Saveable> dataList = read(session, data);
 
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
@@ -170,7 +171,7 @@ class DatabaseControllerSQL implements DatabaseAccess {
                 return false;
             } else {
                 int size = dataList.size();
-                for (Data d : dataList) {
+                for (Saveable d : dataList) {
                     sessionContainer.delete(d);
                 }
                 log.log(TAG, "Deleted " + size + " objects from DB: " + dataList.toString());

@@ -1,7 +1,7 @@
 package de.uulm.mi.mind.io;
 
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -34,7 +34,7 @@ class Query {
         return this;
     }
 
-    public <E extends Data> List<E> execute() {
+    public <E extends Saveable> List<E> execute() {
         List<E> list = new ArrayList<>();
         try {
             Connection connection = DatabaseControllerSQL.getInstance().createConnection();
@@ -110,7 +110,7 @@ class Query {
             return null;
     }
 
-    public void constrain(Class<? extends Data> aClass) {
+    public void constrain(Class<? extends Saveable> aClass) {
         table = aClass.getSimpleName();
     }
 }

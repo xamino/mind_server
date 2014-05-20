@@ -1,8 +1,8 @@
 package de.uulm.mi.mind.io;
 
 import com.db4o.ObjectContainer;
-import de.uulm.mi.mind.objects.Data;
 import de.uulm.mi.mind.objects.DataList;
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
 /**
  * Created by Cassio on 10.05.2014.
@@ -34,19 +34,19 @@ public class Session {
     }
 
 
-    public boolean create(Data data) {
+    public boolean create(Saveable data) {
         return dba.create(this, data);
     }
 
-    public <E extends Data> DataList<E> read(E data) {
+    public <E extends Saveable> DataList<E> read(E data) {
         return dba.read(this, data);
     }
 
-    public boolean update(Data data) {
+    public boolean update(Saveable data) {
         return dba.update(this, data);
     }
 
-    public boolean delete(Data data) {
+    public boolean delete(Saveable data) {
         return dba.delete(this, data);
     }
 

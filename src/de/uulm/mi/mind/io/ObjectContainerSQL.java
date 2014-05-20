@@ -1,7 +1,7 @@
 package de.uulm.mi.mind.io;
 
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -126,7 +126,7 @@ class ObjectContainerSQL {
         return new Query();
     }
 
-    public <E extends Data> List<E> query(Predicate<E> predicate) {
+    public <E extends Saveable> List<E> query(Predicate<E> predicate) {
         Query q = new Query();
         q.constrain(predicate.getClassType());
         List<E> list = q.execute();
@@ -140,7 +140,7 @@ class ObjectContainerSQL {
         return list;
     }
 
-    public <E extends Data> List queryByExample(E requestFilter) {
+    public <E extends Saveable> List queryByExample(E requestFilter) {
         Query q = new Query();
         q.constrain(requestFilter.getClass());
 

@@ -7,8 +7,8 @@
     <script src="javascript/jquery-2.1.0.min.js"></script>
     <script src="javascript/library.js"></script>
     <script src="javascript/run.js"></script>
-	<script src="javascript/pd/displayMap.js"></script>
-	<script src="javascript/pd/pd_general.js"></script>
+    <script src="javascript/pd/displayMap.js"></script>
+    <script src="javascript/pd/pd_general.js"></script>
     <link href="${pageContext.request.contextPath}/css/common.css" rel="stylesheet" type="text/css">
     <title>Login your Public Display</title>
 </head>
