@@ -1,5 +1,7 @@
 package de.uulm.mi.mind.objects;
 
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.enums.Status;
 import de.uulm.mi.mind.security.Authenticated;
 
@@ -10,24 +12,19 @@ import java.util.Date;
  * <p/>
  * zB placeholder user class
  */
-public class User implements Data, Authenticated {
+public class User implements Sendable, Saveable, Authenticated {
     private String name;
-    private String pwdHash;
     private String email;
     private String position;
     private boolean admin;
-    private Date lastAccess;
     private Status status;
+    private String pwdHash;
+    private Date lastAccess;
 
     private User() {
     }
 
     public User(String email) {
-        this.email = email;
-    }
-
-    public User(String email, String pwdHash) {
-        this.pwdHash = pwdHash;
         this.email = email;
     }
 
@@ -37,9 +34,17 @@ public class User implements Data, Authenticated {
         this.admin = admin;
     }
 
-    public String getPosition() {
-        return position;
+    public String getPwdHash() {
+        return pwdHash;
     }
+
+    public void setPwdHash(String pwdHash) {
+        this.pwdHash = pwdHash;
+    }
+
+    /* public String getPosition() {
+        return position;
+    }*/
 
     public void setPosition(String position) {
         this.position = position;
@@ -51,14 +56,6 @@ public class User implements Data, Authenticated {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getPwdHash() {
-        return pwdHash;
-    }
-
-    public void setPwdHash(String pwdHash) {
-        this.pwdHash = pwdHash;
     }
 
     public String getEmail() {
@@ -85,28 +82,36 @@ public class User implements Data, Authenticated {
         this.status = status;
     }
 
-    /**
-     * Method for getting a copy of this user object without the sensitive information.
-     *
-     * @return Copy of this object with empty password string.
-     */
     public User safeClone() {
-        User user = new User(this.email, this.name, this.admin);
-        user.setPwdHash("");
-        user.setPosition(this.position);
-        user.setAccessDate(this.lastAccess);
-        user.setStatus(this.status);
-        return user;
+        User back = new User(this.email);
+        back.setAccessDate(this.lastAccess);
+        back.setPwdHash("");
+        back.setAdmin(this.isAdmin());
+        back.setName(this.name);
+        back.setStatus(this.status);
+        return back;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                // ", pwdHash='" + pwdHash + '\'' +
+                ", email='" + email + '\'' +
+                ", admin=" + admin +
+                ", position=\'" + position + "'" +
+                ", status=\'" + status + "'" +
+                '}';
     }
 
     @Override
     public String readIdentification() {
-        return email;
+        return this.email;
     }
 
     @Override
     public String readAuthentication() {
-        return pwdHash;
+        return this.pwdHash;
     }
 
     @Override
@@ -121,18 +126,6 @@ public class User implements Data, Authenticated {
 
     @Override
     public String getKey() {
-        return email;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "name='" + name + '\'' +
-                // ", pwdHash='" + pwdHash + '\'' +
-                ", email='" + email + '\'' +
-                ", admin=" + admin +
-                ", position=\'" + position + "'" +
-                ", status=\'" + status + "'" +
-                '}';
+        return this.email;
     }
 }

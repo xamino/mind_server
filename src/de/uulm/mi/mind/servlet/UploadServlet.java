@@ -25,6 +25,7 @@ import java.util.List;
  *         images/custom_icons/icon_user@user, where user@user is the unique user email address.
  */
 // original source: http://www.tutorialspoint.com/servlets/servlets-file-uploading.htm
+// todo check for image type and size
 public class UploadServlet extends HttpServlet {
     private final String TAG = "UploadServlet";
     private final int maxFileSize = 5000 * 1024;
@@ -101,7 +102,9 @@ public class UploadServlet extends HttpServlet {
         if (email != null && password != null) {
             // MUST first check these values, sometimes old sessions are still floating around!!!
             // todo check why cookies are never cleaned!
-            active = Security.begin(new User(email, password), null);
+            User user = new User(email);
+            user.setPwdHash(password);
+            active = Security.begin(user, null);
         } else if (session != null) {
             active = Security.begin(null, session);
         } else {

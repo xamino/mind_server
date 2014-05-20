@@ -25,6 +25,7 @@ public class Configuration {
     private String adminEmail;
     private String adminPassword;
     private String universitySSID;
+    private String registration;
     private ArrayList<String> wifiNameFilter;
     private String dbPort;
     private String dbURL;
@@ -51,6 +52,7 @@ public class Configuration {
                 this.adminEmail = config.getProperty("ADMIN_EMAIL");
                 this.adminPassword = config.getProperty("ADMIN_PASSWORD");
                 this.universitySSID = config.getProperty("UNIVERSITY_SSID");
+                this.registration = config.getProperty("REGISTRATION_POLICY");
                 this.dbURL = config.getProperty("DATABASE_URL");
                 this.dbPort = config.getProperty("DATABASE_PORT");
                 this.dbUser = config.getProperty("DATABASE_USER");
@@ -80,6 +82,8 @@ public class Configuration {
                 this.adminPassword = config.getProperty("ADMIN_PASSWORD");
             if (this.universitySSID == null)
                 this.universitySSID = config.getProperty("UNIVERSITY_SSID");
+            if (this.registration == null)
+                this.registration = config.getProperty("REGISTRATION_POLICY");
             if (this.wifiNameFilter == null) {
                 String wifiNames = config.getProperty("UNIVERSITY_SSID_FILTER");
                 this.wifiNameFilter = new ArrayList<>(Arrays.asList(wifiNames.split(",")));
@@ -132,6 +136,10 @@ public class Configuration {
 
     public ArrayList<String> getWifiNameFilter() {
         return this.wifiNameFilter;
+    }
+
+    public String getRegistration() {
+        return this.registration;
     }
 
     public String getDbURL() {

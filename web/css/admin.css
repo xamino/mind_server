@@ -156,6 +156,13 @@ html, body {
     width:100%;
 }*/
 
+.locationCircle {
+	position: absolute;
+	width: 5px;
+    height: 5px;
+    background: #00F;
+}
+
 /************* footer *******************/
 #footer {
    position:absolute;

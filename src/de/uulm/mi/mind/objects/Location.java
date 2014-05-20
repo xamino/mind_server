@@ -1,10 +1,13 @@
 package de.uulm.mi.mind.objects;
 
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
+
 /**
  * @author Tamino Hartmann
  *         Data object for a location. References multiple WifiMorsels that have been detected at this location.
  */
-public class Location implements Data {
+public class Location implements Sendable, Saveable {
     private int coordinateX, coordinateY;
     private String key;
     /**

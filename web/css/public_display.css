@@ -128,10 +128,20 @@ html, body {
     margin:auto;
 }
 
+#awayArea_info{
+	font-weight: bold;
+	font-size:large;
+	color: #32627c;
+}
+
 #content_popup{
 	/*border: 1px solid orange;	/*height should be 100% - settings - login_location*/
 	/*margin-top:20%;*/
 	margin-top: 200px;
+}
+
+#toggleFullscreen, #displayLogoutButton{
+	float:right;	/*Buttons at the right side*/
 }
 
 #login_location{

@@ -157,7 +157,7 @@ $(document).on("mousemove", "#map_png_div", function (e) {
                 drawrect = document.getElementById("draw_rect_div");
 
 //            	drawrect.style.border="1px solid blue";
-                drawrect.style.background = "#1B94E0";
+                drawrect.style.background = "#990099";//"#1B94E0";
                 drawrect.style.opacity = "0.4";
                 drawrect.style.filter = "alpha(opacity=40)";
                 drawrect.style.margin = "0px";
@@ -178,41 +178,41 @@ $(document).on("mousemove", "#map_png_div", function (e) {
             	if(y1 < y2){ //from top to bottom
             		$('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
                     	'<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
-                    	'<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(x1-WIDTH)+'</td></tr>'+
+                    	'<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(x1-WIDTH + -4)+'</td></tr>'+
                     	'<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+y1+'</td></tr>'+
-                    	'<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+WIDTH+'</td></tr>'+
+                    	'<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+(WIDTH + +4)+'</td></tr>'+
                     	'<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+HEIGHT+'</td></tr>'+
                     	'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-            		finalX = (+x1 - +WIDTH);
+            		finalX = (+x1 - +WIDTH + -4);
             		finalY = y1;
-            		finalWidth = WIDTH;
+            		finalWidth = WIDTH + +4;
             		finalHeight = HEIGHT;
             	}else{ //from bottom to top
             		$('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
                         '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
-                        '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(+x1 - +WIDTH)+'</td></tr>'+
+                        '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(+x1 - +WIDTH + -2)+'</td></tr>'+
                         '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+y2+'</td></tr>'+
-                        '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+WIDTH+'</td></tr>'+
+                        '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+(WIDTH + +2)+'</td></tr>'+
                         '<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+HEIGHT+'</td></tr>'+
                         '<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-            		finalX = (+x1 - +WIDTH);
+            		finalX = (+x1 - +WIDTH + -2);
             		finalY = y2;
-            		finalWidth = WIDTH;
+            		finalWidth = WIDTH + +2;
             		finalHeight = HEIGHT;
             	}
             }else{	//left to right
             	if(y1 > y2){ //from bottom to top
             		$('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
                        '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
-                       '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+x1+'</td></tr>'+
-                       '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+y2+'</td></tr>'+
-                       '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+WIDTH+'</td></tr>'+
-                       '<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+HEIGHT+'</td></tr>'+
+                       '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(x1 + -2)+'</td></tr>'+
+                       '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+(y2 + -1)+'</td></tr>'+
+                       '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+(WIDTH + +2)+'</td></tr>'+
+                       '<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+(HEIGHT + +1)+'</td></tr>'+
                        '<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-            		finalX = x1;
-            		finalY = y2;
-            		finalWidth = WIDTH;
-            		finalHeight = HEIGHT;
+            		finalX = x1 + -2;
+            		finalY = y2 + -1;
+            		finalWidth = WIDTH + +2;
+            		finalHeight = HEIGHT + +1;
             	}else{ //from top to bottom
             		$('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
                     	'<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
@@ -223,16 +223,16 @@ $(document).on("mousemove", "#map_png_div", function (e) {
 //                    	'<tr><td>Height:</td><td id="update_tdHeight"><input type="text" id="height" name="height" value="'+HEIGHT+'"></td></tr>'+
 //                    	'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
                     	//so the user can't change the values --> no overlapping with over areas possible
-                    	'<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+x1+'</td></tr>'+
-                    	'<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+y1+'</td></tr>'+
-                    	'<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+WIDTH+'</td></tr>'+
-                    	'<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+HEIGHT+'</td></tr>'+
+                    	'<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">'+(x1 + -2)+'</td></tr>'+
+                    	'<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">'+(y1 + -2)+'</td></tr>'+
+                    	'<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">'+(WIDTH + +2)+'</td></tr>'+
+                    	'<tr id="update_tdHeight"><td>Height:</td><td id="heightValue">'+(HEIGHT + +2)+'</td></tr>'+
                     	//'<tr><td><input type="button" value="Edit Area" onClick="addArea()"></td></tr></table>');
                     	'<tr><td><input type="submit" value="Add Area"></td><td></td></tr></table>');
-            		finalX = x1;
-            		finalY = y1;
-            		finalWidth = WIDTH;
-            		finalHeight = HEIGHT;
+            		finalX = x1 + -2;
+            		finalY = y1 + -2;
+            		finalWidth = WIDTH + +2;
+            		finalHeight = HEIGHT + +2;
             	}
             }
             
@@ -594,7 +594,7 @@ $(document).on("submit", "#areaForm", function (event) {
 	    	alert("You have to set an id for your area!");
 	    }
     }else{
-    	alert("The id may only contain numbers");	//:A-Z, a-z, 0-9, - and _
+    	alert("The id may only contain numbers, A-Z, a-z and _. No umlauts.");	//:A-Z, a-z, 0-9, - and _
     }
 
 });
@@ -629,8 +629,8 @@ function drawAreas() {
 
                     var div = document.getElementById("map_png_div");
                     var clickedArea = "";
-                    clickedArea += '<div id="' + id + '" onClick="clickOnArea(' + id + ')" style=" cursor:pointer; background-color: #C2DFFF; border: 2px solid black; opacity: .5; filter: alpha(opacity=50); position:absolute; margin-top:' + (+y + +2) + 'px; margin-left: ' + (+x + +2) + 'px; width: ' + (+width - +4) + 'px; height: ' + (+height - +4) + 'px;"></div>';
-                    div.innerHTML = div.innerHTML + clickedArea;
+                    clickedArea += '<div id="' + id + '" onClick="clickOnArea(' + id + ')" style=" cursor:pointer; background-color: #990099; border: 2px solid black; opacity: .5; filter: alpha(opacity=50); position:absolute; margin-top:' + (+y + +2) + 'px; margin-left: ' + (+x + +2) + 'px; width: ' + (+width - +4) + 'px; height: ' + (+height - +4) + 'px;"></div>';
+                    div.innerHTML = div.innerHTML + clickedArea;	//#C2DFFF
 
                 }
             }
@@ -709,17 +709,22 @@ function editArea(id) {
  * loads all locations on load of page admin_import_map_location.jsp
  */
 function loadLocations() {
-    var locations = new Location(0, 0, null);
-    doTask("LOCATION_READ", locations, writeLocations);
+//    var locations = new Location(0, 0, null);
+    var area = new Area("University", null, null, null, null, null);
+    doTask("AREA_READ", area, writeLocations);
 }
 
 function writeLocations(data) {
-    if (data.object.length == 0) {
+//	alert(JSON.stringify(data.object[0].locations));
+	var locations = data.object[0].locations;
+//	alert(JSON.stringify(locs));
+    if (locations.length == 0) {
+//    	alert("no locations");
         var noLocationsInDatabase = "<br><br>There are currently no locations in the database. Add locations in the MIND-application.";
         document.getElementById("table_space_locations").innerHTML = noLocationsInDatabase;
     }
     else {
-
+//    	alert(data.object.length+" locations");
         var tablecontents = "";
         tablecontents = "<table border ='1'>";
         tablecontents += "<tr>";
@@ -728,14 +733,26 @@ function writeLocations(data) {
         tablecontents += "<td>Remove Location: </td>";
         tablecontents += "</tr>";
 
-        for (var i = 0; i < data.object.length; i++) {
+        var mapdiv = document.getElementById("map_png_div");
+        var loc;
+        
+        for (var i = 0; i < locations.length; i++) { //for each location
+        	
+//        	//add point for location
+        	loc = document.createElement("div");
+        	loc.className = "locationCircle";
+        	loc.style.marginLeft=locations[i].coordinateX+"px";
+        	loc.style.marginTop =locations[i].coordinateY+"px";
+        	mapdiv.appendChild(loc);
+        	//end add point for location
+        	
             tablecontents += "<tr>";
-            tablecontents += "<td>" + data.object[i].coordinateX + "</td>";
-            tablecontents += "<td>" + data.object[i].coordinateY + "</td>";
-            tablecontents += "<td><input type='submit' value='Remove Location' onClick='removeLocationViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
+            tablecontents += "<td>" + locations[i].coordinateX + "</td>";
+            tablecontents += "<td>" + locations[i].coordinateY + "</td>";
+            tablecontents += "<td><input type='submit' value='Remove Location' onClick='removeLocationViaPopup(" + JSON.stringify(locations[i]) + ")'/></td>";
             tablecontents += "</tr>";
         }
-        if(data.object.length>=1){
+        if(locations.length>=1){
         	tablecontents += "<tr>";
         	tablecontents += "<td><input type='submit' value='Remove All Locations' onClick='removeAllLocationsViaPopup()'/></td>";
         	tablecontents += "<tr>";

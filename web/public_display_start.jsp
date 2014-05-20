@@ -5,7 +5,7 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<script language="JavaScript" src="http://code.jquery.com/jquery-2.1.0.js"></script>
+    <script src="javascript/jquery-2.1.0.min.js"></script>
 <script src="javascript/library.js"></script>
 <script src="javascript/run.js"></script>
 <script src="javascript/pd/displayMap.js"></script>
@@ -13,7 +13,10 @@
 <script src="javascript/jquery.balloon.js"></script>
 <link href="${pageContext.request.contextPath}/css/public_display.css" rel="stylesheet" type="text/css">
 
-
+<%
+    response.setHeader("Cache-Control", "no-cache, must-revalidate");
+    response.setHeader("Cache-Control", "max-age=0, must-revalidate");
+%>  
 
 <title>Public Display</title>
 </head>
@@ -47,7 +50,8 @@
 	</div>
 	<div id="content_popup">
 		<p id="balloonIdle">0</p>
-		<p id="userInfoOnUpdate">info</p>
+		<!-- <p id="userInfoOnUpdate">info</p>  -->
+		<div id="awayArea_info"></div>
 
 		<div id ="show_display_settings" style="display:none;">
 		 	<!-- <div id='settingsBrightness'>
@@ -67,9 +71,12 @@
 				</div>
 		    </div>
 		    <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->
-		    <hr><br><button type='button' id='displaySettingsBack' class="shadow">Back</button> <!-- settingsBackButton() -->
-		    <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display</button>
-		    <button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
+		    <hr><br>
+		    <div id="buttonsDiv">
+			    <button type='button' id='displaySettingsBack' class="shadow" onclick='toggleDisplaySettings()'>Back</button> <!-- settingsBackButton() -->
+			    <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display</button>
+			    <button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
+		    </div>
 	    </div>
 	    <div id ="show_app_settings" style="display:none;">
 	    	There are currently no apps on your system.

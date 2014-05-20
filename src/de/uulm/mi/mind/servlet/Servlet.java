@@ -6,8 +6,9 @@ package de.uulm.mi.mind.servlet;
 
 import de.uulm.mi.mind.json.JsonWrapper;
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.logger.TimerResult;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Interfaces.Data;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.security.Active;
@@ -60,12 +61,12 @@ public class Servlet extends HttpServlet {
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response) throws ServletException, IOException {
         // Start timer
-        log.pushTimer(this, "INCOMING");
+        // log.pushTimer(this, "INCOMING");
         // Get arrival object
         // Watch out, arrival.getData() might be NULL!
         Arrival arrival = getRequest(request);
 
-        Data answer;
+        Sendable answer;
         if (arrival == null) {
             answer = new Error(Error.Type.CAST, "Failed to read Arrival!");
         } else {
@@ -77,8 +78,9 @@ public class Servlet extends HttpServlet {
 
         // Encapsulate answer:
         prepareDeparture(response, answer);
-        TimerResult timerResult = log.popTimer(this);
-        log.error(TAG, "Request " + arrival.getTask() + " took " + timerResult.time + " ms.");
+
+        // TimerResult timerResult = log.popTimer(this);
+        // log.error(TAG, "Request " + arrival.getTask() + " took " + timerResult.time + " ms.");
     }
 
     /**
@@ -87,7 +89,7 @@ public class Servlet extends HttpServlet {
      * @param arrival The arrival with which to work.
      * @return The data returned.
      */
-    private Data runLogic(Arrival arrival) {
+    private Sendable runLogic(Arrival arrival) {
         // check public tasks
         Information inf = functions.handlePublicTask(arrival);
         if (inf != null) {
@@ -113,11 +115,11 @@ public class Servlet extends HttpServlet {
             }
             // If answer is still null, the task wasn't found (or the rights weren't set):
             if (answer == null) {
-                log.log(TAG, "Illegal task sent: " + arrival.getTask());
                 String error = "Illegal task: " + arrival.getTask();
                 if (!currentUser.isAdmin()) {
                     error += ". You may not have the necessary rights!";
                 }
+                log.log(TAG, error);
                 answer = new Error(Error.Type.TASK, error);
             }
             // otherwise answer is valid
@@ -139,8 +141,12 @@ public class Servlet extends HttpServlet {
         }
         // Once we're here, finish the secure session
         Security.finish(activeUser);
+        // ensure sendable
+        if (!(answer instanceof Sendable)) {
+            return new Error(Error.Type.SERVER, "Tried to send a non-sendable object!");
+        }
         // and return the answer
-        return answer;
+        return ((Sendable) answer);
     }
 
     /**
@@ -184,7 +190,7 @@ public class Servlet extends HttpServlet {
      * @param answer   The object to attach.
      * @throws IOException
      */
-    private void prepareDeparture(HttpServletResponse response, Data answer) throws IOException {
+    private void prepareDeparture(HttpServletResponse response, Sendable answer) throws IOException {
         // Must be done before write:
         response.setCharacterEncoding("UTF-8");
         // If this happens, send back a standard error message.

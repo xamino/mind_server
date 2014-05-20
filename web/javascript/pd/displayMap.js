@@ -10,13 +10,16 @@ var factor=1; //the size-factor by which the displayed image deviates from the o
 //TODO read from server
 var refreshRate = 10; //the refresh rate for locating - in seconds
 var interval; //the interval of location refreshing
-var balloonClosingTime = 5;
+var balloonClosingTime = 7;
+var mapDiv;
 //var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
 //var heigthFactor=1; //the factor by which the height of the displayed image deviates from the original image height
 //var zoomValue = 30; //holds the width value for each zoom-step in pixels
 
 var users; //the current (to be) displayed users;
-var areas; //an array of areas - contains all areas that have already been used/needed
+var sortedEmails; //the current user's emails, sorted by areas
+var areas = new Array(); //an array of areas - contains all areas that have already been used/needed
+var awayAreaExists = true;
 
 $(document).ready(function() {
 	window.onresize=function(){mapResize();};
@@ -28,14 +31,26 @@ $(document).ready(function() {
  */
 function initPublicDisplayStuff(){
 
+	mapDiv = document.getElementById("mapscroll");
+	
 	users = new Array();
 	
     send(new Arrival("READ_ALL_AREAS", session), function (data) {
 
-        areas = data.object;
+    	//AREAS STUFF
+        var areasArray = data.object;
+        
         //TODO if no areas found -> ??
-    
-		//get map metrics
+        
+        for ( var i = 0; i < areasArray.length; i++) {
+			areas[areasArray[i].ID] = areasArray[i];
+		}
+        
+        checkAwayArea();
+        
+        //END AREAS STUFF
+		
+        //get map metrics
 		var mapImgLoad = $("<img />");
 		mapImgLoad.attr("src", "images/map");
 		mapImgLoad.unbind("load");
@@ -48,6 +63,7 @@ function initPublicDisplayStuff(){
 			computeIconSize();
 
 			refreshUserData();
+//			loadTestUser();
 			initInterval();
 		});
     });
@@ -157,10 +173,10 @@ function mapResize(){
 	//update user placement
 	if(users != null){
 		changeFactor = +displayedWidth/+oldDisplayedWidth;
-		for ( var i = 0; i < users.length; i++) {
-			users[i].x = Math.round(+changeFactor*+users[i].x);
-			users[i].y = Math.round(+changeFactor*+users[i].y);
-			placeUserIcon(users[i]);
+		for (var email in users) {
+			users[email].x = Math.round(+changeFactor*+users[email].x);
+			users[email].y = Math.round(+changeFactor*+users[email].y);
+			placeUserIcon(users[email]);
 		}
 	}
 
@@ -215,6 +231,14 @@ function addUserIcon(user){
    icon = null;
 }
 
+function removeUserWithIcon(email){
+	var iconElement = document.getElementById('icon_'+email);
+	if(iconElement!=null){
+		iconElement.parentNode.removeChild(iconElement);		
+	}
+	removeItem(users, email);
+}
+
 /**
  * This function sets a user icon's position and size
  * in consideration of the scale factor
@@ -222,8 +246,17 @@ function addUserIcon(user){
  */
 function placeUserIcon(user){
 	var icon = document.getElementById("icon_"+user.email);
+	
+	if(icon==null){ //user has no icon image yet
+		addUserIcon(user);
+		icon = document.getElementById("icon_"+user.email);
+	}
+	
 	if(icon!=null){
 
+		//refresh source (in case of icon swapping)
+		icon.src="/images/custom_icons/icon_"+user.email+"#"+ new Date().getTime();;
+		
 		icon.style.width=displayedIconSize+"px";
 		icon.style.left=Math.round(user.x-displayedIconSize/2)+"px";
 		icon.style.top=Math.round(user.y-displayedIconSize/2)+"px";
@@ -241,103 +274,130 @@ function placeUserIcon(user){
  */
 function setUserIconCoordsByArea(){
 	
-	users.sort(compareByArea); //sort users by area
+	if(Object.keys(users).length<=0){
+		return;
+	}
 
-//	var areastring = "";
-//	for ( var i = 0; i < users.length; i++) {
-//		areastring += users[i].position+",";
-//	}
-//	alert("sorted"+areastring);
 	var area=null;
 	var currentx = 0;
 	var currenty = 0;
-	var firstinrow = true;
+	var iconsInRow;
+	var rowsInArea;
+	var firstInArea;
+	var usersInArea;
 	//vars for y-value placement (if modification necessary);
-	var iconsinarea = 0;
-	var iconsperrow = 0;
-	for ( var i = 0; i < users.length+1; ) {
-		if(area==null || users[i]==null || area.ID != users[i].position){//if new area to solve
-			if(iconsinarea>1){
-				checkHeight(area,iconsinarea,iconsperrow,(i-iconsinarea));
-				if(i==users.length){break;} //if last user finished
-			}
-			if(users[i]==null){break;}
-			area = getAreaById(users[i].position);
-			//TODO handle area==null;
-			currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
-			currenty = Math.round(area.topLeftY*factor+Math.round(displayedIconSize/2));
-			firstinrow = true;
-			iconsinarea = 0;
+	for (var aId in areas) {
+		usersInArea = getUserKeysByAreaID(aId);
+//		alert(usersInArea.length+" in "+aId);
+		//if no user in this area -> continue with next area;
+		if(usersInArea.length<=0){
+			continue;
 		}
-		if(firstinrow){ //if first in this row - always draw -> move currentx
-			users[i].x = currentx;
-			users[i].y = currenty;
-			//alert(currentx+",-,"+currenty);
-			currentx += displayedIconSize;
-			firstinrow = false;
-			iconsinarea++;
-			i++;
-		}else{
-			if( (currentx+(Math.round(displayedIconSize/2))) > Math.round(area.topLeftX*factor+area.width*factor) ){ //current icon would exceed the row
-				firstinrow = true;
-				currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
-				currenty += displayedIconSize;
-				if(iconsperrow<1){
-					iconsperrow = iconsinarea;					
-				}
-			}else{ //current icon still fits in this row
-				users[i].x = currentx;
-				users[i].y = currenty;
+		area = areas[aId];
+		firstInArea = true;
+		iconsInRow = 0;
+		rowsInArea = 0;
+		currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
+		currenty = Math.round(area.topLeftY*factor+Math.round(displayedIconSize/2));
+		
+		for (var i = 0; i<usersInArea.length; i++) { //for each user in this area
+//			alert(uId+" in "+aId);
+			if(firstInArea){ //if first in this row - always draw -> move currentx
+				users[usersInArea[i]].x = currentx;
+				users[usersInArea[i]].y = currenty;
+				//alert(currentx+",-,"+currenty);
+//				iconsInRow++;
 				currentx += displayedIconSize;
-				iconsinarea++;
-				i++;
+				firstInArea = false;
+				rowsInArea++;
+				iconsInRow++;
+			}else{ //user currently not firstinrow
+				//current icon would exceed the row
+				if( (currentx+(Math.round(displayedIconSize/2))) > Math.round(area.topLeftX*factor+area.width*factor) ){
+					currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
+					currenty += displayedIconSize;
+//					//first icon in row:
+					users[usersInArea[i]].x = currentx;
+					users[usersInArea[i]].y = currenty;
+					currentx += displayedIconSize;
+					rowsInArea++;
+				}else{ //current icon still fits in this row
+					users[usersInArea[i]].x = currentx;
+					users[usersInArea[i]].y = currenty;
+					currentx += displayedIconSize;
+//					iconsinarea++;
+					if(rowsInArea==1){
+						iconsInRow++;						
+					}
+				}
+//				if(firstinrow){ //if first in this row - always draw -> move currentx
+//					users[usersInArea[i]].x = currentx;
+//					users[usersInArea[i]].y = currenty;
+//					currentx += displayedIconSize;
+//					firstinrow = false;
+//					rowsInArea++;
+//				}
+			}
+			
+		}//end for each userInArea
+
+		//check for height
+		var outstand = ( (currenty+Math.round(displayedIconSize/2)) - 
+								Math.round((area.topLeftY*factor+area.height*factor)) );
+		if(outstand > 0){
+			var yOffset = 0;
+			var inRow = 0;
+			for(var k = 0; k<usersInArea.length; k++){
+				if(k+2>iconsInRow){ //for all other rows
+					inRow++;
+					if( inRow == iconsInRow){ //new row
+						inRow = 0;
+						yOffset += Math.round(outstand/(rowsInArea-1));
+					}
+					users[usersInArea[k]].y-=yOffset;
+				}
 			}
 		}
+		//end check for height
 		
-	}//end for each user
+		usersInArea = new Array();
+	}//end for each area
 
 }
 
-/**
- * This function checks if icons reach out of the area
- * and if so, moves them upwards
- * @param area the area
- * @param iconsinarea the amount of icons in the area
- * @param iconsperrow the max count of icons in a row
- * @param i check users from index i <= i+iconsinarea-1
- */
-function checkHeight(area,iconsInArea,iconsPerRow,i){
-	
-	var outstand = ((users[i+iconsInArea-1].y+Math.round(displayedIconSize/2)) - Math.round((area.topLeftY*factor+area.height*factor)));
-//	alert("outstandy "+outstand);
 
-	//if (one of the) lowest icons stands out of the area
-	if(outstand > 0){
-		var rows = Math.ceil(iconsInArea/iconsPerRow);
-		var perRowCounter = 0;
-		var yoffsetPerRow = outstand/(rows-1);
-		var currentOffset = yoffsetPerRow;
-		
-		for ( var j=i+iconsPerRow; j < i+iconsInArea; ) { //for each icon - starting from the second row
-			if(perRowCounter >= iconsPerRow){//init next row
-				currentOffset += yoffsetPerRow;
-				perRowCounter = 0;
-			}else{//still in this row
-				perRowCounter++;
-				users[j].y -= currentOffset;
-				j++;
-			}
-		}
-	}
-}
-
-function compareByArea(user1,user2) {
-	  if (user1.position < user2.position)
-	     return -1;
-	  if (user1.position > user2.position)
-	    return 1;
-	  return 0;
-}
+///**
+// * This function checks if icons reach out of the area
+// * and if so, moves them upwards
+// * @param area the area
+// * @param iconsinarea the amount of icons in the area
+// * @param iconsperrow the max count of icons in a row
+// * @param i check users from index i <= i+iconsinarea-1
+// */
+//function checkHeight(area,iconsInArea,iconsPerRow,i){
+//	
+//	var outstand = ((users[i+iconsInArea-1].y+Math.round(displayedIconSize/2)) - Math.round((area.topLeftY*factor+area.height*factor)));
+////	alert("outstandy "+outstand);
+//
+//	//if (one of the) lowest icons stands out of the area
+//	if(outstand > 0){
+//		var rows = Math.ceil(iconsInArea/iconsPerRow);
+//		var perRowCounter = 0;
+//		var yoffsetPerRow = outstand/(rows-1);
+//		var currentOffset = yoffsetPerRow;
+//		
+//		for ( var j=i+iconsPerRow; j < i+iconsInArea; ) { //for each icon - starting from the second row
+//			if(perRowCounter >= iconsPerRow){//init next row
+//				currentOffset += yoffsetPerRow;
+//				perRowCounter = 0;
+//			}else{//still in this row
+//				perRowCounter++;
+//				users[j].y -= currentOffset;
+//				j++;
+//			}
+//		}
+//	}
+//}
 
 
 /**
@@ -346,8 +406,8 @@ function compareByArea(user1,user2) {
  * the user objects
  */
 function updateUserIconPlacement(){
-	for ( var i = 0; i < users.length; i++) {
-		placeUserIcon(users[i]);
+	for ( var email in users ) {
+		placeUserIcon(users[email]);
 	}
 }
 
@@ -356,61 +416,88 @@ function updateUserIconPlacement(){
  * updated user data
  */
 function updateUserListOnReceive(data){
-	var updatedUsers = data.object;
 	
-	document.getElementById("userInfoOnUpdate").innerHTML = JSON.stringify(data);
+	var updatedUsersArray = data.object;
 	
+//	users = new Array();
+//	for ( var i = 0; i < updatedUsersArray.length; i++) {
+//		users[updatedUsersArray[i].email] = updatedUsersArray[i];
+//	}
 	
-	var index;
+	// NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
+	var updatedUsers = new Array();
+	for ( var i = 0; i < updatedUsersArray.length; i++) {
+		updatedUsers[updatedUsersArray[i].email] = updatedUsersArray[i];
+	}
+//	var updatedUsers = data;
+	
+	//debug stuff
+//	document.getElementById("userInfoOnUpdate").innerHTML = JSON.stringify(data);
 
 	//update or remove old user
-	for (var i=users.length-1; i >= 0; i--) { //for each old user
-		index = userExistsInUserarray(users[i],updatedUsers); //the index of updatedUsers in which current (old) user exists
-		if(index >= 0){ //current user exists in new user array - update user position
-//			if(users[i].position != updatedUsers[index].position){ //user's position has changed
-//				users[i].position  = updatedUsers[index].position;
-				users[i] = updatedUsers[index];
-				users[i].x = null;
-				users[i].y = null;
-//			}
-			updatedUsers.splice(index,1); //remove new user since already handled
+	for(var email in users) { //for each old user
+		if(updatedUsers[email]!=null){ //current user exists in new user array - update user position
+			users[email] = updatedUsers[email];
+			removeItem(updatedUsers, email);
 		}else{ //current user is no longer tracked - remove user from list
-			var element = document.getElementById("icon_"+users[i].email);
-			element.parentNode.removeChild(element);
-			users.splice(i,1);
+			removeUserWithIcon(email);
 		}
 	}
 
-	if(updatedUsers !=null){
-		//add completely new users (who weren't tracked in the previous request/response)
-		for ( var i = 0; i < updatedUsers.length; i++) {
-			users.push(updatedUsers[i]);
-			addUserIcon(updatedUsers[i]);
-		}		
-	}
+	for ( var email in updatedUsers) {
+		users[email] = updatedUsers[email];
+	}		
+	
+	 //END NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
 
 	//check for AWAY status and set position to "Away" for Away-Area
-	for (var i = users.length-1; i>=0; i--) {
-		if(users[i].status==="AWAY"){
-			users[i].position = "Away";
+	for(var email in users) {
+		if(users[email].status==="AWAY"){
+			users[email].position = "Away";
 		}
-		//if area does not exist
-		if(!areaExists(users[i].position)){
-			users.splice(i,1);
+		if(!areaExists(users[email].position)){
+			removeUserWithIcon(email);
 		}
+
 	}
-	
+
 	//set individual user icon coordinates considering area
 	setUserIconCoordsByArea();
 	//display all currently tracked users
 	updateUserIconPlacement();
 	
 	
-	var element = document.getElementById("mapscroll");
+//	var element = document.getElementById("mapscroll");
 //	redrawElement(element); // currently not in use but it would work!
-	$(element).redraw();
+	$(mapDiv).redraw();
 
 }
+
+/**
+ * This function returns an associated array (email:user) of all users in the area with id 'id'
+ * @param id
+ * @returns {Array}
+ */
+function getUserKeysByAreaID(id){
+
+	var usersInArea = new Array();
+	for ( var email in users ) {
+		if(users[email].position == id){
+			usersInArea.push(email);
+		}
+	}
+	return usersInArea;
+}
+
+function removeItem(array, key) {
+	   if (!array.hasOwnProperty(key))
+	      return;
+	   if (isNaN(parseInt(key)) || !(array instanceof Array))
+	      delete array[key];
+	   else
+	      array.splice(key, 1);
+};
+
 
 jQuery.fn.redraw = function() {
     return this.hide(0, function() {
@@ -420,22 +507,22 @@ jQuery.fn.redraw = function() {
 
 
 
-/**
- * This function checks if a user exists in an array and returns the corresponding index.
- * A user comparison is based upon the email
- * @param user the user to find in the array
- * @param userarray the array which might contain the user
- * @returns {Number} the index of the user in the userarray, -1 if not found
- */
-function userExistsInUserarray(user,userarray){
-	for ( var i = 0; i < userarray.length; i++) {
-//		alert(user.email+" "+userarray[i].email);
-		if(userarray[i].email === user.email){
-			return i;
-		}
-	}
-	return -1;
-}
+///**
+// * This function checks if a user exists in an array and returns the corresponding index.
+// * A user comparison is based upon the email
+// * @param user the user to find in the array
+// * @param userarray the array which might contain the user
+// * @returns {Number} the index of the user in the userarray, -1 if not found
+// */
+//function userExistsInUserarray(user,userarray){
+//	for ( var i = 0; i < userarray.length; i++) {
+////		alert(user.email+" "+userarray[i].email);
+//		if(userarray[i].email === user.email){
+//			return i;
+//		}
+//	}
+//	return -1;
+//}
 
 var refreshCounter = 0;
 /**
@@ -470,7 +557,7 @@ function loadTestUser(){
 //	user2.x = 450;
 //	user2.y = 400;
 	var user3 = new User("d@d.d",null,"d",false);
-	user3.position = 3302;
+	user3.position = 3301;
 	user3.status = "AVAILABLE";
 //	user3.iconRef = "rabbit.png";
 //	user3.x = 450;
@@ -480,17 +567,44 @@ function loadTestUser(){
 	user4.status = "AWAY";
 //	user4.iconRef = "sheep.png";
 	var user5 = new User("f@f.f",null,"f",false);
-	user5.position = 3301;
+	user5.position = 3304;
 	user5.status = "DO_NOT_DISTURB";
 //	user5.iconRef = "deer.png";
-
+	var user6 = new User("fa@f.f",null,"fa",false);
+	user6.position = 3304;
+	user6.status = "AVAILABLE";
+	var user7 = new User("fb@f.f",null,"fb",false);
+	user7.position = 3304;
+	user7.status = "AVAILABLE";
+	var user8 = new User("fc@f.f",null,"fc",false);
+	user8.position = 3304;
+	user8.status = "AVAILABLE";
+	var user9 = new User("fd@f.f",null,"fd",false);
+	user9.position = 3304;
+	user9.status = "AVAILABLE";
+	var user10 = new User("fe@f.f",null,"fe",false);
+	user10.position = 3304;
+	user10.status = "AVAILABLE";	
+	var user11 = new User("ff@f.f",null,"ff",false);
+	user11.position = 3304;
+	user11.status = "AVAILABLE";
+	var user12 = new User("fg@f.f",null,"fg",false);
+	user12.position = 3304;
+	user12.status = "AVAILABLE";
 	
 	var testusers = new Array();
-	testusers[0] = user1;
-	testusers[1] = user2;
-	testusers[2] = user3;
-	testusers[3] = user4;
-	testusers[4] = user5;
+	testusers[user1.email] = user1;
+	testusers[user2.email] = user2;
+	testusers[user3.email] = user3;
+	testusers[user4.email] = user4;
+	testusers[user5.email] = user5;
+	testusers[user6.email] = user6;
+	testusers[user7.email] = user7;
+	testusers[user8.email] = user8;
+	testusers[user9.email] = user9;
+	testusers[user10.email] = user10;
+	testusers[user11.email] = user11;
+	testusers[user12.email] = user12;
 	updateUserListOnReceive(testusers);
 }
 
@@ -498,23 +612,30 @@ function loadTestUser(){
 
 function getAreaById(id){
 	
-
-	for ( var i = 0; i < areas.length; i++) {
-		if(areas[i].ID==id){
-			return areas[i]; //area has already benn worked with
-		}
-	}
-
-	return null;
+	return areas[id];
+//	for ( var i = 0; i < areas.length; i++) {
+//		if(areas[i].ID==id){
+//			return areas[i]; //area has already benn worked with
+//		}
+//	}
+//
+//	return null;
 }
 
 function areaExists(id){
-	for ( var i = 0; i < areas.length; i++) {
-		if(areas[i].ID==id){
-			return true; //area has already benn worked with
-		}
+	if(areas[id]==null){
+		return false;
+	}else{
+		return true;
 	}
-	return false;
+//	for ( var i = 0; i < areas.length; i++) {
+//		if(areas[i].ID===id){
+////			alert(id+" equals "+areas[i].ID);
+//			return true; //area has already benn worked with
+//		}
+//	}
+////	alert(id+" <- no match");
+//	return false;
 }
 
 
@@ -549,24 +670,24 @@ function getInfoByStatus(status){
 }
 
 
-/**
- * This function returns the user object by email
- * @param email the user's email
- */
-function getUserByEmail(email){
-	for ( var i = 0; i < users.length; i++) {
-		if(users[i].email==email){
-			return users[i];
-		}
-	}
-}
+///**
+// * This function returns the user object by email
+// * @param email the user's email
+// */
+//function getUserByEmail(email){
+//	for ( var i = 0; i < users.length; i++) {
+//		if(users[i].email==email){
+//			return users[i];
+//		}
+//	}
+//}
 
 /**
  * This function is called when a user's icon was clicked.
  * @param email the email of the user that was clicked on
  */
 function displayUserInfo(email){
-	var user = getUserByEmail(email);
+	var user = users[email];
 	if(user!=null){
 		balloonify(user);	
 	}
@@ -595,10 +716,11 @@ function balloonify(user){
 		}
 	}
 
-	//CREATE BALLOON
+	//CREATE BALLOON == SELECT USER
 		//bring selected user-icon to front
-		bringUserToFront(mod_id);
-	
+//		bringUserToFront(mod_id);
+		$(mod_id).addClass('miconSelected');
+		
 		openBalloonUserID = mod_id;
 		
 		var horizontalpos;
@@ -697,49 +819,9 @@ function removeBalloon(){
 //reset balloonIdleTime with mousemove & keypress
 $(document).on("mousemove", function (e) {
 	balloonIdleTime = 0;
-//	if(document.getElementById("balloonIdle")!=null){
-//		document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
-//	}
 });
 $(document).on("keypress", function (e) {
 	balloonIdleTime = 0;
-//	if(document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled){
-////		alert("close_fullscreen");
-////		closeFullscreen();
-//		alert("close");
-//		if (document.exitFullscreen) {
-//	        document.exitFullscreen();
-//	    }
-//	    else if (document.mozCancelFullScreen) {
-//	        document.mozCancelFullScreen();
-//	    }
-//	    else if (document.webkitCancelFullScreen) {
-//	        document.webkitCancelFullScreen();
-//	    }
-//	}else{
-////		alert("open_fullscreen");
-////		doFullscreen();
-//		alert("open");
-//		var docElm = document.getElementsByTagName("body")[0];
-//		if (docElm.requestFullscreen) {
-//			docElm.requestFullscreen();
-//		}
-//		else 
-//		if (docElm.mozRequestFullScreen) {
-//			docElm.mozRequestFullScreen();
-//		}
-//		else if (docElm.webkitRequestFullScreen) {
-//			docElm.webkitRequestFullScreen();
-//		}
-//		else if (docElm.msRequestFullscreen) {
-//			docElm.msRequestFullscreen();
-//		}
-//	}	
-		
-		
-//	if(document.getElementById("balloonIdle")!=null){
-//	document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
-//}
 });
 
 /**
@@ -795,7 +877,7 @@ $(document).on("submit", "form[id^='callForm']", function (event) {
   //get email of recipient
     var recipient = openBalloonUserID.replace(/\\/g, '');
     recipient = recipient.substring(6, recipient.length);
-    alert("call "+recipient);
+//    alert("call "+recipient);
 
     //TODO obvious - init call - call server
 
@@ -812,7 +894,7 @@ $(document).on("submit", "form[id^='messageForm']", function (event) {
 
     var predefMsg = $("#predefMsg").find(":selected").text();
     var customMsg = $("#customMsg").val();
-    alert("send message to "+recipient+":\nPredefMsg: "+predefMsg+"\nCustomMsg: "+customMsg);
+//    alert("send message to "+recipient+":\nPredefMsg: "+predefMsg+"\nCustomMsg: "+customMsg);
     
     //TODO if custommsg is empty - send predefmsg, else send custommsg
     //TODO possibly check for user status

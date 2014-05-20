@@ -156,6 +156,11 @@ function Location(coordinateX, coordinateY, wifiMorsels) {
     this.$type = "Location";
     this.coordinateX = coordinateX;
     this.coordinateY = coordinateY;
+    if (coordinateX == undefined || coordinateY == undefined) {
+        this.key = null;
+    } else {
+        this.key = coordinateX + '/' + coordinateY;
+    }
     this.wifiMorsels = wifiMorsels;
 }
 

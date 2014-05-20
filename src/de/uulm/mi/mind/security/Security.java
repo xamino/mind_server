@@ -5,6 +5,7 @@ import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.unsendable.TimedQueue;
 
 import java.math.BigInteger;
@@ -107,12 +108,22 @@ public class Security {
      *
      * @return ArrayList containing all authenticated user types.
      */
-    public static DataList<Authenticated> readActives() {
+    public static synchronized DataList<Authenticated> readActiveUsers() {
         DataList<Authenticated> list = new DataList<>();
         for (Active active : getInstance().actives.getValues()) {
             list.add(active.getAuthenticated());
         }
         return list;
+    }
+
+    /**
+     * Method that returns an ArrayList of all current Active objects. NOTE that this is NOT meant to be used outside
+     * of the server, so don't send it to the client!
+     *
+     * @return The ArrayList with all useable Active objects.
+     */
+    public static synchronized ArrayList<Active> readActives() {
+        return new ArrayList<>(getInstance().actives.getValues());
     }
 
     /**
@@ -170,6 +181,11 @@ public class Security {
      * @return The Active object if legal, otherwise null.
      */
     private Active login(final Authenticated authenticated) {
+        if (authenticated == null || authenticated.readIdentification() == null || authenticated.readAuthentication() == null) {
+            log.log(TAG, "Unable to log in a NULL object or an object with NULL fields!");
+            return null;
+        }
+        
         // generate the session
         String session = new BigInteger(130, random).toString(32);
         // build active

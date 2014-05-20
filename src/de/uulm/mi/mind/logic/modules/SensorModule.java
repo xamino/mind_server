@@ -5,7 +5,7 @@ import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.WifiSensor;
 import de.uulm.mi.mind.objects.enums.Task;

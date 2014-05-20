@@ -52,18 +52,18 @@ function handleAllUsersPositionData(){
  */
 function toggleDisplaySettings(){
 	if($('#show_app_settings').css('display') != 'none'){	//check wether app settings are still open
-		$( "#show_app_settings" ).toggle("slow", function() {
+		$( "#show_app_settings" ).slideToggle("slow", function() {
 				$('#app_settings_img').css('background-image', 'url(../images/pd_icons/settings_default_350px.png)');
 		});
 	}
-	$( "#show_display_settings" ).toggle("slow", function() {
+	$( "#show_display_settings" ).slideToggle("slow", function() {
 		if($('#show_display_settings').css('display') != 'none'){
 			$('#display_settings_img').css('background-image', 'url(../images/pd_icons/settings_clicked_350px.png)');
-			$("#toggleFullscreen").css('position', 'absolute');
+			/*$("#toggleFullscreen").css('position', 'absolute');
 			$("#toggleFullscreen").css('right', '15px');
 			var buttonwidth = $("#toggleFullscreen").width();
 			$("#displayLogoutButton").css('position', 'absolute');
-			$("#displayLogoutButton").css('right', (+buttonwidth + +50)+'px');
+			$("#displayLogoutButton").css('right', (+buttonwidth + +50)+'px');*/
 		}
 		if($('#show_display_settings').css('display') != 'block'){
 			$('#display_settings_img').css('background-image', 'url(../images/pd_icons/settings_default_350px.png)');
@@ -91,3 +91,22 @@ function toggleAppSettings(){
 	});
 
 }
+
+/**
+ * checks wether the away area exists (if not --> info-text)
+ */
+function checkAwayArea(){
+	
+//	users = new Array();
+	
+//    send(new Arrival("READ_ALL_AREAS", session), function (data) {
+//
+//        areas = data.object;
+        
+        if(!areaExists("Away")){
+        	var noAwayArea = "There is currently no away area (ID: 'Away') in the database. Add this area to see all necessary information.<br>Please contact the admin.";
+	        document.getElementById("awayArea_info").innerHTML = noAwayArea;  
+        }
+//    });
+}
+

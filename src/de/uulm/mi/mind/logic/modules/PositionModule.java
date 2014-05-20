@@ -8,14 +8,15 @@ import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.enums.DeviceClass;
 import de.uulm.mi.mind.objects.enums.Status;
 import de.uulm.mi.mind.objects.enums.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.objects.unsendable.TimedQueue;
+import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.Security;
-import de.uulm.mi.mind.servlet.ServletFunctions;
 
 import java.util.*;
 
@@ -31,6 +32,7 @@ public class PositionModule implements Module {
      */
     // TODO expose to admin?
     private final String TAG = "PositionModule";
+    private final String REAL_POSITION = "realPosition";
     private Messenger log;
     private TimedQueue<String, SensedDevice> sniffedDevices;
 
@@ -132,7 +134,7 @@ public class PositionModule implements Module {
             }
             */
         }
-        log.log(TAG, "Algo sees device at " + area.getID() + ".");
+        // log.log(TAG, "Algo sees device at " + area.getID() + ".");
 
         // send back the location that the server thinks you're at with the area
         DataList<Location> loca = new DataList<>();
@@ -144,43 +146,25 @@ public class PositionModule implements Module {
 
     private Data readPositions() {
         // read all users
-        Data evtlUserList = DatabaseManager.getInstance().open(new Transaction() {
-            @Override
-            public Data doOperations(Session session) {
-                return DatabaseManager.getInstance().open(new Transaction() {
-                    @Override
-                    public Data doOperations(Session session) {
-                        return session.read(new User(null));
-                    }
-                });
-            }
-        });
-
-        Data msg = ServletFunctions.checkDataMessage(evtlUserList, DataList.class);
-        if (msg != null) {
-            return msg;
-        }
-        DataList<User> users = ((DataList<User>) evtlUserList);
+        ArrayList<Active> users = Security.readActives();
         // filter the list – apply status and set special cases
         DataList<User> sendUsers = new DataList<>();
-        for (User us : users) {
-            String position = us.getPosition();
+        for (Active active : users) {
+            // check if user
+            if (!(active.getAuthenticated() instanceof User)) {
+                continue;
+            }
+            User us = ((User) active.getAuthenticated());
+            Area area = ((Area) active.readData(REAL_POSITION));
+            String position = (area == null ? null : area.getID());
             Status status = us.getStatus();
-            Long timeSinceLastLogin = us.getAccessDate() == null ? 0 : System.currentTimeMillis() - us.getAccessDate().getTime();
 
             // Handle logic as to what should be output
-            boolean isLoggedOut = !Security.readActives().contains(us);
             boolean isAtUniversity = position != null && position.equals("University"); //TODO set in find
             boolean isAtLocation = position != null && !position.equals("University");
             boolean isInvisible = us.getStatus() == null || us.getStatus() == Status.INVISIBLE;
 
             // Continue means is not added to output
-            // removed inactive users
-            if (isLoggedOut) {
-                //log.log(TAG,"Not logged in: " + us.getEmail());
-                continue;
-            }
-
             // remove invisible users
             if (isInvisible) {
                 //log.log(TAG,"Is invisible: " + us.getEmail());
@@ -258,7 +242,7 @@ public class PositionModule implements Module {
                 //if (DeviceClass.isSimulatedClass(requestDeviceModel)) {
                 //   average += DeviceClass.getSimulatedDifference(requestDeviceModel);
                 //}
-                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel()));
+                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel(), morsel.getTimeStamp()));
             }
             databaseLocation.setWifiMorsels(averageMorsels);
         }

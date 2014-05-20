@@ -4,7 +4,7 @@ import de.uulm.mi.mind.io.DatabaseManager;
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logic.Module;
-import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.enums.Task;

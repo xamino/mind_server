@@ -1,6 +1,6 @@
 package de.uulm.mi.mind.logic;
 
-import de.uulm.mi.mind.objects.Data;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.enums.Task;
 
 /**

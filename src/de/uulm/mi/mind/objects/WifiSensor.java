@@ -1,5 +1,7 @@
 package de.uulm.mi.mind.objects;
 
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.security.Authenticated;
 
 import java.util.Date;
@@ -8,7 +10,7 @@ import java.util.Date;
  * @author Tamino Hartmann
  *         This class implements the user object for the wifi-sniffing program. It authenticates the sensors.
  */
-public class WifiSensor implements Authenticated, Data {
+public class WifiSensor implements Authenticated, Sendable, Saveable {
 
     /**
      * Unique string that identifies this WifiSensor.

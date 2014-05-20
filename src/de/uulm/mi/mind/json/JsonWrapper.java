@@ -1,6 +1,7 @@
 package de.uulm.mi.mind.json;
 
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.messages.Success;
 
 /**
@@ -8,10 +9,10 @@ import de.uulm.mi.mind.objects.messages.Success;
  */
 public class JsonWrapper {
     private static JsonWrapper INSTANCE;
-    private JsonConverter<Data> converter;
+    private JsonConverter<Sendable> converter;
 
     private JsonWrapper() {
-        converter = new JsonConverter<Data>("$type");
+        converter = new JsonConverter<Sendable>("$type");
         // register JSONator types
         converter.registerType(Area.class);
         converter.registerType(Arrival.class);
@@ -33,11 +34,11 @@ public class JsonWrapper {
         return INSTANCE;
     }
 
-    public Data fromJson(String json) {
+    public Sendable fromJson(String json) {
         return converter.fromJson(json);
     }
 
-    public String toJson(Data object) {
+    public String toJson(Sendable object) {
         return converter.toJson(object);
     }
 }

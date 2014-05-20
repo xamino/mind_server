@@ -128,7 +128,7 @@ function editUserViaPopup(data) {
     var willbeadmin = false;
     var prevuserstatus;
     var newuserstatus;
-	if (isadmin) {
+	if (isadmin == true) {
 		prevuserstatus = "admin";
 		if (data.email == readCookie("MIND_Admin_C_mail")) {
 			willbeadmin = true;

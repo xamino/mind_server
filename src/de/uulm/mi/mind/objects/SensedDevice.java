@@ -1,9 +1,11 @@
 package de.uulm.mi.mind.objects;
 
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
+
 /**
  * @author Tamino Hartmann
  */
-public class SensedDevice implements Data {
+public class SensedDevice implements Sendable {
 
     private String sensor;
     private String position;
@@ -32,16 +34,10 @@ public class SensedDevice implements Data {
     }
 
     public int getLevelValue() {
-
         return levelValue;
     }
 
     public String getIpAddress() {
         return ipAddress;
-    }
-
-    @Override
-    public String getKey() {
-        return null;
     }
 }

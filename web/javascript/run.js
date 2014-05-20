@@ -111,7 +111,7 @@ function doTask(task, object, callback) {
 function userLogout(){
 	doTask("LOGOUT", null, function (event) {
         alert("Your have been successfully logged out.");
-        window.location='index.jsp';
+        window.location='index.html';
     });
 }
 

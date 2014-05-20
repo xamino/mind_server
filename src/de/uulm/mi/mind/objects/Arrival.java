@@ -1,10 +1,13 @@
 package de.uulm.mi.mind.objects;
 
+import de.uulm.mi.mind.objects.Interfaces.Data;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
+
 /**
  * @author Tamino Hartmann
  *         Arrival class – structure of incomming requests must conform to this class.
  */
-public class Arrival implements Data {
+public class Arrival implements Sendable {
     /**
      * The session hash of the client.
      */
@@ -78,10 +81,5 @@ public class Arrival implements Data {
 
     public void setObject(Data object) {
         this.object = object;
-    }
-
-    @Override
-    public String getKey() {
-        return null;
     }
 }

@@ -1,0 +1,22 @@
+.styled {
+    width:100%;
+}
+
+.centered {
+    width: 30%;
+    height: 100%;
+    margin: 0 auto;
+}
+
+.outer {
+    width: 100%;
+    height: 100%;
+}
+
+#pubdi {
+    float: right;
+}
+
+#admin {
+    float: left;
+}

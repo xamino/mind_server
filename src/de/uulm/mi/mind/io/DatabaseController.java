@@ -8,6 +8,7 @@ import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.security.BCrypt;
 
 import javax.servlet.ServletContext;
@@ -52,15 +53,14 @@ class DatabaseController implements DatabaseAccess {
      * @param data The Object to be stored.
      * @return true if the operation was successful and false otherwise.
      */
-    @Override
-    public boolean create(Session session, Data data) {
+    public boolean create(Session session, Saveable data) {
         ObjectContainer sessionContainer = session.getDb4oContainer();
         // Sanitize input on DB, only allow Data objects implementing a unique key
         if (data == null || data.getKey() == null) {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
-        DataList<Data> readData = read(session, data);
+        DataList<Saveable> readData = read(session, data);
         if (readData != null && !readData.isEmpty()) {
             return false;
         }
@@ -82,7 +82,7 @@ class DatabaseController implements DatabaseAccess {
      * @return A DataList of the specified filter parameter Type or null on error.
      */
     @Override
-    public <T extends Data> DataList<T> read(Session session, final T requestFilter) {
+    public <T extends Saveable> DataList<T> read(Session session, final T requestFilter) {
         ObjectContainer sessionContainer = session.getDb4oContainer();
         try {
             List queryResult;
@@ -156,11 +156,11 @@ class DatabaseController implements DatabaseAccess {
     }
 
     @Override
-    public boolean update(Session session, Data data) {
+    public boolean update(Session session, Saveable data) {
         ObjectContainer sessionContainer = session.getDb4oContainer();
         if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
         try {
-            DataList<Data> dataList;
+            DataList<Saveable> dataList;
             if (!(dataList = read(session, data)).isEmpty()) {
                 sessionContainer.delete(dataList.get(0));
                 sessionContainer.store(data);
@@ -181,10 +181,10 @@ class DatabaseController implements DatabaseAccess {
      * @return true if deletion was successful or the object does not exist, otherwise false
      */
     @Override
-    public boolean delete(Session session, Data data) {
+    public boolean delete(Session session, Saveable data) {
         ObjectContainer sessionContainer = session.getDb4oContainer();
         try {
-            DataList<Data> dataList = read(session, data);
+            DataList<Saveable> dataList = read(session, data);
 
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
@@ -195,7 +195,7 @@ class DatabaseController implements DatabaseAccess {
                 return false;
             } else {
                 int size = dataList.size();
-                for (Data d : dataList) {
+                for (Saveable d : dataList) {
                     sessionContainer.delete(d);
                 }
                 log.log(TAG, "Deleted " + size + " objects from DB: " + dataList.toString());
@@ -272,7 +272,9 @@ class DatabaseController implements DatabaseAccess {
                 return o.getKey().equals("University");
             }
         });
-        if (set3 == null || set3.size() == 0) {
+
+        if (set3.size() == 0) {
+            log.log(TAG, "Nothing, does not yet exist!");
             return;
         }
         Area university = set3.get(0);
