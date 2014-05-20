@@ -98,9 +98,16 @@ class Query {
         } else if (type == String.class) {
             return rs.getString(column);
         } else if (type == Date.class) {
+            if (rs.getDate(column) == null) {
+                return null;
+            }
             return new Date(rs.getDate(column).getTime());
-        }
-        return null;
+        } else if (type.isEnum()) {
+            String enumString = rs.getString(column);
+            if (enumString == null) return enumString;
+            return Enum.valueOf((Class) type, enumString);
+        } else
+            return null;
     }
 
     public void constrain(Class<? extends Data> aClass) {

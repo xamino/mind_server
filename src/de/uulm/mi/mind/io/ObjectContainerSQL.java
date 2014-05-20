@@ -15,12 +15,13 @@ import java.util.List;
  */
 class ObjectContainerSQL {
     private static final String TAG = "ObjectContainerSQL";
-    private final Messenger log;
-    private final Connection con;
-
+    private static final String BOOLEAN = "boolean";
     private static final String INTEGER = "int";
     private static final String VARCHAR = "varchar(255)";
     private static final String DATE = "date";
+    private final Messenger log;
+    private final Connection con;
+
 
     public ObjectContainerSQL(Connection connection) {
         con = connection;
@@ -47,13 +48,14 @@ class ObjectContainerSQL {
             try {
 
                 // get SQL type of field
-                String type = getSQLType(field.getType());
+                String type = classToSQLType(field.getType());
 
                 // escape varchars
-                if (type.equals(VARCHAR)) {
-                    valueQuery += "'" + field.get(o) + "',";
+                Object val = field.get(o);
+                if (val != null && (type.equals(VARCHAR) || type.startsWith("ENUM"))) {
+                    valueQuery += "'" + val + "',";
                 } else {
-                    valueQuery += "" + field.get(o) + ",";
+                    valueQuery += "" + val + ",";
                 }
 
                 columnQuery += field.getName() + ",";
@@ -84,14 +86,24 @@ class ObjectContainerSQL {
 
     }
 
-    private String getSQLType(Class<?> type) {
-
-        if (type == int.class) {
+    private String classToSQLType(Class<?> type) {
+        if (type == boolean.class) {
+            return BOOLEAN;
+        } else if (type == int.class) {
             return INTEGER;
         } else if (type == String.class) {
             return VARCHAR;
         } else if (type == Date.class) {
             return DATE;
+        } else if (type.isEnum()) {
+            String enumString = "ENUM(";
+            Object[] constants = type.getEnumConstants();
+            for (Object constant : constants) {
+                enumString += "'" + constant.toString() + "',";
+            }
+            enumString = enumString.substring(0, enumString.lastIndexOf(","));
+            enumString += ")";
+            return enumString;
         }
         //TODO
         return VARCHAR;
