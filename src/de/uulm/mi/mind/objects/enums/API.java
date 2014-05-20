@@ -7,30 +7,6 @@ package de.uulm.mi.mind.objects.enums;
  *         continue with an expressive name that describes what is done.
  */
 public enum API implements Task {
-    /**
-     * Simply returns the object sent to the server. Can be used for various parsing tests.
-     */
-    ECHO,
-    /**
-     * Tries to log a user into the system.
-     */
-    LOGIN,
-    /**
-     * Registers a new user.
-     */
-    REGISTRATION,
-    /**
-     * If applicable logs a user out.
-     */
-    LOGOUT,
-    /**
-     * Check if a session is valid.
-     */
-    CHECK,
-    // USER
-    USER_READ,
-    USER_UPDATE,
-    USER_DELETE,
     // LOCATION
     LOCATION_READ,
     LOCATION_ADD,
@@ -55,10 +31,6 @@ public enum API implements Task {
      * Given a location, find the position.
      */
     POSITION_FIND,
-    /**
-     * Returns public viewable list of all users for their position data.
-     */
-    READ_ALL_POSITIONS,
     /**
      * A read all areas function for the public displays.
      */
@@ -89,28 +61,5 @@ public enum API implements Task {
     /**
      * Deletes a users icon from the system.
      */
-    ICON_DELETE,
-    /**
-     * Kills all sessions.
-     */
-    KILL_SESSIONS,
-    /**
-     * General error, especially when casting to a task doesn't work.
-     */
-    ERROR;
-
-    /**
-     * Use as a safe valueOf. Instead of throwing the error, incorrect values are returned as ERROR enum type. The
-     * value can also be mixed case, as it will be cast to all upper case.
-     *
-     * @param value The string to try to convert.
-     * @return The enum type. If unknown or incorrect value, ERROR.
-     */
-    public static API safeValueOf(String value) {
-        try {
-            return API.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return ERROR;
-        }
-    }
+    ICON_DELETE
 }

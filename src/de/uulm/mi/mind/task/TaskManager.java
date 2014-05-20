@@ -52,7 +52,7 @@ public class TaskManager {
      */
     // todo have input validation in the task abstract class that is called beforehand
     public Sendable run(Arrival arrival) {
-        final String TASK = arrival.getTask();
+        final String TASK = arrival.getTask().toLowerCase();
         // check that task exists
         if (!taskNames.contains(TASK)) {
             log.error(TAG, "Task " + TASK + " not found!");

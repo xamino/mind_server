@@ -2,7 +2,6 @@ package de.uulm.mi.mind.logic.modules;
 
 import de.uulm.mi.mind.io.Configuration;
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Data;
@@ -156,7 +155,8 @@ public class PositionModule implements Module {
         }
 
         // Get University Area containing all locations from database
-        Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("University"))).get(0);
+        // Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("University"))).get(0);
+        Area uniArea = new Area("");
         DataList<Location> dataBaseLocations = uniArea.getLocations();
 
         // Modify database List to contain the average Morsel signal strengths for each location
@@ -353,12 +353,13 @@ public class PositionModule implements Module {
      * @return Most assuredly at least University, otherwise null. Usually you'll get a smaller area than University.
      */
     private Area getBestArea(Location location) {
-        EventModuleManager eventModuleManager = EventModuleManager.getInstance();
-        Data check = eventModuleManager.handleTask(Task.Location.SMALLEST_AREA_BY_LOCATION, location);
-        if (!(check instanceof Area)) {
-            return null;
-        } else {
-            return (Area) check;
-        }
+//        EventModuleManager eventModuleManager = EventModuleManager.getInstance();
+//        Data check = eventModuleManager.handleTask(Task.Location.SMALLEST_AREA_BY_LOCATION, location);
+//        if (!(check instanceof Area)) {
+//            return null;
+//        } else {
+//            return (Area) check;
+//        }
+        return new Area("");
     }
 }

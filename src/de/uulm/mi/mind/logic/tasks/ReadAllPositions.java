@@ -76,6 +76,7 @@ public class ReadAllPositions extends Task<None, Sendable> {
     public Set<String> getTaskPermission() {
         Set<String> permissible = new HashSet<>();
         permissible.add(PublicDisplay.class.getSimpleName());
+        permissible.add(User.class.getSimpleName());
         return permissible;
     }
 

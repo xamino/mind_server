@@ -120,12 +120,12 @@ function userLogout(){
  */
 function isAdmin(data) {
 
-    var user = data.object[0];
+    var user = data.object;
     if (!(instanceOf(user, User))) {
 //        alert("user not user");
         logout();
     } else {
-        if (user.admin) {
+        if (user.admin == "true") {
             writeCookie("MIND_Admin_C_session", session);
             writeCookie("MIND_Admin_C_mail", user.email);
             window.location.href = "admin_home.jsp";
@@ -154,7 +154,7 @@ $(document).on("submit", "#loginForm", function (event) {
     potentialAdmin = new User(email, null, null);
 
     login(email, password, function () {
-        doTask("ADMIN_USER_READ", potentialAdmin, isAdmin);
+        doTask("USER_READ", potentialAdmin, isAdmin);
     });
 
 });

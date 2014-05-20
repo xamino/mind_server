@@ -1,7 +1,14 @@
 package de.uulm.mi.mind.objects.Interfaces;
 
+import de.uulm.mi.mind.io.Configuration;
+import de.uulm.mi.mind.io.DatabaseController;
+import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.objects.messages.*;
+import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.security.Active;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Set;
 
 /**
@@ -9,10 +16,19 @@ import java.util.Set;
  */
 public abstract class Task<I extends Sendable, O extends Sendable> {
 
+    protected Messenger log;
+    protected Configuration configuration;
+    protected DatabaseController database;
+    protected final String TAG;
+
     /**
      * Task MUST have the default constructor!
      */
     public Task() {
+        log = Messenger.getInstance();
+        configuration = Configuration.getInstance();
+        database = DatabaseController.getInstance();
+        TAG = "Task";
     }
 
     /**
@@ -46,4 +62,29 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
     public abstract Class<O> getOutputType();
 
     public abstract boolean isAdminTask();
+
+    /**
+     * Safety catch for messages. Should prevent receiving illegal task messages when the task was legal but no
+     * message was written.
+     *
+     * @param msg The message variable to check for null.
+     * @return A message. Guaranteed!
+     */
+    protected Information nullMessageCatch(Data msg) {
+        if (msg == null || !(msg instanceof Information)) {
+            log.error(TAG, "NullMessage happened! Shouldn't happen, so fix!");
+            return new de.uulm.mi.mind.objects.messages.Error(Error.Type.NULL, "Something went wrong in the task but no message was written!");
+        }
+        return (Information) msg;
+    }
+
+    /**
+     * Small method for checking the validity of input strings.
+     *
+     * @param toCheck The string to check.
+     * @return Boolean value whether legal stuff is happening.
+     */
+    protected boolean safeString(String toCheck) {
+        return (toCheck != null && !toCheck.isEmpty());
+    }
 }

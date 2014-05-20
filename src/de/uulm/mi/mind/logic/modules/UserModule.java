@@ -37,37 +37,11 @@ public class UserModule implements Module {
 
         Task.User userTask = (Task.User) task;
         switch (userTask) {
-            case CREATE:
-                return createUser(user);
             case READ:
                 return readUser(user);
-            case UPDATE:
-                return updateUser(user);
-            case DELETE:
-                return deleteUser(user);
         }
 
         return new Error(Error.Type.TASK, "The task " + task.toString() + " is not implemented.");
-    }
-
-    private Data createUser(User user) {
-        if (user.getKey() == null) {
-            return new Error(Error.Type.WRONG_OBJECT, "User to be created was null!");
-        }
-
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        boolean success = database.create(sessionContainer, user);
-
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("User was created successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Creation of User resulted in an error.");
-        }
     }
 
     private Data readUser(User user) {
@@ -87,46 +61,6 @@ public class UserModule implements Module {
             return new Error(Error.Type.DATABASE, "User could not be found!");
         }
         return read;
-    }
-
-    private Data updateUser(User user) {
-        if (user.getKey() == null) {
-            return new Error(Error.Type.WRONG_OBJECT, "User to be updated was null!");
-        }
-
-        ObjectContainer sessionContainer = database.getSessionContainer();
-
-        boolean success = database.update(sessionContainer, user);
-
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("User was updated successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Update of User resulted in an error.");
-        }
-    }
-
-    private Data deleteUser(User user) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        boolean success = database.delete(sessionContainer, user);
-
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            if (user.getKey() == null) {
-                return new Success("All User were deleted successfully.");
-            }
-            return new Success("User was deleted successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Deletion of User resulted in an error.");
-        }
     }
 
     private Data annihilateUsers() {
