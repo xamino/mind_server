@@ -26,6 +26,10 @@ public class Configuration {
     private String adminPassword;
     private String universitySSID;
     private ArrayList<String> wifiNameFilter;
+    private String dbPort;
+    private String dbURL;
+    private String dbUser;
+    private String dbPassword;
 
 
     private Configuration() {
@@ -47,6 +51,10 @@ public class Configuration {
                 this.adminEmail = config.getProperty("ADMIN_EMAIL");
                 this.adminPassword = config.getProperty("ADMIN_PASSWORD");
                 this.universitySSID = config.getProperty("UNIVERSITY_SSID");
+                this.dbURL = config.getProperty("DATABASE_URL");
+                this.dbPort = config.getProperty("DATABASE_PORT");
+                this.dbUser = config.getProperty("DATABASE_USER");
+                this.dbPassword = config.getProperty("DATABASE_PASSWORD");
 
                 String wifiNames = config.getProperty("UNIVERSITY_SSID_FILTER");
                 this.wifiNameFilter = new ArrayList<>(Arrays.asList(wifiNames.split(",")));
@@ -76,6 +84,14 @@ public class Configuration {
                 String wifiNames = config.getProperty("UNIVERSITY_SSID_FILTER");
                 this.wifiNameFilter = new ArrayList<>(Arrays.asList(wifiNames.split(",")));
             }
+            if (this.dbURL == null)
+                this.dbURL = config.getProperty("DATABASE_URL");
+            if (this.dbPort == null)
+                this.dbPort = config.getProperty("DATABASE_PORT");
+            if (this.dbUser == null)
+                this.dbUser = config.getProperty("DATABASE_USER");
+            if (this.dbPassword == null)
+                this.dbPassword = config.getProperty("DATABASE_PASSWORD");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -119,18 +135,18 @@ public class Configuration {
     }
 
     public String getDbURL() {
-        return null;
+        return this.dbURL;
     }
 
     public String getDbPort() {
-        return null;
+        return this.dbPort;
     }
 
     public String getDbUser() {
-        return null;
+        return this.dbUser;
     }
 
     public String getDbPassword() {
-        return null;
+        return this.dbPassword;
     }
 }

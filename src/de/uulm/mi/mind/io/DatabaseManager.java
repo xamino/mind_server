@@ -14,8 +14,8 @@ public class DatabaseManager implements ServletContextListener {
     //private final DatabaseAccess mySQL;
 
     public DatabaseManager() {
-        dba = DatabaseController.getInstance();
-        //mySQL = DatabaseControllerSQL.getInstance();
+        //dba = DatabaseController.getInstance();
+        dba = DatabaseControllerSQL.getInstance();
     }
 
     public Data open(Transaction transaction) {
@@ -49,7 +49,7 @@ public class DatabaseManager implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         Configuration config = Configuration.getInstance();
-        config.init(servletContextEvent.getServletContext().getContextPath()); // must be first!!!
+        config.init(servletContextEvent.getServletContext().getRealPath("/")); // must be first!!!
         dba.init(servletContextEvent);
     }
 

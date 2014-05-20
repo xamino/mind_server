@@ -191,6 +191,8 @@ class DatabaseControllerSQL implements DatabaseAccess {
 
         rootContainer = getSessionContainer();
         runMaintenance(rootContainer);
+        //rootContainer.store(new WifiSensor("ident","sadasdasdasdasdsd","world"));
+        //rootContainer.store(new WifiMorsel("mac","name",-21,5,"Model"));
         rootContainer.close();
 
         if (reinitialize) {
@@ -202,28 +204,34 @@ class DatabaseControllerSQL implements DatabaseAccess {
 
     private void runMaintenance(ObjectContainerSQL rootContainer) {
         log.log(TAG, "In DB Stats:");
-
+        List<User> set4 = rootContainer.query(new Predicate<User>(User.class) {
+            @Override
+            public boolean match(User o) {
+                return true;
+            }
+        });
+        log.log(TAG, "Users: " + set4.size() + "\n" + set4);
         List<Area> set2 = rootContainer.query(new Predicate<Area>(Area.class) {
             @Override
             public boolean match(Area o) {
                 return true;
             }
         });
-        log.log(TAG, "Areas: " + set2.size());
+        log.log(TAG, "Areas: " + set2.size() + "\n" + set2);
         List<Location> set1 = rootContainer.query(new Predicate<Location>(Location.class) {
             @Override
             public boolean match(Location o) {
                 return true;
             }
         });
-        log.log(TAG, "Locations: " + set1.size());
+        log.log(TAG, "Locations: " + set1.size() + "\n" + set1);
         List<WifiMorsel> set = rootContainer.query(new Predicate<WifiMorsel>(WifiMorsel.class) {
             @Override
             public boolean match(WifiMorsel o) {
                 return true;
             }
         });
-        log.log(TAG, "Morsels: " + set.size());
+        log.log(TAG, "Morsels: " + set.size() + "\n" + set);
 
         log.log(TAG, "In Universe:");
         List<Area> set3 = rootContainer.query(new Predicate<Area>(Area.class) {
@@ -232,6 +240,9 @@ class DatabaseControllerSQL implements DatabaseAccess {
                 return o.getKey().equals("University");
             }
         });
+        if (set3 == null || set3.size() == 0) {
+            return;
+        }
         Area university = set3.get(0);
         log.log(TAG, "Locations: " + university.getLocations().size());
         int morselCounter = 0;
@@ -296,9 +307,11 @@ class DatabaseControllerSQL implements DatabaseAccess {
             con = DriverManager.getConnection(url + "/" + config.getDbName(), user, pass);
         } catch (SQLException e) {
             // possible DB not existant
+            log.log(TAG, "DB '" + config.getDbName() + "' probably not found. Create!");
             con = createDatabase(driver, url, config.getDbName(), user, pass);
-            log.log(TAG, "Connection Failure");
         }
+
+        log.log(TAG, "Connection to SQL DB successful.");
 
         return con;
     }
@@ -310,8 +323,12 @@ class DatabaseControllerSQL implements DatabaseAccess {
             con = DriverManager.getConnection(url, user, pass);
             Statement s = con.createStatement();
             int myResult = s.executeUpdate("CREATE DATABASE IF NOT EXISTS " + dbName);
+
+            log.log(TAG, "DB Create/Update Result: " + myResult);
+
         } catch (ClassNotFoundException | SQLException e) {
             // TODO Auto-generated catch block
+            log.log(TAG, "Connection Failure");
             e.printStackTrace();
         }
         return con;

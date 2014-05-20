@@ -1,21 +1,30 @@
 package de.uulm.mi.mind.io;
 
+import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.Data;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Created by Cassio on 08.05.2014.
  */
 class ObjectContainerSQL {
-
+    private static final String TAG = "ObjectContainerSQL";
+    private final Messenger log;
     private final Connection con;
+
+    private static final String INTEGER = "int";
+    private static final String VARCHAR = "varchar(255)";
+    private static final String DATE = "date";
 
     public ObjectContainerSQL(Connection connection) {
         con = connection;
+        log = Messenger.getInstance();
     }
 
     public void close() {
@@ -27,6 +36,65 @@ class ObjectContainerSQL {
     }
 
     public void store(Object o) {
+
+        String tableName = o.getClass().getSimpleName();
+
+        String columnTypes = "";
+        String columnQuery = "";
+        String valueQuery = "";
+        for (Field field : o.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+
+                // get SQL type of field
+                String type = getSQLType(field.getType());
+
+                // escape varchars
+                if (type.equals(VARCHAR)) {
+                    valueQuery += "'" + field.get(o) + "',";
+                } else {
+                    valueQuery += "" + field.get(o) + ",";
+                }
+
+                columnQuery += field.getName() + ",";
+                columnTypes += field.getName() + " " + type + ",";
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        columnQuery = columnQuery.substring(0, columnQuery.lastIndexOf(","));
+        valueQuery = valueQuery.substring(0, valueQuery.lastIndexOf(","));
+        columnTypes = columnTypes.substring(0, columnTypes.lastIndexOf(","));
+
+        String tableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + "(" + columnTypes + ")";
+        String query = "INSERT INTO " + tableName + " (" + columnQuery + ") VALUES (" + valueQuery + ")";
+        log.log(TAG, tableQuery);
+        log.log(TAG, query);
+
+        try {
+            PreparedStatement statement = con.prepareStatement(tableQuery);
+            statement.execute();
+
+            PreparedStatement pstm = con.prepareStatement(query);
+            pstm.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private String getSQLType(Class<?> type) {
+
+        if (type == int.class) {
+            return INTEGER;
+        } else if (type == String.class) {
+            return VARCHAR;
+        } else if (type == Date.class) {
+            return DATE;
+        }
+        //TODO
+        return VARCHAR;
 
     }
 
