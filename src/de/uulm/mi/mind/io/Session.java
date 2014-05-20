@@ -43,11 +43,11 @@ public class Session {
     }
 
     public boolean update(Data data) {
-        return dba.create(this, data);
+        return dba.update(this, data);
     }
 
     public boolean delete(Data data) {
-        return dba.create(this, data);
+        return dba.delete(this, data);
     }
 
     void rollback() {

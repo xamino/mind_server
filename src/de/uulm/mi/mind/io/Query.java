@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Created by Cassio on 08.05.2014.
  */
-public class Query {
+class Query {
 
     private String table;
     private HashMap<Object, Object> conditionMap = new HashMap<>();

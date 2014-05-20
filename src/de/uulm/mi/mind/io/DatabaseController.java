@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author Andreas Köll, Tamino Hartmann
  */
-public class DatabaseController implements DatabaseAccess {
+class DatabaseController implements DatabaseAccess {
     /**
      * Variable for storing the instance of the class.
      */

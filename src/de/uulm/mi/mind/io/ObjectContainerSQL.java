@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by Cassio on 08.05.2014.
  */
-public class ObjectContainerSQL {
+class ObjectContainerSQL {
 
     private final Connection con;
 

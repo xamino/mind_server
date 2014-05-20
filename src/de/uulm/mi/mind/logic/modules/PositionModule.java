@@ -1,6 +1,9 @@
 package de.uulm.mi.mind.logic.modules;
 
-import de.uulm.mi.mind.io.*;
+import de.uulm.mi.mind.io.Configuration;
+import de.uulm.mi.mind.io.DatabaseManager;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.EventModuleManager;
 import de.uulm.mi.mind.logic.Module;
@@ -144,7 +147,12 @@ public class PositionModule implements Module {
         Data evtlUserList = DatabaseManager.getInstance().open(new Transaction() {
             @Override
             public Data doOperations(Session session) {
-                return DatabaseController.getInstance().read(session, new User(null));
+                return DatabaseManager.getInstance().open(new Transaction() {
+                    @Override
+                    public Data doOperations(Session session) {
+                        return session.read(new User(null));
+                    }
+                });
             }
         });
 

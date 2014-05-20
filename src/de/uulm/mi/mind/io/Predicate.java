@@ -3,7 +3,7 @@ package de.uulm.mi.mind.io;
 /**
  * Created by Cassio on 08.05.2014.
  */
-public abstract class Predicate<ExtentType> {
+abstract class Predicate<ExtentType> {
     private final Class<? extends ExtentType> extentType;
 
     public abstract boolean match(ExtentType o);

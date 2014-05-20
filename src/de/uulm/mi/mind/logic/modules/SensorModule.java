@@ -1,7 +1,5 @@
 package de.uulm.mi.mind.logic.modules;
 
-import com.db4o.ObjectContainer;
-import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.io.DatabaseManager;
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
@@ -59,40 +57,35 @@ public class SensorModule implements Module {
         return new Error(Error.Type.TASK, "The Sensor Module is unable to perform the Task as it appears not to be implemented.");
     }
 
-    private Data createSensor(WifiSensor sensor) {
+    private Data createSensor(final WifiSensor sensor) {
         if (sensor.getKey() == null) {
             return new Error(Error.Type.WRONG_OBJECT, "WifiSensor to be created was null!");
         }
 
-        database.open(new Transaction() {
+        return database.open(new Transaction() {
             @Override
             public Data doOperations(Session session) {
-                session.
-                return null;
+
+                boolean success = session.create(sensor);
+                if (success) {
+                    return new Success("WifiSensor was created successfully.");
+                } else {
+                    // some kind of error occurred
+                    return new Error(Error.Type.DATABASE, "Creation of WifiSensor resulted in an error.");
+                }
+            }
+        });
+    }
+
+    private Data readSensor(final WifiSensor sensor) {
+
+        DataList<WifiSensor> read = (DataList<WifiSensor>) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                return session.read(sensor);
             }
         });
 
-
-        ObjectContainer sessionContainer = database.getSessionContainer();
-
-        boolean success = database.create(sessionContainer, sensor);
-
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("WifiSensor was created successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Creation of WifiSensor resulted in an error.");
-        }
-    }
-
-    private Data readSensor(WifiSensor sensor) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<WifiSensor> read = database.read(sessionContainer, sensor);
-        sessionContainer.close();
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of WifiSensor resulted in an error.");
         }
@@ -108,45 +101,43 @@ public class SensorModule implements Module {
         return read;
     }
 
-    private Data updateSensor(WifiSensor sensor) {
+    private Data updateSensor(final WifiSensor sensor) {
         if (sensor.getKey() == null) {
             return new Error(Error.Type.WRONG_OBJECT, "WifiSensor to be created was null!");
         }
 
-        ObjectContainer sessionContainer = database.getSessionContainer();
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
 
-        boolean success = database.update(sessionContainer, sensor);
-
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("WifiSensor was created successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Creation of WifiSensor resulted in an error.");
-        }
-
+                boolean success = session.update(sensor);
+                if (success) {
+                    return new Success("WifiSensor was created successfully.");
+                } else {
+                    // some kind of error occurred
+                    return new Error(Error.Type.DATABASE, "Creation of WifiSensor resulted in an error.");
+                }
+            }
+        });
     }
 
-    private Data deleteSensor(WifiSensor sensor) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
+    private Data deleteSensor(final WifiSensor sensor) {
+        return database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                boolean success = session.delete(sensor);
 
-        boolean success = database.delete(sessionContainer, sensor);
+                if (success) {
+                    if (sensor.getKey() == null) {
+                        return new Success("All WifiSensors were deleted successfully.");
+                    }
+                    return new Success("WifiSensor was deleted successfully.");
+                } else {
+                    // some kind of error occurred
+                    return new Error(Error.Type.DATABASE, "Deletion of WifiSensor resulted in an error.");
+                }
 
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            if (sensor.getKey() == null) {
-                return new Success("All WifiSensors were deleted successfully.");
             }
-            return new Success("WifiSensor was deleted successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Deletion of WifiSensor resulted in an error.");
-        }
+        });
     }
 }

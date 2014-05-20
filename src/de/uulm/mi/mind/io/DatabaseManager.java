@@ -13,7 +13,7 @@ public class DatabaseManager implements ServletContextListener {
     private final DatabaseAccess dba;
     //private final DatabaseAccess mySQL;
 
-    private DatabaseManager() {
+    public DatabaseManager() {
         dba = DatabaseController.getInstance();
         //mySQL = DatabaseControllerSQL.getInstance();
     }
