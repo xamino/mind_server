@@ -92,8 +92,9 @@ public class JsonConverter<E> {
         Class objectClass = object.getClass();
         // Check if registered TYPE_KEY
         if (!typesClassString.containsKey(objectClass)) {
+            log.error(TAG, "Unregistered object! Register "+objectClass.getSimpleName()+"!");
             throw new IOException("Unregistered TYPE_KEY! Unable to parse to JSON. Register "
-                    + object.getClass().getCanonicalName() + "!");
+                    + objectClass.getCanonicalName() + "!");
         }
         // Get all fields and values recursively
         HashMap<Field, Object> fieldValueList = new HashMap<>();

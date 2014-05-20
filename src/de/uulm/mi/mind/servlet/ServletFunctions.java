@@ -11,7 +11,6 @@ import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
-import de.uulm.mi.mind.security.Authenticated;
 import de.uulm.mi.mind.security.BCrypt;
 import de.uulm.mi.mind.security.Security;
 
@@ -90,39 +89,6 @@ public class ServletFunctions {
         Active activeUser;
         API task = API.safeValueOf(arrival.getTask());
         switch (task) {
-            case LOGIN:
-                // make sure we have the right object
-                if (!(arrival.getObject() instanceof Authenticated)) {
-                    return new Error(Error.Type.WRONG_OBJECT, "Login requires a User, PublicDisplay, or WifiSensor object!");
-                }
-                // try login
-                activeUser = Security.begin((Authenticated) arrival.getObject(), null);
-                // check if okay
-                if (activeUser == null) {
-                    return new Error(Error.Type.LOGIN, "Login failed. Check identification, authentication, and user type!");
-                }
-                // otherwise we finish again directly by returning the session
-                Security.finish(activeUser);
-                // If it was the first login, we send a note instead of just a simple ok so the client can know
-                if (activeUser.wasUnused()) {
-                    return new Success(Success.Type.NOTE, activeUser.getSESSION());
-                }
-                return new Success(Success.Type.OK, activeUser.getSESSION());
-            case LOGOUT:
-                activeUser = Security.begin(null, arrival.getSessionHash());
-                if (activeUser == null) {
-                    return new Success(Success.Type.NOTE, "Session is already not valid!");
-                }
-                activeUser.invalidate();
-                Security.finish(activeUser);
-                return new Success("Logout successful.");
-            case CHECK:
-                activeUser = Security.begin(null, arrival.getSessionHash());
-                if (activeUser == null) {
-                    return new Error(Error.Type.SECURITY, "Session invalid!");
-                }
-                Security.finish(activeUser);
-                return new Success("Session is valid.");
             case REGISTRATION:
                 // if anything other than open is stated here, registration is considered closed
                 if (!"open".equals(config.getRegistration())) {
@@ -584,8 +550,6 @@ public class ServletFunctions {
             // Read all positions (as publicly seen)
             case READ_ALL_POSITIONS:
                 return moduleManager.handleTask(Task.Position.READ, null);
-            case ADMIN_READ_SESSIONS:
-                return Security.readActiveUsers();
             case KILL_SESSIONS:
                 Security.clear();
                 return new Success("All active sessions have been killed.");

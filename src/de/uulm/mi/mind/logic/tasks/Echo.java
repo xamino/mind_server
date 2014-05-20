@@ -3,9 +3,8 @@ package de.uulm.mi.mind.logic.tasks;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.Interfaces.Task;
 import de.uulm.mi.mind.security.Active;
-import de.uulm.mi.mind.security.Authenticated;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author Tamino Hartmann
@@ -23,17 +22,22 @@ public class Echo extends Task<Sendable, Sendable> {
     }
 
     @Override
-    public Collection<Class<? extends Authenticated>> getTaskPermission() {
+    public Set<String> getTaskPermission() {
         return null;
     }
 
     @Override
-    public Class<? extends Sendable> getInputType() {
+    public Class<Sendable> getInputType() {
         return Sendable.class;
     }
 
     @Override
-    public Class<? extends Sendable> getOutputType() {
+    public Class<Sendable> getOutputType() {
         return Sendable.class;
+    }
+
+    @Override
+    public boolean isAdminTask() {
+        return false;
     }
 }

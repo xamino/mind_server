@@ -5,6 +5,7 @@ import de.uulm.mi.mind.objects.Arrival;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.Interfaces.Task;
 import de.uulm.mi.mind.objects.None;
+import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.Security;
@@ -66,17 +67,35 @@ public class TaskManager {
             return new Error(Error.Type.WRONG_OBJECT, "Wrong object supplied!");
         }
         // check security permissions
-        if (task.getTaskPermission() == null || task.getTaskPermission().isEmpty()) {
+        Set permissibles = task.getTaskPermission();
+        if (permissibles == null || permissibles.isEmpty()) {
             // this is public tasks
             return task.doWork(null, sendable);
         } else {
             // these tasks all require authentication
             Active active = Security.begin(null, arrival.getSessionHash());
-            if (active == null || !task.getTaskPermission().contains(active.getAuthenticated())) {
+            if (active == null || !permissibles.contains(active.getAuthenticated().getClass().getSimpleName())) {
                 log.error(TAG, "Illegal task tried!");
                 return new Error(Error.Type.SECURITY, "You do not have permission to use this task!");
             }
-            Sendable answer = task.doWork(active, sendable);
+            // check for admin tasks
+            Sendable answer = null;
+            // if the task is an admin task, we need to check especially
+            if (task.isAdminTask()) {
+                // must be user
+                if (!(active.getAuthenticated() instanceof User)) {
+                    Security.finish(active);
+                    return new Error(Error.Type.SECURITY, "You do not have permission to use this task!");
+                }
+                if (((User) active.getAuthenticated()).isAdmin()) {
+                    answer = task.doWork(active, sendable);
+                } else {
+                    Security.finish(active);
+                    return new Error(Error.Type.SECURITY, "You do not have permission to use this task!");
+                }
+            } else {
+                answer = task.doWork(active, sendable);
+            }
             Security.finish(active);
             return answer;
         }
@@ -91,7 +110,7 @@ public class TaskManager {
      */
     private Sendable prepareTaskObject(Task task, Arrival arrival) {
         // check if none is required
-        if (task.getInputType().isInstance(None.class)) {
+        if (task.getInputType().equals(None.class)) {
             return new None();
         }
         // check if arrival.getObject is the object required
@@ -99,7 +118,7 @@ public class TaskManager {
             return arrival.getObject();
         }
         // check whether the arrival object itself is required
-        else if (task.getInputType().isInstance(Arrival.class)) {
+        else if (task.getInputType().isAssignableFrom(Arrival.class)) {
             return arrival;
         }
         // if all else fails, return null --> error
@@ -145,6 +164,11 @@ public class TaskManager {
                 toAdd = ((Task) task.getDeclaredConstructors()[0].newInstance());
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 log.error(TAG, "Failed to get an instance of " + task.getSimpleName() + " via default constructor!");
+                continue;
+            }
+            // check for null
+            if (toAdd.getTaskName() == null || toAdd.getTaskName().isEmpty()) {
+                log.error(TAG, "Task name for "+toAdd.getClass().getSimpleName()+" is NULL or EMPTY, skipping!");
                 continue;
             }
             // check that all API calls are unique

@@ -1,9 +1,8 @@
 package de.uulm.mi.mind.objects.Interfaces;
 
 import de.uulm.mi.mind.security.Active;
-import de.uulm.mi.mind.security.Authenticated;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author Tamino Hartmann
@@ -40,9 +39,11 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
      *
      * @return A collection of the Authenticated classes.
      */
-    public abstract Collection<Class<? extends Authenticated>> getTaskPermission();
+    public abstract Set<String> getTaskPermission();
 
-    public abstract Class<? extends Sendable> getInputType();
+    public abstract Class<I> getInputType();
 
-    public abstract Class<? extends Sendable> getOutputType();
+    public abstract Class<O> getOutputType();
+
+    public abstract boolean isAdminTask();
 }

@@ -10,6 +10,7 @@ import de.uulm.mi.mind.objects.Arrival;
 import de.uulm.mi.mind.objects.Departure;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
+import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.task.TaskManager;
 
@@ -127,7 +128,7 @@ public class Servlet extends HttpServlet {
         // Must be done before write:
         response.setCharacterEncoding("UTF-8");
         // If this happens, send back a standard error message.
-        if (answer == null) {
+        if (answer == null || answer instanceof None) {
             log.error(TAG, "Empty ANSWER! Should never happen!");
             answer = new Error(Error.Type.WRONG_OBJECT, "Answer does not contain an object! Make sure your request is valid!");
         }

@@ -1,6 +1,7 @@
 package de.uulm.mi.mind.security;
 
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
 
 import java.util.Date;
 
@@ -8,7 +9,7 @@ import java.util.Date;
  * Interface that all objects must implement that can be used to log in to the system.
  * For now, that should only be User and PublicDisplay.
  */
-public interface Authenticated extends Saveable {
+public interface Authenticated extends Sendable, Saveable {
     /**
      * Reads the ID for the login.
      *
