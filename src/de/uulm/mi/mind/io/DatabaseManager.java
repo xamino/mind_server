@@ -48,6 +48,8 @@ public class DatabaseManager implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
+        Configuration config = Configuration.getInstance();
+        config.init(servletContextEvent.getServletContext().getContextPath()); // must be first!!!
         dba.init(servletContextEvent);
     }
 

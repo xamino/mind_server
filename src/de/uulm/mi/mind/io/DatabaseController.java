@@ -213,7 +213,6 @@ class DatabaseController implements DatabaseAccess {
 
     public void init(String servletFilePath, boolean reinitialize) {
         Configuration config = Configuration.getInstance();
-        config.init(servletFilePath); // must be first!!!
         log = Messenger.getInstance();
         String dbFilePath = servletFilePath + "WEB-INF/" + config.getDbName();
 
@@ -273,6 +272,9 @@ class DatabaseController implements DatabaseAccess {
                 return o.getKey().equals("University");
             }
         });
+        if (set3 == null || set3.size() == 0) {
+            return;
+        }
         Area university = set3.get(0);
         log.log(TAG, "Locations: " + university.getLocations().size());
         int morselCounter = 0;
@@ -371,7 +373,7 @@ class DatabaseController implements DatabaseAccess {
 
         // Initializing Database
         log.log(TAG, "Running DB init.");
-        DataList<Area> areaData = read(session, new Area("University", null, 0, 0, 0, 0));
+        DataList<Area> areaData = read(session, new Area("University"));
         if (areaData == null || areaData.isEmpty()) {
             log.log(TAG, "Universe not existing, creating it.");
             create(session, new Area("University", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));

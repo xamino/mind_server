@@ -187,14 +187,11 @@ class DatabaseControllerSQL implements DatabaseAccess {
     }
 
     public void init(String servletFilePath, boolean reinitialize) {
-        Configuration config = Configuration.getInstance();
-        config.init(servletFilePath); // must be first!!!
         log = Messenger.getInstance();
 
-        //rootContainer = getSessionContainer();
-
-
-        //runMaintenance(rootContainer);
+        rootContainer = getSessionContainer();
+        runMaintenance(rootContainer);
+        rootContainer.close();
 
         if (reinitialize) {
             //reinit(rootContainer);
@@ -254,7 +251,7 @@ class DatabaseControllerSQL implements DatabaseAccess {
 
         // Initializing Database
         log.log(TAG, "Running DB init.");
-        DataList<Area> areaData = read(session, new Area("University", null, 0, 0, 0, 0));
+        DataList<Area> areaData = read(session, new Area("University"));
         if (areaData == null || areaData.isEmpty()) {
             log.log(TAG, "Universe not existing, creating it.");
             create(session, new Area("University", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
