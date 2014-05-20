@@ -1,6 +1,5 @@
 package de.uulm.mi.mind.objects;
 
-import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 
 /**
@@ -19,7 +18,7 @@ public class Arrival implements Sendable {
     /**
      * Voluntary object with which to work with during a task.
      */
-    private Data object;
+    private Sendable object;
     /**
      * Stores the IP address of the client for this access.
      */
@@ -28,7 +27,7 @@ public class Arrival implements Sendable {
     private Arrival() {
     }
 
-    public Arrival(String sessionHash, String task, Data object) {
+    public Arrival(String sessionHash, String task, Sendable object) {
         this.sessionHash = sessionHash;
         this.task = task;
         this.object = object;
@@ -75,11 +74,11 @@ public class Arrival implements Sendable {
         this.task = task;
     }
 
-    public Data getObject() {
+    public Sendable getObject() {
         return object;
     }
 
-    public void setObject(Data object) {
+    public void setObject(Sendable object) {
         this.object = object;
     }
 }

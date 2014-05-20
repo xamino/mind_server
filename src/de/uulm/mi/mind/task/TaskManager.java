@@ -1,9 +1,13 @@
 package de.uulm.mi.mind.task;
 
 import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.objects.Arrival;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.Interfaces.Task;
+import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.security.Active;
+import de.uulm.mi.mind.security.Security;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -24,9 +28,9 @@ public class TaskManager {
 
     private TaskManager() {
         log = Messenger.getInstance();
+        TAG = "TaskManager";
         taskNames = new HashSet<>();
         taskObjects = new HashMap<>();
-        TAG = "TaskManager";
         // now register initial tasks
         loadTasks();
         log.log(TAG, "Created.");
@@ -39,16 +43,72 @@ public class TaskManager {
         return INSTANCE;
     }
 
-    public Sendable run(final String TASK, Sendable object) {
+    /**
+     * Method that runs a received task.
+     *
+     * @param arrival The arrival object to use.
+     * @return The answer to send back.
+     */
+    // todo have input validation in the task abstract class that is called beforehand
+    public Sendable run(Arrival arrival) {
+        final String TASK = arrival.getTask();
+        // check that task exists
         if (!taskNames.contains(TASK)) {
             log.error(TAG, "Task " + TASK + " not found!");
             return new Error(Error.Type.TASK, "Task " + TASK + " is not available!");
         }
-        // todo check authentication
-        log.log(TAG, "Running task " + TASK + "...");
-        return taskObjects.get(TASK).doWork(object);
+        // get task object
+        Task task = taskObjects.get(TASK);
+        // make sure that the given object fits what the task wants
+        Sendable sendable = prepareTaskObject(task, arrival);
+        if (sendable == null) {
+            log.error(TAG, "Task " + TASK + " was called with wrong supplied object!");
+            return new Error(Error.Type.WRONG_OBJECT, "Wrong object supplied!");
+        }
+        // check security permissions
+        if (task.getTaskPermission() == null || task.getTaskPermission().isEmpty()) {
+            // this is public tasks
+            return task.doWork(null, sendable);
+        } else {
+            // these tasks all require authentication
+            Active active = Security.begin(null, arrival.getSessionHash());
+            if (active == null || !task.getTaskPermission().contains(active.getAuthenticated())) {
+                log.error(TAG, "Illegal task tried!");
+                return new Error(Error.Type.SECURITY, "You do not have permission to use this task!");
+            }
+            Sendable answer = task.doWork(active, sendable);
+            Security.finish(active);
+            return answer;
+        }
     }
 
+    /**
+     * Method that checks which type of object a task wants and tries to supply that to the doWork method.
+     *
+     * @param task    The task for which to check.
+     * @param arrival The arrival to use.
+     * @return The object to pass to the doWork method.
+     */
+    private Sendable prepareTaskObject(Task task, Arrival arrival) {
+        // check if none is required
+        if (task.getInputType().isInstance(None.class)) {
+            return new None();
+        }
+        // check if arrival.getObject is the object required
+        else if (arrival.getObject() != null && task.getInputType().isAssignableFrom(arrival.getObject().getClass())) {
+            return arrival.getObject();
+        }
+        // check whether the arrival object itself is required
+        else if (task.getInputType().isInstance(Arrival.class)) {
+            return arrival;
+        }
+        // if all else fails, return null --> error
+        return null;
+    }
+
+    /**
+     * Method that looks within the tasks package and registers all tasks.
+     */
     private void loadTasks() {
         // todo allow loading from config path
         // Get our package name
@@ -94,10 +154,10 @@ public class TaskManager {
                 continue;
             }
             // otherwise okay, we can register
-            // todo register authenticated
-            taskNames.add(toAdd.getTaskName());
-            taskObjects.put(toAdd.getTaskName(), toAdd);
-            log.log(TAG, "Added task " + toAdd.getTaskName() + " from " + toAdd.getClass().getSimpleName() + ".");
+            final String TASK = toAdd.getTaskName().toLowerCase();
+            taskNames.add(TASK);
+            taskObjects.put(TASK, toAdd);
+            log.log(TAG, "Added task " + TASK + " from " + toAdd.getClass().getSimpleName() + ".");
         }
         log.log(TAG, "Done registering " + taskNames.size() + " tasks.");
     }

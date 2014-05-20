@@ -72,13 +72,7 @@ public class Servlet extends HttpServlet {
             // set IP address in case we need it (warning: can be IPv4 OR IPv6!!!)
             arrival.setIpAddress(request.getRemoteAddr());
 
-            answer = TaskManager.getInstance().run(arrival.getTask(), (Sendable) arrival.getObject());
-
-            /*
-            OLD
-            // get the answer from the logic
-            answer = runLogic(arrival);
-            */
+            answer = TaskManager.getInstance().run(arrival);
         }
 
         // Encapsulate answer:
