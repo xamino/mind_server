@@ -12,22 +12,12 @@ import java.util.Set;
  * Created by Tamino Hartmann on 5/21/14.
  * Implementation of the Task class to allow easy access to methods that many location tasks require.
  */
-public abstract class LocationTask extends AdminTask<Location, Sendable> {
+public abstract class LocationTask<I extends Sendable, O extends Sendable> extends AdminTask<I, O> {
     protected ArrayList<String> wifiNameFilter;
 
     public LocationTask() {
         super();
         wifiNameFilter = configuration.getWifiNameFilter();
-    }
-
-    @Override
-    public Class<Location> getInputType() {
-        return Location.class;
-    }
-
-    @Override
-    public Class<Sendable> getOutputType() {
-        return Sendable.class;
     }
 
     /**

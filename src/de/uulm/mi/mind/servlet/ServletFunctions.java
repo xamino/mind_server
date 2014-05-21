@@ -237,39 +237,6 @@ public class ServletFunctions {
 //                }
 //                return moduleManager.handleTask(Task.Area.DELETE, arrival.getObject());
 //            // DISPLAYS ---------------------------------------------------------------------------
-//            case DISPLAY_READ:
-//                if (!(arrival.getObject() instanceof PublicDisplay)) {
-//                    return new Error(Error.Type.WRONG_OBJECT);
-//                }
-//                return moduleManager.handleTask(Task.Display.READ, arrival.getObject());
-//            case DISPLAY_ADD:
-//                if (!(arrival.getObject() instanceof PublicDisplay)) {
-//                    return new Error(Error.Type.WRONG_OBJECT);
-//                }
-//                display = (PublicDisplay) arrival.getObject();
-//                // check identification
-//                if (!safeString(display.getIdentification())) {
-//                    return new Error(Error.Type.ILLEGAL_VALUE, "Identification is primary key! May not be empty.");
-//                }
-//                // check coordinates
-//                if (display.getCoordinateX() < 0 || display.getCoordinateY() < 0) {
-//                    return new Error(Error.Type.ILLEGAL_VALUE, "Coordinates must be positive!");
-//                }
-//                // password
-//                if (safeString(display.getToken())) {
-//                    display.setToken(BCrypt.hashpw(display.getToken(), BCrypt.gensalt(12)));
-//                    return moduleManager.handleTask(Task.Display.CREATE, display);
-//                }
-//                // otherwise we need to generate a token
-//                token = generateKey();
-//                // hash it
-//                display.setToken(BCrypt.hashpw(token, BCrypt.gensalt(12)));
-//                data = moduleManager.handleTask(Task.Display.CREATE, display);
-//                // If the operation was a success, we need to send the generated key back
-//                if (data instanceof Success) {
-//                    data = new Success(Success.Type.NOTE, token);
-//                }
-//                return nullMessageCatch(data);
 //            case DISPLAY_UPDATE:
 //                if (!(arrival.getObject() instanceof PublicDisplay)) {
 //                    return new Error(Error.Type.WRONG_OBJECT);

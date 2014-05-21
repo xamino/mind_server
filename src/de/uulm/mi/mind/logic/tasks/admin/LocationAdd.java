@@ -2,23 +2,17 @@ package de.uulm.mi.mind.logic.tasks.admin;
 
 import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.objects.DataList;
-import de.uulm.mi.mind.objects.Interfaces.Sendable;
-import de.uulm.mi.mind.objects.tasks.LocationTask;
-import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.objects.Location;
-import de.uulm.mi.mind.objects.WifiMorsel;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
+import de.uulm.mi.mind.objects.tasks.LocationTask;
 import de.uulm.mi.mind.security.Active;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Created by Tamino Hartmann on 5/21/14.
  */
-public class LocationAdd extends LocationTask {
+public class LocationAdd extends LocationTask<Location, Information> {
 
     @Override
     public Information doWork(Active active, Location location) {
@@ -87,5 +81,15 @@ public class LocationAdd extends LocationTask {
     @Override
     public String getTaskName() {
         return "location_add";
+    }
+
+    @Override
+    public Class<Location> getInputType() {
+        return Location.class;
+    }
+
+    @Override
+    public Class<Information> getOutputType() {
+        return Information.class;
     }
 }
