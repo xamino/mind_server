@@ -245,11 +245,6 @@ public class ServletFunctions {
 //                }
 //                // update
 //                return moduleManager.handleTask(Task.Display.UPDATE, display);
-//            case DISPLAY_REMOVE:
-//                if (!(arrival.getObject() instanceof PublicDisplay)) {
-//                    return new Error(Error.Type.WRONG_OBJECT);
-//                }
-//                return moduleManager.handleTask(Task.Display.DELETE, arrival.getObject());
 //            // SENSORS -----------------------------------------------------------------------------------------
 //            case SENSOR_ADD:
 //                if (!(arrival.getObject() instanceof WifiSensor)) {
@@ -302,21 +297,11 @@ public class ServletFunctions {
 //                }
 //                // update
 //                return moduleManager.handleTask(Task.Sensor.UPDATE, originalSensor);
-//            case SENSOR_REMOVE:
-//                if (!(arrival.getObject() instanceof WifiSensor)) {
-//                    return new Error(Error.Type.WRONG_OBJECT);
-//                }
-//                return moduleManager.handleTask(Task.Sensor.DELETE, arrival.getObject());
 //            // Special admin stuff ---------------------------------------------------------------
 //            case READ_ALL_ADMIN:
 //                User filter = new User(null);
 //                filter.setAdmin(true);
 //                return moduleManager.handleTask(Task.User.READ, filter);
-//            case ADMIN_ANNIHILATE_USER:
-//                log.log(TAG, "Removing all users!");
-//                // purge sessions
-//                Security.clear();
-//                return moduleManager.handleTask(Task.User.ANNIHILATE, null);
 //            default:
 //                return null;
 //        }
