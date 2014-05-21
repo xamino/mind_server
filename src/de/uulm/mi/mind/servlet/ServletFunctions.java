@@ -96,8 +96,6 @@ public class ServletFunctions {
 //                }
 //                // everything okay, return real position area (must be freshly read because we might have written to it)
 //                return (Area) activeUser.readData(REAL_POSITION);
-//            case READ_ALL_AREAS:
-//                return moduleManager.handleTask(Task.Area.READ, new Area(null));
 //            case ICON_DELETE:
 //                String icon = "icon_" + user.readIdentification();
 //                File file = new File(filePath.iconPath() + icon);
@@ -302,29 +300,6 @@ public class ServletFunctions {
 //                User filter = new User(null);
 //                filter.setAdmin(true);
 //                return moduleManager.handleTask(Task.User.READ, filter);
-//            default:
-//                return null;
-//        }
-//    }
-//
-//    /**
-//     * Tasks for PublicDisplays.
-//     *
-//     * @param arrival The arrival object.
-//     * @return Resulting data.
-//     */
-//    public Data handleDisplayTask(Arrival arrival, Active activeUser) {
-//        // better be safe
-//        if (!(activeUser.getAuthenticated() instanceof PublicDisplay)) {
-//            log.error(TAG, "Display task was handed the wrong type of Authenticated!");
-//            return new Error(Error.Type.WRONG_OBJECT, "Display task was handed the wrong type of Authenticated!");
-//        }
-//        PublicDisplay display = ((PublicDisplay) activeUser.getAuthenticated());
-//        API task = API.safeValueOf(arrival.getTask());
-//        switch (task) {
-//            case READ_ALL_AREAS:
-//                Area filter = new Area(null);
-//                return moduleManager.handleTask(Task.Area.READ, filter);
 //            default:
 //                return null;
 //        }
