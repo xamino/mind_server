@@ -4,6 +4,7 @@ import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,7 +90,7 @@ class ObjectContainerSQL {
         try {
             //insert values
             PreparedStatement pstm = con.prepareStatement(query);
-            pstm.execute();
+            //pstm.execute();
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -99,6 +100,8 @@ class ObjectContainerSQL {
 
     private void createTableForClassIfNotExist(Class<?> o) {
         String tableName = o.getCanonicalName().replace('.', '_');
+
+        log.log(TAG, "Create Table for: " + o.getSimpleName());
 
         // Check if table already exists
         int size = -1;
@@ -121,17 +124,25 @@ class ObjectContainerSQL {
         // give it a auto increment index column for referencing
         String columnTypes = "id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,";
         ArrayList<String> foreignKeys = new ArrayList<>();
-        for (Field field : o.getClass().getDeclaredFields()) {
+        for (Field field : o.getDeclaredFields()) {
             field.setAccessible(true);
 
+            Class<?> fieldClass = field.getType();
+
             // get SQL type of field
-            String type = classToSQLType(field.getType());
+            String type = classToSQLType(fieldClass);
             if (type.equals(OBJECT)) {
-                createTableForClassIfNotExist(field.getType());
-                foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + field.getType().getCanonicalName().replace(".", "_") + "(id),");
+                log.log(TAG, "Nested class found: " + fieldClass.getSimpleName());
+                createTableForClassIfNotExist(fieldClass);
+                foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + fieldClass.getCanonicalName().replace(".", "_") + "(id),");
                 type = INT;
             } else if (type.equals(LIST)) {
-
+                Class<?> elementClass = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                log.log(TAG, "Nested list/array found: " + fieldClass.getSimpleName() + " of " + elementClass.getSimpleName());
+                createTableForClassIfNotExist(elementClass);
+                createTableForListsIfNotExist(o, elementClass);
+                foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + o.getSimpleName() + "__" + elementClass.getSimpleName() + "(pid),");
+                type = INT;
             }
             columnTypes += COLESC + field.getName() + COLESC + " " + type + ",";
         }
@@ -144,6 +155,25 @@ class ObjectContainerSQL {
 
         String tableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + columnTypes + ")";
         log.log(TAG, tableQuery);
+        try {
+            //create table structure
+            PreparedStatement statement = con.prepareStatement(tableQuery);
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createTableForListsIfNotExist(Class<?> containerClass, Class<?> elementClass) {
+        String tableQuery = "CREATE TABLE IF NOT EXISTS " +
+                containerClass.getSimpleName() + "__" + elementClass.getSimpleName() +
+                " (pid INTEGER NOT NULL," +
+                " cid INTEGER NOT NULL," +
+                "INDEX pid_index (pid), INDEX cid_index (cid))";
+        //"FOREIGN KEY (" + COLESC + "pid" + COLESC + ") REFERENCES " + containerClass.getCanonicalName().replace(".", "_") + "(id)," +
+        //"FOREIGN KEY (" + COLESC + "cid" + COLESC + ") REFERENCES " + elementClass.getCanonicalName().replace(".", "_") + "(id))";
+        log.log(TAG, tableQuery);
+
         try {
             //create table structure
             PreparedStatement statement = con.prepareStatement(tableQuery);
@@ -181,7 +211,7 @@ class ObjectContainerSQL {
             enumString = enumString.substring(0, enumString.lastIndexOf(","));
             enumString += ")";
             return enumString;
-        } else if (type == Object[].class || type.isInstance(Collection.class)) {
+        } else if (type.isArray() || Collection.class.isAssignableFrom(type)) {
             return LIST;
         } else {
             return OBJECT;
@@ -235,6 +265,10 @@ class ObjectContainerSQL {
     }
 
     public void rollback() {
-
+        try {
+            con.rollback();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

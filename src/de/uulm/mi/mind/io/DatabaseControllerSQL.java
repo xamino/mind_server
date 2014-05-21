@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -192,7 +193,10 @@ class DatabaseControllerSQL implements DatabaseAccess {
 
         rootContainer = getSessionContainer();
 
-        Location loc = new Location(1, 2);
+        DataList<WifiMorsel> wl = new DataList<>();
+        wl.add(new WifiMorsel(null, null, 10, 10, null, new Date()));
+
+        Location loc = new Location(1, 2, wl);
         rootContainer.store(loc);
 
         //runMaintenance(rootContainer);
