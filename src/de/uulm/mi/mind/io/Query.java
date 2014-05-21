@@ -58,8 +58,7 @@ class Query {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(query);
             while (rs.next()) {
-                Class<?> objectClass = Class.forName("de.uulm.mi.mind.objects." + table);
-                //log.log(TAG, "Table2Class: de.uulm.mi.mind.objects." + table);
+                Class<?> objectClass = Class.forName(table.replace("_", "."));
                 E object = null;
                 try {
                     Constructor constructor = objectClass.getDeclaredConstructor(new Class[]{});
@@ -97,18 +96,27 @@ class Query {
     private Object typeCastParse(Class<?> type, String column, ResultSet rs) throws SQLException {
         if (type == boolean.class) {
             return rs.getBoolean(column);
+        } else if (type == byte.class) {
+            return rs.getByte(column);
+        } else if (type == short.class) {
+            return rs.getShort(column);
         } else if (type == int.class) {
             return rs.getInt(column);
+        } else if (type == long.class) {
+            return rs.getLong(column);
+        } else if (type == float.class) {
+            return rs.getFloat(column);
+        } else if (type == double.class) {
+            return rs.getDouble(column);
         } else if (type == String.class) {
             return rs.getString(column);
         } else if (type == Date.class) {
-            if (rs.getDate(column) == null) {
-                return null;
-            }
-            return new Date(rs.getDate(column).getTime());
+            java.sql.Date date = rs.getDate(column);
+            if (date == null) return null;
+            return new Date(date.getTime());
         } else if (type.isEnum()) {
             String enumString = rs.getString(column);
-            if (enumString == null) return enumString;
+            if (enumString == null) return null;
             return Enum.valueOf((Class) type, enumString);
         } else
             return null;

@@ -5,6 +5,8 @@ import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
 import java.lang.reflect.Field;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -14,9 +16,20 @@ import java.util.List;
 class ObjectContainerSQL {
     private static final String TAG = "ObjectContainerSQL";
     private static final String BOOLEAN = "BOOLEAN";
-    private static final String INTEGER = "INZT";
+    private static final String BYTE = "TINYINT";
+    private static final String SHORT = "SMALLINT";
+    private static final String INT = "INTEGER";
+    private static final String LONG = "BIGINT";
+    private static final String FLOAT = "FLOAT";
+    private static final String DOUBLE = "DOUBLE";
     private static final String VARCHAR = "VARCHAR(255)";
-    private static final String DATE = "DATETIME";
+    private static final String DATETIME = "DATETIME";
+
+    private static final String COLESC = "`";
+    private static final String STRESC = "'";
+
+    private static final String OBJECT = "OBJECT";
+    private static final String LIST = "LIST";
     private final Messenger log;
     private final Connection con;
 
@@ -35,10 +48,10 @@ class ObjectContainerSQL {
     }
 
     public void store(Object o) {
-        String tableName = o.getClass().getSimpleName();
+        String tableName = o.getClass().getCanonicalName().replace('.', '_');
 
         // Build table structure
-        createTableForClassIfNotExist(o);
+        createTableForClassIfNotExist(o.getClass());
 
         // insert values
         String columnQuery = "";
@@ -53,14 +66,14 @@ class ObjectContainerSQL {
                 if (val == null) {
                     valueQuery += null + ",";
                 } else if (type == String.class || type.isEnum()) {
-                    valueQuery += "'" + val + "',";
+                    valueQuery += STRESC + val + STRESC + ",";
                 } else if (val instanceof Date) {
-                    valueQuery += "'" + new Timestamp(((Date) val).getTime()) + "',";
+                    valueQuery += STRESC + new Timestamp(((Date) val).getTime()) + STRESC + ",";
                 } else {
                     valueQuery += val + ",";
                 }
 
-                columnQuery += field.getName() + ",";
+                columnQuery += COLESC + field.getName() + COLESC + ",";
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -84,12 +97,14 @@ class ObjectContainerSQL {
 
     }
 
-    private void createTableForClassIfNotExist(Object o) {
-        String tableName = o.getClass().getSimpleName();
+    private void createTableForClassIfNotExist(Class<?> o) {
+        String tableName = o.getCanonicalName().replace('.', '_');
+
+        // Check if table already exists
         int size = -1;
         try {
             Statement stm = con.createStatement();
-            ResultSet rs = stm.executeQuery("SHOW TABLES LIKE '" + tableName + "'");
+            ResultSet rs = stm.executeQuery("SHOW TABLES LIKE " + STRESC + tableName + STRESC);
             rs.last();
             size = rs.getRow();
             rs.close();
@@ -102,17 +117,32 @@ class ObjectContainerSQL {
             return;
         }
 
-        String columnTypes = "";
+        // Create new table
+        // give it a auto increment index column for referencing
+        String columnTypes = "id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,";
+        ArrayList<String> foreignKeys = new ArrayList<>();
         for (Field field : o.getClass().getDeclaredFields()) {
             field.setAccessible(true);
 
             // get SQL type of field
             String type = classToSQLType(field.getType());
-            columnTypes += field.getName() + " " + type + ",";
+            if (type.equals(OBJECT)) {
+                createTableForClassIfNotExist(field.getType());
+                foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + field.getType().getCanonicalName().replace(".", "_") + "(id),");
+                type = INT;
+            } else if (type.equals(LIST)) {
+
+            }
+            columnTypes += COLESC + field.getName() + COLESC + " " + type + ",";
         }
+
+        for (String foreignKey : foreignKeys) {
+            columnTypes += foreignKey;
+        }
+
         columnTypes = columnTypes.substring(0, columnTypes.lastIndexOf(","));
 
-        String tableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + "(" + columnTypes + ")";
+        String tableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + columnTypes + ")";
         log.log(TAG, tableQuery);
         try {
             //create table structure
@@ -126,25 +156,36 @@ class ObjectContainerSQL {
     private String classToSQLType(Class<?> type) {
         if (type == boolean.class) {
             return BOOLEAN;
+        } else if (type == byte.class) {
+            return BYTE;
+        } else if (type == short.class) {
+            return SHORT;
         } else if (type == int.class) {
-            return INTEGER;
+            return INT;
+        } else if (type == long.class) {
+            return LONG;
+        } else if (type == float.class) {
+            return FLOAT;
+        } else if (type == double.class) {
+            return DOUBLE;
         } else if (type == String.class) {
             return VARCHAR;
         } else if (type == Date.class) {
-            return DATE;
+            return DATETIME;
         } else if (type.isEnum()) {
             String enumString = "ENUM(";
             Object[] constants = type.getEnumConstants();
             for (Object constant : constants) {
-                enumString += "'" + constant.toString() + "',";
+                enumString += STRESC + constant.toString() + STRESC + ",";
             }
             enumString = enumString.substring(0, enumString.lastIndexOf(","));
             enumString += ")";
             return enumString;
+        } else if (type == Object[].class || type.isInstance(Collection.class)) {
+            return LIST;
+        } else {
+            return OBJECT;
         }
-        //TODO
-        return VARCHAR;
-
     }
 
     public void delete(Object o) {
