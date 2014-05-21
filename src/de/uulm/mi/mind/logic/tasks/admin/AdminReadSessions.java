@@ -1,7 +1,8 @@
-package de.uulm.mi.mind.logic.tasks;
+package de.uulm.mi.mind.logic.tasks.admin;
 
 import de.uulm.mi.mind.objects.DataList;
-import de.uulm.mi.mind.objects.Interfaces.Task;
+import de.uulm.mi.mind.objects.tasks.AdminTask;
+import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.security.Active;
@@ -14,7 +15,7 @@ import java.util.Set;
  * @author Tamino Hartmann
  */
 // todo how to check for admin?
-public class AdminReadSessions extends Task<None, DataList> {
+public class AdminReadSessions extends AdminTask<None, DataList> {
     @Override
     public DataList doWork(Active active, None object) {
         return Security.readActiveUsers();
@@ -26,13 +27,6 @@ public class AdminReadSessions extends Task<None, DataList> {
     }
 
     @Override
-    public Set<String> getTaskPermission() {
-        Set<String> permissible = new HashSet<>();
-        permissible.add(User.class.getSimpleName());
-        return permissible;
-    }
-
-    @Override
     public Class<None> getInputType() {
         return None.class;
     }
@@ -40,10 +34,5 @@ public class AdminReadSessions extends Task<None, DataList> {
     @Override
     public Class<DataList> getOutputType() {
         return DataList.class;
-    }
-
-    @Override
-    public boolean isAdminTask() {
-        return true;
     }
 }

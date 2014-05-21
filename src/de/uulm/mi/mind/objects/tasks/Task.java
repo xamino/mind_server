@@ -1,8 +1,10 @@
-package de.uulm.mi.mind.objects.Interfaces;
+package de.uulm.mi.mind.objects.tasks;
 
 import de.uulm.mi.mind.io.Configuration;
 import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.objects.Interfaces.Data;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.messages.*;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.security.Active;

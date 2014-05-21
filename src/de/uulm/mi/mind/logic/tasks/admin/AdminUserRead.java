@@ -1,10 +1,11 @@
-package de.uulm.mi.mind.logic.tasks;
+package de.uulm.mi.mind.logic.tasks.admin;
 
 import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
-import de.uulm.mi.mind.objects.Interfaces.Task;
+import de.uulm.mi.mind.objects.tasks.AdminTask;
+import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.*;
 import de.uulm.mi.mind.objects.messages.Error;
@@ -16,7 +17,7 @@ import java.util.Set;
 /**
  * Created by Tamino Hartmann on 5/21/14.
  */
-public class AdminUserRead  extends Task<User, Sendable> {
+public class AdminUserRead  extends AdminTask<User, Sendable> {
     @Override
     public Sendable doWork(Active active, User object) {
         ObjectContainer sessionContainer = database.getSessionContainer();
@@ -65,13 +66,6 @@ public class AdminUserRead  extends Task<User, Sendable> {
     }
 
     @Override
-    public Set<String> getTaskPermission() {
-        Set<String> permissible = new HashSet<>();
-        permissible.add(User.class.getSimpleName());
-        return permissible;
-    }
-
-    @Override
     public Class<User> getInputType() {
         return User.class;
     }
@@ -79,10 +73,5 @@ public class AdminUserRead  extends Task<User, Sendable> {
     @Override
     public Class<Sendable> getOutputType() {
         return Sendable.class;
-    }
-
-    @Override
-    public boolean isAdminTask() {
-        return true;
     }
 }

@@ -1,7 +1,7 @@
-package de.uulm.mi.mind.logic.tasks;
+package de.uulm.mi.mind.logic.tasks.all;
 
 import de.uulm.mi.mind.objects.Arrival;
-import de.uulm.mi.mind.objects.Interfaces.Task;
+import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;

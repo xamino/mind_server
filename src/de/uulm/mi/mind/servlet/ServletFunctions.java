@@ -124,34 +124,6 @@ public class ServletFunctions {
 //        }
 //    }
 //
-//    /**
-//     * Handles tasks that are specifically only for the admin class user.
-//     *
-//     * @param arrival The arrival object.
-//     * @return The value to return.
-//     */
-//    public Data handleAdminTask(Arrival arrival, Active activeUser) {
-//        // better be safe
-//        if (!(activeUser.getAuthenticated() instanceof User)) {
-//            log.error(TAG, "Administrative task was handed the wrong type of Authenticated!");
-//            return new Error(Error.Type.WRONG_OBJECT, "Administrative task was handed the wrong type of Authenticated!");
-//        }
-//        User user = (User) activeUser.getAuthenticated();
-//        // Better safe than sorry:
-//        if (!user.isAdmin()) {
-//            log.error(TAG, "User " + user.readIdentification() + " almost accessed admin functions!");
-//            return new Error(Error.Type.SECURITY, "You do not have permission for this task.");
-//        }
-//        API task = API.safeValueOf(arrival.getTask());
-//        // Because we'll need these rather often:
-//        Data data, message;
-//        User tempUser;
-//        PublicDisplay display;
-//        WifiSensor sensor;
-//        String token;
-//        Area area;
-//        switch (task) {
-//            // USERS -----------------------------------------------------------------------------
 //            case ADMIN_USER_ADD:
 //                if (!(arrival.getObject() instanceof User)) {
 //                    return new Error(Error.Type.WRONG_OBJECT);
@@ -228,11 +200,6 @@ public class ServletFunctions {
 //                return moduleManager.handleTask(Task.User.DELETE, arrival.getObject());
 //            // LOCATION --------------------------------------------------------------------------
 //            // TODO sanitize and make sane!
-//            case LOCATION_READ:
-//                if (!(arrival.getObject() instanceof Location)) {
-//                    return new Error(Error.Type.WRONG_OBJECT);
-//                }
-//                return moduleManager.handleTask(Task.Location.READ, arrival.getObject());
 //            case LOCATION_ADD:
 //                if (!(arrival.getObject() instanceof Location)) {
 //                    return new Error(Error.Type.WRONG_OBJECT);

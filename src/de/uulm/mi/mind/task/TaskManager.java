@@ -3,7 +3,7 @@ package de.uulm.mi.mind.task;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.Arrival;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
-import de.uulm.mi.mind.objects.Interfaces.Task;
+import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
@@ -33,7 +33,11 @@ public class TaskManager {
         taskNames = new HashSet<>();
         taskObjects = new HashMap<>();
         // now register initial tasks
-        loadTasks();
+        loadTasks("de.uulm.mi.mind.logic.tasks.all");
+        loadTasks("de.uulm.mi.mind.logic.tasks.admin");
+        loadTasks("de.uulm.mi.mind.logic.tasks.multiple");
+        loadTasks("de.uulm.mi.mind.logic.tasks.user");
+        log.log(TAG, "Registered " + taskNames.size() + " tasks total.");
         log.log(TAG, "Created.");
     }
 
@@ -128,10 +132,8 @@ public class TaskManager {
     /**
      * Method that looks within the tasks package and registers all tasks.
      */
-    private void loadTasks() {
+    private void loadTasks(String packageName) {
         // todo allow loading from config path
-        // Get our package name
-        String packageName = "de.uulm.mi.mind.logic.tasks";
         List<Class<Task>> tasks = new ArrayList<Class<Task>>();
         URL root = Thread.currentThread().getContextClassLoader().getResource(packageName.replace(".", "/"));
         if (root == null) {
@@ -158,6 +160,7 @@ public class TaskManager {
             }
         }
         // Instantiate them and register
+        int counter = 0;
         for (Class<Task> task : tasks) {
             Task toAdd = null;
             try {
@@ -168,7 +171,7 @@ public class TaskManager {
             }
             // check for null
             if (toAdd.getTaskName() == null || toAdd.getTaskName().isEmpty()) {
-                log.error(TAG, "Task name for "+toAdd.getClass().getSimpleName()+" is NULL or EMPTY, skipping!");
+                log.error(TAG, "Task name for " + toAdd.getClass().getSimpleName() + " is NULL or EMPTY, skipping!");
                 continue;
             }
             // check that all API calls are unique
@@ -182,7 +185,8 @@ public class TaskManager {
             taskNames.add(TASK);
             taskObjects.put(TASK, toAdd);
             log.log(TAG, "Added task " + TASK + " from " + toAdd.getClass().getSimpleName() + ".");
+            counter++;
         }
-        log.log(TAG, "Done registering " + taskNames.size() + " tasks.");
+        log.log(TAG, "Done registering " + counter + " new tasks.");
     }
 }

@@ -1,7 +1,7 @@
-package de.uulm.mi.mind.logic.tasks;
+package de.uulm.mi.mind.logic.tasks.user;
 
 import com.db4o.ObjectContainer;
-import de.uulm.mi.mind.objects.Interfaces.Task;
+import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;

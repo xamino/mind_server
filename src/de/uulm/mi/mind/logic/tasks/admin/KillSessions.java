@@ -1,6 +1,7 @@
-package de.uulm.mi.mind.logic.tasks;
+package de.uulm.mi.mind.logic.tasks.admin;
 
-import de.uulm.mi.mind.objects.Interfaces.Task;
+import de.uulm.mi.mind.objects.tasks.AdminTask;
+import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Information;
@@ -14,7 +15,7 @@ import java.util.Set;
 /**
  * Created by Tamino Hartmann.
  */
-public class KillSessions extends Task<None, Information> {
+public class KillSessions extends AdminTask<None, Information> {
     @Override
     public Information doWork(Active active, None object) {
         Security.clear();
@@ -27,13 +28,6 @@ public class KillSessions extends Task<None, Information> {
     }
 
     @Override
-    public Set<String> getTaskPermission() {
-        Set<String> permissible = new HashSet<>();
-        permissible.add(User.class.getSimpleName());
-        return permissible;
-    }
-
-    @Override
     public Class<None> getInputType() {
         return None.class;
     }
@@ -41,10 +35,5 @@ public class KillSessions extends Task<None, Information> {
     @Override
     public Class<Information> getOutputType() {
         return Information.class;
-    }
-
-    @Override
-    public boolean isAdminTask() {
-        return true;
     }
 }

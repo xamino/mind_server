@@ -1,9 +1,8 @@
-package de.uulm.mi.mind.logic.tasks;
+package de.uulm.mi.mind.logic.tasks.user;
 
-import de.uulm.mi.mind.objects.Interfaces.Task;
+import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.User;
-import de.uulm.mi.mind.objects.WifiSensor;
 import de.uulm.mi.mind.security.Active;
 
 import java.util.HashSet;

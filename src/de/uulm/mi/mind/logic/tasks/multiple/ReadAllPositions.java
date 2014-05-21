@@ -1,8 +1,8 @@
-package de.uulm.mi.mind.logic.tasks;
+package de.uulm.mi.mind.logic.tasks.multiple;
 
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
-import de.uulm.mi.mind.objects.Interfaces.Task;
+import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.objects.enums.Status;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.Security;
