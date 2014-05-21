@@ -96,15 +96,6 @@ public class ServletFunctions {
 //                }
 //                // everything okay, return real position area (must be freshly read because we might have written to it)
 //                return (Area) activeUser.readData(REAL_POSITION);
-//            /*
-//            case TOGGLE_ADMIN:
-//                // TODO remove this, only for test!
-//                log.error(TAG, "Toggled admin! DANGEROUS OPERATION!");
-//                user.setAdmin(!user.isAdmin());
-//                return moduleManager.handleTask(Task.User.UPDATE, user);
-//            */
-//            case READ_ALL_POSITIONS:
-//                return moduleManager.handleTask(Task.Position.READ, null);
 //            case READ_ALL_AREAS:
 //                return moduleManager.handleTask(Task.Area.READ, new Area(null));
 //            case ICON_DELETE:
@@ -193,11 +184,6 @@ public class ServletFunctions {
 //                originalUser.setAdmin(tempUser.isAdmin());
 //                // and update
 //                return moduleManager.handleTask(Task.User.UPDATE, originalUser);
-//            case ADMIN_USER_DELETE:
-//                if (!(arrival.getObject() instanceof User)) {
-//                    return new Error(Error.Type.WRONG_OBJECT);
-//                }
-//                return moduleManager.handleTask(Task.User.DELETE, arrival.getObject());
 //            // LOCATION --------------------------------------------------------------------------
 //            // TODO sanitize and make sane!
 //            case LOCATION_ADD:
@@ -216,16 +202,6 @@ public class ServletFunctions {
 //                return moduleManager.handleTask(Task.Location.DELETE, arrival.getObject());
 //            // AREAS -----------------------------------------------------------------------------
 //            // TODO sanitize and make sane!
-//            case AREA_ADD:
-//                if (!(arrival.getObject() instanceof Area)) {
-//                    return new Error(Error.Type.WRONG_OBJECT);
-//                }
-//                // Adding locations via area_add is not allowed
-//                area = (Area) arrival.getObject();
-//                if (area.getLocations() != null) {
-//                    return new Error(Error.Type.ILLEGAL_VALUE, "Adding locations via an area is illegal!");
-//                }
-//                return moduleManager.handleTask(Task.Area.CREATE, area);
 //            case AREA_UPDATE:
 //                if (!(arrival.getObject() instanceof Area)) {
 //                    return new Error(Error.Type.WRONG_OBJECT);
@@ -275,11 +251,6 @@ public class ServletFunctions {
 //                }
 //                return moduleManager.handleTask(Task.Display.DELETE, arrival.getObject());
 //            // SENSORS -----------------------------------------------------------------------------------------
-//            case SENSOR_READ:
-//                if (!(arrival.getObject() instanceof WifiSensor)) {
-//                    return new Error(Error.Type.WRONG_OBJECT);
-//                }
-//                return moduleManager.handleTask(Task.Sensor.READ, arrival.getObject());
 //            case SENSOR_ADD:
 //                if (!(arrival.getObject() instanceof WifiSensor)) {
 //                    return new Error(Error.Type.WRONG_OBJECT);
@@ -341,9 +312,6 @@ public class ServletFunctions {
 //                User filter = new User(null);
 //                filter.setAdmin(true);
 //                return moduleManager.handleTask(Task.User.READ, filter);
-//            case ADMIN_ANNIHILATE_AREA:
-//                log.log(TAG, "Removing all area objects!");
-//                return moduleManager.handleTask(Task.Area.ANNIHILATE, null);
 //            case ADMIN_ANNIHILATE_USER:
 //                log.log(TAG, "Removing all users!");
 //                // purge sessions

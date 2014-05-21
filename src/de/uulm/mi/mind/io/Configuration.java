@@ -51,8 +51,9 @@ public class Configuration {
                 this.registration = config.getProperty("REGISTRATION_POLICY");
 
                 String wifiNames = config.getProperty("UNIVERSITY_SSID_FILTER");
-                this.wifiNameFilter = new ArrayList<>(Arrays.asList(wifiNames.split(",")));
-
+                if (wifiNames != null && wifiNames.isEmpty()) {
+                    this.wifiNameFilter = new ArrayList<>(Arrays.asList(wifiNames.split(",")));
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();

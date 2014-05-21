@@ -110,7 +110,6 @@ function doTask(task, object, callback) {
 //$(document).on("submit", "#logout", function (event) {
 function userLogout(){
 	doTask("LOGOUT", null, function (event) {
-        alert("Your have been successfully logged out.");
         window.location='index.html';
     });
 }

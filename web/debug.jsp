@@ -51,7 +51,6 @@ The session is saved in var session for your convenience, no need to copy & past
 three parts: the JQuery library (don't touch!), the library.js (only touch if you're Tamino :P ), and run.js, where all
 the functional code should go.
 <br>
-<!--
 <br>
 Click here to run a unit test of the API. WARNING: while the test is running, the webpage will be unresponsive!
 <br>
@@ -94,6 +93,5 @@ Test user icon upload:
     <input type="file" name="file" size="50"/><br>
     <input type="submit" value="Upload File"/>
 </form>
--->
 </body>
 </html>
