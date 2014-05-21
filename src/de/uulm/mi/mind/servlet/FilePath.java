@@ -1,5 +1,7 @@
 package de.uulm.mi.mind.servlet;
 
+import de.uulm.mi.mind.logger.Messenger;
+
 import javax.servlet.ServletContext;
 
 /**
@@ -13,6 +15,10 @@ public class FilePath {
     private String SEP = System.getProperty("file.separator");
 
     public FilePath(ServletContext context) {
+        if (context == null) {
+            // TAMINO FIX IF THIS HAPPENS
+            Messenger.getInstance().error("FilePath","Context is null! THIS WON'T WORK!");
+        }
         // set base directory for files to be stored in
         filePath = context.getRealPath("/") + "images" + SEP;
     }

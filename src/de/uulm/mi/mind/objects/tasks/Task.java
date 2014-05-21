@@ -8,6 +8,8 @@ import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.messages.*;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.security.Active;
+import de.uulm.mi.mind.servlet.FilePath;
+import de.uulm.mi.mind.servlet.Servlet;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -21,6 +23,7 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
     protected Messenger log;
     protected Configuration configuration;
     protected DatabaseController database;
+    protected FilePath filePath;
     protected final String TAG;
 
     /**
@@ -30,6 +33,7 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
         log = Messenger.getInstance();
         configuration = Configuration.getInstance();
         database = DatabaseController.getInstance();
+        filePath = new FilePath(Servlet.getContext());
         TAG = "Task";
     }
 

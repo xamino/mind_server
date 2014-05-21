@@ -14,6 +14,7 @@ import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.task.TaskManager;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +39,11 @@ public class Servlet extends HttpServlet {
      * Class for logging stuff.
      */
     private Messenger log;
-    private ServletFunctions functions;
+    private static ServletContext context;
+
+    public static ServletContext getContext() {
+        return context;
+    }
 
     @Override
     public void init() throws ServletException {
@@ -46,7 +51,7 @@ public class Servlet extends HttpServlet {
         super.init();
         log = Messenger.getInstance();
         json = JsonWrapper.getInstance();
-        functions = ServletFunctions.getInstance(this.getServletContext());
+        context = this.getServletContext();
         log.log(TAG, "Created.");
     }
 

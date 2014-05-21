@@ -96,18 +96,6 @@ public class ServletFunctions {
 //                }
 //                // everything okay, return real position area (must be freshly read because we might have written to it)
 //                return (Area) activeUser.readData(REAL_POSITION);
-//            case ICON_DELETE:
-//                String icon = "icon_" + user.readIdentification();
-//                File file = new File(filePath.iconPath() + icon);
-//                if (!file.exists()) {
-//                    return new Success(Success.Type.NOTE, "No icon to remove.");
-//                }
-//                if (!file.delete()) {
-//                    log.error(TAG, "Failed to remove icon for " + user.readIdentification() + "!");
-//                    return new Error(Error.Type.SERVER, "Failed to delete icon!");
-//                }
-//                log.log(TAG, "User " + user.readIdentification() + " deleted icon.");
-//                return new Success("Icon removed.");
 //            default:
 //                return null;
 //        }
