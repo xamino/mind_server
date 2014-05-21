@@ -28,7 +28,7 @@ class Query {
     }
 
     public Query descendConstrain(Object o, Object c) {
-        if (c == null || c == 0 || c == 0.0)
+        if (c == null || !((boolean) c) || c == 0 || c == 0.0)
             return this; // Removes condition allowing all matching results in these cases TODO does this wrong?
         conditionMap.put(o, c);
         return this;
@@ -44,9 +44,13 @@ class Query {
             if (conditionMap.size() > 0) {
                 query += " WHERE ";
                 for (Map.Entry<Object, Object> objectObjectEntry : conditionMap.entrySet()) {
-                    query += objectObjectEntry.getKey() + " = " + objectObjectEntry.getValue() + " AND ";
+                    Object val = objectObjectEntry.getValue();
+                    if (val instanceof String || val instanceof Enum) {
+                        val = "'" + val + "'";
+                    }
+                    query += objectObjectEntry.getKey() + " = " + val + " AND ";
                 }
-                query += "is TRUE";
+                query = query.substring(0, query.lastIndexOf("AND") - 1);
             }
 
             log.log(TAG, query);
@@ -55,7 +59,7 @@ class Query {
             ResultSet rs = statement.executeQuery(query);
             while (rs.next()) {
                 Class<?> objectClass = Class.forName("de.uulm.mi.mind.objects." + table);
-                log.log(TAG, "Table2Class: de.uulm.mi.mind.objects." + table);
+                //log.log(TAG, "Table2Class: de.uulm.mi.mind.objects." + table);
                 E object = null;
                 try {
                     Constructor constructor = objectClass.getDeclaredConstructor(new Class[]{});

@@ -4,9 +4,7 @@ import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Date;
 import java.util.List;
 
@@ -15,10 +13,10 @@ import java.util.List;
  */
 class ObjectContainerSQL {
     private static final String TAG = "ObjectContainerSQL";
-    private static final String BOOLEAN = "boolean";
-    private static final String INTEGER = "int";
-    private static final String VARCHAR = "varchar(255)";
-    private static final String DATE = "date";
+    private static final String BOOLEAN = "BOOLEAN";
+    private static final String INTEGER = "INZT";
+    private static final String VARCHAR = "VARCHAR(255)";
+    private static final String DATE = "DATETIME";
     private final Messenger log;
     private final Connection con;
 
@@ -37,46 +35,46 @@ class ObjectContainerSQL {
     }
 
     public void store(Object o) {
-
         String tableName = o.getClass().getSimpleName();
 
-        String columnTypes = "";
+        // Build table structure
+        createTableForClassIfNotExist(o);
+
+        // insert values
         String columnQuery = "";
         String valueQuery = "";
         for (Field field : o.getClass().getDeclaredFields()) {
             field.setAccessible(true);
             try {
-
                 // get SQL type of field
-                String type = classToSQLType(field.getType());
-
-                // escape varchars
+                Class<?> type = field.getType();
+                // escape strings in query
                 Object val = field.get(o);
-                if (val != null && (type.equals(VARCHAR) || type.startsWith("ENUM"))) {
+                if (val == null) {
+                    valueQuery += null + ",";
+                } else if (type == String.class || type.isEnum()) {
                     valueQuery += "'" + val + "',";
+                } else if (val instanceof Date) {
+                    valueQuery += "'" + new Timestamp(((Date) val).getTime()) + "',";
                 } else {
-                    valueQuery += "" + val + ",";
+                    valueQuery += val + ",";
                 }
 
                 columnQuery += field.getName() + ",";
-                columnTypes += field.getName() + " " + type + ",";
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
         columnQuery = columnQuery.substring(0, columnQuery.lastIndexOf(","));
         valueQuery = valueQuery.substring(0, valueQuery.lastIndexOf(","));
-        columnTypes = columnTypes.substring(0, columnTypes.lastIndexOf(","));
 
-        String tableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + "(" + columnTypes + ")";
+
         String query = "INSERT INTO " + tableName + " (" + columnQuery + ") VALUES (" + valueQuery + ")";
-        log.log(TAG, tableQuery);
+
         log.log(TAG, query);
 
         try {
-            PreparedStatement statement = con.prepareStatement(tableQuery);
-            statement.execute();
-
+            //insert values
             PreparedStatement pstm = con.prepareStatement(query);
             pstm.execute();
 
@@ -84,6 +82,45 @@ class ObjectContainerSQL {
             e.printStackTrace();
         }
 
+    }
+
+    private void createTableForClassIfNotExist(Object o) {
+        String tableName = o.getClass().getSimpleName();
+        int size = -1;
+        try {
+            Statement stm = con.createStatement();
+            ResultSet rs = stm.executeQuery("SHOW TABLES LIKE '" + tableName + "'");
+            rs.last();
+            size = rs.getRow();
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (size != 0) {
+            // exists already
+            return;
+        }
+
+        String columnTypes = "";
+        for (Field field : o.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+
+            // get SQL type of field
+            String type = classToSQLType(field.getType());
+            columnTypes += field.getName() + " " + type + ",";
+        }
+        columnTypes = columnTypes.substring(0, columnTypes.lastIndexOf(","));
+
+        String tableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + "(" + columnTypes + ")";
+        log.log(TAG, tableQuery);
+        try {
+            //create table structure
+            PreparedStatement statement = con.prepareStatement(tableQuery);
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private String classToSQLType(Class<?> type) {
@@ -140,11 +177,12 @@ class ObjectContainerSQL {
         return list;
     }
 
-    public <E extends Saveable> List queryByExample(E requestFilter) {
+    public <E extends Saveable> List<E> queryByExample(E requestFilter) {
         Query q = new Query();
         q.constrain(requestFilter.getClass());
 
         for (Field field : requestFilter.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
             try {
                 q.descendConstrain(field.getName(), field.get(requestFilter));
             } catch (IllegalAccessException e) {

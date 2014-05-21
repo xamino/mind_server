@@ -194,11 +194,32 @@ class DatabaseControllerSQL implements DatabaseAccess {
 
         //rootContainer.store(new WifiSensor("ident","sadasdasdasdasdsd","world"));
         //rootContainer.store(new WifiMorsel("mac","name",-21,5,"Model"));
-        //User user = new User("blub@mail.de", "mypassword");
+        //User user = new User("blub@mail.de");
+        //user.setAccessDate(new Date());
+        //user.setPwdHash("blubhash");
         //user.setStatus(Status.AVAILABLE);
+        //rootContainer.store(new User("kjahsk@kjahsd", "assadasd", false));
         //rootContainer.store(user);
         //rootContainer.store(new User("blub@sss-de", "name", true));
-        runMaintenance(rootContainer);
+
+        Query q = rootContainer.query();
+        q.constrain(User.class);
+        List<User> list = q.execute();
+        System.out.println("Q: " + list);
+
+        User u = new User(null);
+        List<User> list1 = rootContainer.queryByExample(u);
+        System.out.println("E: " + list1);
+
+        List<User> list2 = rootContainer.query(new Predicate<User>(User.class) {
+            @Override
+            public boolean match(User o) {
+                return true;
+            }
+        });
+        System.out.println("P: " + list2);
+
+        //runMaintenance(rootContainer);
         rootContainer.close();
 
         if (reinitialize) {
