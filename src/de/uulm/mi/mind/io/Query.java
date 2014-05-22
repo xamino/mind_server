@@ -20,7 +20,7 @@ class Query {
     private final Messenger log;
     private final Connection connection;
     private Class<?> objectClass;
-    private HashMap<Object, Object> conditionMap;
+    private final HashMap<Object, Object> conditionMap;
     private static final String TAG = "Query";
 
     public Query(Connection connection) {
@@ -64,13 +64,11 @@ class Query {
             statement.close();
         } catch (SQLException e) {
             log.error(TAG, e.getMessage());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
         return list;
     }
 
-    private <E> E rowToObject(Class<?> objectClass, ResultSet rs, Connection connection) throws ClassNotFoundException, SQLException {
+    private <E> E rowToObject(Class<?> objectClass, ResultSet rs, Connection connection) throws SQLException {
         E object = null;
         try {
             Constructor constructor = objectClass.getDeclaredConstructor(new Class[]{});
@@ -149,7 +147,7 @@ class Query {
             }
             rs.close();
             statement.close();
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return objects;

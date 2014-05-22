@@ -17,7 +17,7 @@ public class DatabaseManager implements ServletContextListener {
     private static DatabaseManager INSTANCE;
     private final String TAG = "DatabaseManager";
     private final DatabaseAccess dba;
-    private Messenger log;
+    private final Messenger log;
     //private final DatabaseAccess mySQL;
 
     public DatabaseManager() {
@@ -49,7 +49,8 @@ public class DatabaseManager implements ServletContextListener {
     private void init(ServletContextEvent servletContextEvent, boolean reinitialize) {
         // Allow database to run initialization
         dba.init(servletContextEvent);
-        reinit();
+        if (reinitialize)
+            reinit();
     }
 
     private void reinit() {
@@ -76,7 +77,7 @@ public class DatabaseManager implements ServletContextListener {
                     adminProto.setPwdHash(BCrypt.hashpw(config.getAdminPassword(), BCrypt.gensalt(12)));
                     session.create(adminProto);
                 }
-                return new Success("Initilaized");
+                return new Success("Initialized");
             }
         });
     }

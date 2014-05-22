@@ -11,14 +11,14 @@ import java.util.Arrays;
 import java.util.Properties;
 
 /**
- * Created by Andreas on 20.02.14.
+ * Access to configuration properties file
  */
 public class Configuration {
 
     private static Configuration instance;
-    private Messenger log;
+    private final Messenger log;
 
-    private final String CLASS = "Configuration";
+    private static final String TAG = "Configuration";
 
     private String dbName;
     private String adminName;
@@ -65,7 +65,7 @@ public class Configuration {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else log.log(CLASS, "Did not find custom config! Loading standard config.");
+        } else log.log(TAG, "Did not find custom config! Loading standard config.");
 
 
         // load default config

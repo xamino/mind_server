@@ -8,7 +8,7 @@ import javax.servlet.ServletContextEvent;
 /**
  * Created by Cassio on 10.05.2014.
  */
-public interface DatabaseAccess {
+interface DatabaseAccess {
     boolean update(Session session, Saveable data);
 
     boolean delete(Session session, Saveable data);

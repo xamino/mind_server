@@ -116,9 +116,6 @@ class ObjectContainerSQL {
     }
 
     private <E> void storeCollection(Class<?> containerClass, Class<? extends E> elementClass, Collection<E> children, int pid) {
-
-        String container = containerClass.getCanonicalName().replace(".", "_");
-        String element = elementClass.getCanonicalName().replace(".", "_");
         String oneToMany = containerClass.getSimpleName() + "__" + elementClass.getSimpleName();
 
         ArrayList<Integer> cids = new ArrayList<>();

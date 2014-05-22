@@ -26,7 +26,7 @@ class DatabaseControllerSQL implements DatabaseAccess {
      * Private constructor for DatabaseController for implementing the singleton
      * instance. Use getInstance() to get a reference to an object of this type.
      */
-    public DatabaseControllerSQL() {
+    private DatabaseControllerSQL() {
         instance = this;
     }
 
@@ -191,7 +191,7 @@ class DatabaseControllerSQL implements DatabaseAccess {
         String user = config.getDbUser();
         String pass = config.getDbPassword();
 
-        Connection con = null;
+        Connection con;
 
         try {
             Class.forName(driver);

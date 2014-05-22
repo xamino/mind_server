@@ -30,7 +30,7 @@ class DatabaseController implements DatabaseAccess {
      * Private constructor for DatabaseController for implementing the singleton
      * instance. Use getInstance() to get a reference to an object of this type.
      */
-    public DatabaseController() {
+    private DatabaseController() {
         instance = this;
     }
 
@@ -210,27 +210,6 @@ class DatabaseController implements DatabaseAccess {
         return rootContainer.ext().openSession();
     }
 
-    public void init(String servletFilePath, boolean reinitialize) {
-        Configuration config = Configuration.getInstance();
-        log = Messenger.getInstance();
-        String dbFilePath = servletFilePath + "WEB-INF/" + config.getDbName();
-
-        EmbeddedConfiguration dbconfig = Db4oEmbedded.newConfiguration();
-        //dbconfig.common().diagnostic().addListener(new DiagnosticToConsole());
-        dbconfig.common().objectClass(Area.class).cascadeOnUpdate(true);
-        dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);
-        dbconfig.common().objectClass(Location.class).cascadeOnDelete(true);
-        //dbconfig.common().optimizeNativeQueries(true);
-        dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
-        dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
-        dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
-        dbconfig.common().objectClass(WifiSensor.class).objectField("identification").indexed(true);
-        dbconfig.common().objectClass(Location.class).objectField("key").indexed(true);
-        rootContainer = Db4oEmbedded.openFile(dbconfig, dbFilePath);
-
-        log.log(TAG, "db4o startup on " + dbFilePath);
-    }
-
     private void cleanOrphans(ObjectContainer rootContainer) {
         ObjectSet<Location> set1 = rootContainer.query(new Predicate<Location>() {
             @Override
@@ -290,10 +269,7 @@ class DatabaseController implements DatabaseAccess {
     }
 
     private boolean bothNullOrEqual(String deviceModel, String deviceModel1) {
-        if (deviceModel == null && deviceModel1 == null) return true;
-        else if (deviceModel != null && deviceModel1 != null) {
-            return deviceModel.equals(deviceModel1);
-        } else return false;
+        return deviceModel == null && deviceModel1 == null || (deviceModel != null) && (deviceModel1 != null) && deviceModel.equals(deviceModel1);
     }
 
     @Override
@@ -305,7 +281,26 @@ class DatabaseController implements DatabaseAccess {
     public void init(ServletContextEvent event) {
         ServletContext context = event.getServletContext();
         String filePath = context.getRealPath("/");
-        init(filePath, true);
+
+        Configuration config = Configuration.getInstance();
+        log = Messenger.getInstance();
+        String dbFilePath = filePath + "WEB-INF/" + config.getDbName();
+
+        EmbeddedConfiguration dbconfig = Db4oEmbedded.newConfiguration();
+        //dbconfig.common().diagnostic().addListener(new DiagnosticToConsole());
+        dbconfig.common().objectClass(Area.class).cascadeOnUpdate(true);
+        dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);
+        dbconfig.common().objectClass(Location.class).cascadeOnDelete(true);
+        //dbconfig.common().optimizeNativeQueries(true);
+        dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
+        dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
+        dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
+        dbconfig.common().objectClass(WifiSensor.class).objectField("identification").indexed(true);
+        dbconfig.common().objectClass(Location.class).objectField("key").indexed(true);
+        rootContainer = Db4oEmbedded.openFile(dbconfig, dbFilePath);
+
+        log.log(TAG, "db4o startup on " + dbFilePath);
+
     }
 
     @Override
