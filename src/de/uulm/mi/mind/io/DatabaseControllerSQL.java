@@ -128,6 +128,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
     }
 
     public boolean update(Session session, Saveable data) {
+        log.log(TAG, "To update: " + data.toString());
         ObjectContainerSQL sessionContainer = session.getSqlContainer();
         if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
         try {
@@ -138,6 +139,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
                 log.log(TAG, "Updated in DB: " + data.toString());
                 return true;
             }
+            log.log(TAG, "Not found on read: " + data.toString());
             return false;
         } catch (Exception e) {
             return false;
@@ -152,10 +154,11 @@ class DatabaseControllerSQL extends DatabaseAccess {
      * @return true if deletion was successful or the object does not exist, otherwise false
      */
     public boolean delete(Session session, Saveable data) {
+        log.log(TAG, "To Delete: " + data.toString());
         ObjectContainerSQL sessionContainer = session.getSqlContainer();
         try {
             DataList<Saveable> dataList = read(session, data);
-
+            log.log(TAG, "Read Delete: " + dataList.toString());
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
                 return false;

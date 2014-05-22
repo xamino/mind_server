@@ -51,6 +51,8 @@ public class DatabaseManager implements ServletContextListener {
     private void init(ServletContextEvent servletContextEvent, boolean reinitialize) {
         // Allow database to run initialization
         dba.init(servletContextEvent);
+
+
         if (reinitialize)
             reinit();
     }
@@ -60,6 +62,8 @@ public class DatabaseManager implements ServletContextListener {
             @Override
             public Data doOperations(Session session) {
                 // Initializing Database
+                System.out.println(session.read(new User("admin@admin.admin")));
+                runMaintenance(session.getSqlContainer());
                 session.reinit();
                 return new Success("Reinitialized");
             }

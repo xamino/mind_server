@@ -267,6 +267,44 @@ class ObjectContainerSQL {
     }
 
     public void delete(Object o) {
+        String query = "DELETE FROM " + o.getClass().getCanonicalName().replace(".", "_") +
+                " WHERE ";
+        for (Field field : o.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+                // get SQL type of field
+                Class<?> type = field.getType();
+                // escape strings in query
+                Object val = field.get(o);
+                String valQuery = "";
+                if (val == null) {
+                    valQuery += null;
+                } else if (type == String.class || type.isEnum()) {
+                    valQuery += STRESC + val + STRESC;
+                } else if (type == Date.class) {
+                    valQuery += STRESC + new Timestamp(((Date) val).getTime()) + STRESC;
+                } else if (Collection.class.isAssignableFrom(type) || type.isArray()) {
+                    //objectArrayList.put(getClassFromGenericField(field), (Collection) val);
+                    continue;
+                } else {
+                    valQuery += val;
+                }
+                query += COLESC + field.getName() + COLESC + " = " + valQuery + " AND ";
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        query = query.substring(0, query.lastIndexOf("AND") - 1);
+
+        log.log(TAG, query);
+
+
+        try {
+            PreparedStatement pstm = con.prepareStatement(query);
+            pstm.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 
