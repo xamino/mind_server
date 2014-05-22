@@ -1,7 +1,7 @@
 package de.uulm.mi.mind.io;
 
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.Interfaces.Saveable;
+import de.uulm.mi.mind.objects.DataList;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -18,7 +18,7 @@ import java.util.*;
 class Query {
 
     private final Messenger log;
-    private String table;
+    private Class<?> objectClass;
     private HashMap<Object, Object> conditionMap;
     private static final String TAG = "Query";
 
@@ -34,12 +34,12 @@ class Query {
         return this;
     }
 
-    public <E extends Saveable> List<E> execute() {
-        List<E> list = new ArrayList<>();
+    public <E> ArrayList<E> execute() {
+        ArrayList<E> list = new ArrayList<>();
         try {
             Connection connection = DatabaseControllerSQL.getInstance().createConnection();
 
-            String query = "SELECT * FROM " + table;
+            String query = "SELECT * FROM " + objectClass.getCanonicalName().replace(".", "_");
 
             if (conditionMap.size() > 0) {
                 query += " WHERE ";
@@ -58,31 +58,10 @@ class Query {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(query);
             while (rs.next()) {
-                Class<?> objectClass = Class.forName(table.replace("_", "."));
-                E object = null;
-                try {
-                    Constructor constructor = objectClass.getDeclaredConstructor(new Class[]{});
-                    constructor.setAccessible(true);
-                    object = (E) constructor.newInstance(new Class[]{});
-                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                    log.error(TAG, "Default constructor missing for " + objectClass.toString() + "!");
-                    //throw new IOException(TAG + ": Objects must have default constructor! May be private though.");
-                }
-                // apply all fields, leaving those we have no value for at their default value
-                for (Field f : objectClass.getDeclaredFields()) {
-                    f.setAccessible(true);
-                    Object parsedValue = typeCastParse(f.getType(), f.getName(), rs);
-                    try {
-                        // this is where we also parse the value to the correct type
-                        f.set(object, parsedValue);
-                    } catch (IllegalAccessException e) {
-                        //throw new IOException(TAG + ": Failed to write fields!");
-                    }
-
-                }
-                list.add(object);
+                list.add(this.<E>rowToObject(objectClass, rs, connection));
             }
             rs.close();
+            statement.close();
             connection.close();
 
         } catch (SQLException e) {
@@ -93,7 +72,33 @@ class Query {
         return list;
     }
 
-    private Object typeCastParse(Class<?> type, String column, ResultSet rs) throws SQLException {
+    private <E> E rowToObject(Class<?> objectClass, ResultSet rs, Connection connection) throws ClassNotFoundException, SQLException {
+        E object = null;
+        try {
+            Constructor constructor = objectClass.getDeclaredConstructor(new Class[]{});
+            constructor.setAccessible(true);
+            object = (E) constructor.newInstance(new Class[]{});
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            log.error(TAG, "Default constructor missing for " + objectClass.toString() + "!");
+            //throw new IOException(TAG + ": Objects must have default constructor! May be private though.");
+        }
+        // apply all fields, leaving those we have no value for at their default value
+        for (Field f : objectClass.getDeclaredFields()) {
+            f.setAccessible(true);
+
+            Object parsedValue = typeCastParse(f.getType(), f.getName(), rs, objectClass, connection, f);
+            try {
+                // this is where we also parse the value to the correct type
+                f.set(object, parsedValue);
+            } catch (IllegalAccessException e) {
+                //throw new IOException(TAG + ": Failed to write fields!");
+            }
+
+        }
+        return object;
+    }
+
+    private Object typeCastParse(Class<?> type, String column, ResultSet rs, Class<?> parentType, Connection connection, Field f) throws SQLException {
         if (type == boolean.class) {
             return rs.getBoolean(column);
         } else if (type == byte.class) {
@@ -118,11 +123,41 @@ class Query {
             String enumString = rs.getString(column);
             if (enumString == null) return null;
             return Enum.valueOf((Class) type, enumString);
+        } else if (type.isArray() || Collection.class.isAssignableFrom(type)) {
+            return getObjectList(parentType, ObjectContainerSQL.getClassFromGenericField(f), rs.getInt("id"), connection);
         } else
             return null;
     }
 
-    public void constrain(Class<? extends Saveable> aClass) {
-        table = aClass.getSimpleName();
+    private <E> Collection<E> getObjectList(Class<?> parentType, Class<? extends E> type, int id, Connection connection) {
+        String element = type.getCanonicalName().replace(".", "_");
+        String oneToMany = parentType.getSimpleName() + "__" + type.getSimpleName();
+
+        String query = "SELECT * FROM "
+                + oneToMany
+                + " LEFT JOIN " + element
+                + " ON " + oneToMany + ".cid = " + element + ".id"
+                + " WHERE " + oneToMany + ".pid = " + id;
+
+        log.log(TAG, query);
+
+        Collection<E> objects = new DataList(); //TODO get rid
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+
+            while (rs.next()) {
+                objects.add(this.<E>rowToObject(type, rs, connection));
+            }
+            rs.close();
+            statement.close();
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return objects;
+    }
+
+    public void constrain(Class<?> aClass) {
+        objectClass = aClass;
     }
 }

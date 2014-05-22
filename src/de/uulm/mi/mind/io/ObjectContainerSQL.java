@@ -1,15 +1,12 @@
 package de.uulm.mi.mind.io;
 
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by Cassio on 08.05.2014.
@@ -48,7 +45,7 @@ class ObjectContainerSQL {
         }
     }
 
-    public void store(Object o) {
+    public int store(Object o) {
         String tableName = o.getClass().getCanonicalName().replace('.', '_');
 
         // Build table structure
@@ -57,6 +54,9 @@ class ObjectContainerSQL {
         // insert values
         String columnQuery = "";
         String valueQuery = "";
+
+        HashMap<Class<?>, Collection> objectArrayList = new HashMap<>();
+
         for (Field field : o.getClass().getDeclaredFields()) {
             field.setAccessible(true);
             try {
@@ -68,8 +68,11 @@ class ObjectContainerSQL {
                     valueQuery += null + ",";
                 } else if (type == String.class || type.isEnum()) {
                     valueQuery += STRESC + val + STRESC + ",";
-                } else if (val instanceof Date) {
+                } else if (type == Date.class) {
                     valueQuery += STRESC + new Timestamp(((Date) val).getTime()) + STRESC + ",";
+                } else if (Collection.class.isAssignableFrom(type) || type.isArray()) {
+                    objectArrayList.put(getClassFromGenericField(field), (Collection) val);
+                    continue;
                 } else {
                     valueQuery += val + ",";
                 }
@@ -87,14 +90,59 @@ class ObjectContainerSQL {
 
         log.log(TAG, query);
 
+        int insertID = -1;
         try {
             //insert values
-            PreparedStatement pstm = con.prepareStatement(query);
-            //pstm.execute();
+            PreparedStatement pstm = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            pstm.executeUpdate();
+
+            ResultSet rs = pstm.getGeneratedKeys();
+            if (rs.next()) {
+                insertID = rs.getInt(1);
+            }
+            rs.close();
+            pstm.close();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        for (Map.Entry<Class<?>, Collection> entry : objectArrayList.entrySet()) {
+            storeCollection(o.getClass(), entry.getKey(), entry.getValue(), insertID);
+        }
+
+        return insertID;
+
+    }
+
+    private <E> void storeCollection(Class<?> containerClass, Class<? extends E> elementClass, Collection<E> children, int pid) {
+
+        String container = containerClass.getCanonicalName().replace(".", "_");
+        String element = elementClass.getCanonicalName().replace(".", "_");
+        String oneToMany = containerClass.getSimpleName() + "__" + elementClass.getSimpleName();
+
+        ArrayList<Integer> cids = new ArrayList<>();
+
+        //store children
+        for (E child : children) {
+            cids.add(store(child));
+        }
+        // update relation table
+        String query = "INSERT INTO " + oneToMany + " (pid,cid) VALUES (?,?)";
+        try {
+            PreparedStatement pstm = con.prepareStatement(query);
+
+            for (Integer cid : cids) {
+                pstm.setInt(1, pid);
+                pstm.setInt(2, cid);
+                pstm.executeUpdate();
+            }
+            pstm.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -111,6 +159,7 @@ class ObjectContainerSQL {
             rs.last();
             size = rs.getRow();
             rs.close();
+            stm.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -134,15 +183,15 @@ class ObjectContainerSQL {
             if (type.equals(OBJECT)) {
                 log.log(TAG, "Nested class found: " + fieldClass.getSimpleName());
                 createTableForClassIfNotExist(fieldClass);
-                foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + fieldClass.getCanonicalName().replace(".", "_") + "(id),");
-                type = INT;
+                //foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + fieldClass.getCanonicalName().replace(".", "_") + "(id),");
+                continue;
             } else if (type.equals(LIST)) {
-                Class<?> elementClass = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                Class<?> elementClass = getClassFromGenericField(field);
                 log.log(TAG, "Nested list/array found: " + fieldClass.getSimpleName() + " of " + elementClass.getSimpleName());
                 createTableForClassIfNotExist(elementClass);
                 createTableForListsIfNotExist(o, elementClass);
-                foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + o.getSimpleName() + "__" + elementClass.getSimpleName() + "(pid),");
-                type = INT;
+                //foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + o.getSimpleName() + "__" + elementClass.getSimpleName() + "(pid),");
+                continue;
             }
             columnTypes += COLESC + field.getName() + COLESC + " " + type + ",";
         }
@@ -158,7 +207,8 @@ class ObjectContainerSQL {
         try {
             //create table structure
             PreparedStatement statement = con.prepareStatement(tableQuery);
-            statement.execute();
+            statement.executeUpdate();
+            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -169,15 +219,16 @@ class ObjectContainerSQL {
                 containerClass.getSimpleName() + "__" + elementClass.getSimpleName() +
                 " (pid INTEGER NOT NULL," +
                 " cid INTEGER NOT NULL," +
-                "INDEX pid_index (pid), INDEX cid_index (cid))";
-        //"FOREIGN KEY (" + COLESC + "pid" + COLESC + ") REFERENCES " + containerClass.getCanonicalName().replace(".", "_") + "(id)," +
-        //"FOREIGN KEY (" + COLESC + "cid" + COLESC + ") REFERENCES " + elementClass.getCanonicalName().replace(".", "_") + "(id))";
+                "INDEX pid_index (pid)," +
+                //"FOREIGN KEY (" + COLESC + "pid" + COLESC + ") REFERENCES " + containerClass.getCanonicalName().replace(".", "_") + "(id)," +
+                "FOREIGN KEY (" + COLESC + "cid" + COLESC + ") REFERENCES " + elementClass.getCanonicalName().replace(".", "_") + "(id))";
         log.log(TAG, tableQuery);
 
         try {
             //create table structure
             PreparedStatement statement = con.prepareStatement(tableQuery);
-            statement.execute();
+            statement.executeUpdate();
+            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -234,7 +285,7 @@ class ObjectContainerSQL {
         return new Query();
     }
 
-    public <E extends Saveable> List<E> query(Predicate<E> predicate) {
+    public <E> List<E> query(Predicate<E> predicate) {
         Query q = new Query();
         q.constrain(predicate.getClassType());
         List<E> list = q.execute();
@@ -248,7 +299,7 @@ class ObjectContainerSQL {
         return list;
     }
 
-    public <E extends Saveable> List<E> queryByExample(E requestFilter) {
+    public <E> List<E> queryByExample(E requestFilter) {
         Query q = new Query();
         q.constrain(requestFilter.getClass());
 
@@ -262,6 +313,10 @@ class ObjectContainerSQL {
         }
 
         return q.execute();
+    }
+
+    static Class<?> getClassFromGenericField(Field field) {
+        return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
     }
 
     public void rollback() {

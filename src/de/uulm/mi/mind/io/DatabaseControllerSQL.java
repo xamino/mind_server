@@ -195,11 +195,13 @@ class DatabaseControllerSQL implements DatabaseAccess {
 
         DataList<WifiMorsel> wl = new DataList<>();
         wl.add(new WifiMorsel(null, null, 10, 10, null, new Date()));
+        wl.add(new WifiMorsel("asdasd", "asdasd", -20, 5, "Samsung", null));
+        wl.add(new WifiMorsel("dddddd", "ddddd", -10, 4, "Sony", null));
 
         Location loc = new Location(1, 2, wl);
-        rootContainer.store(loc);
+        //rootContainer.store(loc);
 
-        //runMaintenance(rootContainer);
+        runMaintenance(rootContainer);
         rootContainer.close();
 
         if (reinitialize) {
@@ -240,6 +242,7 @@ class DatabaseControllerSQL implements DatabaseAccess {
         });
         log.log(TAG, "Morsels: " + set.size() + "\n" + set);
 
+        /*
         log.log(TAG, "In Universe:");
         List<Area> set3 = rootContainer.query(new Predicate<Area>(Area.class) {
             @Override
@@ -257,6 +260,7 @@ class DatabaseControllerSQL implements DatabaseAccess {
             morselCounter += location.getWifiMorsels().size();
         }
         log.log(TAG, "Morsels: " + morselCounter);
+        */
     }
 
     /**
