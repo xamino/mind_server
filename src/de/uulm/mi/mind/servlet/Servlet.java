@@ -27,6 +27,7 @@ import java.io.IOException;
  */
 public class Servlet extends HttpServlet {
 
+    private static ServletContext context;
     /**
      * TAG for logging.
      */
@@ -39,7 +40,6 @@ public class Servlet extends HttpServlet {
      * Class for logging stuff.
      */
     private Messenger log;
-    private static ServletContext context;
 
     public static ServletContext getContext() {
         return context;
@@ -77,8 +77,9 @@ public class Servlet extends HttpServlet {
         } else {
             // set IP address in case we need it (warning: can be IPv4 OR IPv6!!!)
             arrival.setIpAddress(request.getRemoteAddr());
-
+            log.pushTimer(this, "tasks");
             answer = TaskManager.getInstance().run(arrival);
+            log.log(TAG, "Task " + arrival.getTask() + " took " + log.popTimer(this).time + "ms.");
         }
 
         // Encapsulate answer:

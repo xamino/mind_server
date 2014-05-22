@@ -37,6 +37,7 @@ public class TaskManager {
         loadTasks("de.uulm.mi.mind.logic.tasks.admin");
         loadTasks("de.uulm.mi.mind.logic.tasks.multiple");
         loadTasks("de.uulm.mi.mind.logic.tasks.user");
+        loadTasks("de.uulm.mi.mind.logic.tasks.sensor");
         log.log(TAG, "Registered " + taskNames.size() + " tasks total.");
         log.log(TAG, "Created.");
     }
