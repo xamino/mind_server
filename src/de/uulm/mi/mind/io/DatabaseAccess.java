@@ -22,6 +22,4 @@ public interface DatabaseAccess {
     boolean create(Session session, Saveable data);
 
     <E extends Saveable> DataList<E> read(Session session, E data);
-
-    void reinit(Session session);
 }

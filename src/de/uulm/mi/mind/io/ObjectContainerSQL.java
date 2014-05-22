@@ -282,11 +282,11 @@ class ObjectContainerSQL {
     }
 
     public Query query() {
-        return new Query();
+        return new Query(con);
     }
 
     public <E> List<E> query(Predicate<E> predicate) {
-        Query q = new Query();
+        Query q = new Query(con);
         q.constrain(predicate.getClassType());
         List<E> list = q.execute();
 
@@ -300,7 +300,7 @@ class ObjectContainerSQL {
     }
 
     public <E> List<E> queryByExample(E requestFilter) {
-        Query q = new Query();
+        Query q = new Query(con);
         q.constrain(requestFilter.getClass());
 
         for (Field field : requestFilter.getClass().getDeclaredFields()) {

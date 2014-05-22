@@ -3,15 +3,12 @@ package de.uulm.mi.mind.io;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
-import de.uulm.mi.mind.security.BCrypt;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,8 +19,7 @@ class DatabaseControllerSQL implements DatabaseAccess {
      * Variable for storing the instance of the class.
      */
     private static DatabaseControllerSQL instance;
-    private final String TAG = "DatabaseController";
-    private ObjectContainerSQL rootContainer;
+    private final String TAG = "DatabaseControllerSQL";
     private Messenger log;
 
     /**
@@ -64,9 +60,7 @@ class DatabaseControllerSQL implements DatabaseAccess {
             return false;
         }
         try {
-
             sessionContainer.store(data);
-
 
             log.log(TAG, "Written to DB: " + data.toString());
             return true;
@@ -183,115 +177,6 @@ class DatabaseControllerSQL implements DatabaseAccess {
         }
     }
 
-    public ObjectContainerSQL getSessionContainer() {
-        // open the db4o-session.
-        return new ObjectContainerSQL(createConnection());
-    }
-
-    public void init(String servletFilePath, boolean reinitialize) {
-        log = Messenger.getInstance();
-
-        rootContainer = getSessionContainer();
-
-        DataList<WifiMorsel> wl = new DataList<>();
-        wl.add(new WifiMorsel(null, null, 10, 10, null, new Date()));
-        wl.add(new WifiMorsel("asdasd", "asdasd", -20, 5, "Samsung", null));
-        wl.add(new WifiMorsel("dddddd", "ddddd", -10, 4, "Sony", null));
-
-        Location loc = new Location(1, 2, wl);
-        //rootContainer.store(loc);
-
-        runMaintenance(rootContainer);
-        rootContainer.close();
-
-        if (reinitialize) {
-            //reinit(rootContainer);
-            //rootContainer.commit();
-        }
-
-    }
-
-    private void runMaintenance(ObjectContainerSQL rootContainer) {
-        log.log(TAG, "In DB Stats:");
-        List<User> set4 = rootContainer.query(new Predicate<User>(User.class) {
-            @Override
-            public boolean match(User o) {
-                return true;
-            }
-        });
-        log.log(TAG, "Users: " + set4.size() + "\n" + set4);
-        List<Area> set2 = rootContainer.query(new Predicate<Area>(Area.class) {
-            @Override
-            public boolean match(Area o) {
-                return true;
-            }
-        });
-        log.log(TAG, "Areas: " + set2.size() + "\n" + set2);
-        List<Location> set1 = rootContainer.query(new Predicate<Location>(Location.class) {
-            @Override
-            public boolean match(Location o) {
-                return true;
-            }
-        });
-        log.log(TAG, "Locations: " + set1.size() + "\n" + set1);
-        List<WifiMorsel> set = rootContainer.query(new Predicate<WifiMorsel>(WifiMorsel.class) {
-            @Override
-            public boolean match(WifiMorsel o) {
-                return true;
-            }
-        });
-        log.log(TAG, "Morsels: " + set.size() + "\n" + set);
-
-        /*
-        log.log(TAG, "In Universe:");
-        List<Area> set3 = rootContainer.query(new Predicate<Area>(Area.class) {
-            @Override
-            public boolean match(Area o) {
-                return o.getKey().equals("University");
-            }
-        });
-        if (set3 == null || set3.size() == 0) {
-            return;
-        }
-        Area university = set3.get(0);
-        log.log(TAG, "Locations: " + university.getLocations().size());
-        int morselCounter = 0;
-        for (Location location : university.getLocations()) {
-            morselCounter += location.getWifiMorsels().size();
-        }
-        log.log(TAG, "Morsels: " + morselCounter);
-        */
-    }
-
-    /**
-     * Must not be called before the
-     */
-    public void reinit(Session session) {
-        ObjectContainerSQL sessionContainer = session.getSqlContainer();
-        //
-        Configuration config = Configuration.getInstance();
-
-        // Initializing Database
-        log.log(TAG, "Running DB init.");
-        DataList<Area> areaData = read(session, new Area("University"));
-        if (areaData == null || areaData.isEmpty()) {
-            log.log(TAG, "Universe not existing, creating it.");
-            create(session, new Area("University", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
-        }
-
-        // Create default admin if no other admin exists
-        User adminProto = new User(null);
-        adminProto.setAdmin(true);
-        DataList<User> adminData = read(session, adminProto);
-        // test for existing single admin or list of admins
-        if (adminData == null || adminData.isEmpty()) {
-            log.log(TAG, "Admin not existing, creating one.");
-            adminProto = new User(config.getAdminEmail(), config.getAdminName(), true);
-            adminProto.setPwdHash(BCrypt.hashpw(config.getAdminPassword(), BCrypt.gensalt(12)));
-            create(session, adminProto);
-        }
-    }
-
     /**
      * Returns a new Database connection
      *
@@ -322,8 +207,12 @@ class DatabaseControllerSQL implements DatabaseAccess {
             con = createDatabase(driver, url, config.getDbName(), user, pass);
         }
 
-        log.log(TAG, "Connection to SQL DB successful.");
-
+        //log.log(TAG, "Connection to SQL DB successful.");
+        try {
+            con.setAutoCommit(false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return con;
     }
 
@@ -353,16 +242,10 @@ class DatabaseControllerSQL implements DatabaseAccess {
 
     @Override
     public void init(ServletContextEvent event) {
-        ServletContext context = event.getServletContext();
-        String filePath = context.getRealPath("/");
-        init(filePath, true);
+        log = Messenger.getInstance();
     }
 
     @Override
     public void destroy(ServletContextEvent event) {
-        if (rootContainer != null) {
-            rootContainer.close();
-            log.log(TAG, "db4o shutdown");
-        }
     }
 }

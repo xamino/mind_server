@@ -18,11 +18,13 @@ import java.util.*;
 class Query {
 
     private final Messenger log;
+    private final Connection connection;
     private Class<?> objectClass;
     private HashMap<Object, Object> conditionMap;
     private static final String TAG = "Query";
 
-    public Query() {
+    public Query(Connection connection) {
+        this.connection = connection;
         log = Messenger.getInstance();
         conditionMap = new HashMap<>();
     }
@@ -37,8 +39,6 @@ class Query {
     public <E> ArrayList<E> execute() {
         ArrayList<E> list = new ArrayList<>();
         try {
-            Connection connection = DatabaseControllerSQL.getInstance().createConnection();
-
             String query = "SELECT * FROM " + objectClass.getCanonicalName().replace(".", "_");
 
             if (conditionMap.size() > 0) {
@@ -62,8 +62,6 @@ class Query {
             }
             rs.close();
             statement.close();
-            connection.close();
-
         } catch (SQLException e) {
             log.error(TAG, e.getMessage());
         } catch (ClassNotFoundException e) {

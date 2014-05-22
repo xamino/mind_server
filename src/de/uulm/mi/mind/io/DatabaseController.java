@@ -9,7 +9,6 @@ import com.db4o.query.Query;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
-import de.uulm.mi.mind.security.BCrypt;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -230,74 +229,6 @@ class DatabaseController implements DatabaseAccess {
         rootContainer = Db4oEmbedded.openFile(dbconfig, dbFilePath);
 
         log.log(TAG, "db4o startup on " + dbFilePath);
-
-        runMaintenance(rootContainer);
-
-        if (reinitialize) {
-            reinit(new Session(rootContainer, getInstance()));
-            rootContainer.commit();
-        }
-
-    }
-
-    private void runMaintenance(ObjectContainer rootContainer) {
-        log.log(TAG, "In DB Stats:");
-
-        ObjectSet<Area> set2 = rootContainer.query(new Predicate<Area>() {
-            @Override
-            public boolean match(Area o) {
-                return true;
-            }
-        });
-        log.log(TAG, "Areas: " + set2.size());
-        ObjectSet<Location> set1 = rootContainer.query(new Predicate<Location>() {
-            @Override
-            public boolean match(Location o) {
-                return true;
-            }
-        });
-        log.log(TAG, "Locations: " + set1.size());
-        ObjectSet<WifiMorsel> set = rootContainer.query(new Predicate<WifiMorsel>() {
-            @Override
-            public boolean match(WifiMorsel o) {
-                return true;
-            }
-        });
-        log.log(TAG, "Morsels: " + set.size());
-
-        log.log(TAG, "In Universe:");
-        ObjectSet<Area> set3 = rootContainer.query(new Predicate<Area>() {
-            @Override
-            public boolean match(Area o) {
-                return o.getKey().equals("University");
-            }
-        });
-
-        if (set3.size() == 0) {
-            log.log(TAG, "Nothing, does not yet exist!");
-            return;
-        }
-        Area university = set3.get(0);
-        log.log(TAG, "Locations: " + university.getLocations().size());
-        int morselCounter = 0;
-        for (Location location : university.getLocations()) {
-            morselCounter += location.getWifiMorsels().size();
-        }
-        log.log(TAG, "Morsels: " + morselCounter);
-
-
-        //cleanOrphans(rootContainer);
-
-        /*for (WifiMorsel wifiMorsel : set) {
-            if (wifiMorsel.getWifiName().equals("eduroam") || wifiMorsel.getWifiName().equals("welcome"))
-                rootContainer.delete(wifiMorsel);
-        }
-*/
-        /*ObjectSet<Location> locs = rootContainer.query(Location.class);
-        for (Location loc : locs){
-            loc.setCoordinateX(loc.getCoordinateX());
-            rootContainer.store(loc);
-        }*/
     }
 
     private void cleanOrphans(ObjectContainer rootContainer) {
@@ -363,39 +294,6 @@ class DatabaseController implements DatabaseAccess {
         else if (deviceModel != null && deviceModel1 != null) {
             return deviceModel.equals(deviceModel1);
         } else return false;
-    }
-
-    /**
-     * Must not be called before the
-     */
-    public void reinit(Session session) {
-        ObjectContainer sessionContainer = session.getDb4oContainer();
-        //
-        Configuration config = Configuration.getInstance();
-
-        // Initializing Database
-        log.log(TAG, "Running DB init.");
-        DataList<Area> areaData = read(session, new Area("University"));
-        if (areaData == null || areaData.isEmpty()) {
-            log.log(TAG, "Universe not existing, creating it.");
-            create(session, new Area("University", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
-        }
-
-        // Create default admin if no other admin exists
-        User adminProto = new User(null);
-        adminProto.setAdmin(true);
-        DataList<User> adminData = read(session, adminProto);
-        // test for existing single admin or list of admins
-        if (adminData == null || adminData.isEmpty()) {
-            log.log(TAG, "Admin not existing, creating one.");
-            adminProto = new User(config.getAdminEmail(), config.getAdminName(), true);
-            adminProto.setPwdHash(BCrypt.hashpw(config.getAdminPassword(), BCrypt.gensalt(12)));
-            create(session, adminProto);
-        }
-    }
-
-    public void close() {
-
     }
 
     @Override
