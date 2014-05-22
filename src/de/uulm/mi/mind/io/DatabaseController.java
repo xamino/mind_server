@@ -17,14 +17,13 @@ import java.util.List;
 /**
  * @author Andreas Köll, Tamino Hartmann
  */
-class DatabaseController implements DatabaseAccess {
+class DatabaseController extends DatabaseAccess {
     /**
      * Variable for storing the instance of the class.
      */
     private static DatabaseController instance;
     private final String TAG = "DatabaseController";
     private ObjectContainer rootContainer;
-    private Messenger log;
 
     /**
      * Private constructor for DatabaseController for implementing the singleton

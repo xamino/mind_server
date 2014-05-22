@@ -1,10 +1,12 @@
 package de.uulm.mi.mind.io;
 
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.objects.Area;
 import de.uulm.mi.mind.objects.Interfaces.Data;
+import de.uulm.mi.mind.objects.Location;
+import de.uulm.mi.mind.objects.User;
+import de.uulm.mi.mind.objects.WifiMorsel;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.security.BCrypt;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -54,30 +56,12 @@ public class DatabaseManager implements ServletContextListener {
     }
 
     private void reinit() {
-        final Configuration config = Configuration.getInstance();
         open(new Transaction() {
             @Override
             public Data doOperations(Session session) {
                 // Initializing Database
-                log.log(TAG, "Running DB init.");
-                DataList<Area> areaData = session.read(new Area("University"));
-                if (areaData == null || areaData.isEmpty()) {
-                    log.log(TAG, "Universe not existing, creating it.");
-                    session.create(new Area("University", new DataList<Location>(), 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE));
-                }
-
-                // Create default admin if no other admin exists
-                User adminProto = new User(null);
-                adminProto.setAdmin(true);
-                DataList<User> adminData = session.read(adminProto);
-                // test for existing single admin or list of admins
-                if (adminData == null || adminData.isEmpty()) {
-                    log.log(TAG, "Admin not existing, creating one.");
-                    adminProto = new User(config.getAdminEmail(), config.getAdminName(), true);
-                    adminProto.setPwdHash(BCrypt.hashpw(config.getAdminPassword(), BCrypt.gensalt(12)));
-                    session.create(adminProto);
-                }
-                return new Success("Initialized");
+                session.reinit();
+                return new Success("Reinitialized");
             }
         });
     }

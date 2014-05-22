@@ -120,20 +120,20 @@ class Query {
             if (enumString == null) return null;
             return Enum.valueOf((Class) type, enumString);
         } else if (type.isArray() || Collection.class.isAssignableFrom(type)) {
-            return getObjectList(parentType, ObjectContainerSQL.getClassFromGenericField(f), rs.getInt("id"), connection);
+            return getObjectList(parentType, ObjectContainerSQL.getClassFromGenericField(f), rs.getInt("aid"), connection);
         } else
             return null;
     }
 
-    private <E> Collection<E> getObjectList(Class<?> parentType, Class<? extends E> type, int id, Connection connection) {
+    private <E> Collection<E> getObjectList(Class<?> parentType, Class<? extends E> type, int aid, Connection connection) {
         String element = type.getCanonicalName().replace(".", "_");
         String oneToMany = parentType.getSimpleName() + "__" + type.getSimpleName();
 
         String query = "SELECT * FROM "
                 + oneToMany
                 + " LEFT JOIN " + element
-                + " ON " + oneToMany + ".cid = " + element + ".id"
-                + " WHERE " + oneToMany + ".pid = " + id;
+                + " ON " + oneToMany + ".cid = " + element + ".aid"
+                + " WHERE " + oneToMany + ".pid = " + aid;
 
         log.log(TAG, query);
 

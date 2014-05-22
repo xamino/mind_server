@@ -168,7 +168,7 @@ class ObjectContainerSQL {
 
         // Create new table
         // give it a auto increment index column for referencing
-        String columnTypes = "id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,";
+        String columnTypes = "aid INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,";
         ArrayList<String> foreignKeys = new ArrayList<>();
         for (Field field : o.getDeclaredFields()) {
             field.setAccessible(true);
@@ -180,7 +180,7 @@ class ObjectContainerSQL {
             if (type.equals(OBJECT)) {
                 log.log(TAG, "Nested class found: " + fieldClass.getSimpleName());
                 createTableForClassIfNotExist(fieldClass);
-                //foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + fieldClass.getCanonicalName().replace(".", "_") + "(id),");
+                //foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + fieldClass.getCanonicalName().replace(".", "_") + "(aid),");
                 continue;
             } else if (type.equals(LIST)) {
                 Class<?> elementClass = getClassFromGenericField(field);
@@ -217,8 +217,8 @@ class ObjectContainerSQL {
                 " (pid INTEGER NOT NULL," +
                 " cid INTEGER NOT NULL," +
                 "INDEX pid_index (pid)," +
-                //"FOREIGN KEY (" + COLESC + "pid" + COLESC + ") REFERENCES " + containerClass.getCanonicalName().replace(".", "_") + "(id)," +
-                "FOREIGN KEY (" + COLESC + "cid" + COLESC + ") REFERENCES " + elementClass.getCanonicalName().replace(".", "_") + "(id))";
+                //"FOREIGN KEY (" + COLESC + "pid" + COLESC + ") REFERENCES " + containerClass.getCanonicalName().replace(".", "_") + "(aid)," +
+                "FOREIGN KEY (" + COLESC + "cid" + COLESC + ") REFERENCES " + elementClass.getCanonicalName().replace(".", "_") + "(aid))";
         log.log(TAG, tableQuery);
 
         try {
