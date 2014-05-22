@@ -9,15 +9,10 @@ import de.uulm.mi.mind.objects.tasks.AdminTask;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.BCrypt;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 /**
  * Created by Tamino Hartmann on 5/21/14.
  */
 public class DisplayAdd extends AdminTask<PublicDisplay, Sendable> {
-
-    private final int GENERATED_KEY_LENGTH = 8;
 
     @Override
     public Sendable doWork(Active active, PublicDisplay display) {
@@ -68,14 +63,6 @@ public class DisplayAdd extends AdminTask<PublicDisplay, Sendable> {
             sessionContainer.close();
             return new Error(Error.Type.DATABASE, "Creation of PublicDisplay resulted in an error.");
         }
-    }
-
-    private String generateKey() {
-        String key = new BigInteger(130, new SecureRandom()).toString(32);
-        if (key.length() > GENERATED_KEY_LENGTH) {
-            return key.substring(0, GENERATED_KEY_LENGTH);
-        }
-        return key;
     }
 
     @Override
