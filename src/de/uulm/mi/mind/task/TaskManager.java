@@ -3,10 +3,10 @@ package de.uulm.mi.mind.task;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.Arrival;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
-import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.Security;
 
@@ -69,7 +69,7 @@ public class TaskManager {
         Sendable sendable = prepareTaskObject(task, arrival);
         if (sendable == null) {
             log.error(TAG, "Task " + TASK + " was called with wrong supplied object!");
-            return new Error(Error.Type.WRONG_OBJECT, "Wrong object supplied!");
+            return new Error(Error.Type.WRONG_OBJECT, "Wrong object for " + TASK + " supplied!");
         }
         // check security permissions
         Set permissibles = task.getTaskPermission();
@@ -80,7 +80,7 @@ public class TaskManager {
             // these tasks all require authentication
             Active active = Security.begin(null, arrival.getSessionHash());
             if (active == null || !permissibles.contains(active.getAuthenticated().getClass().getSimpleName())) {
-                log.error(TAG, "Illegal task tried!");
+                log.error(TAG, "Illegal task " + TASK + " tried!");
                 return new Error(Error.Type.SECURITY, "You do not have permission to use this task!");
             }
             // check for admin tasks
@@ -90,13 +90,15 @@ public class TaskManager {
                 // must be user
                 if (!(active.getAuthenticated() instanceof User)) {
                     Security.finish(active);
-                    return new Error(Error.Type.SECURITY, "You do not have permission to use this task!");
+                    log.error(TAG, "Illegal task " + TASK + " tried! Not user!");
+                    return new Error(Error.Type.SECURITY, "You do not have permission to use this task! Not user!");
                 }
                 if (((User) active.getAuthenticated()).isAdmin()) {
                     answer = task.doWork(active, sendable);
                 } else {
                     Security.finish(active);
-                    return new Error(Error.Type.SECURITY, "You do not have permission to use this task!");
+                    log.error(TAG, "Illegal task " + TASK + " tried! Not admin!");
+                    return new Error(Error.Type.SECURITY, "You do not have permission to use this task! Not admin!");
                 }
             } else {
                 answer = task.doWork(active, sendable);
