@@ -160,7 +160,7 @@ public class DatabaseController implements ServletContextListener {
             if (!(dataList = read(sessionContainer, data)).isEmpty()) {
                 sessionContainer.delete(dataList.get(0));
                 sessionContainer.store(data);
-                log.log(TAG, "Updated in DB: " + data.toString());
+                //log.log(TAG, "Updated in DB: " + data.toString());
                 return true;
             }
             return false;
