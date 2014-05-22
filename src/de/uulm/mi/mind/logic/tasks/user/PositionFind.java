@@ -1,5 +1,6 @@
 package de.uulm.mi.mind.logic.tasks.user;
 
+import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.io.Configuration;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
@@ -57,10 +58,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
      * @return The Area with the calculated Location in it.
      */
     private Sendable findPosition(Arrival request) {
-        // extract data we need
         Location requestLocation = ((Location) request.getObject());
-        String ip = request.getIpAddress();
-
         // First check if there is any AP measurement from the university
         boolean isAtUniversity = false;
         for (WifiMorsel morsel : requestLocation.getWifiMorsels()) {
@@ -87,6 +85,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
             log.error(TAG, "NULL area for position_find – shouldn't happen as University should be returned at least!");
             return new Success(Success.Type.NOTE, "Your position could not be found.");
         }
+        // log.log(TAG, "Algo sees device at " + area.getID() + ".");
 
         // send back the location that the server thinks you're at with the area
         DataList<Location> loca = new DataList<>();
@@ -116,8 +115,18 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
 
         // Get University Area containing all locations from database
-        // Area uniArea = (Area) ((DataList) EventModuleManager.getInstance().handleTask(Task.Area.READ, new Area("University"))).get(0);
-        Area uniArea = new Area("");
+        ObjectContainer sessionContainer = database.getSessionContainer();
+        DataList<Area> read = database.read(sessionContainer, new Area("University"));
+        sessionContainer.close();
+        if (read == null) {
+            return null;
+        }
+
+        // from here on only objects with a valid key == single ones are queried
+        else if (read.isEmpty() || read.size() != 1) {
+            return null;
+        }
+        Area uniArea = read.get(0);
         DataList<Location> dataBaseLocations = uniArea.getLocations();
 
         // Modify database List to contain the average Morsel signal strengths for each location
@@ -305,14 +314,31 @@ public class PositionFind extends Task<Arrival, Sendable> {
      * @return Most assuredly at least University, otherwise null. Usually you'll get a smaller area than University.
      */
     private Area getBestArea(Location location) {
-//        EventModuleManager eventModuleManager = EventModuleManager.getInstance();
-//        Data check = eventModuleManager.handleTask(Task.Location.SMALLEST_AREA_BY_LOCATION, location);
-//        if (!(check instanceof Area)) {
-//            return null;
-//        } else {
-//            return (Area) check;
-//        }
-        return new Area("");
+        ObjectContainer sessionContainer = database.getSessionContainer();
+        // Get all areas
+        DataList<Area> dbCall = database.read(sessionContainer, new Area(null));
+        if (dbCall == null) {
+            log.error(TAG, "All areas: dbCall == null – shouldn't happen, FIX!");
+            return null;
+        }
+        DataList<Area> all = dbCall;
+        dbCall = database.read(sessionContainer, new Area("University"));
+        if (dbCall == null) {
+            log.error(TAG, "University: dbCall == null – shouldn't happen, FIX!");
+            return null;
+        }
+
+        sessionContainer.close();
+
+        Area finalArea = dbCall.get(0);
+        for (Area temp : all) {
+            if (temp.getArea() < finalArea.getArea()
+                    && temp.contains(location.getCoordinateX(), location.getCoordinateY())) {
+                finalArea = temp;
+            }
+        }
+
+        return finalArea;
     }
 
     @Override
