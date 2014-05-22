@@ -30,7 +30,7 @@ class Query {
     }
 
     public Query descendConstrain(Object o, Object c) {
-        if (c == null || !((boolean) c) || c == 0 || c == 0.0)
+        if (c == null || (c instanceof Boolean && !((boolean) c)) || c == 0 || c == 0.0)
             return this; // Removes condition allowing all matching results in these cases TODO does this wrong?
         conditionMap.put(o, c);
         return this;

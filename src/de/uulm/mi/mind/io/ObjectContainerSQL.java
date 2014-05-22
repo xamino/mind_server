@@ -276,6 +276,11 @@ class ObjectContainerSQL {
                 Class<?> type = field.getType();
                 // escape strings in query
                 Object val = field.get(o);
+
+                if (val == null || (type == boolean.class && val == false) || val == 0 || val == 0.0) {
+                    continue;
+                }
+
                 String valQuery = "";
                 if (val == null) {
                     valQuery += null;

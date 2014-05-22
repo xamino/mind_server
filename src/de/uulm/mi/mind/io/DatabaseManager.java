@@ -62,9 +62,8 @@ public class DatabaseManager implements ServletContextListener {
             @Override
             public Data doOperations(Session session) {
                 // Initializing Database
-                System.out.println(session.read(new User("admin@admin.admin")));
-                runMaintenance(session.getSqlContainer());
                 session.reinit();
+                runMaintenance(session.getSqlContainer());
                 return new Success("Reinitialized");
             }
         });
