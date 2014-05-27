@@ -59,7 +59,8 @@ public class Configuration {
                 this.dbPassword = config.getProperty("DATABASE_PASSWORD");
 
                 String wifiNames = config.getProperty("UNIVERSITY_SSID_FILTER");
-                this.wifiNameFilter = new ArrayList<>(Arrays.asList(wifiNames.split(",")));
+                if (wifiNames != null)
+                    this.wifiNameFilter = new ArrayList<>(Arrays.asList(wifiNames.split(",")));
 
 
             } catch (IOException e) {

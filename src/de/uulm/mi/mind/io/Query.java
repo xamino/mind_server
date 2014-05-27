@@ -6,11 +6,9 @@ import de.uulm.mi.mind.objects.DataList;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Created by Cassio on 08.05.2014.
@@ -30,7 +28,10 @@ class Query {
     }
 
     public Query descendConstrain(Object o, Object c) {
-        if (c == null || (c instanceof Boolean && !((boolean) c)) || c == 0 || c == 0.0)
+        if (c == null
+                || (c instanceof Boolean && !((boolean) c))
+                || (c instanceof Integer && (int) c == 0)
+                || c == 0.0)
             return this; // Removes condition allowing all matching results in these cases TODO does this wrong?
         conditionMap.put(o, c);
         return this;
@@ -112,7 +113,7 @@ class Query {
         } else if (type == String.class) {
             return rs.getString(column);
         } else if (type == Date.class) {
-            java.sql.Date date = rs.getDate(column);
+            Timestamp date = rs.getTimestamp(column);
             if (date == null) return null;
             return new Date(date.getTime());
         } else if (type.isEnum()) {
