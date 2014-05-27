@@ -64,14 +64,15 @@ class ObjectContainerSQL {
                 Class<?> type = field.getType();
                 // escape strings in query
                 Object val = field.get(o);
-                if (val == null) {
+                if (val == null && !Collection.class.isAssignableFrom(type)) { // null lists are skipped
                     valueQuery += null + ",";
                 } else if (type == String.class || type.isEnum()) {
                     valueQuery += STRESC + val + STRESC + ",";
                 } else if (type == Date.class) {
                     valueQuery += STRESC + new Timestamp(((Date) val).getTime()) + STRESC + ",";
                 } else if (Collection.class.isAssignableFrom(type) || type.isArray()) {
-                    objectArrayList.put(getClassFromGenericField(field), (Collection) val);
+                    if (val != null)
+                        objectArrayList.put(getClassFromGenericField(field), (Collection) val);
                     continue;
                 } else {
                     valueQuery += val + ",";
