@@ -25,6 +25,15 @@ public class ReadAllAreas extends Task<None, Sendable> {
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of area resulted in an error.");
         }
+
+        if (compact) {
+            for (Area area : read) {
+                for (Location location : area.getLocations()) {
+                    location.setWifiMorsels(null);
+                }
+            }
+        }
+
         return read;
     }
 

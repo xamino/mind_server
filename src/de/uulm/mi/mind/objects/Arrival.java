@@ -24,6 +24,8 @@ public class Arrival implements Sendable {
      */
     private String ipAddress;
 
+    private boolean compact;
+
     private Arrival() {
     }
 
@@ -80,5 +82,13 @@ public class Arrival implements Sendable {
 
     public void setObject(Sendable object) {
         this.object = object;
+    }
+
+    public boolean isCompact() {
+        return compact;
+    }
+
+    public void setCompact(boolean compact) {
+        this.compact = compact;
     }
 }

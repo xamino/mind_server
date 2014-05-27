@@ -75,7 +75,7 @@ public class TaskManager {
         Set permissibles = task.getTaskPermission();
         if (permissibles == null || permissibles.isEmpty()) {
             // this is public tasks
-            return task.doWork(null, sendable);
+            return task.doWork(null, sendable, arrival.isCompact());
         } else {
             // these tasks all require authentication
             Active active = Security.begin(null, arrival.getSessionHash());
@@ -94,14 +94,14 @@ public class TaskManager {
                     return new Error(Error.Type.SECURITY, "You do not have permission to use this task! Not user!");
                 }
                 if (((User) active.getAuthenticated()).isAdmin()) {
-                    answer = task.doWork(active, sendable);
+                    answer = task.doWork(active, sendable, arrival.isCompact());
                 } else {
                     Security.finish(active);
                     log.error(TAG, "Illegal task " + TASK + " tried! Not admin!");
                     return new Error(Error.Type.SECURITY, "You do not have permission to use this task! Not admin!");
                 }
             } else {
-                answer = task.doWork(active, sendable);
+                answer = task.doWork(active, sendable, arrival.isCompact());
             }
             Security.finish(active);
             return answer;

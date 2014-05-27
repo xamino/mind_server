@@ -89,6 +89,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
 
         // send back the location that the server thinks you're at with the area
         DataList<Location> loca = new DataList<>();
+        location.setWifiMorsels(null); // TODO are they required somewhere after this?
         loca.add(location);
         area.setLocations(loca);
 

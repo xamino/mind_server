@@ -5,14 +5,12 @@ import de.uulm.mi.mind.io.DatabaseController;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
-import de.uulm.mi.mind.objects.messages.*;
 import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.servlet.FilePath;
 import de.uulm.mi.mind.servlet.Servlet;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.Set;
 
 /**
@@ -25,6 +23,7 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
     protected DatabaseController database;
     protected FilePath filePath;
     protected final String TAG;
+    protected boolean compact;
 
     /**
      * Task MUST have the default constructor!
@@ -44,7 +43,19 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
      * @param object The object requested.
      * @return The object to return.
      */
-    public abstract O doWork(Active active, I object);
+    public O doWork(Active active, I object, boolean compact) {
+        this.compact = compact;
+        return doWork(active, object);
+    }
+
+    /**
+     * Method that is called for doing the task. Note that while you are ensured to only receive objects of the type you
+     * require, it is still up to the task to check that it is a valid object (so check whether it is null!).
+     *
+     * @param object The object requested.
+     * @return The object to return.
+     */
+    abstract public O doWork(Active active, I object);
 
     /**
      * Return the name of the task we want to register. The name given is exactly the API call that is publicly
