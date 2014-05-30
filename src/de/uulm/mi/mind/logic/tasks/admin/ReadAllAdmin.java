@@ -1,12 +1,11 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.logic.tasks.AdminTask;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.tasks.AdminTask;
 import de.uulm.mi.mind.security.Active;
 
 /**
@@ -18,9 +17,7 @@ public class ReadAllAdmin extends AdminTask<None, Sendable> {
         User filter = new User(null);
         filter.setAdmin(true);
         // get
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<User> read = database.read(sessionContainer, filter);
-        sessionContainer.close();
+        DataList<User> read = database.read(filter);
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of User resulted in an error.");
         } else if (read.isEmpty()) {

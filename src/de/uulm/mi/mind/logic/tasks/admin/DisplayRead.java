@@ -1,11 +1,10 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.logic.tasks.AdminTask;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.PublicDisplay;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.tasks.AdminTask;
 import de.uulm.mi.mind.security.Active;
 
 /**
@@ -14,9 +13,7 @@ import de.uulm.mi.mind.security.Active;
 public class DisplayRead extends AdminTask<PublicDisplay, Sendable> {
     @Override
     public Sendable doWork(Active active, PublicDisplay display) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<PublicDisplay> read = database.read(sessionContainer, display);
-        sessionContainer.close();
+        DataList<PublicDisplay> read = database.read(display);
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of PublicDisplay resulted in an error.");
         }

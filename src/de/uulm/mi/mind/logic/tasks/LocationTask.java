@@ -1,12 +1,13 @@
-package de.uulm.mi.mind.objects.tasks;
+package de.uulm.mi.mind.logic.tasks;
 
-import com.db4o.ObjectContainer;
-import de.uulm.mi.mind.objects.*;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.objects.Area;
+import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
+import de.uulm.mi.mind.objects.Location;
+import de.uulm.mi.mind.objects.WifiMorsel;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created by Tamino Hartmann on 5/21/14.
@@ -52,12 +53,10 @@ public abstract class LocationTask<I extends Sendable, O extends Sendable> exten
 
     /**
      * Method that updates the Location <--> Area mapping.
-     *
-     * @param sessionContainer
      */
-    protected boolean updateMapping(ObjectContainer sessionContainer) {
-        DataList<Location> locations = database.read(sessionContainer, new Location(0, 0, null));
-        DataList<Area> areas = database.read(sessionContainer, new Area(null));
+    protected boolean updateMapping(Session session) {
+        DataList<Location> locations = session.read(new Location(0, 0, null));
+        DataList<Area> areas = session.read(new Area(null));
 
         log.pushTimer(this, "");
         for (Area area : areas) {
@@ -68,7 +67,7 @@ public abstract class LocationTask<I extends Sendable, O extends Sendable> exten
                 }
             }
             // must write data back to DB
-            if (!database.update(sessionContainer, area)) {
+            if (!session.update(area)) {
                 log.error(TAG, "Failed to update mapping in DB for " + area.getID() + "!");
                 return false;
             }
@@ -77,4 +76,5 @@ public abstract class LocationTask<I extends Sendable, O extends Sendable> exten
         log.log(TAG, "Updated Location <--> Area mapping. Took " + log.popTimer(this).time + "ms.");
         return true;
     }
+
 }

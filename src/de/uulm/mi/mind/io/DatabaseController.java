@@ -6,7 +6,6 @@ import com.db4o.ObjectSet;
 import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.query.Predicate;
 import com.db4o.query.Query;
-import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
@@ -282,7 +281,6 @@ class DatabaseController extends DatabaseAccess {
         String filePath = context.getRealPath("/");
 
         Configuration config = Configuration.getInstance();
-        log = Messenger.getInstance();
         String dbFilePath = filePath + "WEB-INF/" + config.getDbName();
 
         EmbeddedConfiguration dbconfig = Db4oEmbedded.newConfiguration();

@@ -1,12 +1,11 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.logic.tasks.LocationTask;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.Location;
 import de.uulm.mi.mind.objects.WifiMorsel;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.tasks.LocationTask;
 import de.uulm.mi.mind.security.Active;
 
 /**
@@ -15,14 +14,12 @@ import de.uulm.mi.mind.security.Active;
 public class LocationRead extends LocationTask<Location, Sendable> {
     @Override
     public Sendable doWork(Active active, Location location) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
         String deviceModelFilter = "";
         if (location.getWifiMorsels() != null && location.getWifiMorsels().size() > 0) {
             deviceModelFilter = location.getWifiMorsels().get(0).getDeviceModel();
         }
         location.setWifiMorsels(null); // reset to not filter these
-        DataList<Location> read = database.read(sessionContainer, location);
-        sessionContainer.close();
+        DataList<Location> read = database.read(location);
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of location resulted in an error.");
         }

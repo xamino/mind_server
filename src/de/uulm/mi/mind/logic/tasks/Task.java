@@ -1,7 +1,8 @@
-package de.uulm.mi.mind.objects.tasks;
+package de.uulm.mi.mind.logic.tasks;
 
+import de.uulm.mi.mind.ServerManager;
 import de.uulm.mi.mind.io.Configuration;
-import de.uulm.mi.mind.io.DatabaseController;
+import de.uulm.mi.mind.io.DatabaseManager;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
@@ -9,7 +10,6 @@ import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.servlet.FilePath;
-import de.uulm.mi.mind.servlet.Servlet;
 
 import java.util.Set;
 
@@ -20,7 +20,7 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
 
     protected Messenger log;
     protected Configuration configuration;
-    protected DatabaseController database;
+    protected DatabaseManager database;
     protected FilePath filePath;
     protected final String TAG;
     protected boolean compact;
@@ -31,8 +31,8 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
     public Task() {
         log = Messenger.getInstance();
         configuration = Configuration.getInstance();
-        database = DatabaseController.getInstance();
-        filePath = new FilePath(Servlet.getContext());
+        database = DatabaseManager.getInstance();
+        filePath = new FilePath(ServerManager.getContext());
         TAG = "Task";
     }
 

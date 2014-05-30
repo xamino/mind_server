@@ -1,28 +1,21 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.logic.tasks.AdminTask;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
-import de.uulm.mi.mind.objects.tasks.AdminTask;
-import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.objects.User;
-import de.uulm.mi.mind.objects.messages.*;
 import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.security.Active;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created by Tamino Hartmann on 5/21/14.
  */
-public class AdminUserRead  extends AdminTask<User, Sendable> {
+public class AdminUserRead extends AdminTask<User, Sendable> {
     @Override
     public Sendable doWork(Active active, User object) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<User> read = database.read(sessionContainer, object);
-        sessionContainer.close();
+        DataList<User> read = database.read(object);
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of User resulted in an error.");
         } else if (read.isEmpty()) {

@@ -1,6 +1,5 @@
 package de.uulm.mi.mind.io;
 
-import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
@@ -244,7 +243,6 @@ class DatabaseControllerSQL extends DatabaseAccess {
 
     @Override
     public void init(ServletContextEvent event) {
-        log = Messenger.getInstance();
     }
 
     @Override

@@ -1,12 +1,14 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logic.tasks.AdminTask;
 import de.uulm.mi.mind.objects.DataList;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.tasks.AdminTask;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.BCrypt;
 
@@ -16,21 +18,18 @@ import de.uulm.mi.mind.security.BCrypt;
 public class AdminUserUpdate extends AdminTask<User, Information> {
     @Override
     public Information doWork(Active active, User tempUser) {
-        // todo use only one sessionContainter?
         // check email
         if (!safeString(tempUser.getEmail())) {
             return new Error(Error.Type.ILLEGAL_VALUE, "Email must not be empty!");
         }
         // get original
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<User> read = database.read(sessionContainer, new User(tempUser.getEmail()));
-        sessionContainer.close();
+        DataList<User> read = database.read(new User(tempUser.getEmail()));
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of User resulted in an error.");
         } else if (read.isEmpty() || read.size() != 1) {
             return new Error(Error.Type.DATABASE, "User could not be found!");
         }
-        User originalUser = read.get(0);
+        final User originalUser = read.get(0);
         // change name
         if (safeString(tempUser.getName())) {
             originalUser.setName(tempUser.getName());
@@ -44,20 +43,19 @@ public class AdminUserUpdate extends AdminTask<User, Information> {
         // change admin status
         originalUser.setAdmin(tempUser.isAdmin());
         // and update
-        sessionContainer = database.getSessionContainer();
+        return (Information) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                boolean success = session.update(originalUser);
 
-        boolean success = database.update(sessionContainer, originalUser);
-
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("User was updated successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Update of User resulted in an error.");
-        }
+                if (success) {
+                    return new Success("User was updated successfully.");
+                } else {
+                    // some kind of error occurred
+                    return new Error(Error.Type.DATABASE, "Update of User resulted in an error.");
+                }
+            }
+        });
     }
 
     @Override

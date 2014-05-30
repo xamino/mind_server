@@ -1,12 +1,11 @@
 package de.uulm.mi.mind.logic.tasks.user;
 
-import com.db4o.ObjectContainer;
 import de.uulm.mi.mind.io.Configuration;
+import de.uulm.mi.mind.logic.tasks.Task;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.enums.DeviceClass;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.security.Active;
 
 import java.util.*;
@@ -116,9 +115,8 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
 
         // Get University Area containing all locations from database
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<Area> read = database.read(sessionContainer, new Area("University"));
-        sessionContainer.close();
+        DataList<Area> read = database.read(new Area("University"));
+
         if (read == null) {
             return null;
         }
@@ -315,21 +313,18 @@ public class PositionFind extends Task<Arrival, Sendable> {
      * @return Most assuredly at least University, otherwise null. Usually you'll get a smaller area than University.
      */
     private Area getBestArea(Location location) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
         // Get all areas
-        DataList<Area> dbCall = database.read(sessionContainer, new Area(null));
+        DataList<Area> dbCall = database.read(new Area(null));
         if (dbCall == null) {
             log.error(TAG, "All areas: dbCall == null – shouldn't happen, FIX!");
             return null;
         }
         DataList<Area> all = dbCall;
-        dbCall = database.read(sessionContainer, new Area("University"));
+        dbCall = database.read(new Area("University"));
         if (dbCall == null) {
             log.error(TAG, "University: dbCall == null – shouldn't happen, FIX!");
             return null;
         }
-
-        sessionContainer.close();
 
         Area finalArea = dbCall.get(0);
         for (Area temp : all) {

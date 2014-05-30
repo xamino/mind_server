@@ -1,12 +1,14 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logic.tasks.LocationTask;
 import de.uulm.mi.mind.objects.DataList;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Location;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.tasks.LocationTask;
 import de.uulm.mi.mind.security.Active;
 
 /**
@@ -15,67 +17,59 @@ import de.uulm.mi.mind.security.Active;
 public class LocationAdd extends LocationTask<Location, Information> {
 
     @Override
-    public Information doWork(Active active, Location location) {
+    public Information doWork(Active active, final Location location) {
         if (location.getKey() == null) {
             return new de.uulm.mi.mind.objects.messages.Error(Error.Type.WRONG_OBJECT, "Location to be created was null!");
         }
 
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        // If a location already exists we simply update it
-        DataList<Location> read = database.read(sessionContainer, new Location(location.getCoordinateX(), location.getCoordinateY()));
-        if (read.isEmpty()) {
-            // this probably means that no location was found for the given location
-            // so filter
-            location = filterMorsels(location);
-            // and create
-            boolean success1 = database.create(sessionContainer, location);
-            // area has changed, so redo mapping
-            boolean success2 = updateMapping(sessionContainer);
+        return (Information) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                // If a location already exists we simply update it
+                DataList<Location> read = session.read(new Location(location.getCoordinateX(), location.getCoordinateY()));
+                if (read.isEmpty()) {
+                    // this probably means that no location was found for the given location
+                    // so filter
+                    Location filteredLocation = filterMorsels(location);
+                    // and create
+                    boolean success1 = session.create(filteredLocation);
+                    // area has changed, so redo mapping
+                    boolean success2 = updateMapping(session);
 
-            if (success1 && success2) {
-                sessionContainer.commit();
-                sessionContainer.close();
-                return new Success("Location was created successfully.");
+                    if (success1 && success2) {
+                        return new Success("Location was created successfully.");
+                    }
+
+                    // Evaluate Error
+                    if (!success1) {
+                        return new Error(Error.Type.DATABASE, "Creation of location resulted in an error.");
+                    } else { //!success2
+                        return new Error(Error.Type.DATABASE, "Creation of location resulted in an error: The mapping could not be updated.");
+                    }
+
+                } else {
+                    // If a location already exists, we simply add the wifimorsels of the given one
+                    Location exist = read.get(0);
+                    exist.getWifiMorsels().addAll(location.getWifiMorsels());
+                    // filter
+                    exist = filterMorsels(exist);
+                    boolean success1 = session.update(exist);
+                    // area has changed, so redo mapping
+                    boolean success2 = updateMapping(session);
+
+                    if (success1 && success2) {
+                        return new Success("Location was not created but updated successfully as it existed already.");
+                    }
+
+                    // Evaluate Error
+                    if (!success1) {
+                        return new Error(Error.Type.DATABASE, "Creation of location resulted in an error.");
+                    } else { //!success2
+                        return new Error(Error.Type.DATABASE, "Creation of location resulted in an error: The mapping could not be updated.");
+                    }
+                }
             }
-
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-
-            // Evaluate Error
-            if (!success1) {
-                return new Error(Error.Type.DATABASE, "Creation of location resulted in an error.");
-            } else { //!success2
-                return new Error(Error.Type.DATABASE, "Creation of location resulted in an error: The mapping could not be updated.");
-            }
-
-        } else {
-            // If a location already exists, we simply add the wifimorsels of the given one
-            Location exist = read.get(0);
-            exist.getWifiMorsels().addAll(location.getWifiMorsels());
-            // filter
-            exist = filterMorsels(exist);
-            boolean success1 = database.update(sessionContainer, exist);
-            // area has changed, so redo mapping
-            boolean success2 = updateMapping(sessionContainer);
-
-            if (success1 && success2) {
-                sessionContainer.commit();
-                sessionContainer.close();
-                return new Success("Location was not created but updated successfully as it existed already.");
-            }
-
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-
-            // Evaluate Error
-            if (!success1) {
-                return new Error(Error.Type.DATABASE, "Creation of location resulted in an error.");
-            } else { //!success2
-                return new Error(Error.Type.DATABASE, "Creation of location resulted in an error: The mapping could not be updated.");
-            }
-        }
+        });
     }
 
     @Override

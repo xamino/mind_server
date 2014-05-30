@@ -1,13 +1,16 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logic.tasks.AdminTask;
 import de.uulm.mi.mind.objects.Area;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Location;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.WifiMorsel;
-import de.uulm.mi.mind.objects.messages.*;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.tasks.AdminTask;
+import de.uulm.mi.mind.objects.messages.Information;
+import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 
 /**
@@ -16,21 +19,21 @@ import de.uulm.mi.mind.security.Active;
 public class AdminAnnihilateArea extends AdminTask<None, Information> {
     @Override
     public Information doWork(Active active, None object) {
-        log.log(TAG, "Removing all area objects!");
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        Boolean deleted = database.delete(sessionContainer, new Area(null));
-        // Delete these to be sure...
-        deleted &= database.delete(sessionContainer, new Location(0, 0, null));
-        deleted &= database.delete(sessionContainer, new WifiMorsel(null, null, 0, 0, null, null));
-        if (deleted) {
-            database.reinit(sessionContainer);
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("All areas were removed from Database.");
-        }
-        sessionContainer.rollback();
-        sessionContainer.close();
-        return new de.uulm.mi.mind.objects.messages.Error(Error.Type.DATABASE, "Removal of areas failed.");
+        log.log(TAG, "Removing all area, location and morsel objects!");
+        return (Information) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                Boolean deleted = session.delete(new Area(null));
+                // Delete these to be sure...
+                deleted &= session.delete(new Location(0, 0, null));
+                deleted &= session.delete(new WifiMorsel(null, null, 0, 0, null, null));
+                if (deleted) {
+                    session.reinit();
+                    return new Success("All areas were removed from Database.");
+                }
+                return new Error(Error.Type.DATABASE, "Removal of areas, locations or morsels failed. The operation was rolled back.");
+            }
+        });
     }
 
     @Override

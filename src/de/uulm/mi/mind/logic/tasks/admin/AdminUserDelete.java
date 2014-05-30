@@ -1,11 +1,13 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logic.tasks.AdminTask;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.tasks.AdminTask;
 import de.uulm.mi.mind.security.Active;
 
 /**
@@ -13,20 +15,23 @@ import de.uulm.mi.mind.security.Active;
  */
 public class AdminUserDelete extends AdminTask<User, Information> {
     @Override
-    public Information doWork(Active active, User user) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        boolean success = database.delete(sessionContainer, user);
+    public Information doWork(Active active, final User user) {
+        return (Information) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                boolean success = session.delete(user);
 
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("User was deleted successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Deletion of User " + user.getEmail() + " resulted in an error.");
-        }
+                if (success) {
+                    if (user.getKey() == null) {
+                        return new Success("All Users were deleted successfully.");
+                    }
+                    return new Success("User was deleted successfully.");
+                } else {
+                    // some kind of error occurred
+                    return new Error(Error.Type.DATABASE, "Deletion of User " + user.getEmail() + " resulted in an error.");
+                }
+            }
+        });
     }
 
     @Override

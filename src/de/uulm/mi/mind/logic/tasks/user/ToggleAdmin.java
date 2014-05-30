@@ -1,12 +1,14 @@
 package de.uulm.mi.mind.logic.tasks.user;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logic.tasks.Task;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.security.Active;
 
 import java.util.HashSet;
@@ -19,23 +21,22 @@ public class ToggleAdmin extends Task<None, Information> {
     @Override
     public Information doWork(Active active, None object) {
         log.error(TAG, "Toggled admin! DANGEROUS OPERATION!");
-        User user = ((User) active.getAuthenticated());
+        final User user = ((User) active.getAuthenticated());
         user.setAdmin(!user.isAdmin());
 
-        ObjectContainer sessionContainer = database.getSessionContainer();
+        return (Information) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                boolean success = session.update(user);
 
-        boolean success = database.update(sessionContainer, user);
-
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("User was updated successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Update of User resulted in an error.");
-        }
+                if (success) {
+                    return new Success("User was updated successfully.");
+                } else {
+                    // some kind of error occurred
+                    return new Error(Error.Type.DATABASE, "Update of User resulted in an error.");
+                }
+            }
+        });
     }
 
     @Override

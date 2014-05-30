@@ -1,12 +1,14 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logic.tasks.AdminTask;
 import de.uulm.mi.mind.objects.DataList;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.PublicDisplay;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.tasks.AdminTask;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.BCrypt;
 
@@ -15,14 +17,11 @@ import de.uulm.mi.mind.security.BCrypt;
  */
 public class DisplayUpdate extends AdminTask<PublicDisplay, Information> {
     @Override
-    public Information doWork(Active active, PublicDisplay display) {
-        // todo use one sessionContainer for the whole operation!
+    public Information doWork(Active active, final PublicDisplay display) {
         if (!safeString(display.getIdentification())) {
             return new Error(Error.Type.ILLEGAL_VALUE, "Identification must not be empty!");
         }
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<PublicDisplay> read = database.read(sessionContainer, new PublicDisplay(display.getIdentification(), null, null, 0, 0));
-        sessionContainer.close();
+        DataList<PublicDisplay> read = database.read(new PublicDisplay(display.getIdentification(), null, null, 0, 0));
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of PublicDisplay resulted in an error.");
         }
@@ -45,20 +44,18 @@ public class DisplayUpdate extends AdminTask<PublicDisplay, Information> {
             originalDisplay.setLocation(display.getLocation());
         }
         // update
-        sessionContainer = database.getSessionContainer();
+        return (Information) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session dba) {
+                boolean success = dba.update(display);
 
-        boolean success = database.update(sessionContainer, originalDisplay);
-
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("PublicDisplay was created successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Creation of PublicDisplay resulted in an error.");
-        }
+                if (success) {
+                    return new Success("PublicDisplay was created successfully.");
+                } else {
+                    return new Error(Error.Type.DATABASE, "Creation of PublicDisplay resulted in an error.");
+                }
+            }
+        });
     }
 
     @Override

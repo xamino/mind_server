@@ -1,6 +1,6 @@
 package de.uulm.mi.mind.logic.tasks.all;
 
-import de.uulm.mi.mind.objects.tasks.Task;
+import de.uulm.mi.mind.logic.tasks.Task;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * @author Tamino Hartmann
  */
-public class Login extends Task<Authenticated, Information>{
+public class Login extends Task<Authenticated, Information> {
 
     @Override
     public Information doWork(Active active, Authenticated object) {

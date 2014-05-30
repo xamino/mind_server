@@ -1,7 +1,7 @@
 package de.uulm.mi.mind.logic.tasks.all;
 
+import de.uulm.mi.mind.logic.tasks.Task;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
-import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.security.Active;
 
 import java.util.Set;

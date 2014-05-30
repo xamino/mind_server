@@ -1,4 +1,4 @@
-package de.uulm.mi.mind.objects.tasks;
+package de.uulm.mi.mind.logic.tasks;
 
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.User;

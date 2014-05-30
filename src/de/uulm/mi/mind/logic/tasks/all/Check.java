@@ -1,9 +1,10 @@
 package de.uulm.mi.mind.logic.tasks.all;
 
+import de.uulm.mi.mind.logic.tasks.Task;
 import de.uulm.mi.mind.objects.Arrival;
-import de.uulm.mi.mind.objects.tasks.Task;
-import de.uulm.mi.mind.objects.messages.*;
 import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.objects.messages.Information;
+import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.Security;
 
@@ -18,7 +19,7 @@ public class Check extends Task<Arrival, Information> {
     public Information doWork(Active active, Arrival object) {
         Active activeUser = Security.begin(null, object.getSessionHash());
         if (activeUser == null) {
-            return new de.uulm.mi.mind.objects.messages.Error(Error.Type.SECURITY, "Session invalid!");
+            return new Error(Error.Type.SECURITY, "Session invalid!");
         }
         Security.finish(activeUser);
         return new Success("Session is valid.");

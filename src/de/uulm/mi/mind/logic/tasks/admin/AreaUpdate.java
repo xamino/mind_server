@@ -1,11 +1,13 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logic.tasks.LocationTask;
 import de.uulm.mi.mind.objects.Area;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.tasks.LocationTask;
 import de.uulm.mi.mind.security.Active;
 
 /**
@@ -13,32 +15,30 @@ import de.uulm.mi.mind.security.Active;
  */
 public class AreaUpdate extends LocationTask<Area, Information> {
     @Override
-    public Information doWork(Active active, Area area) {
+    public Information doWork(Active active, final Area area) {
         if (area.getKey() == null) {
-            return new de.uulm.mi.mind.objects.messages.Error(Error.Type.WRONG_OBJECT, "Area to be updated was null!");
+            return new Error(Error.Type.WRONG_OBJECT, "Area to be updated was null!");
         }
 
-        ObjectContainer sessionContainer = database.getSessionContainer();
+        return (Information) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
 
-        boolean success1 = database.update(sessionContainer, area);
-        boolean success2 = updateMapping(sessionContainer);
+                boolean success1 = session.update(area);
+                boolean success2 = updateMapping(session);
 
-        if (success1 && success2) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("Area was updated successfully.");
-        }
+                if (success1 && success2) {
+                    return new Success("Area was updated successfully.");
+                }
 
-        // some kind of error occurred
-        sessionContainer.rollback();
-        sessionContainer.close();
-
-        // Evaluate Error
-        if (!success1) {
-            return new Error(Error.Type.DATABASE, "Update of area resulted in an error.");
-        } else { //!success2
-            return new Error(Error.Type.DATABASE, "Update of area resulted in an error: The mapping could not be updated.");
-        }
+                // Evaluate Error
+                if (!success1) {
+                    return new Error(Error.Type.DATABASE, "Update of area resulted in an error.");
+                } else { //!success2
+                    return new Error(Error.Type.DATABASE, "Update of area resulted in an error: The mapping could not be updated.");
+                }
+            }
+        });
     }
 
     @Override

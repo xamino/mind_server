@@ -1,16 +1,11 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import de.uulm.mi.mind.objects.tasks.AdminTask;
-import de.uulm.mi.mind.objects.tasks.Task;
+import de.uulm.mi.mind.logic.tasks.AdminTask;
 import de.uulm.mi.mind.objects.None;
-import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.Security;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created by Tamino Hartmann.

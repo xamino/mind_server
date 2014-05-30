@@ -1,11 +1,10 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.logic.tasks.AdminTask;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.WifiSensor;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.tasks.AdminTask;
 import de.uulm.mi.mind.security.Active;
 
 /**
@@ -14,9 +13,7 @@ import de.uulm.mi.mind.security.Active;
 public class SensorRead extends AdminTask<WifiSensor, Sendable> {
     @Override
     public Sendable doWork(Active active, WifiSensor sensor) {
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<WifiSensor> read = database.read(sessionContainer, sensor);
-        sessionContainer.close();
+        DataList<WifiSensor> read = database.read(sensor);
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of WifiSensor resulted in an error.");
         }

@@ -1,21 +1,18 @@
 package de.uulm.mi.mind.io;
 
 import de.uulm.mi.mind.logger.Messenger;
-import de.uulm.mi.mind.objects.Area;
+import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Data;
-import de.uulm.mi.mind.objects.Location;
-import de.uulm.mi.mind.objects.User;
-import de.uulm.mi.mind.objects.WifiMorsel;
+import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.objects.messages.Success;
 
 import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import java.util.List;
 
 /**
  * Created by Cassio on 10.05.2014.
  */
-public class DatabaseManager implements ServletContextListener {
+public class DatabaseManager {
     private static DatabaseManager INSTANCE;
     private final String TAG = "DatabaseManager";
     private final DatabaseAccess dba;
@@ -24,8 +21,8 @@ public class DatabaseManager implements ServletContextListener {
 
     public DatabaseManager() {
         log = Messenger.getInstance();
-        //dba = DatabaseController.getInstance();
-        dba = DatabaseControllerSQL.getInstance();
+        dba = DatabaseController.getInstance();
+        //dba = DatabaseControllerSQL.getInstance();
     }
 
     public static DatabaseManager getInstance() {
@@ -35,16 +32,11 @@ public class DatabaseManager implements ServletContextListener {
         return INSTANCE;
     }
 
-    @Override
-    public void contextInitialized(ServletContextEvent servletContextEvent) {
-        Configuration config = Configuration.getInstance();
-        String filePath = servletContextEvent.getServletContext().getRealPath("/");
-        config.init(filePath); // must be first!!!
+    public void init(ServletContextEvent servletContextEvent) {
         init(servletContextEvent, true);
     }
 
-    @Override
-    public void contextDestroyed(ServletContextEvent servletContextEvent) {
+    public void destroy(ServletContextEvent servletContextEvent) {
         dba.destroy(servletContextEvent);
     }
 
@@ -63,7 +55,7 @@ public class DatabaseManager implements ServletContextListener {
             public Data doOperations(Session session) {
                 // Initializing Database
                 session.reinit();
-                runMaintenance(session.getSqlContainer());
+                //runMaintenance(session.getSqlContainer()); // TODO
                 return new Success("Reinitialized");
             }
         });
@@ -140,5 +132,19 @@ public class DatabaseManager implements ServletContextListener {
         }
         log.log(TAG, "Morsels: " + morselCounter);
         */
+    }
+
+    /**
+     * Opens a new session on the database only for this very read operation.
+     *
+     * @param filter
+     * @param <E>
+     * @return
+     */
+    public <E extends Saveable> DataList<E> read(E filter) {
+        Session session = dba.open();
+        DataList<E> ret = session.read(filter);
+        session.close();
+        return ret;
     }
 }

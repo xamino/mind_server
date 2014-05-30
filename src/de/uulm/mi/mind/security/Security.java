@@ -260,7 +260,7 @@ public class Security {
         if (active.isInvalidate()) {
             // must destroy all session of the same user
             ArrayList<Active> remove = new ArrayList<>();
-            remove.add(active);
+            // remove.add(active); TODO why was this line here?
             for (Active check : actives.getValues()) {
                 if (check.getAuthenticated().readIdentification().equals(active.getAuthenticated().readIdentification())) {
                     remove.add(check);

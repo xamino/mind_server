@@ -1,11 +1,13 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logic.tasks.AdminTask;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.tasks.AdminTask;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.BCrypt;
 
@@ -14,7 +16,7 @@ import de.uulm.mi.mind.security.BCrypt;
  */
 public class AdminUserAdd extends AdminTask<User, Information> {
     @Override
-    public Information doWork(Active active, User tempUser) {
+    public Information doWork(Active active, final User tempUser) {
         // check email
         if (!safeString(tempUser.getEmail())) {
             return new Error(Error.Type.ILLEGAL_VALUE, "Email is primary key! May not be empty.");
@@ -31,40 +33,41 @@ public class AdminUserAdd extends AdminTask<User, Information> {
             // this means a password was provided
             tempUser.setPwdHash(BCrypt.hashpw(tempUser.getPwdHash(), BCrypt.gensalt(12)));
             // update to DB
-            ObjectContainer sessionContainer = database.getSessionContainer();
-            boolean success = database.create(sessionContainer, tempUser);
-            if (success) {
-                sessionContainer.commit();
-                sessionContainer.close();
-                log.log(TAG, "User " + tempUser.readIdentification() + " has been registered.");
-                return new Success("Registered to '" + tempUser.getEmail() + "'.");
-            } else {
-                // some kind of error occurred
-                sessionContainer.rollback();
-                sessionContainer.close();
-                return new Error(Error.Type.DATABASE, "Creation of User resulted in an error.");
-            }
+            return (Information) database.open(new Transaction() {
+                @Override
+                public Data doOperations(Session session) {
+                    boolean success = session.create(tempUser);
+
+                    if (success) {
+                        log.log(TAG, "User " + tempUser.readIdentification() + " has been registered.");
+                        return new Success("Registered to '" + tempUser.getEmail() + "'.");
+                    } else {
+                        // some kind of error occurred
+                        return new Error(Error.Type.DATABASE, "Creation of User resulted in an error.");
+                    }
+                }
+            });
         }
         // this means we generate a password
-        String key = generateKey();
+        final String key = generateKey();
         // hash it
         tempUser.setPwdHash(BCrypt.hashpw(key, BCrypt.gensalt(12)));
         // update to DB
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        boolean success = database.create(sessionContainer, tempUser);
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            log.log(TAG, "User " + tempUser.readIdentification() + " has been registered.");
-            // Send key if successful
-            return new Success(Success.Type.NOTE, key);
+        return (Information) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                boolean success = session.create(tempUser);
 
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Creation of User resulted in an error.");
-        }
+                if (success) {
+                    log.log(TAG, "User " + tempUser.readIdentification() + " has been registered.");
+                    // Send key if successful
+                    return new Success(Success.Type.NOTE, key);
+                } else {
+                    // some kind of error occurred
+                    return new Error(Error.Type.DATABASE, "Creation of User resulted in an error.");
+                }
+            }
+        });
     }
 
     @Override

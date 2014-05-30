@@ -1,7 +1,9 @@
 package de.uulm.mi.mind.logic.tasks.user;
 
-import com.db4o.ObjectContainer;
-import de.uulm.mi.mind.objects.tasks.Task;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logic.tasks.Task;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
@@ -21,7 +23,7 @@ public class UserUpdate extends Task<User, Information> {
         // Note that the session user object now needs to be updated. This is done the next time the user
         // sends a request through SecurityModule; it will always get the up to date object from the
         // database.
-        User user = ((User) active.getAuthenticated());
+        final User user = ((User) active.getAuthenticated());
         // Email is primary key, thus can not be changed!
         if (!sentUser.getEmail().equals(user.getEmail())) {
             return new de.uulm.mi.mind.objects.messages.Error(Error.Type.ILLEGAL_VALUE, "Email can not be changed in an existing user");
@@ -41,20 +43,20 @@ public class UserUpdate extends Task<User, Information> {
         }
         user.setStatus(sentUser.getStatus());
 
-        ObjectContainer sessionContainer = database.getSessionContainer();
 
-        boolean success = database.update(sessionContainer, user);
+        return (Information) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                boolean success = session.update(user);
 
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("User was updated successfully.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Update of User resulted in an error.");
-        }
+                if (success) {
+                    return new Success("User was updated successfully.");
+                } else {
+                    // some kind of error occurred
+                    return new Error(Error.Type.DATABASE, "Update of User resulted in an error.");
+                }
+            }
+        });
     }
 
     @Override

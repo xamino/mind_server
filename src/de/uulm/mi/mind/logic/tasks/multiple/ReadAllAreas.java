@@ -1,10 +1,9 @@
 package de.uulm.mi.mind.logic.tasks.multiple;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.logic.tasks.Task;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.security.Active;
 
 import java.util.HashSet;
@@ -18,10 +17,9 @@ import java.util.Set;
 public class ReadAllAreas extends Task<None, Sendable> {
     @Override
     public Sendable doWork(Active active, None object) {
-        Area filter = new Area(null);
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        DataList<Area> read = database.read(sessionContainer, filter);
-        sessionContainer.close();
+        final Area filter = new Area(null);
+        DataList<Area> read = database.read(filter);
+
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of area resulted in an error.");
         }
@@ -33,7 +31,6 @@ public class ReadAllAreas extends Task<None, Sendable> {
                 }
             }
         }
-
         return read;
     }
 

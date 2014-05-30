@@ -1,7 +1,9 @@
 package de.uulm.mi.mind.logic.tasks.all;
 
-import com.db4o.ObjectContainer;
-import de.uulm.mi.mind.objects.tasks.Task;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logic.tasks.Task;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
@@ -17,7 +19,7 @@ import java.util.Set;
  */
 public class Registration extends Task<User, Information> {
     @Override
-    public Information doWork(Active active, User user) {
+    public Information doWork(Active active, final User user) {
         // if anything other than open is stated here, registration is considered closed
         if (!"open".equals(configuration.getRegistration())) {
             return new de.uulm.mi.mind.objects.messages.Error(Error.Type.SECURITY, "Registration is not open! Please contact the admin.");
@@ -32,19 +34,21 @@ public class Registration extends Task<User, Information> {
         // set access time
         user.setAccessDate(new Date());
         // create user
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        boolean success = database.create(sessionContainer, user);
-        if (success) {
-            sessionContainer.commit();
-            sessionContainer.close();
-            log.log(TAG, "User " + user.readIdentification() + " has been registered.");
-            return new Success("Registered to '" + user.getEmail() + "'.");
-        } else {
-            // some kind of error occurred
-            sessionContainer.rollback();
-            sessionContainer.close();
-            return new Error(Error.Type.DATABASE, "Creation of User resulted in an error.");
-        }
+
+        return (Information) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                boolean success = session.create(user);
+
+                if (success) {
+                    log.log(TAG, "User " + user.readIdentification() + " has been registered.");
+                    return new Success("Registered to '" + user.getEmail() + "'.");
+                } else {
+                    // some kind of error occurred
+                    return new Error(Error.Type.DATABASE, "Creation of User resulted in an error.");
+                }
+            }
+        });
     }
 
     @Override

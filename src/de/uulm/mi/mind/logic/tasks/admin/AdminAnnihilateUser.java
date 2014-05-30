@@ -1,12 +1,14 @@
 package de.uulm.mi.mind.logic.tasks.admin;
 
-import com.db4o.ObjectContainer;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logic.tasks.AdminTask;
+import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.tasks.AdminTask;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.Security;
 
@@ -18,18 +20,19 @@ public class AdminAnnihilateUser extends AdminTask<None, Information> {
     public Information doWork(Active active, None object) {
         log.log(TAG, "Removing all users!");
         Security.clear();
-        ObjectContainer sessionContainer = database.getSessionContainer();
-        boolean deleted = database.delete(sessionContainer, new User(null));
-        if (deleted) {
-            database.reinit(sessionContainer);
-            sessionContainer.commit();
-            sessionContainer.close();
-            return new Success("All users were removed from Database. Use default admin.");
-        }
-        sessionContainer.rollback();
-        sessionContainer.close();
-        return new Error(Error.Type.DATABASE, "Removal of users failed.");
+        return (Information) database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                boolean deleted = session.delete(new User(null));
+                if (deleted) {
+                    session.reinit();
+                    return new Success("All users were removed from Database. Use default admin.");
+                }
+                return new Error(Error.Type.DATABASE, "Removal of users failed.");
+            }
+        });
     }
+
 
     @Override
     public String getTaskName() {

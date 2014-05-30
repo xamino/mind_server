@@ -1,11 +1,11 @@
 package de.uulm.mi.mind.logic.tasks.user;
 
+import de.uulm.mi.mind.logic.tasks.Task;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
-import de.uulm.mi.mind.objects.tasks.Task;
 import de.uulm.mi.mind.security.Active;
 
 import java.io.File;
