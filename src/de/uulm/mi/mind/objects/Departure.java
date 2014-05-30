@@ -14,7 +14,7 @@ public class Departure implements Sendable {
     private Data object;
 
     private Departure() {
-        
+
     }
 
     /**

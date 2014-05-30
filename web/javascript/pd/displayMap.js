@@ -2,11 +2,11 @@ var originalWidth; //the native width of the map-image in pixels
 var originalHeight; //the native height of the map-image in pixels
 var displayedWidth; //the current width of the displayed map-image in pixels
 var displayedHeight; //the current height of the map-image in pixels
-var displayedIconSize=0; //the native size of the icon in pixels
+var displayedIconSize = 0; //the native size of the icon in pixels
 var iconByAreaFactor = 0.45; //the factor by which the icon size is set -> (smallest area width or height)*iconByAreaFactor
 var iconByMapWidthFactor = 0.06; //the factor by which the icon size is set -> displayedWidth*iconByAreaFactor
 var defaultIconSize = 110; //if something goes wrong when setting the icon size - defaultIconSize will be applied
-var factor=1; //the size-factor by which the displayed image deviates from the original image
+var factor = 1; //the size-factor by which the displayed image deviates from the original image
 //TODO read from server
 var refreshRate = 10; //the refresh rate for locating - in seconds
 var interval; //the interval of location refreshing
@@ -21,100 +21,104 @@ var sortedEmails; //the current user's emails, sorted by areas
 var areas = new Array(); //an array of areas - contains all areas that have already been used/needed
 var awayAreaExists = true;
 
-$(document).ready(function() {
-	window.onresize=function(){mapResize();};
+$(document).ready(function () {
+    window.onresize = function () {
+        mapResize();
+    };
 });
 
 /**
  * This function retrives the original metrics (width & height) of one icon image
  * @param allusers
  */
-function initPublicDisplayStuff(){
+function initPublicDisplayStuff() {
 
-	mapDiv = document.getElementById("mapscroll");
-	
-	users = new Array();
-	
+    mapDiv = document.getElementById("mapscroll");
+
+    users = new Array();
+
     send(new Arrival("READ_ALL_AREAS", session), function (data) {
 
-    	//AREAS STUFF
+        //AREAS STUFF
         var areasArray = data.object;
-        
+
         //TODO if no areas found -> ??
-        
-        for ( var i = 0; i < areasArray.length; i++) {
-			areas[areasArray[i].ID] = areasArray[i];
-		}
-        
+
+        for (var i = 0; i < areasArray.length; i++) {
+            areas[areasArray[i].ID] = areasArray[i];
+        }
+
         checkAwayArea();
-        
+
         //END AREAS STUFF
-		
+
         //get map metrics
-		var mapImgLoad = $("<img />");
-		mapImgLoad.attr("src", "images/map");
-		mapImgLoad.unbind("load");
-		mapImgLoad.bind("load", function () {
-			originalWidth = this.width;
-			originalHeight = this.height;
-			
-			retriveBackgroundImageSizeMetricsAndFactor();
+        var mapImgLoad = $("<img />");
+        mapImgLoad.attr("src", "images/map");
+        mapImgLoad.unbind("load");
+        mapImgLoad.bind("load", function () {
+            originalWidth = this.width;
+            originalHeight = this.height;
 
-			computeIconSize();
+            retriveBackgroundImageSizeMetricsAndFactor();
 
-			refreshUserData();
+            computeIconSize();
+
+            refreshUserData();
 //			loadTestUser();
-			initInterval();
-		});
+            initInterval();
+        });
     });
 }
 
 
-document.addEventListener("click",function (event){
-	
-	var element = document.getElementsByTagName("html")[0];
-	
-	if(event.target.id === 'toggleFullscreen'){
-		if (element.requestFullScreen){
-		 
-			if (!document.fullScreen){
-				element.requestFullscreen();
-			}else{
-				document.exitFullScreen();
-			}
-		}else if(element.mozRequestFullScreen){
-			if(!document.mozFullScreen){
-				element.mozRequestFullScreen();
-			}else{
-				document.mozCancelFullScreen();
-			}
-		}else if(element.webkitRequestFullScreen){
-			 
-			if (!document.webkitIsFullScreen){
-				element.webkitRequestFullScreen();
-			}else{
-				document.webkitCancelFullScreen();
-			}
-		}
-	}
-	
+document.addEventListener("click", function (event) {
+
+    var element = document.getElementsByTagName("html")[0];
+
+    if (event.target.id === 'toggleFullscreen') {
+        if (element.requestFullScreen) {
+
+            if (!document.fullScreen) {
+                element.requestFullscreen();
+            } else {
+                document.exitFullScreen();
+            }
+        } else if (element.mozRequestFullScreen) {
+            if (!document.mozFullScreen) {
+                element.mozRequestFullScreen();
+            } else {
+                document.mozCancelFullScreen();
+            }
+        } else if (element.webkitRequestFullScreen) {
+
+            if (!document.webkitIsFullScreen) {
+                element.webkitRequestFullScreen();
+            } else {
+                document.webkitCancelFullScreen();
+            }
+        }
+    }
+
 });
 
 
 /**
  * This function resets the interval - should be called after the refreshRate was changed
  */
-function initInterval(){
-	if(interval!=null){
-		clearInterval(interval);		
-	}
-	interval = setInterval(function(){refreshUserData();},refreshRate*+1000);		
+function initInterval() {
+    if (interval != null) {
+        clearInterval(interval);
+    }
+    interval = setInterval(function () {
+        refreshUserData();
+    }, refreshRate * +1000);
 }
 
 /**
  * This funciton computes the icon size by considering the smalles area height or width
  */
-function computeIconSize(){
+function computeIconSize() {
 //	var smallest = 99999999;
 //	for ( var i = 0; i < areas.length; i++) {
 //		if(areas[i].width<smallest){smallest = areas[i].width;}
@@ -127,7 +131,7 @@ function computeIconSize(){
 //	if(displayedIconSize==0){
 //		displayedIconSize = defaultIconSize;
 //	}
-	displayedIconSize = Math.round(displayedWidth*iconByMapWidthFactor);
+    displayedIconSize = Math.round(displayedWidth * iconByMapWidthFactor);
 //	alert("iconsize: "+displayedIconSize);
 }
 
@@ -135,50 +139,50 @@ function computeIconSize(){
  * This function retrives the actual width and height of the map image
  * and computes the factor by which the displayed image deviates from the actual image
  */
-function retriveBackgroundImageSizeMetricsAndFactor(){
-	
-	displayedHeight = $("#mapscroll").height();
-	displayedWidth = $("#mapscroll").width();
-	
-	if( (displayedWidth/displayedHeight) >= (originalWidth/originalHeight) ){
-		factor = displayedHeight/originalHeight;
-		displayedWidth = factor*originalWidth;
-	}else{
-		factor = displayedWidth/originalWidth;
-		displayedHeight = factor*originalHeight;
-	}
+function retriveBackgroundImageSizeMetricsAndFactor() {
+
+    displayedHeight = $("#mapscroll").height();
+    displayedWidth = $("#mapscroll").width();
+
+    if ((displayedWidth / displayedHeight) >= (originalWidth / originalHeight)) {
+        factor = displayedHeight / originalHeight;
+        displayedWidth = factor * originalWidth;
+    } else {
+        factor = displayedWidth / originalWidth;
+        displayedHeight = factor * originalHeight;
+    }
 }
 
 
-function mapResize(){
+function mapResize() {
 
-	//if resize is called on startup -> no resize necessary
-	if(displayedWidth==null){
+    //if resize is called on startup -> no resize necessary
+    if (displayedWidth == null) {
 //		alert("don't resize_");
-		return;
-	}
+        return;
+    }
 
-	oldDisplayedWidth = displayedWidth;
-	oldDisplayedHeight = displayedHeight;
-	
-	//compute map & icon metrics
-	retriveBackgroundImageSizeMetricsAndFactor();
-	
-	if(oldDisplayedWidth==displayedWidth){
+    oldDisplayedWidth = displayedWidth;
+    oldDisplayedHeight = displayedHeight;
+
+    //compute map & icon metrics
+    retriveBackgroundImageSizeMetricsAndFactor();
+
+    if (oldDisplayedWidth == displayedWidth) {
 //		alert("no resize");
-		return;
-	}
-	computeIconSize();
-	
-	//update user placement
-	if(users != null){
-		changeFactor = +displayedWidth/+oldDisplayedWidth;
-		for (var email in users) {
-			users[email].x = Math.round(+changeFactor*+users[email].x);
-			users[email].y = Math.round(+changeFactor*+users[email].y);
-			placeUserIcon(users[email]);
-		}
-	}
+        return;
+    }
+    computeIconSize();
+
+    //update user placement
+    if (users != null) {
+        changeFactor = +displayedWidth / +oldDisplayedWidth;
+        for (var email in users) {
+            users[email].x = Math.round(+changeFactor * +users[email].x);
+            users[email].y = Math.round(+changeFactor * +users[email].y);
+            placeUserIcon(users[email]);
+        }
+    }
 
 }
 
@@ -188,8 +192,8 @@ function mapResize(){
  * @param the width of the element
  * @returns the x value ready for displaying purposes
  */
-function getX(raw_x,scale){
-	return Math.round((raw_x*factor-(scale/2)));
+function getX(raw_x, scale) {
+    return Math.round((raw_x * factor - (scale / 2)));
 }
 
 
@@ -199,8 +203,8 @@ function getX(raw_x,scale){
  * @param raw_scale the original scale value
  * @returns the scale value ready for displaying purposes
  */
-function getScale(raw_scale){
-	return Math.round(raw_scale*factor);
+function getScale(raw_scale) {
+    return Math.round(raw_scale * factor);
 }
 
 
@@ -208,35 +212,35 @@ function getScale(raw_scale){
  * This function creates a user icon as an <img/>
  * @param user the user
  */
-function addUserIcon(user){
-	var divToAugment = document.getElementById("mapscroll");
-	var icon=document.createElement("img");
-	icon.id="icon_"+user.email;
-	icon.className="micon";
+function addUserIcon(user) {
+    var divToAugment = document.getElementById("mapscroll");
+    var icon = document.createElement("img");
+    icon.id = "icon_" + user.email;
+    icon.className = "micon";
 
-	icon.src="/images/custom_icons/icon_"+user.email;
+    icon.src = "/images/custom_icons/icon_" + user.email;
 //	icon.src='/images/custom_icons/defaulticon.png';
-	icon.onerror = function () {
-	  this.src = '/images/custom_icons/defaulticon.png'; //Defualt icon
-	};
-	
-	icon.onclick=function () {
-	    displayUserInfo(user.email);
-	};
-	//style
-	icon.style.position ="absolute";
-	icon.style.cursor="pointer";
-   
-   divToAugment.appendChild(icon);
-   icon = null;
+    icon.onerror = function () {
+        this.src = '/images/custom_icons/defaulticon.png'; //Defualt icon
+    };
+
+    icon.onclick = function () {
+        displayUserInfo(user.email);
+    };
+    //style
+    icon.style.position = "absolute";
+    icon.style.cursor = "pointer";
+
+    divToAugment.appendChild(icon);
+    icon = null;
 }
 
-function removeUserWithIcon(email){
-	var iconElement = document.getElementById('icon_'+email);
-	if(iconElement!=null){
-		iconElement.parentNode.removeChild(iconElement);		
-	}
-	removeItem(users, email);
+function removeUserWithIcon(email) {
+    var iconElement = document.getElementById('icon_' + email);
+    if (iconElement != null) {
+        iconElement.parentNode.removeChild(iconElement);
+    }
+    removeItem(users, email);
 }
 
 /**
@@ -244,27 +248,28 @@ function removeUserWithIcon(email){
  * in consideration of the scale factor
  * @param user the user
  */
-function placeUserIcon(user){
-	var icon = document.getElementById("icon_"+user.email);
-	
-	if(icon==null){ //user has no icon image yet
-		addUserIcon(user);
-		icon = document.getElementById("icon_"+user.email);
-	}
-	
-	if(icon!=null){
+function placeUserIcon(user) {
+    var icon = document.getElementById("icon_" + user.email);
 
-		//refresh source (in case of icon swapping)
-		icon.src="/images/custom_icons/icon_"+user.email+"#"+ new Date().getTime();;
-		
-		icon.style.width=displayedIconSize+"px";
-		icon.style.left=Math.round(user.x-displayedIconSize/2)+"px";
-		icon.style.top=Math.round(user.y-displayedIconSize/2)+"px";
-		
-		//apply visual effect regarding user status
-		var statusinfo = getInfoByStatus(user.status);
-		icon.className = 'micon '+statusinfo.classname;
-	}
+    if (icon == null) { //user has no icon image yet
+        addUserIcon(user);
+        icon = document.getElementById("icon_" + user.email);
+    }
+
+    if (icon != null) {
+
+        //refresh source (in case of icon swapping)
+        icon.src = "/images/custom_icons/icon_" + user.email + "#" + new Date().getTime();
+        ;
+
+        icon.style.width = displayedIconSize + "px";
+        icon.style.left = Math.round(user.x - displayedIconSize / 2) + "px";
+        icon.style.top = Math.round(user.y - displayedIconSize / 2) + "px";
+
+        //apply visual effect regarding user status
+        var statusinfo = getInfoByStatus(user.status);
+        icon.className = 'micon ' + statusinfo.classname;
+    }
 }
 
 /**
@@ -272,64 +277,64 @@ function placeUserIcon(user){
  * according to the area as position.
  * Keep in mind: the x and y values are intended to for the center of the icon
  */
-function setUserIconCoordsByArea(){
-	
-	if(Object.keys(users).length<=0){
-		return;
-	}
+function setUserIconCoordsByArea() {
 
-	var area=null;
-	var currentx = 0;
-	var currenty = 0;
-	var iconsInRow;
-	var rowsInArea;
-	var firstInArea;
-	var usersInArea;
-	//vars for y-value placement (if modification necessary);
-	for (var aId in areas) {
-		usersInArea = getUserKeysByAreaID(aId);
+    if (Object.keys(users).length <= 0) {
+        return;
+    }
+
+    var area = null;
+    var currentx = 0;
+    var currenty = 0;
+    var iconsInRow;
+    var rowsInArea;
+    var firstInArea;
+    var usersInArea;
+    //vars for y-value placement (if modification necessary);
+    for (var aId in areas) {
+        usersInArea = getUserKeysByAreaID(aId);
 //		alert(usersInArea.length+" in "+aId);
-		//if no user in this area -> continue with next area;
-		if(usersInArea.length<=0){
-			continue;
-		}
-		area = areas[aId];
-		firstInArea = true;
-		iconsInRow = 0;
-		rowsInArea = 0;
-		currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
-		currenty = Math.round(area.topLeftY*factor+Math.round(displayedIconSize/2));
-		
-		for (var i = 0; i<usersInArea.length; i++) { //for each user in this area
+        //if no user in this area -> continue with next area;
+        if (usersInArea.length <= 0) {
+            continue;
+        }
+        area = areas[aId];
+        firstInArea = true;
+        iconsInRow = 0;
+        rowsInArea = 0;
+        currentx = Math.round(area.topLeftX * factor + Math.round(displayedIconSize / 2));
+        currenty = Math.round(area.topLeftY * factor + Math.round(displayedIconSize / 2));
+
+        for (var i = 0; i < usersInArea.length; i++) { //for each user in this area
 //			alert(uId+" in "+aId);
-			if(firstInArea){ //if first in this row - always draw -> move currentx
-				users[usersInArea[i]].x = currentx;
-				users[usersInArea[i]].y = currenty;
-				//alert(currentx+",-,"+currenty);
+            if (firstInArea) { //if first in this row - always draw -> move currentx
+                users[usersInArea[i]].x = currentx;
+                users[usersInArea[i]].y = currenty;
+                //alert(currentx+",-,"+currenty);
 //				iconsInRow++;
-				currentx += displayedIconSize;
-				firstInArea = false;
-				rowsInArea++;
-				iconsInRow++;
-			}else{ //user currently not firstinrow
-				//current icon would exceed the row
-				if( (currentx+(Math.round(displayedIconSize/2))) > Math.round(area.topLeftX*factor+area.width*factor) ){
-					currentx = Math.round(area.topLeftX*factor+Math.round(displayedIconSize/2));
-					currenty += displayedIconSize;
+                currentx += displayedIconSize;
+                firstInArea = false;
+                rowsInArea++;
+                iconsInRow++;
+            } else { //user currently not firstinrow
+                //current icon would exceed the row
+                if ((currentx + (Math.round(displayedIconSize / 2))) > Math.round(area.topLeftX * factor + area.width * factor)) {
+                    currentx = Math.round(area.topLeftX * factor + Math.round(displayedIconSize / 2));
+                    currenty += displayedIconSize;
 //					//first icon in row:
-					users[usersInArea[i]].x = currentx;
-					users[usersInArea[i]].y = currenty;
-					currentx += displayedIconSize;
-					rowsInArea++;
-				}else{ //current icon still fits in this row
-					users[usersInArea[i]].x = currentx;
-					users[usersInArea[i]].y = currenty;
-					currentx += displayedIconSize;
+                    users[usersInArea[i]].x = currentx;
+                    users[usersInArea[i]].y = currenty;
+                    currentx += displayedIconSize;
+                    rowsInArea++;
+                } else { //current icon still fits in this row
+                    users[usersInArea[i]].x = currentx;
+                    users[usersInArea[i]].y = currenty;
+                    currentx += displayedIconSize;
 //					iconsinarea++;
-					if(rowsInArea==1){
-						iconsInRow++;						
-					}
-				}
+                    if (rowsInArea == 1) {
+                        iconsInRow++;
+                    }
+                }
 //				if(firstinrow){ //if first in this row - always draw -> move currentx
 //					users[usersInArea[i]].x = currentx;
 //					users[usersInArea[i]].y = currenty;
@@ -337,31 +342,31 @@ function setUserIconCoordsByArea(){
 //					firstinrow = false;
 //					rowsInArea++;
 //				}
-			}
-			
-		}//end for each userInArea
+            }
 
-		//check for height
-		var outstand = ( (currenty+Math.round(displayedIconSize/2)) - 
-								Math.round((area.topLeftY*factor+area.height*factor)) );
-		if(outstand > 0){
-			var yOffset = 0;
-			var inRow = 0;
-			for(var k = 0; k<usersInArea.length; k++){
-				if(k+2>iconsInRow){ //for all other rows
-					inRow++;
-					if( inRow == iconsInRow){ //new row
-						inRow = 0;
-						yOffset += Math.round(outstand/(rowsInArea-1));
-					}
-					users[usersInArea[k]].y-=yOffset;
-				}
-			}
-		}
-		//end check for height
-		
-		usersInArea = new Array();
-	}//end for each area
+        }//end for each userInArea
+
+        //check for height
+        var outstand = ( (currenty + Math.round(displayedIconSize / 2)) -
+            Math.round((area.topLeftY * factor + area.height * factor)) );
+        if (outstand > 0) {
+            var yOffset = 0;
+            var inRow = 0;
+            for (var k = 0; k < usersInArea.length; k++) {
+                if (k + 2 > iconsInRow) { //for all other rows
+                    inRow++;
+                    if (inRow == iconsInRow) { //new row
+                        inRow = 0;
+                        yOffset += Math.round(outstand / (rowsInArea - 1));
+                    }
+                    users[usersInArea[k]].y -= yOffset;
+                }
+            }
+        }
+        //end check for height
+
+        usersInArea = new Array();
+    }//end for each area
 
 }
 
@@ -405,71 +410,71 @@ function setUserIconCoordsByArea(){
  * -> places all the icons correctly by referencing the x,y coordinates of
  * the user objects
  */
-function updateUserIconPlacement(){
-	for ( var email in users ) {
-		placeUserIcon(users[email]);
-	}
+function updateUserIconPlacement() {
+    for (var email in users) {
+        placeUserIcon(users[email]);
+    }
 }
 
 /**
  * This function should be utilized for callback when requesting
  * updated user data
  */
-function updateUserListOnReceive(data){
-	
-	var updatedUsersArray = data.object;
-	
+function updateUserListOnReceive(data) {
+
+    var updatedUsersArray = data.object;
+
 //	users = new Array();
 //	for ( var i = 0; i < updatedUsersArray.length; i++) {
 //		users[updatedUsersArray[i].email] = updatedUsersArray[i];
 //	}
-	
-	// NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
-	var updatedUsers = new Array();
-	for ( var i = 0; i < updatedUsersArray.length; i++) {
-		updatedUsers[updatedUsersArray[i].email] = updatedUsersArray[i];
-	}
+
+    // NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
+    var updatedUsers = new Array();
+    for (var i = 0; i < updatedUsersArray.length; i++) {
+        updatedUsers[updatedUsersArray[i].email] = updatedUsersArray[i];
+    }
 //	var updatedUsers = data;
-	
-	//debug stuff
+
+    //debug stuff
 //	document.getElementById("userInfoOnUpdate").innerHTML = JSON.stringify(data);
 
-	//update or remove old user
-	for(var email in users) { //for each old user
-		if(updatedUsers[email]!=null){ //current user exists in new user array - update user position
-			users[email] = updatedUsers[email];
-			removeItem(updatedUsers, email);
-		}else{ //current user is no longer tracked - remove user from list
-			removeUserWithIcon(email);
-		}
-	}
+    //update or remove old user
+    for (var email in users) { //for each old user
+        if (updatedUsers[email] != null) { //current user exists in new user array - update user position
+            users[email] = updatedUsers[email];
+            removeItem(updatedUsers, email);
+        } else { //current user is no longer tracked - remove user from list
+            removeUserWithIcon(email);
+        }
+    }
 
-	for ( var email in updatedUsers) {
-		users[email] = updatedUsers[email];
-	}		
-	
-	 //END NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
+    for (var email in updatedUsers) {
+        users[email] = updatedUsers[email];
+    }
 
-	//check for AWAY status and set position to "Away" for Away-Area
-	for(var email in users) {
-		if(users[email].status==="AWAY"){
-			users[email].position = "Away";
-		}
-		if(!areaExists(users[email].position)){
-			removeUserWithIcon(email);
-		}
+    //END NEEDED FOR ACCESSING CHANGED USERS OR NEW USERS
 
-	}
+    //check for AWAY status and set position to "Away" for Away-Area
+    for (var email in users) {
+        if (users[email].status === "AWAY") {
+            users[email].position = "Away";
+        }
+        if (!areaExists(users[email].position)) {
+            removeUserWithIcon(email);
+        }
 
-	//set individual user icon coordinates considering area
-	setUserIconCoordsByArea();
-	//display all currently tracked users
-	updateUserIconPlacement();
-	
-	
+    }
+
+    //set individual user icon coordinates considering area
+    setUserIconCoordsByArea();
+    //display all currently tracked users
+    updateUserIconPlacement();
+
+
 //	var element = document.getElementById("mapscroll");
 //	redrawElement(element); // currently not in use but it would work!
-	$(mapDiv).redraw();
+    $(mapDiv).redraw();
 
 }
 
@@ -478,33 +483,32 @@ function updateUserListOnReceive(data){
  * @param id
  * @returns {Array}
  */
-function getUserKeysByAreaID(id){
+function getUserKeysByAreaID(id) {
 
-	var usersInArea = new Array();
-	for ( var email in users ) {
-		if(users[email].position == id){
-			usersInArea.push(email);
-		}
-	}
-	return usersInArea;
+    var usersInArea = new Array();
+    for (var email in users) {
+        if (users[email].position == id) {
+            usersInArea.push(email);
+        }
+    }
+    return usersInArea;
 }
 
 function removeItem(array, key) {
-	   if (!array.hasOwnProperty(key))
-	      return;
-	   if (isNaN(parseInt(key)) || !(array instanceof Array))
-	      delete array[key];
-	   else
-	      array.splice(key, 1);
+    if (!array.hasOwnProperty(key))
+        return;
+    if (isNaN(parseInt(key)) || !(array instanceof Array))
+        delete array[key];
+    else
+        array.splice(key, 1);
 };
 
 
-jQuery.fn.redraw = function() {
-    return this.hide(0, function() {
+jQuery.fn.redraw = function () {
+    return this.hide(0, function () {
         $(this).show();
     });
 };
-
 
 
 ///**
@@ -528,91 +532,90 @@ var refreshCounter = 0;
 /**
  * This function should be called periodically to refresh the users location visually
  */
-function refreshUserData(){
-	if(balloonIsOpen()){
-		return;
-	}
-	
-	refreshCounter = +refreshCounter+1;
-	if(document.getElementById("balloonIdle")!=null){
-		document.getElementById("balloonIdle").innerHTML = refreshCounter;		
-	}
-	send(new Arrival("read_all_positions", session), updateUserListOnReceive);
+function refreshUserData() {
+    if (balloonIsOpen()) {
+        return;
+    }
+
+    refreshCounter = +refreshCounter + 1;
+    if (document.getElementById("balloonIdle") != null) {
+        document.getElementById("balloonIdle").innerHTML = refreshCounter;
+    }
+    send(new Arrival("read_all_positions", session), updateUserListOnReceive);
 }
 
 
 //TEST STUFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
-function loadTestUser(){
-	var user1 = new User("a@a.a",null,"a",false);
-	user1.status = "OCCUPIED";
-	user1.position = 3301;
+function loadTestUser() {
+    var user1 = new User("a@a.a", null, "a", false);
+    user1.status = "OCCUPIED";
+    user1.position = 3301;
 //	user1.iconRef = "crab.png";
 //	user1.x = 400;
 //	user1.y = 300;
-	var user2 = new User("c@c.c",null,"c",false);
-	user2.position = 3301;
-	user2.status = "OCCUPIED";
+    var user2 = new User("c@c.c", null, "c", false);
+    user2.position = 3301;
+    user2.status = "OCCUPIED";
 //	user2.iconRef = "cow.png";
 //	user2.x = 450;
 //	user2.y = 400;
-	var user3 = new User("d@d.d",null,"d",false);
-	user3.position = 3301;
-	user3.status = "AVAILABLE";
+    var user3 = new User("d@d.d", null, "d", false);
+    user3.position = 3301;
+    user3.status = "AVAILABLE";
 //	user3.iconRef = "rabbit.png";
 //	user3.x = 450;
 //	user3.y = 600;
-	var user4 = new User("e@e.e",null,"e",false);
-	user4.position = 3301;
-	user4.status = "AWAY";
+    var user4 = new User("e@e.e", null, "e", false);
+    user4.position = 3301;
+    user4.status = "AWAY";
 //	user4.iconRef = "sheep.png";
-	var user5 = new User("f@f.f",null,"f",false);
-	user5.position = 3304;
-	user5.status = "DO_NOT_DISTURB";
+    var user5 = new User("f@f.f", null, "f", false);
+    user5.position = 3304;
+    user5.status = "DO_NOT_DISTURB";
 //	user5.iconRef = "deer.png";
-	var user6 = new User("fa@f.f",null,"fa",false);
-	user6.position = 3304;
-	user6.status = "AVAILABLE";
-	var user7 = new User("fb@f.f",null,"fb",false);
-	user7.position = 3304;
-	user7.status = "AVAILABLE";
-	var user8 = new User("fc@f.f",null,"fc",false);
-	user8.position = 3304;
-	user8.status = "AVAILABLE";
-	var user9 = new User("fd@f.f",null,"fd",false);
-	user9.position = 3304;
-	user9.status = "AVAILABLE";
-	var user10 = new User("fe@f.f",null,"fe",false);
-	user10.position = 3304;
-	user10.status = "AVAILABLE";	
-	var user11 = new User("ff@f.f",null,"ff",false);
-	user11.position = 3304;
-	user11.status = "AVAILABLE";
-	var user12 = new User("fg@f.f",null,"fg",false);
-	user12.position = 3304;
-	user12.status = "AVAILABLE";
-	
-	var testusers = new Array();
-	testusers[user1.email] = user1;
-	testusers[user2.email] = user2;
-	testusers[user3.email] = user3;
-	testusers[user4.email] = user4;
-	testusers[user5.email] = user5;
-	testusers[user6.email] = user6;
-	testusers[user7.email] = user7;
-	testusers[user8.email] = user8;
-	testusers[user9.email] = user9;
-	testusers[user10.email] = user10;
-	testusers[user11.email] = user11;
-	testusers[user12.email] = user12;
-	updateUserListOnReceive(testusers);
+    var user6 = new User("fa@f.f", null, "fa", false);
+    user6.position = 3304;
+    user6.status = "AVAILABLE";
+    var user7 = new User("fb@f.f", null, "fb", false);
+    user7.position = 3304;
+    user7.status = "AVAILABLE";
+    var user8 = new User("fc@f.f", null, "fc", false);
+    user8.position = 3304;
+    user8.status = "AVAILABLE";
+    var user9 = new User("fd@f.f", null, "fd", false);
+    user9.position = 3304;
+    user9.status = "AVAILABLE";
+    var user10 = new User("fe@f.f", null, "fe", false);
+    user10.position = 3304;
+    user10.status = "AVAILABLE";
+    var user11 = new User("ff@f.f", null, "ff", false);
+    user11.position = 3304;
+    user11.status = "AVAILABLE";
+    var user12 = new User("fg@f.f", null, "fg", false);
+    user12.position = 3304;
+    user12.status = "AVAILABLE";
+
+    var testusers = new Array();
+    testusers[user1.email] = user1;
+    testusers[user2.email] = user2;
+    testusers[user3.email] = user3;
+    testusers[user4.email] = user4;
+    testusers[user5.email] = user5;
+    testusers[user6.email] = user6;
+    testusers[user7.email] = user7;
+    testusers[user8.email] = user8;
+    testusers[user9.email] = user9;
+    testusers[user10.email] = user10;
+    testusers[user11.email] = user11;
+    testusers[user12.email] = user12;
+    updateUserListOnReceive(testusers);
 }
 
 
+function getAreaById(id) {
 
-function getAreaById(id){
-	
-	return areas[id];
+    return areas[id];
 //	for ( var i = 0; i < areas.length; i++) {
 //		if(areas[i].ID==id){
 //			return areas[i]; //area has already benn worked with
@@ -622,12 +625,12 @@ function getAreaById(id){
 //	return null;
 }
 
-function areaExists(id){
-	if(areas[id]==null){
-		return false;
-	}else{
-		return true;
-	}
+function areaExists(id) {
+    if (areas[id] == null) {
+        return false;
+    } else {
+        return true;
+    }
 //	for ( var i = 0; i < areas.length; i++) {
 //		if(areas[i].ID===id){
 ////			alert(id+" equals "+areas[i].ID);
@@ -641,32 +644,32 @@ function areaExists(id){
 
 //END TEST STUFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
-function StatusInfo(color,txt,classname){
-	this.color = color;
-	this.txt = txt;
-	this.classname = classname;
+function StatusInfo(color, txt, classname) {
+    this.color = color;
+    this.txt = txt;
+    this.classname = classname;
 }
 
-function getInfoByStatus(status){
-	var statusInfo;
-	switch (status) {
-	case 'AVAILABLE':
-		statusInfo = new StatusInfo('#6AFF50','Verfuegbar','miconAvailable');
-		break;
-	case 'OCCUPIED':
-		statusInfo = new StatusInfo('#5CB9FF','Beschaeftigt','miconOccupied');
-		break;
-	case 'DO_NOT_DISTURB':
-		statusInfo = new StatusInfo('#FF5543','Bitte nicht stoeren','miconDnD');
-		break;
-	case 'AWAY':
-		statusInfo = new StatusInfo('#DDDDDD','Nicht da','miconAway');
-		break;
-	default:
-		statusInfo = new StatusInfo('#DDDDDD','','');
-		break;
-	}
-	return statusInfo;
+function getInfoByStatus(status) {
+    var statusInfo;
+    switch (status) {
+        case 'AVAILABLE':
+            statusInfo = new StatusInfo('#6AFF50', 'Verfuegbar', 'miconAvailable');
+            break;
+        case 'OCCUPIED':
+            statusInfo = new StatusInfo('#5CB9FF', 'Beschaeftigt', 'miconOccupied');
+            break;
+        case 'DO_NOT_DISTURB':
+            statusInfo = new StatusInfo('#FF5543', 'Bitte nicht stoeren', 'miconDnD');
+            break;
+        case 'AWAY':
+            statusInfo = new StatusInfo('#DDDDDD', 'Nicht da', 'miconAway');
+            break;
+        default:
+            statusInfo = new StatusInfo('#DDDDDD', '', '');
+            break;
+    }
+    return statusInfo;
 }
 
 
@@ -686,11 +689,11 @@ function getInfoByStatus(status){
  * This function is called when a user's icon was clicked.
  * @param email the email of the user that was clicked on
  */
-function displayUserInfo(email){
-	var user = users[email];
-	if(user!=null){
-		balloonify(user);	
-	}
+function displayUserInfo(email) {
+    var user = users[email];
+    if (user != null) {
+        balloonify(user);
+    }
 }
 
 //the modified id (for closing purposes) of the current opened balloon, null if no balloon is open 
@@ -702,126 +705,131 @@ var idleInterval;
  * This function displays or removes a user balloon
  * @param user the user that was clicked on
  */
-function balloonify(user){
-	
-	var id = '#icon_'+user.email;
-	//modifying the id by escaping '.' & '@'
-	var mod_id = id.replace(/\./g, '\\.');
-	mod_id = mod_id.replace(/\@/g, '\\@');
-	if(openBalloonUserID!=null){ //some balloon is open -> close balloon
-		var previousBalloonifiedID = openBalloonUserID;
-		removeBalloon();
-		if(mod_id===previousBalloonifiedID){//clicked on icon of just hid balloon -> do not open it again
-			return;
-		}
-	}
+function balloonify(user) {
 
-	//CREATE BALLOON == SELECT USER
-		//bring selected user-icon to front
+    var id = '#icon_' + user.email;
+    //modifying the id by escaping '.' & '@'
+    var mod_id = id.replace(/\./g, '\\.');
+    mod_id = mod_id.replace(/\@/g, '\\@');
+    if (openBalloonUserID != null) { //some balloon is open -> close balloon
+        var previousBalloonifiedID = openBalloonUserID;
+        removeBalloon();
+        if (mod_id === previousBalloonifiedID) {//clicked on icon of just hid balloon -> do not open it again
+            return;
+        }
+    }
+
+    //CREATE BALLOON == SELECT USER
+    //bring selected user-icon to front
 //		bringUserToFront(mod_id);
-		$(mod_id).addClass('miconSelected');
-		
-		openBalloonUserID = mod_id;
-		
-		var horizontalpos;
-		var verticalpos;
-		if((+user.x)<(+displayedWidth/+2)){
-			horizontalpos = "right"; }else{ horizontalpos = "left"; }
-		if((+user.y)<(+displayedHeight/+2)){
-			verticalpos = "bottom"; }else{ verticalpos = "top"; }
-		var positioning = verticalpos+" "+horizontalpos;
-		var statusInfo = getInfoByStatus(user.status);
-		$(mod_id).showBalloon({
-			position: positioning,
-			showDuration: 250,
-			contents: '<p id="balloonParagraph" style="background-color:'+statusInfo.color+';">'
-				+'<strong>'+user.name+' in '+user.position+'</strong>'
-				+'<br>'+statusInfo.txt+'</p>'
-				/*
-			+'<p>Send me a message!</p>'
-			//+'<input type="hidden" value="'+user.email+'" id="userBalloonID" />'
-			+'<form id="messageForm">'
-			+'<select id="predefMsg">'
-			+'<option value="komm du">Kannst Du kurz vorbeikommen?</option>'
-			+'<option value="ich komme">Ich komme gleich vorbei.</option>'
-			+'<option value="keine Zeit">Ich habe keine Zeit.</option>'
-			+'<option value="ja">Ja</option>'
-			+'<option value="nein">Nein</option>'
-			+'</select>'
-			+'<br>'
-			+'<input id="customMsg" type="text" size="40"/>'
-			+'<br>'
-			+'<input type="submit" value="Benachrichtigen"/>'
-			+'</form>'
-			
-			+'<br>'
-			
-			+'<p>Call me!</p>'
-			+'<form id="callForm">'
-			+'<input type="submit" value="Call '+user.name+'"/>'
-			+'</form>'*/
-		});		
-		document.getElementById("balloonParagraph").parentNode.id = "userBalloon";
-		
-	    //Increment the idle time counter every second
-		if(idleInterval==null){
-			idleInterval = setInterval(timerIncrement, 1000);			
-		}
+    $(mod_id).addClass('miconSelected');
+
+    openBalloonUserID = mod_id;
+
+    var horizontalpos;
+    var verticalpos;
+    if ((+user.x) < (+displayedWidth / +2)) {
+        horizontalpos = "right";
+    } else {
+        horizontalpos = "left";
+    }
+    if ((+user.y) < (+displayedHeight / +2)) {
+        verticalpos = "bottom";
+    } else {
+        verticalpos = "top";
+    }
+    var positioning = verticalpos + " " + horizontalpos;
+    var statusInfo = getInfoByStatus(user.status);
+    $(mod_id).showBalloon({
+        position: positioning,
+        showDuration: 250,
+        contents: '<p id="balloonParagraph" style="background-color:' + statusInfo.color + ';">'
+            + '<strong>' + user.name + ' in ' + user.position + '</strong>'
+            + '<br>' + statusInfo.txt + '</p>'
+        /*
+         +'<p>Send me a message!</p>'
+         //+'<input type="hidden" value="'+user.email+'" id="userBalloonID" />'
+         +'<form id="messageForm">'
+         +'<select id="predefMsg">'
+         +'<option value="komm du">Kannst Du kurz vorbeikommen?</option>'
+         +'<option value="ich komme">Ich komme gleich vorbei.</option>'
+         +'<option value="keine Zeit">Ich habe keine Zeit.</option>'
+         +'<option value="ja">Ja</option>'
+         +'<option value="nein">Nein</option>'
+         +'</select>'
+         +'<br>'
+         +'<input id="customMsg" type="text" size="40"/>'
+         +'<br>'
+         +'<input type="submit" value="Benachrichtigen"/>'
+         +'</form>'
+
+         +'<br>'
+
+         +'<p>Call me!</p>'
+         +'<form id="callForm">'
+         +'<input type="submit" value="Call '+user.name+'"/>'
+         +'</form>'*/
+    });
+    document.getElementById("balloonParagraph").parentNode.id = "userBalloon";
+
+    //Increment the idle time counter every second
+    if (idleInterval == null) {
+        idleInterval = setInterval(timerIncrement, 1000);
+    }
 }
 
 /**
  * This function is to be called when a user-icon is selected
  * @param mod_id the modified id of the icon-img for jquery-selection
  */
-function bringUserToFront(mod_id){
+function bringUserToFront(mod_id) {
 //	var id = '#icon_'+user.email;
 //	//modifying the id by escaping '.' & '@'
 //	var mod_id = id.replace(/\./g, '\\.');
 //	mod_id = mod_id.replace(/\@/g, '\\@');
-	$(mod_id).appendTo("#mapscroll");
-	
-	//DO GLOW
+    $(mod_id).appendTo("#mapscroll");
+
+    //DO GLOW
 //	var icon=document.createElement("img");
 //	icon.className="micon";
 //	$(mod_id).className = "miconSelected";
 //	$(mod_id).removeClass();
-	$(mod_id).addClass('miconSelected');
+    $(mod_id).addClass('miconSelected');
 }
-
 
 
 /**
  * This function removes the opened balloon
  */
-function removeBalloon(){
-	if(!balloonIsOpen()){ //if no balloon is open -> no need to remove
-		openBalloonUserID=null;
+function removeBalloon() {
+    if (!balloonIsOpen()) { //if no balloon is open -> no need to remove
+        openBalloonUserID = null;
 //		alert("removeBalloon - no balloon open");
-		return;
-	}
-	//reset balloon idle counter stuff
+        return;
+    }
+    //reset balloon idle counter stuff
 //	clearInterval(interval);
 //	resetInterval();
-	balloonIdleTime = 0;
-	//hide...
-	$(openBalloonUserID).hideBalloon();
-	//& delete balloon
-	var balloonElement = document.getElementById("userBalloon");
-	balloonElement.parentNode.removeChild(balloonElement);
-	
-	//REMOVE GLOW
-	$(openBalloonUserID).removeClass('miconSelected');
+    balloonIdleTime = 0;
+    //hide...
+    $(openBalloonUserID).hideBalloon();
+    //& delete balloon
+    var balloonElement = document.getElementById("userBalloon");
+    balloonElement.parentNode.removeChild(balloonElement);
 
-	openBalloonUserID=null;
+    //REMOVE GLOW
+    $(openBalloonUserID).removeClass('miconSelected');
+
+    openBalloonUserID = null;
 
 }
 
 //reset balloonIdleTime with mousemove & keypress
 $(document).on("mousemove", function (e) {
-	balloonIdleTime = 0;
+    balloonIdleTime = 0;
 });
 $(document).on("keypress", function (e) {
-	balloonIdleTime = 0;
+    balloonIdleTime = 0;
 });
 
 /**
@@ -829,27 +837,27 @@ $(document).on("keypress", function (e) {
  * balloonClosingTime was reached
  */
 function timerIncrement() {
-	if(balloonIsOpen()){
-		balloonIdleTime = +balloonIdleTime + 1;
+    if (balloonIsOpen()) {
+        balloonIdleTime = +balloonIdleTime + 1;
 //		if(document.getElementById("balloonIdle")!=null){
 //			document.getElementById("balloonIdle").innerHTML = balloonIdleTime;		
 //		}
-		if (balloonIdleTime >= balloonClosingTime) {
-			removeBalloon();
-		}
-	}
+        if (balloonIdleTime >= balloonClosingTime) {
+            removeBalloon();
+        }
+    }
 }
 
 /**
  * This function checks, if a balloon is open
  * @returns {Boolean} true if open, else false
  */
-function balloonIsOpen(){
-	if(document.getElementById("userBalloon")==null){
-		return false;
-	}else{
-		return true;
-	}
+function balloonIsOpen() {
+    if (document.getElementById("userBalloon") == null) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 /**
@@ -857,16 +865,14 @@ function balloonIsOpen(){
  * and handles balloon hiding in case of clicking on no icon
  */
 $(document).on("mousedown", "#mapscroll", function (event) {
-	  if (!$(event.target).hasClass('micon')) { //if !(click on icon)
-		  if(balloonIsOpen()){ //if balloon is open -> hide balloon
-			  removeBalloon();
-			  openBalloonUserID = null;
-		  }		  
-	  }
-	  
+    if (!$(event.target).hasClass('micon')) { //if !(click on icon)
+        if (balloonIsOpen()) { //if balloon is open -> hide balloon
+            removeBalloon();
+            openBalloonUserID = null;
+        }
+    }
+
 });
-
-
 
 
 /**
@@ -874,7 +880,7 @@ $(document).on("mousedown", "#mapscroll", function (event) {
  */
 $(document).on("submit", "form[id^='callForm']", function (event) {
     event.preventDefault();
-  //get email of recipient
+    //get email of recipient
     var recipient = openBalloonUserID.replace(/\\/g, '');
     recipient = recipient.substring(6, recipient.length);
 //    alert("call "+recipient);
@@ -895,112 +901,112 @@ $(document).on("submit", "form[id^='messageForm']", function (event) {
     var predefMsg = $("#predefMsg").find(":selected").text();
     var customMsg = $("#customMsg").val();
 //    alert("send message to "+recipient+":\nPredefMsg: "+predefMsg+"\nCustomMsg: "+customMsg);
-    
+
     //TODO if custommsg is empty - send predefmsg, else send custommsg
     //TODO possibly check for user status
 });
 
 
-
-
 //MAP SCALING AND PANNING STUFF - NOT IN USE
 /*
-var clicking = false;
-var previousX;
-var previousY;
+ var clicking = false;
+ var previousX;
+ var previousY;
 
-$(document).on("mousedown", "#mapscroll", function (e) {
-e.preventDefault();
-previousX = e.clientX;
-previousY = e.clientY;
-clicking = true;
-});
+ $(document).on("mousedown", "#mapscroll", function (e) {
+ e.preventDefault();
+ previousX = e.clientX;
+ previousY = e.clientY;
+ clicking = true;
+ });
 
-$(document).mouseup(function() {
-    clicking = false;
-});
+ $(document).mouseup(function() {
+ clicking = false;
+ });
 
 
-$(document).mousemove(function(e) {	
-    if (clicking) {
-        e.preventDefault();
-        //accelerated panning
-//        var directionX = (previousX - e.clientX) > 0 ? 1 : -1;
-//        var directionY = (previousY - e.clientY) > 0 ? 1 : -1;
-//        $("#mapscroll").scrollLeft($("#mapscroll").scrollLeft() + 10 * directionX);
-//        $("#mapscroll").scrollTop($("#mapscroll").scrollTop() + 10 * directionY);
-        $("#mapscroll").scrollLeft($("#mapscroll").scrollLeft() + (previousX - e.clientX));
-        $("#mapscroll").scrollTop($("#mapscroll").scrollTop() + (previousY - e.clientY));
-        previousX = e.clientX;
-        previousY = e.clientY;
+ $(document).mousemove(function(e) {
+ if (clicking) {
+ e.preventDefault();
+ //accelerated panning
+ //        var directionX = (previousX - e.clientX) > 0 ? 1 : -1;
+ //        var directionY = (previousY - e.clientY) > 0 ? 1 : -1;
+ //        $("#mapscroll").scrollLeft($("#mapscroll").scrollLeft() + 10 * directionX);
+ //        $("#mapscroll").scrollTop($("#mapscroll").scrollTop() + 10 * directionY);
+ $("#mapscroll").scrollLeft($("#mapscroll").scrollLeft() + (previousX - e.clientX));
+ $("#mapscroll").scrollTop($("#mapscroll").scrollTop() + (previousY - e.clientY));
+ previousX = e.clientX;
+ previousY = e.clientY;
+ }
+ });
+
+
+ $("#scroll").mouseleave(function(e) {
+ clicking = false;
+ });
+
+
+
+ //SLIDE BAR STUFF
+ var trigger = 1;
+ var previousScaleValue = 0;
+ var zoomWiding = 1;
+ function doScale(value){
+
+ //determine if zoom in or zoom out an zoom map
+ if(previousScaleValue<value){ //zoom in
+ //		document.getElementById("slidertext").innerHTML = "up:"+previousScaleValue+"-"+value+"-"+mapimg.clientWidth;
+ zoomWiding = mapimg.clientWidth+zoomValue;
+ }else if(previousScaleValue>value){ //zoom out
+ zoomWiding = mapimg.clientWidth-zoomValue;
+ //		document.getElementById("slidertext").innerHTML = "down:"+previousScaleValue+"-"+value+"-"+mapimg.clientWidth;
+ }
+ mapimg.style.width = zoomWiding+"px";
+
+ //update the scale factors
+ computeFactors();
+ //	document.getElementById("slidertext").innerHTML = "fact w:"+widthFactor+" h:"+heigthFactor;
+ //update user icons
+ updateUserIconPlacement();
+
+ previousScaleValue = value;
+
+ }*/
+
+function changeRefreshRate(value) {
+
+    switch (value) {
+        case '1':
+        {
+            refreshRate = 5;
+            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 5 sec';
+            break;
+        }
+        case '2':
+            refreshRate = 10;
+            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 10 sec';
+            break;
+        case '3':
+            refreshRate = 15;
+            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 15 sec';
+            break;
+        case '4':
+            refreshRate = 30;
+            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 30 sec';
+            break;
+        case '5':
+            refreshRate = 60;
+            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 60 sec';
+            break;
+        default:
+            break;
     }
-});
-
-
-$("#scroll").mouseleave(function(e) {
-    clicking = false;
-});
-
-
-
-//SLIDE BAR STUFF
-var trigger = 1;
-var previousScaleValue = 0;
-var zoomWiding = 1;
-function doScale(value){
-
-	//determine if zoom in or zoom out an zoom map
-	if(previousScaleValue<value){ //zoom in
-//		document.getElementById("slidertext").innerHTML = "up:"+previousScaleValue+"-"+value+"-"+mapimg.clientWidth;
-		zoomWiding = mapimg.clientWidth+zoomValue;
-	}else if(previousScaleValue>value){ //zoom out
-		zoomWiding = mapimg.clientWidth-zoomValue;
-//		document.getElementById("slidertext").innerHTML = "down:"+previousScaleValue+"-"+value+"-"+mapimg.clientWidth;
-	}
-	mapimg.style.width = zoomWiding+"px";
-	
-	//update the scale factors
-	computeFactors();
-//	document.getElementById("slidertext").innerHTML = "fact w:"+widthFactor+" h:"+heigthFactor;
-	//update user icons
-	updateUserIconPlacement();
-	
-	previousScaleValue = value;
-	
-}*/
-
-function changeRefreshRate(value){
-
-	switch (value) {
-	case '1':{
-		refreshRate = 5;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 5 sec';
-		break;}
-	case '2':
-		refreshRate = 10;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 10 sec';
-		break;
-	case '3':
-		refreshRate = 15;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 15 sec';
-		break;
-	case '4':
-		refreshRate = 30;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 30 sec';
-		break;
-	case '5':
-		refreshRate = 60;
-		document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 60 sec';
-		break;
-	default:
-		break;
-	}
-	initInterval();
+    initInterval();
 }
 
 /*
-function changeBrightness(value){
+ function changeBrightness(value){
 
-	document.getElementById("slidertext_brightness").innerHTML = "Brightness: "+value;
-	
-}*/
+ document.getElementById("slidertext_brightness").innerHTML = "Brightness: "+value;
+
+ }*/

@@ -96,11 +96,11 @@ public class User implements Sendable, Saveable, Authenticated {
     public String toString() {
         return "User{" +
                 "name='" + name + '\'' +
-                // ", pwdHash='" + pwdHash + '\'' +
                 ", email='" + email + '\'' +
+                ", position='" + position + '\'' +
                 ", admin=" + admin +
-                ", position=\'" + position + "'" +
-                ", status=\'" + status + "'" +
+                ", status=" + status +
+                ", lastAccess=" + lastAccess +
                 '}';
     }
 

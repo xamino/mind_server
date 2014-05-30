@@ -1,174 +1,176 @@
 /************* put footer at the bottom **************/
 html, body {
-   margin:0;
-   padding:0;
-   height:100%;
-   /* width to force float left/right*/
-   width:100%;
-   min-width:1200px;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    /* width to force float left/right*/
+    width: 100%;
+    min-width: 1200px;
 }
 
-#container {	/*contains header content and footer*/
-   min-height:100%;
-   position:relative;   
+#container {
+    /*contains header content and footer*/
+    min-height: 100%;
+    position: relative;
 }
 
-/************* header **************/ /*---> new */
-#banner{
-	background: #cbd7dd;	/*light blue (uni color)*/
-   	height: 100px;
+/************* header **************/
+/*---> new */
+#banner {
+    background: #cbd7dd; /*light blue (uni color)*/
+    height: 100px;
     top: 0;
     position: fixed;
-    width:100%;		/* if modified --> set padding-top of content */
-    text-align:center;
-    z-index: 6000;	/*otherwise --> navigation in front and drawed rect*/
+    width: 100%; /* if modified --> set padding-top of content */
+    text-align: center;
+    z-index: 6000; /*otherwise --> navigation in front and drawed rect*/
 }
 
 /************* div with navigation content and logout **************/
-#content{
-	width:auto;
-	/* if modified --> set padding-top of content */
-	padding-top:110px;		/* to put content beneath header*/
-	padding-bottom:50px; /* height of footer and 20px padding*/ /* --> new */
+#content {
+    width: auto;
+    /* if modified --> set padding-top of content */
+    padding-top: 110px; /* to put content beneath header*/
+    padding-bottom: 50px; /* height of footer and 20px padding*/
+    /* --> new */
 }
 
 /************ navigation div ******************/
-#navigation{
-	/*width: 25%;*/
-    margin: 0; 
-    padding: 0; 
-	width: 200px;
-	border: solid 1px #7d9aaa; 	/*dark blue (uni color)*/
-   	background: #cbd7dd;	/*light blue (uni color)*/
-   	float: left;
-   	/*position:absolute;	/*for dropdown*/
+#navigation {
+    /*width: 25%;*/
+    margin: 0;
+    padding: 0;
+    width: 200px;
+    border: solid 1px #7d9aaa; /*dark blue (uni color)*/
+    background: #cbd7dd; /*light blue (uni color)*/
+    float: left;
+    /*position:absolute;	/*for dropdown*/
 }
 
 /* start normal menu list */
-#navigation ul{
-	list-style:none;
-	margin:0;
-	padding:0;
+#navigation ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
-#navigation ul li{
-   list-style: none; 
-   font-size: medium; 
-   border: solid 1px #7d9aaa; 	/*dark blue (uni color)*/
-   position:relative;
+#navigation ul li {
+    list-style: none;
+    font-size: medium;
+    border: solid 1px #7d9aaa; /*dark blue (uni color)*/
+    position: relative;
 }
 
-#navigation a{
-	padding: 3px;
-	display:block;
-	color:black;			/*text color black*/
-	text-decoration: none; 
+#navigation a {
+    padding: 3px;
+    display: block;
+    color: black; /*text color black*/
+    text-decoration: none;
 }
 
 /* normal menu list - hover and active*/
-#navigation ul li a:active {  
-   background: #7d9aaa; 	/*dark blue (uni color)*/
-   color: #ffffff;			/*text color white*/
+#navigation ul li a:active {
+    background: #7d9aaa; /*dark blue (uni color)*/
+    color: #ffffff; /*text color white*/
 }
 
-#navigation ul li a:hover { 
-   margin: 0; 
-   padding-left: 10px; 
-   text-decoration: none; 
-   font-weight: bold; 
-   font-size: medium; 
-   background-color: #97aebb; 	/*middle blue (uni color)*/
-   color: #ffffff; 			/*text color white*/
-   display: block; 
+#navigation ul li a:hover {
+    margin: 0;
+    padding-left: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: medium;
+    background-color: #97aebb; /*middle blue (uni color)*/
+    color: #ffffff; /*text color white*/
+    display: block;
 }
 
 /* drop-down functionality */
 #navigation ul ul {
-	display: none;
-	position:absolute;
-	left: 200px; 
-	top:0;
-	min-width:250px;	/*enlarge if space is not enough*/
-	background-color: #97aebb; 	/*middle blue (uni color)*/
+    display: none;
+    position: absolute;
+    left: 200px;
+    top: 0;
+    min-width: 250px; /*enlarge if space is not enough*/
+    background-color: #97aebb; /*middle blue (uni color)*/
 }
 
-#navigation ul ul li a{
-	color: #ffffff; 			/*text color white*/
+#navigation ul ul li a {
+    color: #ffffff; /*text color white*/
 }
 
 /* drop-down functionality - hover*/
 #navigation ul li:hover > ul {
-		display: block;
-	}
+    display: block;
+}
 
 /* hover submenu */
-#navigation ul li:hover > ul li a:hover { 
-   margin: 0; 
-   padding-left: 10px; 
-   text-decoration: none; 
-   font-weight: bold; 
-   font-size: medium; 
-   background: #cbd7dd;	/*light blue (uni color)*/
-   color: black; 			/*text color black*/
-   display: block; 
+#navigation ul li:hover > ul li a:hover {
+    margin: 0;
+    padding-left: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: medium;
+    background: #cbd7dd; /*light blue (uni color)*/
+    color: black; /*text color black*/
+    display: block;
 }
 
 /***************end navigation******************/
 
-
 /********** div with normal text ***************/
-#text-content{
-	width:calc(100% - 330px - 2px);
-	margin-left: 10px;
-	padding-left:10px;
-	padding-right:10px;
-	padding-top:5px;
-	float:left;
-	/*border-left: 1px solid lightgrey;
-	border-right: 1px solid lightgrey;*/
+#text-content {
+    width: calc(100% - 330px - 2px);
+    margin-left: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    float: left;
+    /*border-left: 1px solid lightgrey;
+    border-right: 1px solid lightgrey;*/
 }
 
 /************** div with logout- button (more can be added) ******************/
-#logout{
-	float: right;
-	width: 70px;
-	padding-right: 10px;
-	text-align:right;
-	
+#logout {
+    float: right;
+    width: 70px;
+    padding-right: 10px;
+    text-align: right;
+
 }
 
 /************** nice settings for drawing on map (admin_import_map_location.jsp) ******************/
 
 #map_png_div {
     cursor: crosshair;
-  }
+}
 
 /************* clear floats *******************/
-.clear{
-	clear:both;
+.clear {
+    clear: both;
 }
 
 /*#footer{
 	background: #cbd7dd;	/*light blue (uni color)*/
-   	/*height: 30px;
-    bottom: 0;
-    position: fixed;
-    width:100%;
+/*height: 30px;
+bottom: 0;
+position: fixed;
+width:100%;
 }*/
 
 .locationCircle {
-	position: absolute;
-	width: 5px;
+    position: absolute;
+    width: 5px;
     height: 5px;
     background: #00F;
 }
 
 /************* footer *******************/
 #footer {
-   position:absolute;
-   bottom:0;
-   width: 100%;
-   min-width: 1200px;
-   height:30px;   /* Height of the footer */
-   background:#cbd7dd;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    min-width: 1200px;
+    height: 30px; /* Height of the footer */
+    background: #cbd7dd;
 }

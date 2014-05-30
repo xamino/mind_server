@@ -1,21 +1,21 @@
 /*****************************TODO: relation of display and content****************************************/
 
 html, body {
-   margin:0;
-   padding:0;
-   height:100%;
+    margin: 0;
+    padding: 0;
+    height: 100%;
 }
 
-#mapscroll{
-	width:75%;
-	height:100%;
-	/*border:1px solid green;*/
-	/*float:left;*/
-	/*display: inline-block;
+#mapscroll {
+    width: 75%;
+    height: 100%;
+    /*border:1px solid green;*/
+    /*float:left;*/
+    /*display: inline-block;
     vertical-align: left;*/
-	background-image:url(../images/map);
-	background-repeat:no-repeat;
-	background-size: contain;
+    background-image: url(../images/map);
+    background-repeat: no-repeat;
+    background-size: contain;
 }
 
 /* map scroll stuff */
@@ -38,210 +38,206 @@ html, body {
 }
     */
 
-
 .micon {
-	/*position: absolute; top: 0px; left: 0px;*/
-	/*width: 130px;*/
-	
+    /*position: absolute; top: 0px; left: 0px;*/
+    /*width: 130px;*/
+
 }
 
 /* end map scroll stuff */
 
 /*
 #content {	/*contains settings and location/login*/
-  /* min-height:100%;
-   position:relative;
+/* min-height:100%;
+ position:relative;
 }*/
 
-#content{
-	/*width:25%;*/
-	width:calc(25% - 21px);
-	min-width: 300px;
-	height:calc(100% - 21px);
-	/*float:right;*/
-	/*display: inline-block;
+#content {
+    /*width:25%;*/
+    width: calc(25% - 21px);
+    min-width: 300px;
+    height: calc(100% - 21px);
+    /*float:right;*/
+    /*display: inline-block;
     vertical-align: right !important;*/
-    position:absolute;
+    position: absolute;
     right: 0;
     top: 0;
-    -moz-box-shadow:    inset 0 0 10px #000000;
-   	-webkit-box-shadow: inset 0 0 10px #000000;
-   	box-shadow:         inset 0 0 10px #000000;
-	border-left:1px solid black;
-	padding:10px;
+    -moz-box-shadow: inset 0 0 10px #000000;
+    -webkit-box-shadow: inset 0 0 10px #000000;
+    box-shadow: inset 0 0 10px #000000;
+    border-left: 1px solid black;
+    padding: 10px;
 }
 
-#app_settings{
-	/*float:left;*/
-	display: inline-block;
+#app_settings {
+    /*float:left;*/
+    display: inline-block;
     vertical-align: left;
-	width:50%;
-	height:200px;
-	position: absolute;
-	top:10px;
-	text-align: center;
-	/*width:50%;
-	height:20%;*/
+    width: 50%;
+    height: 200px;
+    position: absolute;
+    top: 10px;
+    text-align: center;
+    /*width:50%;
+    height:20%;*/
 }
 
-#display_settings{
-	/*float:right;*/
-	display: inline-block;
+#display_settings {
+    /*float:right;*/
+    display: inline-block;
     vertical-align: right;
-	width:50%;
-	height:200px;
-	/*width:50%;
-	height:20%;*/
-	text-align: center;
-	position: absolute;
-	right:0px;
-	top:10px;
+    width: 50%;
+    height: 200px;
+    /*width:50%;
+    height:20%;*/
+    text-align: center;
+    position: absolute;
+    right: 0px;
+    top: 10px;
 }
 
 #app_settings_img {
-    background-image:url(../images/pd_icons/settings_default_350px.png);
-	background-repeat:no-repeat;
-	background-size: contain;
-    display:block;
-    width:150px;
-    height:150px;
-    margin:auto;
+    background-image: url(../images/pd_icons/settings_default_350px.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: block;
+    width: 150px;
+    height: 150px;
+    margin: auto;
 }
 
 /*#display_settings_img {    
     display:block;
 	/*background-size: 100px auto;*/
-	/*height: 100%; overflow: auto;*/
-   /* max-width:100%; max-height:100%;*/
-    
-    /*background-repeat:no-repeat;
-	background-size: contain;*/
+/*height: 100%; overflow: auto;*/
+/* max-width:100%; max-height:100%;*/
 
+/*background-repeat:no-repeat;
+background-size: contain;*/
 
-#display_settings_img{
-	display:block;
-	width:150px;
-	height:150px;
-	background-image:url(../images/pd_icons/settings_default_350px.png);
-	background-repeat:no-repeat;
-	background-size: contain;
-    margin:auto;
+#display_settings_img {
+    display: block;
+    width: 150px;
+    height: 150px;
+    background-image: url(../images/pd_icons/settings_default_350px.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin: auto;
 }
 
-#awayArea_info{
-	font-weight: bold;
-	font-size:large;
-	color: #32627c;
+#awayArea_info {
+    font-weight: bold;
+    font-size: large;
+    color: #32627c;
 }
 
-#content_popup{
-	/*border: 1px solid orange;	/*height should be 100% - settings - login_location*/
-	/*margin-top:20%;*/
-	margin-top: 200px;
+#content_popup {
+    /*border: 1px solid orange;	/*height should be 100% - settings - login_location*/
+    /*margin-top:20%;*/
+    margin-top: 200px;
 }
 
-#toggleFullscreen, #displayLogoutButton{
-	float:right;	/*Buttons at the right side*/
+#toggleFullscreen, #displayLogoutButton {
+    float: right; /*Buttons at the right side*/
 }
 
-#login_location{
-	bottom:0px;
-	position:absolute;
-	right:0px;
-	height:200px;
-	/*border: 1px solid yellow;*/
-	width:100%;
-	/*width:25%;*/
+#login_location {
+    bottom: 0px;
+    position: absolute;
+    right: 0px;
+    height: 200px;
+    /*border: 1px solid yellow;*/
+    width: 100%;
+    /*width:25%;*/
 }
 
 /* #location, */
-#login{
-	/*float:left;*/
-	display: inline-block;
+#login {
+    /*float:left;*/
+    display: inline-block;
     vertical-align: left;
-	width:50%;
-	position: absolute;
-	bottom:10px;
-	text-align: center;
+    width: 50%;
+    position: absolute;
+    bottom: 10px;
+    text-align: center;
 }
 
-#privacy{
-	/*float:left;*/
-	display: inline-block;
+#privacy {
+    /*float:left;*/
+    display: inline-block;
     vertical-align: right;
-	width:50%;
-	position: absolute;
-	bottom:10px;
-	right:0;
-	text-align: center;
+    width: 50%;
+    position: absolute;
+    bottom: 10px;
+    right: 0;
+    text-align: center;
 }
-
-
 
 /*#login{
 	height:150px;
 	width:150px;
 }*/
 
-#login_img{
-     /*width:100%;
-     height:100px;*/
-     display:block;
-	 width:150px;
-	 height:150px;
-	 background-image:url(../images/pd_icons/locked_350px.png);
-	 background-repeat:no-repeat;
-	 background-size: contain;
-     margin:auto;
+#login_img {
+    /*width:100%;
+    height:100px;*/
+    display: block;
+    width: 150px;
+    height: 150px;
+    background-image: url(../images/pd_icons/locked_350px.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin: auto;
 }
 
-#privacy_img{
-	/* not drawn yet */
+#privacy_img {
+    /* not drawn yet */
 }
 
-.shadow{
-	-moz-box-shadow:    2px 2px 5px 1px #565252;
-  	-webkit-box-shadow: 2px 2px 5px 1px #565252;
-  	box-shadow:         2px 2px 5px 1px #565252;
+.shadow {
+    -moz-box-shadow: 2px 2px 5px 1px #565252;
+    -webkit-box-shadow: 2px 2px 5px 1px #565252;
+    box-shadow: 2px 2px 5px 1px #565252;
 }
 
 .micon {
-    -webkit-filter: drop-shadow(0px 0px 6px rgba(0,0,0,0.5));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.5));
     filter: url(micon-shadow.xml#drop-shadow_micon);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }
 
 .miconAvailable {
-    -webkit-filter: drop-shadow(0px 0px 6px rgba(0,225,0,1.0));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(0, 225, 0, 1.0));
     filter: url(micon-shadow.xml#drop-shadow_miconAvailable);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }
 
 .miconOccupied {
-    -webkit-filter: drop-shadow(0px 0px 6px rgba(30,35,225,1.0));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(30, 35, 225, 1.0));
     filter: url(micon-shadow.xml#drop-shadow_miconOccupied);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }
 
 .miconDnD {
-    -webkit-filter: drop-shadow(0px 0px 6px rgba(225,0,0,1.0));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(225, 0, 0, 1.0));
     filter: url(micon-shadow.xml#drop-shadow_miconDnD);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
 }
 
 .miconAway {
-    -webkit-filter: drop-shadow(0px 0px 6px rgba(206,206,206,1.0));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(206, 206, 206, 1.0));
     filter: url(micon-shadow.xml#drop-shadow_miconAway);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=12, Color='#444')";
 }
 
 .miconSelected {
-    -webkit-filter: drop-shadow(0px 0px 6px rgba(255,255,0,1.0));
+    -webkit-filter: drop-shadow(0px 0px 6px rgba(255, 255, 0, 1.0));
     filter: url(micon-shadow.xml#drop-shadow_miconSelected);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";

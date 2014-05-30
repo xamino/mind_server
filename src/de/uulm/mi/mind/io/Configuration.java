@@ -11,14 +11,14 @@ import java.util.Arrays;
 import java.util.Properties;
 
 /**
- * Created by Andreas on 20.02.14.
+ * Access to configuration properties file
  */
 public class Configuration {
 
     private static Configuration instance;
-    private Messenger log;
+    private final Messenger log;
 
-    private final String CLASS = "Configuration";
+    private static final String TAG = "Configuration";
 
     private String dbName;
     private String adminName;
@@ -27,6 +27,10 @@ public class Configuration {
     private String universitySSID;
     private String registration;
     private ArrayList<String> wifiNameFilter;
+    private String dbPort;
+    private String dbURL;
+    private String dbUser;
+    private String dbPassword;
 
 
     private Configuration() {
@@ -49,15 +53,19 @@ public class Configuration {
                 this.adminPassword = config.getProperty("ADMIN_PASSWORD");
                 this.universitySSID = config.getProperty("UNIVERSITY_SSID");
                 this.registration = config.getProperty("REGISTRATION_POLICY");
+                this.dbURL = config.getProperty("DATABASE_URL");
+                this.dbPort = config.getProperty("DATABASE_PORT");
+                this.dbUser = config.getProperty("DATABASE_USER");
+                this.dbPassword = config.getProperty("DATABASE_PASSWORD");
+
                 String wifiNames = config.getProperty("UNIVERSITY_SSID_FILTER");
-                if (wifiNames != null && !wifiNames.isEmpty()) {
+                if (wifiNames != null)
                     this.wifiNameFilter = new ArrayList<>(Arrays.asList(wifiNames.split(",")));
-                }
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else log.log(CLASS, "Did not find custom config! Loading standard config.");
+        } else log.log(TAG, "Did not find custom config! Loading standard config.");
 
 
         // load default config
@@ -82,6 +90,14 @@ public class Configuration {
                     this.wifiNameFilter = new ArrayList<>(Arrays.asList(wifiNames.split(",")));
                 }
             }
+            if (this.dbURL == null)
+                this.dbURL = config.getProperty("DATABASE_URL");
+            if (this.dbPort == null)
+                this.dbPort = config.getProperty("DATABASE_PORT");
+            if (this.dbUser == null)
+                this.dbUser = config.getProperty("DATABASE_USER");
+            if (this.dbPassword == null)
+                this.dbPassword = config.getProperty("DATABASE_PASSWORD");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -126,5 +142,21 @@ public class Configuration {
 
     public String getRegistration() {
         return this.registration;
+    }
+
+    public String getDbURL() {
+        return this.dbURL;
+    }
+
+    public String getDbPort() {
+        return this.dbPort;
+    }
+
+    public String getDbUser() {
+        return this.dbUser;
+    }
+
+    public String getDbPassword() {
+        return this.dbPassword;
     }
 }
