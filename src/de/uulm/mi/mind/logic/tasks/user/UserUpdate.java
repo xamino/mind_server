@@ -41,7 +41,9 @@ public class UserUpdate extends Task<User, Information> {
         if (safeString(sentUser.getName())) {
             user.setName(sentUser.getName());
         }
-        user.setStatus(sentUser.getStatus());
+        if (sentUser.getStatus() != null) {
+            user.setStatus(sentUser.getStatus());
+        }
 
 
         return (Information) database.open(new Transaction() {
