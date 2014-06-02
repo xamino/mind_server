@@ -1,5 +1,6 @@
 package de.uulm.mi.mind.task;
 
+import de.uulm.mi.mind.ServerManager;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.tasks.Task;
 import de.uulm.mi.mind.objects.Arrival;
@@ -26,10 +27,12 @@ public class TaskManager {
     private Messenger log;
     private Set<String> taskNames;
     private HashMap<String, Task> taskObjects;
+    private final String FILESEPARATOR;
 
     private TaskManager() {
         log = Messenger.getInstance();
         TAG = "TaskManager";
+        FILESEPARATOR = System.getProperty("file.separator");
         taskNames = new HashSet<>();
         taskObjects = new HashMap<>();
         // now register initial tasks
@@ -138,13 +141,14 @@ public class TaskManager {
     private void loadTasks(String packageName) {
         // todo allow loading from config path
         List<Class<Task>> tasks = new ArrayList<Class<Task>>();
-        URL root = Thread.currentThread().getContextClassLoader().getResource(packageName.replace(".", "/"));
+        URL root = Thread.currentThread().getContextClassLoader().getResource(packageName.replace(".", FILESEPARATOR));
         if (root == null) {
             log.error(TAG, "Root path is null! Does the directory exist?");
             return;
         }
         // Filter .class files.
-        File[] files = new File(root.getFile()).listFiles(new FilenameFilter() {
+        String pathFix = ServerManager.getContext().getRealPath("/")+"WEB-INF/classes/"+packageName.replace(".", "/");
+        File[] files = new File(pathFix).listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 return name.endsWith(".class");
             }
