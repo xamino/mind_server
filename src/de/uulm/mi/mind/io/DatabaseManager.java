@@ -1,5 +1,7 @@
 package de.uulm.mi.mind.io;
 
+import com.db4o.ObjectContainer;
+import com.db4o.query.Predicate;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Data;
@@ -55,7 +57,7 @@ public class DatabaseManager {
             public Data doOperations(Session session) {
                 // Initializing Database
                 session.reinit();
-                //runMaintenance(session.getSqlContainer()); // TODO
+                runMaintenance(session.getDb4oContainer()); // TODO
                 return new Success("Reinitialized");
             }
         });
@@ -82,40 +84,40 @@ public class DatabaseManager {
         return returnData;
     }
 
-    private void runMaintenance(ObjectContainerSQL rootContainer) {
+    private void runMaintenance(ObjectContainer rootContainer) {
         log.log(TAG, "In DB Stats:");
-        List<User> set4 = rootContainer.query(new Predicate<User>(User.class) {
+        List<User> set4 = rootContainer.query(new Predicate<User>() {
             @Override
             public boolean match(User o) {
                 return true;
             }
         });
-        log.log(TAG, "Users: " + set4.size() + "\n" + set4);
-        List<Area> set2 = rootContainer.query(new Predicate<Area>(Area.class) {
+        log.log(TAG, "Users: " + set4.size());
+        List<Area> set2 = rootContainer.query(new Predicate<Area>() {
             @Override
             public boolean match(Area o) {
                 return true;
             }
         });
-        log.log(TAG, "Areas: " + set2.size() + "\n" + set2);
-        List<Location> set1 = rootContainer.query(new Predicate<Location>(Location.class) {
+        log.log(TAG, "Areas: " + set2.size());
+        List<Location> set1 = rootContainer.query(new Predicate<Location>() {
             @Override
             public boolean match(Location o) {
                 return true;
             }
         });
-        log.log(TAG, "Locations: " + set1.size() + "\n" + set1);
-        List<WifiMorsel> set = rootContainer.query(new Predicate<WifiMorsel>(WifiMorsel.class) {
+        log.log(TAG, "Locations: " + set1.size());
+        List<WifiMorsel> set = rootContainer.query(new Predicate<WifiMorsel>() {
             @Override
             public boolean match(WifiMorsel o) {
                 return true;
             }
         });
-        log.log(TAG, "Morsels: " + set.size() + "\n" + set);
+        log.log(TAG, "Morsels: " + set.size());
 
-        /*
+
         log.log(TAG, "In Universe:");
-        List<Area> set3 = rootContainer.query(new Predicate<Area>(Area.class) {
+        List<Area> set3 = rootContainer.query(new Predicate<Area>() {
             @Override
             public boolean match(Area o) {
                 return o.getKey().equals("University");
@@ -131,7 +133,7 @@ public class DatabaseManager {
             morselCounter += location.getWifiMorsels().size();
         }
         log.log(TAG, "Morsels: " + morselCounter);
-        */
+
     }
 
     /**
