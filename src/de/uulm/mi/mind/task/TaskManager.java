@@ -26,10 +26,12 @@ public class TaskManager {
     private Messenger log;
     private Set<String> taskNames;
     private HashMap<String, Task> taskObjects;
+    private final String FILESEPARATOR;
 
     private TaskManager() {
         log = Messenger.getInstance();
         TAG = "TaskManager";
+        FILESEPARATOR = System.getProperty("file.separator");
         taskNames = new HashSet<>();
         taskObjects = new HashMap<>();
         // now register initial tasks
@@ -138,7 +140,7 @@ public class TaskManager {
     private void loadTasks(String packageName) {
         // todo allow loading from config path
         List<Class<Task>> tasks = new ArrayList<Class<Task>>();
-        URL root = Thread.currentThread().getContextClassLoader().getResource(packageName.replace(".", "/"));
+        URL root = Thread.currentThread().getContextClassLoader().getResource(packageName.replace(".", FILESEPARATOR));
         if (root == null) {
             log.error(TAG, "Root path is null! Does the directory exist?");
             return;

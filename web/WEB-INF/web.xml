@@ -6,6 +6,9 @@
         <servlet-name>Servlet</servlet-name>
         <servlet-class>de.uulm.mi.mind.servlet.Servlet</servlet-class>
     </servlet>
+    <listener>
+        <listener-class>de.uulm.mi.mind.ServerManager</listener-class>
+    </listener>
     <servlet>
         <servlet-name>UploadServlet</servlet-name>
         <servlet-class>de.uulm.mi.mind.servlet.UploadServlet</servlet-class>
@@ -18,8 +21,6 @@
         <servlet-name>UploadServlet</servlet-name>
         <url-pattern>/upload/*</url-pattern>
     </servlet-mapping>
-    <listener>
-        <listener-class>de.uulm.mi.mind.ServerManager</listener-class>
-    </listener>
+
 
 </web-app>
