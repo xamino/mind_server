@@ -114,11 +114,12 @@ function deleteCookie(name) {
 
 // OBJECT DEFINITIONS HERE –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––-
 
-function Arrival(task, sessionHash, object) {
+function Arrival(task, sessionHash, object, compact) {
     this.$type = "Arrival";
     this.sessionHash = sessionHash;
     this.task = task;
     this.object = object;
+    this.compact = compact;
 }
 
 function User(email, password, name, admin, status) {
