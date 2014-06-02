@@ -18,11 +18,11 @@ import java.util.Set;
  */
 public abstract class Task<I extends Sendable, O extends Sendable> {
 
+    protected final String TAG;
     protected Messenger log;
     protected Configuration configuration;
     protected DatabaseManager database;
     protected FilePath filePath;
-    protected final String TAG;
     protected boolean compact;
 
     /**
@@ -40,7 +40,9 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
      * Method that is called for doing the task. Note that while you are ensured to only receive objects of the type you
      * require, it is still up to the task to check that it is a valid object (so check whether it is null!).
      *
-     * @param object The object requested.
+     * @param active  The active user object to work with.
+     * @param object  The object requested.
+     * @param compact Whether a compact answer is wished for or not.
      * @return The object to return.
      */
     public O doWork(Active active, I object, boolean compact) {
@@ -52,6 +54,7 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
      * Method that is called for doing the task. Note that while you are ensured to only receive objects of the type you
      * require, it is still up to the task to check that it is a valid object (so check whether it is null!).
      *
+     * @param active The active user object to work with.
      * @param object The object requested.
      * @return The object to return.
      */
