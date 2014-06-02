@@ -7,13 +7,10 @@ import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import de.uulm.mi.mind.objects.*;
-import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -84,10 +81,9 @@ class DatabaseController extends DatabaseAccess {
     @Override
     public <T extends Saveable> DataList<T> read(Session session, final T requestFilter) {
         ObjectContainer sessionContainer = session.getDb4oContainer();
-        Object o = new Object();
-        log.pushTimer(o, "if");
+        log.pushTimer(this, "if");
         try {
-            List<T> queryResult;
+            ObjectSet<T> queryResult;
             // When unique key is empty, directly use the filter.
             if (requestFilter == null
                     || requestFilter.getKey() == null) { //TODO better location key
@@ -120,14 +116,11 @@ class DatabaseController extends DatabaseAccess {
                     });
                 }
             }
-            log.log(TAG, "if " + log.popTimer(o).time + "ms");
+            log.log(TAG, "if " + log.popTimer(this).time + "ms");
             // Write query results to DataList
-            log.pushTimer(o, "list copy");
-            DataList<T> result = new DataList<>();
-            if (queryResult != null) {
-                result.addAll(queryResult);
-            }
-            log.log(TAG, "list copy " + log.popTimer(o).time + "ms");
+            log.pushTimer(this, "list copy");
+            DataList<T> result = new DataList<>(queryResult);
+            log.log(TAG, "list copy " + log.popTimer(this).time + "ms");
 
             // log.error(TAG, "Read from DB: " + result.toString());
             return result;
