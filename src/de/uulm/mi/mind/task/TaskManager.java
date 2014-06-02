@@ -1,5 +1,6 @@
 package de.uulm.mi.mind.task;
 
+import de.uulm.mi.mind.ServerManager;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.logic.tasks.Task;
 import de.uulm.mi.mind.objects.Arrival;
@@ -146,7 +147,8 @@ public class TaskManager {
             return;
         }
         // Filter .class files.
-        File[] files = new File(root.getFile()).listFiles(new FilenameFilter() {
+        String pathFix = ServerManager.getContext().getRealPath("/")+"WEB-INF/classes/"+packageName.replace(".", "/");
+        File[] files = new File(pathFix).listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 return name.endsWith(".class");
             }
