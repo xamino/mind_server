@@ -5,6 +5,7 @@ import de.uulm.mi.mind.objects.Area;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.Location;
+import de.uulm.mi.mind.objects.WifiMorsel;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.security.Active;
 
@@ -19,9 +20,12 @@ public class AreaRead extends AdminTask<Area, Sendable> {
             return new Error(Error.Type.DATABASE, "Reading of area resulted in an error.");
         }
 
+        // If compact is set, purge all wifimorsels
         if (compact) {
             for (Area area1 : read) {
-                area1.setLocations(new DataList<Location>());
+                for (Location location : area1.getLocations()) {
+                    location.setWifiMorsels(new DataList<WifiMorsel>());
+                }
             }
         }
 

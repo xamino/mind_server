@@ -38,7 +38,8 @@ function build() {
     send(new Arrival("sensor_read", session, new WifiSensor()), function (data) {
         b_table('sensors', data.object);
     });
-    send(new Arrival("area_read", session, new Area()), function (data) {
+    // note that we compact this one (we'll get the morsels later):
+    send(new Arrival("area_read", session, new Area(), true), function (data) {
         b_table('areas', data.object);
     });
     send(new Arrival("location_read", session, new Location()), function (data) {
