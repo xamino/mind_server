@@ -147,8 +147,6 @@ class ObjectContainerSQL {
     private void createTableForClassIfNotExist(Class<?> o) {
         String tableName = o.getCanonicalName().replace('.', '_');
 
-        log.log(TAG, "Create Table for: " + o.getSimpleName());
-
         // Check if table already exists
         int size = -1;
         try {
@@ -167,10 +165,15 @@ class ObjectContainerSQL {
             return;
         }
 
+        log.log(TAG, "Create Table for: " + o.getSimpleName());
+
+        HashMap<Class<?>, String> blub = DatabaseControllerSQL.classFieldIndexedMap;
+
         // Create new table
         // give it a auto increment index column for referencing
         String columnTypes = "aid INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,";
         ArrayList<String> foreignKeys = new ArrayList<>();
+        ArrayList<String> indexKeys = new ArrayList<>();
         for (Field field : o.getDeclaredFields()) {
             field.setAccessible(true);
 
@@ -182,18 +185,23 @@ class ObjectContainerSQL {
                 log.log(TAG, "Nested class found: " + fieldClass.getSimpleName());
                 createTableForClassIfNotExist(fieldClass);
                 //foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + fieldClass.getCanonicalName().replace(".", "_") + "(aid),");
-                continue;
             } else if (type.equals(LIST)) {
                 Class<?> elementClass = getClassFromGenericField(field);
                 log.log(TAG, "Nested list/array found: " + fieldClass.getSimpleName() + " of " + elementClass.getSimpleName());
                 createTableForClassIfNotExist(elementClass);
                 createTableForListsIfNotExist(o, elementClass);
                 //foreignKeys.add("FOREIGN KEY (" + COLESC + field.getName() + COLESC + ") REFERENCES " + o.getSimpleName() + "__" + elementClass.getSimpleName() + "(pid),");
-                continue;
+            } else if (blub.containsKey(o) && blub.get(o).equals(field.getName())) {
+                indexKeys.add("INDEX (" + COLESC + field.getName() + COLESC + "),");
+                columnTypes += COLESC + field.getName() + COLESC + " " + type + ",";
+            } else {
+                columnTypes += COLESC + field.getName() + COLESC + " " + type + ",";
             }
-            columnTypes += COLESC + field.getName() + COLESC + " " + type + ",";
         }
 
+        for (String index : indexKeys) {
+            columnTypes += index;
+        }
         for (String foreignKey : foreignKeys) {
             columnTypes += foreignKey;
         }
@@ -201,6 +209,7 @@ class ObjectContainerSQL {
         columnTypes = columnTypes.substring(0, columnTypes.lastIndexOf(","));
 
         String tableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + columnTypes + ")";
+
         log.log(TAG, tableQuery);
         try {
             //create table structure
@@ -220,6 +229,8 @@ class ObjectContainerSQL {
                 "INDEX pid_index (pid)," +
                 //"FOREIGN KEY (" + COLESC + "pid" + COLESC + ") REFERENCES " + containerClass.getCanonicalName().replace(".", "_") + "(aid)," +
                 "FOREIGN KEY (" + COLESC + "cid" + COLESC + ") REFERENCES " + elementClass.getCanonicalName().replace(".", "_") + "(aid))";
+
+
         log.log(TAG, tableQuery);
 
         try {
@@ -301,6 +312,7 @@ class ObjectContainerSQL {
             }
         }
         query = query.substring(0, query.lastIndexOf("AND") - 1);
+
 
         log.log(TAG, query);
 

@@ -3,11 +3,11 @@ package de.uulm.mi.mind.io;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
-import javax.servlet.ServletContextEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -20,12 +20,15 @@ class DatabaseControllerSQL extends DatabaseAccess {
     private static DatabaseControllerSQL instance;
     private final String TAG = "DatabaseControllerSQL";
 
+    static HashMap<Class<?>, String> classFieldIndexedMap;
+
     /**
      * Private constructor for DatabaseController for implementing the singleton
      * instance. Use getInstance() to get a reference to an object of this type.
      */
     private DatabaseControllerSQL() {
         instance = this;
+        classFieldIndexedMap = new HashMap<>();
     }
 
     /**
@@ -49,7 +52,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
     public boolean create(Session session, Saveable data) {
         ObjectContainerSQL sessionContainer = session.getSqlContainer();
         // Sanitize input on DB, only allow Data objects implementing a unique key
-        if (data == null || data.getKey() == null) {
+        if (data == null || data.getKey() == null || data.getKey().equals("")) {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
@@ -59,6 +62,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
         }
         try {
             sessionContainer.store(data);
+
 
             log.log(TAG, "Written to DB: " + data.toString());
             return true;
@@ -101,6 +105,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
                     query.descendConstrain("key", requestFilter.getKey());
                     queryResult = query.execute();
                 } else {
+
                     log.log(TAG, "Object Type " + requestFilter.getClass().getSimpleName() + " reading could be optimized.");
                     queryResult = sessionContainer.query(new Predicate<Saveable>(requestFilter.getClass()) {
                         @Override
@@ -127,6 +132,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
     }
 
     public boolean update(Session session, Saveable data) {
+
         log.log(TAG, "To update: " + data.toString());
         ObjectContainerSQL sessionContainer = session.getSqlContainer();
         if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
@@ -135,9 +141,11 @@ class DatabaseControllerSQL extends DatabaseAccess {
             if (!(dataList = read(session, data)).isEmpty()) {
                 sessionContainer.delete(dataList.get(0));
                 sessionContainer.store(data);
+
                 log.log(TAG, "Updated in DB: " + data.toString());
                 return true;
             }
+
             log.log(TAG, "Not found on read: " + data.toString());
             return false;
         } catch (Exception e) {
@@ -153,10 +161,10 @@ class DatabaseControllerSQL extends DatabaseAccess {
      * @return true if deletion was successful or the object does not exist, otherwise false
      */
     public boolean delete(Session session, Saveable data) {
-        log.log(TAG, "To Delete: " + data.toString());
         ObjectContainerSQL sessionContainer = session.getSqlContainer();
         try {
             DataList<Saveable> dataList = read(session, data);
+
             log.log(TAG, "Read Delete: " + dataList.toString());
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
@@ -170,6 +178,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
                 for (Saveable d : dataList) {
                     sessionContainer.delete(d);
                 }
+
                 log.log(TAG, "Deleted " + size + " objects from DB: " + dataList.toString());
                 return true;
             }
@@ -197,6 +206,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
         try {
             Class.forName(driver);
         } catch (ClassNotFoundException e) {
+
             log.log(TAG, "Driver Start failure");
         }
 
@@ -204,6 +214,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
             con = DriverManager.getConnection(url + "/" + config.getDbName(), user, pass);
         } catch (SQLException e) {
             // possible DB not existant
+
             log.log(TAG, "DB '" + config.getDbName() + "' probably not found. Create!");
             con = createDatabase(driver, url, config.getDbName(), user, pass);
         }
@@ -229,6 +240,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
 
         } catch (ClassNotFoundException | SQLException e) {
             // TODO Auto-generated catch block
+
             log.log(TAG, "Connection Failure");
             e.printStackTrace();
         }
@@ -242,10 +254,20 @@ class DatabaseControllerSQL extends DatabaseAccess {
     }
 
     @Override
-    public void init(ServletContextEvent event) {
+    public void init(String event) {
+/*
+        dbconfig.common().objectClass(Area.class).cascadeOnUpdate(true);
+        dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);
+        dbconfig.common().objectClass(Location.class).cascadeOnDelete(true);
+*/
+        classFieldIndexedMap.put(User.class, "email");
+        classFieldIndexedMap.put(Area.class, "ID");
+        classFieldIndexedMap.put(PublicDisplay.class, "identification");
+        classFieldIndexedMap.put(WifiSensor.class, "identification");
+        classFieldIndexedMap.put(Location.class, "key");
     }
 
     @Override
-    public void destroy(ServletContextEvent event) {
+    public void destroy() {
     }
 }

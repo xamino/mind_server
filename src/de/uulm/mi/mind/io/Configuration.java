@@ -1,8 +1,6 @@
 package de.uulm.mi.mind.io;
 
 
-import de.uulm.mi.mind.logger.Messenger;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,9 +14,6 @@ import java.util.Properties;
 public class Configuration {
 
     private static Configuration instance;
-    private final Messenger log;
-
-    private static final String TAG = "Configuration";
 
     private String dbName;
     private String adminName;
@@ -31,10 +26,11 @@ public class Configuration {
     private String dbURL;
     private String dbUser;
     private String dbPassword;
+    private String dbType;
+    private String isDebug;
 
 
     private Configuration() {
-        log = Messenger.getInstance();
     }
 
     public void init(String servletPath) {
@@ -57,6 +53,8 @@ public class Configuration {
                 this.dbPort = config.getProperty("DATABASE_PORT");
                 this.dbUser = config.getProperty("DATABASE_USER");
                 this.dbPassword = config.getProperty("DATABASE_PASSWORD");
+                this.dbType = config.getProperty("DATABASE_TYPE");
+                this.isDebug = config.getProperty("DEBUG");
 
                 String wifiNames = config.getProperty("UNIVERSITY_SSID_FILTER");
                 if (wifiNames != null)
@@ -65,7 +63,7 @@ public class Configuration {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else log.log(TAG, "Did not find custom config! Loading standard config.");
+        } else System.out.println("Did not find custom config! Loading standard config.");
 
 
         // load default config
@@ -98,6 +96,10 @@ public class Configuration {
                 this.dbUser = config.getProperty("DATABASE_USER");
             if (this.dbPassword == null)
                 this.dbPassword = config.getProperty("DATABASE_PASSWORD");
+            if (this.dbType == null)
+                this.dbType = config.getProperty("DATABASE_TYPE");
+            if (this.isDebug == null)
+                this.isDebug = config.getProperty("DEBUG");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -158,5 +160,13 @@ public class Configuration {
 
     public String getDbPassword() {
         return this.dbPassword;
+    }
+
+    public String getDbType() {
+        return this.dbType;
+    }
+
+    public boolean isDebug() {
+        return Boolean.valueOf(isDebug);
     }
 }

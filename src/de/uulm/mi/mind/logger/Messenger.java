@@ -1,5 +1,7 @@
 package de.uulm.mi.mind.logger;
 
+import de.uulm.mi.mind.io.Configuration;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,6 +23,7 @@ public class Messenger {
      * Super tag that is in all messages printed by Messenger.
      */
     private final String TAG = "Messenger";
+    private final boolean debug;
     /**
      * The stack with which the TimerResult objects are managed.
      */
@@ -31,7 +34,8 @@ public class Messenger {
      * Messenger, ust the getInstance Method.
      */
     private Messenger() {
-        this.timers = new HashMap<Object, Stack<TimerResult>>();
+        this.timers = new HashMap<>();
+        this.debug = Configuration.getInstance().isDebug();
     }
 
     /**
@@ -52,7 +56,8 @@ public class Messenger {
      * @param content The content of the message to log.
      */
     public synchronized void log(final String tag, final String content) {
-        System.out.println(TAG + "|" + tag + "::" + content);
+        if (debug)
+            System.out.println(TAG + "|" + tag + "::" + content);
     }
 
     /**
@@ -62,7 +67,8 @@ public class Messenger {
      * @param content The content of the error to log.
      */
     public synchronized void error(final String tag, final String content) {
-        System.err.println(TAG + "|" + tag + "::" + content);
+        if (debug)
+            System.err.println(TAG + "|" + tag + "::" + content);
     }
 
     /**

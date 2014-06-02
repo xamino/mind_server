@@ -19,12 +19,14 @@ public class DatabaseManager {
     private final String TAG = "DatabaseManager";
     private final DatabaseAccess dba;
     private final Messenger log;
-    //private final DatabaseAccess mySQL;
 
     public DatabaseManager() {
         log = Messenger.getInstance();
-        dba = DatabaseController.getInstance();
-        //dba = DatabaseControllerSQL.getInstance();
+        if (Configuration.getInstance().getDbType().toLowerCase().equals("sql")) {
+            dba = DatabaseControllerSQL.getInstance();
+        } else {
+            dba = DatabaseController.getInstance();
+        }
     }
 
     public static DatabaseManager getInstance() {
@@ -39,13 +41,13 @@ public class DatabaseManager {
     }
 
     public void destroy(ServletContextEvent servletContextEvent) {
-        dba.destroy(servletContextEvent);
+        dba.destroy();
     }
 
     private void init(ServletContextEvent servletContextEvent, boolean reinitialize) {
         // Allow database to run initialization
-        dba.init(servletContextEvent);
-
+        String filePath = servletContextEvent.getServletContext().getRealPath("/");
+        dba.init(filePath);
 
         if (reinitialize)
             reinit();

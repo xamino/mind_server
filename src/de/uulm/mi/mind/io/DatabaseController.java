@@ -9,8 +9,6 @@ import com.db4o.query.Query;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
 import java.util.List;
 
 /**
@@ -53,7 +51,7 @@ class DatabaseController extends DatabaseAccess {
     public boolean create(Session session, Saveable data) {
         ObjectContainer sessionContainer = session.getDb4oContainer();
         // Sanitize input on DB, only allow Data objects implementing a unique key
-        if (data == null || data.getKey() == null) {
+        if (data == null || data.getKey() == null || data.getKey().equals("")) {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
@@ -275,12 +273,9 @@ class DatabaseController extends DatabaseAccess {
     }
 
     @Override
-    public void init(ServletContextEvent event) {
-        ServletContext context = event.getServletContext();
-        String filePath = context.getRealPath("/");
-
+    public void init(String contextPath) {
         Configuration config = Configuration.getInstance();
-        String dbFilePath = filePath + "WEB-INF/" + config.getDbName();
+        String dbFilePath = contextPath + "WEB-INF/" + config.getDbName();
 
         EmbeddedConfiguration dbconfig = Db4oEmbedded.newConfiguration();
         //dbconfig.common().diagnostic().addListener(new DiagnosticToConsole());
@@ -300,7 +295,7 @@ class DatabaseController extends DatabaseAccess {
     }
 
     @Override
-    public void destroy(ServletContextEvent event) {
+    public void destroy() {
         if (rootContainer != null) {
             rootContainer.close();
             log.log(TAG, "db4o shutdown");

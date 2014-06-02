@@ -8,8 +8,6 @@ import de.uulm.mi.mind.objects.Location;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.security.BCrypt;
 
-import javax.servlet.ServletContextEvent;
-
 /**
  * Created by Cassio on 10.05.2014.
  */
@@ -27,9 +25,9 @@ abstract class DatabaseAccess {
 
     abstract Session open();
 
-    abstract void init(ServletContextEvent event);
+    abstract void init(String contextPath);
 
-    abstract void destroy(ServletContextEvent event);
+    abstract void destroy();
 
     abstract boolean create(Session session, Saveable data);
 
