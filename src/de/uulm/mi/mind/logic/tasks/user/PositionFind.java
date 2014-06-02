@@ -72,7 +72,9 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
 
         // Everything okay from here on out:
+        log.pushTimer(this, "rofl");
         Location location = calculateLocation(requestLocation);
+        log.log(TAG, "calculateLocation "+log.popTimer(this).time+"ms");
         if (location == null) {
             // this means the location could not be found in the DB but user is at University
             return new Area("University");
@@ -129,6 +131,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
         DataList<Location> dataBaseLocations = uniArea.getLocations();
 
         // Modify database List to contain the average Morsel signal strengths for each location
+        log.pushTimer(this, "time");
         for (Location databaseLocation : dataBaseLocations) {
             DataList<WifiMorsel> averageMorsels = new DataList<>();
             for (WifiMorsel morsel : databaseLocation.getWifiMorsels()) {
@@ -159,6 +162,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
             }
             databaseLocation.setWifiMorsels(averageMorsels);
         }
+        log.log(TAG, "FOR Alpha "+log.popTimer(this).time+"ms");
 
         // A Map that describes how many matches there are for this location
         HashMap<Location, Integer> locationMatchesMap = new HashMap<>();
@@ -169,6 +173,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
 
         // For each request morsel, check if a morsel with the same mac address exists in a database location.
         // Then check how far wifi levels are apart. If it is below a tolerance value increase the goodness of that location.
+        log.pushTimer(this, "for2");
         for (WifiMorsel currentRequestMorsel : requestWifiMorsels) {
             for (Location dataBaseLocation : dataBaseLocations) {
 
@@ -195,6 +200,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
                 }
             }
         }
+        log.log(TAG, "FOR beta "+log.popTimer(this).time+"ms");
 
 
         //FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
@@ -255,7 +261,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
                     }
                 }
 
-                // Now there are only those locations left, that have the same amount of matches AND the same levelDifferenceSum
+                // Now there are only tholog.popTimer(this)se locations left, that have the same amount of matches AND the same levelDifferenceSum
                 //e.g. -50 is a stronger dBm value (better signal) than -90
                 if (sortedLocationCandidateList.size() > 1) {
                     //LAST CHANGE - MAX_VALUE TO MIN_VALUE & < TO >

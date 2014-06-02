@@ -80,7 +80,10 @@ class DatabaseController extends DatabaseAccess {
      */
     @Override
     public <T extends Saveable> DataList<T> read(Session session, final T requestFilter) {
+        log.pushTimer(this, "db");
         ObjectContainer sessionContainer = session.getDb4oContainer();
+        log.log(TAG, "sessioncontainer " + log.popTimer(this).time + "ms");
+        log.pushTimer(this, "if");
         try {
             List queryResult;
             // When unique key is empty, directly use the filter.
@@ -123,6 +126,7 @@ class DatabaseController extends DatabaseAccess {
                     result.add((T) o);
                 }
             }
+            log.log(TAG, "if " + log.popTimer(this).time + "ms");
             // log.error(TAG, "Read from DB: " + result.toString());
             return result;
 
