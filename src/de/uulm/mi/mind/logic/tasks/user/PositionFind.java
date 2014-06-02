@@ -81,9 +81,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
 
         // get best area for location to return
-        log.pushTimer(this, "lol");
         Area area = getBestArea(location);
-        log.log(TAG, "getBestArea "+log.popTimer(this).time+"ms");
         if (area == null) {
             log.error(TAG, "NULL area for position_find – shouldn't happen as University should be returned at least!");
             return new Success(Success.Type.NOTE, "Your position could not be found.");
@@ -263,7 +261,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
                     }
                 }
 
-                // Now there are only those locations left, that have the same amount of matches AND the same levelDifferenceSum
+                // Now there are only tholog.popTimer(this)se locations left, that have the same amount of matches AND the same levelDifferenceSum
                 //e.g. -50 is a stronger dBm value (better signal) than -90
                 if (sortedLocationCandidateList.size() > 1) {
                     //LAST CHANGE - MAX_VALUE TO MIN_VALUE & < TO >
