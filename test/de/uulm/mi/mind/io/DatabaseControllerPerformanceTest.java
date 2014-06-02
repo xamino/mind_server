@@ -1,10 +1,10 @@
 package de.uulm.mi.mind.io;
 
-import de.uulm.mi.mind.objects.DataList;
-import de.uulm.mi.mind.objects.User;
+import de.uulm.mi.mind.objects.*;
 import org.junit.*;
 
 import java.io.File;
+import java.util.Date;
 
 /**
  * Created by Cassio on 07.03.14.
@@ -28,12 +28,13 @@ public class DatabaseControllerPerformanceTest {
         dbc.init(new File("").getAbsolutePath() + "/web/");
 
         Session session = dbc.open();
+        session.delete(null);
         // init 10000 users
-        for (int i = 0; i < 10000; i++) {
+        /*for (int i = 0; i < 10000; i++) {
             session.create(new User("readDummy" + i + "@dummy.du"));
             // dbc.create(new User("updateDummy" + i + "@dummy.du"));
             //dbc.create(new User("deleteDummy" + i + "@dummy.du"));
-        }
+        }*/
         session.commit();
         session.close();
         System.out.println("---Test Setup Complete---");
@@ -57,6 +58,7 @@ public class DatabaseControllerPerformanceTest {
 
     @After
     public void afterEachTest() {
+        session.delete(null);
         session.close();
     }
 
@@ -64,7 +66,6 @@ public class DatabaseControllerPerformanceTest {
     @Test
     public void userCreatePerformance() {
         Long time = System.currentTimeMillis();
-
         for (int i = 0; i < 10000; i++) {
             session.create(new User("createDummy" + i + "@dummy.du"));
         }
@@ -106,6 +107,30 @@ public class DatabaseControllerPerformanceTest {
             session.delete(new User("deleteDummy" + i + "@dummy.du"));
         }
         System.out.println("Delete: " + (System.currentTimeMillis() - time) + "ms");
+    }
+
+
+    @Test
+    public void areaLocationsMorselMadness() {
+        DataList<Location> locations = new DataList<>();
+        for (int i = 1; i < 31; i++) {
+            DataList<WifiMorsel> morsels = new DataList<>();
+            for (int j = 1; j < 501; j++) {
+                morsels.add(new WifiMorsel("macAddress" + j, "Welcome", -j, 6, "Debugger", new Date()));
+            }
+            locations.add(new Location(i, i, morsels));
+        }
+        Area uni = new Area("University", locations, 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
+        Long time = System.currentTimeMillis();
+        session.create(uni);
+        session.commit();
+        System.out.println("Write University: " + (System.currentTimeMillis() - time) + "ms");
+        time = System.currentTimeMillis();
+        DataList<Area> areas = session.read(new Area("University"));
+        System.out.println("Read University: " + (System.currentTimeMillis() - time) + "ms");
+        time = System.currentTimeMillis();
+        DataList<WifiMorsel> morselDataList = session.read(new WifiMorsel(null, null, 0, 0, null, null));
+        System.out.println("ReadAll Morsels: " + morselDataList.size() + " - " + (System.currentTimeMillis() - time) + "ms");
     }
 
 }

@@ -20,6 +20,8 @@ class Query {
     private Class<?> objectClass;
     private final HashMap<Object, Object> conditionMap;
     private static final String TAG = "Query";
+    private static final String COLESC = "`";
+    private static final String STRESC = "'";
 
     public Query(Connection connection) {
         this.connection = connection;
@@ -38,6 +40,11 @@ class Query {
     }
 
     public <E> ArrayList<E> execute() {
+
+        if (objectClass == null) {
+            return queryAllObjects();
+        }
+
         ArrayList<E> list = new ArrayList<>();
         try {
             String query = "SELECT * FROM " + objectClass.getCanonicalName().replace(".", "_");
@@ -67,6 +74,39 @@ class Query {
             log.error(TAG, e.getMessage());
         }
         return list;
+    }
+
+    private <E> ArrayList<E> queryAllObjects() {
+
+        ArrayList<Class<?>> classes = new ArrayList<>();
+        try {
+            Statement stm = connection.createStatement();
+            ResultSet rs = stm.executeQuery("SELECT table_name FROM INFORMATION_SCHEMA.TABLES " +
+                    "WHERE table_schema = '" + Configuration.getInstance().getDbName() + "' " +
+                    "AND table_name NOT LIKE '%\\_\\_%'; ");
+            while (rs.next()) {
+                //TODO no way here for the correct name here
+                classes.add(Class.forName(rs.getString("table_name").replace("_", ".")));
+            }
+            rs.close();
+            stm.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (classes.size() == 0) {
+            return null;
+        }
+        ArrayList<E> results = new ArrayList<>();
+        for (Class<?> aClass : classes) {
+            Query q = new Query(connection);
+            q.constrain(aClass);
+            results.addAll(q.<E>execute());
+        }
+
+        return results;
     }
 
     private <E> E rowToObject(Class<?> objectClass, ResultSet rs, Connection connection) throws SQLException {

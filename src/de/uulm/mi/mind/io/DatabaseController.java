@@ -83,8 +83,7 @@ class DatabaseController extends DatabaseAccess {
         try {
             ObjectSet<T> queryResult;
             // When unique key is empty, directly use the filter.
-            if (requestFilter == null
-                    || requestFilter.getKey() == null) { //TODO better location key
+            if (requestFilter == null || requestFilter.getKey() == null) {
                 queryResult = sessionContainer.queryByExample(requestFilter);
             } else {
                 Query query = sessionContainer.query();
@@ -288,6 +287,7 @@ class DatabaseController extends DatabaseAccess {
         dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
         dbconfig.common().objectClass(WifiSensor.class).objectField("identification").indexed(true);
         dbconfig.common().objectClass(Location.class).objectField("key").indexed(true);
+        dbconfig.common().objectClass(WifiMorsel.class).objectField("wifiMac").indexed(true);
         rootContainer = Db4oEmbedded.openFile(dbconfig, dbFilePath);
 
         log.log(TAG, "db4o startup on " + dbFilePath);

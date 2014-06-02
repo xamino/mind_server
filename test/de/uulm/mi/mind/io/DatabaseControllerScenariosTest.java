@@ -47,22 +47,17 @@ public class DatabaseControllerScenariosTest {
     @Before
     public void beforeEachTest() {
         session = dbc.open();
-
         session.create(new User("user1@mail.de"));
         session.create(new User("user2@mail.de", "User2", false));
         session.create(new User("admin@mail.de", "Admin", true));
+        session.commit();
     }
 
     @After
     public void afterEachTest() {
         session.delete(null);
+        session.commit();
         session.close();
-    }
-
-    @Before
-    public void testSetup() {
-        // init with some data
-
     }
 
     @Test

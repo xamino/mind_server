@@ -83,8 +83,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
         try {
             List queryResult;
             // When unique key is empty, directly use the filter.
-            if (requestFilter == null
-                    || requestFilter.getKey() == null) { //TODO better location key
+            if (requestFilter == null || requestFilter.getKey() == null) {
                 queryResult = sessionContainer.queryByExample(requestFilter);
             } else {
                 Query query = sessionContainer.query();
@@ -265,6 +264,7 @@ class DatabaseControllerSQL extends DatabaseAccess {
         classFieldIndexedMap.put(PublicDisplay.class, "identification");
         classFieldIndexedMap.put(WifiSensor.class, "identification");
         classFieldIndexedMap.put(Location.class, "key");
+        classFieldIndexedMap.put(WifiMorsel.class, "wifiMac");
     }
 
     @Override

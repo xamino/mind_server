@@ -353,6 +353,10 @@ class ObjectContainerSQL {
     }
 
     public <E> List<E> queryByExample(E requestFilter) {
+        if (requestFilter == null || requestFilter.getClass() == new Object().getClass() || requestFilter == new Object().getClass()) {
+            return new Query(con).execute();
+        }
+
         Query q = new Query(con);
         q.constrain(requestFilter.getClass());
 
