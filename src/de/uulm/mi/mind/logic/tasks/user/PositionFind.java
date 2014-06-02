@@ -81,7 +81,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
 
         // get best area for location to return
-        log.pushTimer(this, "rofl");
+        log.pushTimer(this, "");
         Area area = getBestArea(location);
         log.log(TAG, "getBestArea " + log.popTimer(this).time + "ms");
         if (area == null) {

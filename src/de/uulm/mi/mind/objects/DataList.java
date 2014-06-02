@@ -5,6 +5,8 @@ import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by Cassio on 25.02.14.
@@ -12,6 +14,14 @@ import java.util.ArrayList;
  * Saved Tamino's sanity on Feb 25, 2014. All hail the DataList!
  */
 public class DataList<T extends Data> extends ArrayList<T> implements Sendable {
+
+
+    public DataList(List<T> ts) {
+        super(ts);
+    }
+
+    public DataList() {
+    }
 
     // Override to allow contains() to work with Data keys.
     @Override
