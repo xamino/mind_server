@@ -40,6 +40,7 @@ public class TaskManager {
         loadTasks("de.uulm.mi.mind.tasks.multiple");
         loadTasks("de.uulm.mi.mind.tasks.user");
         loadTasks("de.uulm.mi.mind.tasks.sensor");
+        loadTasks("de.uulm.mi.mind.tasks.polling");
         log.log(TAG, "Registered " + taskNames.size() + " tasks total.");
         log.log(TAG, "Created.");
     }
@@ -160,7 +161,7 @@ public class TaskManager {
         List<Class<Task>> tasks = new ArrayList<Class<Task>>();
         URL root = Thread.currentThread().getContextClassLoader().getResource(packageName.replace(".", FILESEPARATOR));
         if (root == null) {
-            log.error(TAG, "Root path is null! Does the directory exist?");
+            log.error(TAG, "Root path is null! Does the directory for " + packageName + " exist?");
             return;
         }
         // Filter .class files.
