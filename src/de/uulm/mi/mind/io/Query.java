@@ -81,12 +81,10 @@ class Query {
         ArrayList<Class<?>> classes = new ArrayList<>();
         try {
             Statement stm = connection.createStatement();
-            ResultSet rs = stm.executeQuery("SELECT table_name FROM INFORMATION_SCHEMA.TABLES " +
-                    "WHERE table_schema = '" + Configuration.getInstance().getDbName() + "' " +
-                    "AND table_name NOT LIKE '%\\_\\_%'; ");
+            ResultSet rs = stm.executeQuery("SELECT * FROM object__index");
             while (rs.next()) {
                 //TODO no way here for the correct name here
-                classes.add(Class.forName(rs.getString("table_name").replace("_", ".")));
+                classes.add(Class.forName(rs.getString("class")));
             }
             rs.close();
             stm.close();

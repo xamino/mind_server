@@ -208,12 +208,25 @@ class ObjectContainerSQL {
 
         columnTypes = columnTypes.substring(0, columnTypes.lastIndexOf(","));
 
+        String objectIndexTableQuery = "CREATE TABLE IF NOT EXISTS `object__index` (`name` VARCHAR(255), `class` VARCHAR(255))";
         String tableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + columnTypes + ")";
+        String structureToTableIndexQuery = "INSERT `object__index` (`name`,`class`)\n" +
+                "SELECT '" + o.getSimpleName() + "', '" + o.getCanonicalName() + "' " +
+                "FROM dual\n" +
+                "WHERE\n" +
+                "   NOT EXISTS (SELECT 1 FROM `object__index`\n" +
+                "              WHERE name = '" + o.getSimpleName() + "')";
 
         log.log(TAG, tableQuery);
         try {
             //create table structure
-            PreparedStatement statement = con.prepareStatement(tableQuery);
+            PreparedStatement statement = con.prepareStatement(objectIndexTableQuery);
+            statement.executeUpdate();
+            statement.close();
+            statement = con.prepareStatement(tableQuery);
+            statement.executeUpdate();
+            statement.close();
+            statement = con.prepareStatement(structureToTableIndexQuery);
             statement.executeUpdate();
             statement.close();
         } catch (SQLException e) {
