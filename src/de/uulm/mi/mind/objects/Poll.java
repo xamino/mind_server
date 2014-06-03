@@ -23,10 +23,14 @@ public class Poll implements Sendable, Saveable {
 
     public Poll() {
         // I hope this never turns up :P
-        this.key = "EMPTY";
+        this.key = "";
+        this.votes = new HashMap<>();
+        this.state = PollState.ONGOING;
+        this.icon = "default";
     }
 
     public Poll(String question, Date created) {
+        this();
         this.question = question;
         this.created = created;
         // create unique key
