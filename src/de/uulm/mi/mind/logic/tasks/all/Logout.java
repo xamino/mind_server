@@ -14,7 +14,12 @@ import java.util.Set;
  */
 public class Logout extends Task<Arrival, Information> {
     @Override
-    public Information doWork(Active active, Arrival object) {
+    public boolean validateInput(Arrival object) {
+        return safeString(object.getSessionHash());
+    }
+
+    @Override
+    public Information doWork(Active active, Arrival object, boolean compact) {
         Active activeUser = Security.begin(null, object.getSessionHash());
         if (activeUser == null) {
             return new Success(Success.Type.NOTE, "Session is already not valid!");

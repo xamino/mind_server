@@ -17,7 +17,12 @@ import de.uulm.mi.mind.security.BCrypt;
 public class DisplayAdd extends AdminTask<PublicDisplay, Sendable> {
 
     @Override
-    public Sendable doWork(Active active, final PublicDisplay display) {
+    public boolean validateInput(PublicDisplay object) {
+        return safeString(object.getKey());
+    }
+
+    @Override
+    public Sendable doWork(Active active, final PublicDisplay display, boolean compact) {
         // check identification
         if (!safeString(display.getIdentification())) {
             return new Error(Error.Type.ILLEGAL_VALUE, "Identification is primary key! May not be empty.");

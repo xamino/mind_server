@@ -15,7 +15,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class LocationRemove extends LocationTask<Location, Information> {
     @Override
-    public Information doWork(Active active, final Location location) {
+    public boolean validateInput(Location object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, final Location location, boolean compact) {
         return (Information) database.open(new Transaction() {
             @Override
             public Data doOperations(Session session) {

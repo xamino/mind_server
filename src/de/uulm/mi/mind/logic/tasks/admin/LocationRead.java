@@ -13,7 +13,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class LocationRead extends LocationTask<Location, Sendable> {
     @Override
-    public Sendable doWork(Active active, Location location) {
+    public boolean validateInput(Location object) {
+        return true;
+    }
+
+    @Override
+    public Sendable doWork(Active active, Location location, boolean compact) {
         String deviceModelFilter = "";
         if (location.getWifiMorsels() != null && location.getWifiMorsels().size() > 0) {
             deviceModelFilter = location.getWifiMorsels().get(0).getDeviceModel();

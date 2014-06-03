@@ -16,7 +16,12 @@ import java.util.Set;
  */
 public class ReadAllAreas extends Task<None, Sendable> {
     @Override
-    public Sendable doWork(Active active, None object) {
+    public boolean validateInput(None object) {
+        return true;
+    }
+
+    @Override
+    public Sendable doWork(Active active, None object, boolean compact) {
         final Area filter = new Area(null);
         DataList<Area> read = database.read(filter);
 

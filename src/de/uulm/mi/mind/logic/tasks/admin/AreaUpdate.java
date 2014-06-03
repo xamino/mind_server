@@ -15,7 +15,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class AreaUpdate extends LocationTask<Area, Information> {
     @Override
-    public Information doWork(Active active, final Area area) {
+    public boolean validateInput(Area object) {
+        return safeString(object.getKey());
+    }
+
+    @Override
+    public Information doWork(Active active, final Area area, boolean compact) {
         if (area.getKey() == null) {
             return new Error(Error.Type.WRONG_OBJECT, "Area to be updated was null!");
         }

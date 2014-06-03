@@ -24,10 +24,10 @@ public class TaskManager {
 
     private static TaskManager INSTANCE;
     private final String TAG;
+    private final String FILESEPARATOR;
     private Messenger log;
     private Set<String> taskNames;
     private HashMap<String, Task> taskObjects;
-    private final String FILESEPARATOR;
 
     private TaskManager() {
         log = Messenger.getInstance();
@@ -78,7 +78,7 @@ public class TaskManager {
         Set permissibles = task.getTaskPermission();
         if (permissibles == null || permissibles.isEmpty()) {
             // this is public tasks
-            return task.doWork(null, sendable, arrival.isCompact());
+            return doTask(task, null, sendable, arrival.isCompact());
         } else {
             // these tasks all require authentication
             Active active = Security.begin(null, arrival.getSessionHash());
@@ -97,18 +97,36 @@ public class TaskManager {
                     return new Error(Error.Type.SECURITY, "You do not have permission to use this task! Not user!");
                 }
                 if (((User) active.getAuthenticated()).isAdmin()) {
-                    answer = task.doWork(active, sendable, arrival.isCompact());
+                    answer = doTask(task, active, sendable, arrival.isCompact());
                 } else {
                     Security.finish(active);
                     log.error(TAG, "Illegal task " + TASK + " tried! Not admin!");
                     return new Error(Error.Type.SECURITY, "You do not have permission to use this task! Not admin!");
                 }
             } else {
-                answer = task.doWork(active, sendable, arrival.isCompact());
+                answer = doTask(task, active, sendable, arrival.isCompact());
             }
             Security.finish(active);
             return answer;
         }
+    }
+
+    /**
+     * Method that validates the input per task and, if valid, runs it.
+     *
+     * @param task     The task to run.
+     * @param active   The active object if exists.
+     * @param sendable The input object.
+     * @param compact  The compact value.
+     * @return The answer of the task or an error.
+     */
+    private Sendable doTask(Task task, Active active, Sendable sendable, boolean compact) {
+        if (task.validateInput(sendable)) {
+            return task.doWork(active, sendable, compact);
+        }
+        log.error(TAG, "Task " + task.getTaskName() + " failed input validation!");
+        // otherwise the validate failed
+        return new Error(Error.Type.ILLEGAL_VALUE, "Invalid input for task " + task.getTaskName() + "!");
     }
 
     /**
@@ -147,7 +165,7 @@ public class TaskManager {
             return;
         }
         // Filter .class files.
-        String pathFix = ServerManager.getContext().getRealPath("/")+"WEB-INF/classes/"+packageName.replace(".", "/");
+        String pathFix = ServerManager.getContext().getRealPath("/") + "WEB-INF/classes/" + packageName.replace(".", "/");
         File[] files = new File(pathFix).listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 return name.endsWith(".class");

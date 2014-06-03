@@ -19,7 +19,12 @@ import java.util.Set;
  */
 public class UserUpdate extends Task<User, Information> {
     @Override
-    public Information doWork(Active active, User sentUser) {
+    public boolean validateInput(User object) {
+        return safeString(object.getKey());
+    }
+
+    @Override
+    public Information doWork(Active active, User sentUser, boolean compact) {
         // Note that the session user object now needs to be updated. This is done the next time the user
         // sends a request through SecurityModule; it will always get the up to date object from the
         // database.

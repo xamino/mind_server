@@ -15,7 +15,7 @@ import de.uulm.mi.mind.security.Active;
  */
 public class AdminUserDelete extends AdminTask<User, Information> {
     @Override
-    public Information doWork(Active active, final User user) {
+    public Information doWork(Active active, final User user, boolean compact) {
         return (Information) database.open(new Transaction() {
             @Override
             public Data doOperations(Session session) {
@@ -47,5 +47,10 @@ public class AdminUserDelete extends AdminTask<User, Information> {
     @Override
     public Class<Information> getOutputType() {
         return Information.class;
+    }
+
+    @Override
+    public boolean validateInput(User object) {
+        return true;
     }
 }

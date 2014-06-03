@@ -15,7 +15,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class DisplayRemove extends AdminTask<PublicDisplay, Information> {
     @Override
-    public Information doWork(Active active, final PublicDisplay display) {
+    public boolean validateInput(PublicDisplay object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, final PublicDisplay display, boolean compact) {
         return (Information) database.open(new Transaction() {
             @Override
             public Data doOperations(Session dba) {

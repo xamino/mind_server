@@ -13,7 +13,12 @@ import java.util.Set;
  */
 public class WifiSensorUpdate extends Task<DataList, Information> {
     @Override
-    public Information doWork(Active active, DataList devices) {
+    public boolean validateInput(DataList object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, DataList devices, boolean compact) {
         // before below code need to check security and validity!
 //        for (SensedDevice device : receivedDevices) {
 //            if (!sniffedDevices.contains(device.getIpAddress())) {

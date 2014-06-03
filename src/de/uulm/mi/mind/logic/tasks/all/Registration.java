@@ -19,15 +19,20 @@ import java.util.Set;
  */
 public class Registration extends Task<User, Information> {
     @Override
-    public Information doWork(Active active, final User user) {
+    public boolean validateInput(User object) {
+        return safeString(object.getKey());
+    }
+
+    @Override
+    public Information doWork(Active active, final User user, boolean compact) {
         // if anything other than open is stated here, registration is considered closed
         if (!"open".equals(configuration.getRegistration())) {
             return new de.uulm.mi.mind.objects.messages.Error(Error.Type.SECURITY, "Registration is not open! Please contact the admin.");
         }
-        // email and password should be okay
+        // password should be okay
         // note that we do not allow key generation for registration
-        if (!safeString(user.readIdentification()) || !safeString(user.readAuthentication())) {
-            return new Error(Error.Type.ILLEGAL_VALUE, "Email and password may not be empty!");
+        if (!safeString(user.readAuthentication())) {
+            return new Error(Error.Type.ILLEGAL_VALUE, "Password may not be empty!");
         }
         // hash pwd
         user.setPwdHash(BCrypt.hashpw(user.getPwdHash(), BCrypt.gensalt(12)));

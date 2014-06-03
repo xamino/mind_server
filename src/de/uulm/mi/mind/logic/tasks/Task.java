@@ -37,6 +37,15 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
     }
 
     /**
+     * Method that is called before doWork is called, allowing a task to validate its input before doing the actual
+     * work. This neatly divides input validation from the actual work to do.
+     *
+     * @param object The object to check.
+     * @return True if valid, otherwise false. An error message that the object content is invalid will be returned then.
+     */
+    abstract public boolean validateInput(I object);
+
+    /**
      * Method that is called for doing the task. Note that while you are ensured to only receive objects of the type you
      * require, it is still up to the task to check that it is a valid object (so check whether it is null!).
      *
@@ -45,20 +54,7 @@ public abstract class Task<I extends Sendable, O extends Sendable> {
      * @param compact Whether a compact answer is wished for or not.
      * @return The object to return.
      */
-    public O doWork(Active active, I object, boolean compact) {
-        this.compact = compact;
-        return doWork(active, object);
-    }
-
-    /**
-     * Method that is called for doing the task. Note that while you are ensured to only receive objects of the type you
-     * require, it is still up to the task to check that it is a valid object (so check whether it is null!).
-     *
-     * @param active The active user object to work with.
-     * @param object The object requested.
-     * @return The object to return.
-     */
-    abstract public O doWork(Active active, I object);
+    abstract public O doWork(Active active, I object, boolean compact);
 
     /**
      * Return the name of the task we want to register. The name given is exactly the API call that is publicly

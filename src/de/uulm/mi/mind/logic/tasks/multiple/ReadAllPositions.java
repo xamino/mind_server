@@ -19,7 +19,12 @@ public class ReadAllPositions extends Task<None, Sendable> {
     private final String REAL_POSITION = "realPosition";
 
     @Override
-    public Sendable doWork(Active unused, None object) {
+    public boolean validateInput(None object) {
+        return true;
+    }
+
+    @Override
+    public Sendable doWork(Active unused, None object, boolean compact) {
         // read all users
         ArrayList<Active> users = Security.readActives();
         // filter the list – apply status and set special cases

@@ -16,11 +16,12 @@ import de.uulm.mi.mind.security.BCrypt;
  */
 public class SensorAdd extends AdminTask<WifiSensor, Sendable> {
     @Override
-    public Sendable doWork(Active active, final WifiSensor sensor) {
-        // check identification
-        if (!safeString(sensor.readIdentification())) {
-            return new Error(Error.Type.ILLEGAL_VALUE, "Identification is primary key! May not be empty.");
-        }
+    public boolean validateInput(WifiSensor object) {
+        return safeString(object.getKey());
+    }
+
+    @Override
+    public Sendable doWork(Active active, final WifiSensor sensor, boolean compact) {
         // password
         if (safeString(sensor.getTokenHash())) {
             sensor.setTokenHash(BCrypt.hashpw(sensor.getTokenHash(), BCrypt.gensalt(12)));

@@ -12,7 +12,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class DisplayRead extends AdminTask<PublicDisplay, Sendable> {
     @Override
-    public Sendable doWork(Active active, PublicDisplay display) {
+    public boolean validateInput(PublicDisplay object) {
+        return true;
+    }
+
+    @Override
+    public Sendable doWork(Active active, PublicDisplay display, boolean compact) {
         DataList<PublicDisplay> read = database.read(display);
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of PublicDisplay resulted in an error.");

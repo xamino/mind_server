@@ -14,7 +14,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class AreaRead extends AdminTask<Area, Sendable> {
     @Override
-    public Sendable doWork(Active active, Area area) {
+    public boolean validateInput(Area object) {
+        return true;
+    }
+
+    @Override
+    public Sendable doWork(Active active, Area area, boolean compact) {
         DataList<Area> read = database.read(area);
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of area resulted in an error.");

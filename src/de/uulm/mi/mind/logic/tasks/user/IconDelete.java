@@ -17,7 +17,12 @@ import java.util.Set;
  */
 public class IconDelete extends Task<None, Information> {
     @Override
-    public Information doWork(Active active, None object) {
+    public boolean validateInput(None object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, None object, boolean compact) {
         String userID = active.getAuthenticated().readIdentification();
         String icon = "icon_" + userID;
         File file = new File(filePath.iconPath() + icon);

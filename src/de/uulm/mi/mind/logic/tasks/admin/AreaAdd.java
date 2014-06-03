@@ -15,7 +15,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class AreaAdd extends LocationTask<Area, Information> {
     @Override
-    public Information doWork(Active active, final Area area) {
+    public boolean validateInput(Area object) {
+        return safeString(object.getID());
+    }
+
+    @Override
+    public Information doWork(Active active, final Area area, boolean compact) {
         //Adding locations via area_add is not allowed
         if (area.getLocations() != null) {
             return new Error(Error.Type.ILLEGAL_VALUE, "Adding locations via an area is illegal!");

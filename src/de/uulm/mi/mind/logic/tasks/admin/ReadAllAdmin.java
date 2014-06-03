@@ -13,7 +13,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class ReadAllAdmin extends AdminTask<None, Sendable> {
     @Override
-    public Sendable doWork(Active active, None object) {
+    public boolean validateInput(None object) {
+        return true;
+    }
+
+    @Override
+    public Sendable doWork(Active active, None object, boolean compact) {
         User filter = new User(null);
         filter.setAdmin(true);
         // get

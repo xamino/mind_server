@@ -15,7 +15,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class SensorRemove extends AdminTask<WifiSensor, Information> {
     @Override
-    public Information doWork(Active active, final WifiSensor sensor) {
+    public boolean validateInput(WifiSensor object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, final WifiSensor sensor, boolean compact) {
         return (Information) database.open(new Transaction() {
             @Override
             public Data doOperations(Session session) {

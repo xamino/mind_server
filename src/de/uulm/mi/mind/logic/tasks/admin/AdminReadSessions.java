@@ -12,7 +12,12 @@ import de.uulm.mi.mind.security.Security;
 // todo how to check for admin?
 public class AdminReadSessions extends AdminTask<None, DataList> {
     @Override
-    public DataList doWork(Active active, None object) {
+    public boolean validateInput(None object) {
+        return true;
+    }
+
+    @Override
+    public DataList doWork(Active active, None object, boolean compact) {
         return Security.readActiveUsers();
     }
 

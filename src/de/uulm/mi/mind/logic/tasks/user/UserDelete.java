@@ -19,7 +19,12 @@ import java.util.Set;
  */
 public class UserDelete extends Task<None, Information> {
     @Override
-    public Information doWork(Active active, None object) {
+    public boolean validateInput(None object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, None object, boolean compact) {
         active.invalidate();
         final User user = (User) active.getAuthenticated();
 
@@ -29,9 +34,6 @@ public class UserDelete extends Task<None, Information> {
                 boolean success = session.delete(user);
 
                 if (success) {
-                    if (user.getKey() == null) {
-                        return new Success("All Users were deleted successfully.");
-                    }
                     return new Success("User was deleted successfully.");
                 } else {
                     // some kind of error occurred

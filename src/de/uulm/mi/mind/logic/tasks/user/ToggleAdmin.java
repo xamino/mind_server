@@ -19,7 +19,12 @@ import java.util.Set;
  */
 public class ToggleAdmin extends Task<None, Information> {
     @Override
-    public Information doWork(Active active, None object) {
+    public boolean validateInput(None object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, None object, boolean compact) {
         log.error(TAG, "Toggled admin! DANGEROUS OPERATION!");
         final User user = ((User) active.getAuthenticated());
         user.setAdmin(!user.isAdmin());

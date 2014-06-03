@@ -12,7 +12,12 @@ import de.uulm.mi.mind.security.Security;
  */
 public class KillSessions extends AdminTask<None, Information> {
     @Override
-    public Information doWork(Active active, None object) {
+    public boolean validateInput(None object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, None object, boolean compact) {
         Security.clear();
         return new Success("All active sessions have been killed.");
     }

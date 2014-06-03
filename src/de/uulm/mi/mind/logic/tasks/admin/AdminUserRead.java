@@ -14,7 +14,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class AdminUserRead extends AdminTask<User, Sendable> {
     @Override
-    public Sendable doWork(Active active, User object) {
+    public boolean validateInput(User object) {
+        return true;
+    }
+
+    @Override
+    public Sendable doWork(Active active, User object, boolean compact) {
         DataList<User> read = database.read(object);
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of User resulted in an error.");

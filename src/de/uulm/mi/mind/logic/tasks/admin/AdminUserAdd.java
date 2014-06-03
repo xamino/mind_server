@@ -16,7 +16,12 @@ import de.uulm.mi.mind.security.BCrypt;
  */
 public class AdminUserAdd extends AdminTask<User, Information> {
     @Override
-    public Information doWork(Active active, final User tempUser) {
+    public boolean validateInput(User object) {
+        return safeString(object.getKey());
+    }
+
+    @Override
+    public Information doWork(Active active, final User tempUser, boolean compact) {
         // check email
         if (!safeString(tempUser.getEmail())) {
             return new Error(Error.Type.ILLEGAL_VALUE, "Email is primary key! May not be empty.");

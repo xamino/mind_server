@@ -17,10 +17,12 @@ import de.uulm.mi.mind.security.Active;
 public class LocationAdd extends LocationTask<Location, Information> {
 
     @Override
-    public Information doWork(Active active, final Location location) {
-        if (location.getKey() == null) {
-            return new de.uulm.mi.mind.objects.messages.Error(Error.Type.WRONG_OBJECT, "Location to be created was null!");
-        }
+    public boolean validateInput(Location object) {
+        return safeString(object.getKey());
+    }
+
+    @Override
+    public Information doWork(Active active, final Location location, boolean compact) {
 
         return (Information) database.open(new Transaction() {
             @Override

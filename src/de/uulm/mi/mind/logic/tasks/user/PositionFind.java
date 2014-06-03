@@ -21,7 +21,12 @@ public class PositionFind extends Task<Arrival, Sendable> {
     private final String TAG = "PositionModule";
 
     @Override
-    public Sendable doWork(Active active, Arrival object) {
+    public boolean validateInput(Arrival object) {
+        return true;
+    }
+
+    @Override
+    public Sendable doWork(Active active, Arrival object, boolean compact) {
         User user = ((User) active.getAuthenticated());
         // find the area
         Sendable sendable = findPosition(object);

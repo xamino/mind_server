@@ -13,7 +13,12 @@ import java.util.Set;
  */
 public class UserRead extends Task<None, User> {
     @Override
-    public User doWork(Active active, None object) {
+    public boolean validateInput(None object) {
+        return true;
+    }
+
+    @Override
+    public User doWork(Active active, None object, boolean compact) {
         return ((User) active.getAuthenticated()).safeClone();
     }
 

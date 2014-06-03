@@ -12,7 +12,12 @@ import java.util.Set;
 public class Echo extends Task<Sendable, Sendable> {
 
     @Override
-    public Sendable doWork(Active active, Sendable object) {
+    public boolean validateInput(Sendable object) {
+        return true;
+    }
+
+    @Override
+    public Sendable doWork(Active active, Sendable object, boolean compact) {
         return object;
     }
 

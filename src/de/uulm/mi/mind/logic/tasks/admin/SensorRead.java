@@ -12,7 +12,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class SensorRead extends AdminTask<WifiSensor, Sendable> {
     @Override
-    public Sendable doWork(Active active, WifiSensor sensor) {
+    public boolean validateInput(WifiSensor object) {
+        return true;
+    }
+
+    @Override
+    public Sendable doWork(Active active, WifiSensor sensor, boolean compact) {
         DataList<WifiSensor> read = database.read(sensor);
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of WifiSensor resulted in an error.");

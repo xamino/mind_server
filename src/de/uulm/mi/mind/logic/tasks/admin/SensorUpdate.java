@@ -17,7 +17,12 @@ import de.uulm.mi.mind.security.BCrypt;
  */
 public class SensorUpdate extends AdminTask<WifiSensor, Information> {
     @Override
-    public Information doWork(Active active, final WifiSensor sensor) {
+    public boolean validateInput(WifiSensor object) {
+        return safeString(object.getKey());
+    }
+
+    @Override
+    public Information doWork(Active active, final WifiSensor sensor, boolean compact) {
         if (!safeString(sensor.readIdentification())) {
             return new Error(Error.Type.ILLEGAL_VALUE, "Identification must not be empty!");
         }

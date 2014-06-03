@@ -17,7 +17,12 @@ import de.uulm.mi.mind.security.BCrypt;
  */
 public class DisplayUpdate extends AdminTask<PublicDisplay, Information> {
     @Override
-    public Information doWork(Active active, final PublicDisplay display) {
+    public boolean validateInput(PublicDisplay object) {
+        return safeString(object.getKey());
+    }
+
+    @Override
+    public Information doWork(Active active, final PublicDisplay display, boolean compact) {
         if (!safeString(display.getIdentification())) {
             return new Error(Error.Type.ILLEGAL_VALUE, "Identification must not be empty!");
         }

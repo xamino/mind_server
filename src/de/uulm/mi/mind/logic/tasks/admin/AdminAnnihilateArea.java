@@ -18,7 +18,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class AdminAnnihilateArea extends AdminTask<None, Information> {
     @Override
-    public Information doWork(Active active, None object) {
+    public boolean validateInput(None object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, None object, boolean compact) {
         log.log(TAG, "Removing all area, location and morsel objects!");
         return (Information) database.open(new Transaction() {
             @Override

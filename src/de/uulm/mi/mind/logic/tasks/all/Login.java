@@ -16,7 +16,12 @@ import java.util.Set;
 public class Login extends Task<Authenticated, Information> {
 
     @Override
-    public Information doWork(Active active, Authenticated object) {
+    public boolean validateInput(Authenticated object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, Authenticated object, boolean compact) {
         // try login
         Active activeUser = Security.begin(object, null);
         // check if okay

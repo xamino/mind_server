@@ -17,7 +17,12 @@ import de.uulm.mi.mind.security.Security;
  */
 public class AdminAnnihilateUser extends AdminTask<None, Information> {
     @Override
-    public Information doWork(Active active, None object) {
+    public boolean validateInput(None object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, None object, boolean compact) {
         log.log(TAG, "Removing all users!");
         Security.clear();
         return (Information) database.open(new Transaction() {

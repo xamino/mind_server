@@ -15,7 +15,12 @@ import de.uulm.mi.mind.security.Active;
  */
 public class AreaRemove extends LocationTask<Area, Information> {
     @Override
-    public Information doWork(Active active, final Area area) {
+    public boolean validateInput(Area object) {
+        return true;
+    }
+
+    @Override
+    public Information doWork(Active active, final Area area, boolean compact) {
         // key is allowed to be null here to delete all
         return (Information) database.open(new Transaction() {
             @Override
