@@ -194,3 +194,17 @@ function SensedDevice(sensor, ipAddress, levelValue) {
     this.ipAddress = ipAddress;
     this.levelValue = levelValue;
 }
+
+function Poll(question, endDate, options, icon, numSelOptions) {
+    this.$type = "Poll";
+    this.question = question;
+    this.end = endDate;
+    this.options = options;
+    this.icon = icon;
+    this.allowedOptionSelections = numSelOptions;
+}
+
+function PollOption(value) {
+    this.$type = "PollOption";
+    this.optionValue = value;
+}

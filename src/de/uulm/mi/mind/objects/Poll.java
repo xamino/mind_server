@@ -12,7 +12,7 @@ import java.util.Date;
  */
 public class Poll implements Sendable, Saveable {
 
-    private String key = "";
+    private String key;
     private String question;
     private Date created;
     private Date end;

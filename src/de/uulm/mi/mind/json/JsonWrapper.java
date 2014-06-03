@@ -19,6 +19,8 @@ public class JsonWrapper {
         converter.registerType(Departure.class);
         converter.registerType(de.uulm.mi.mind.objects.messages.Error.class);
         converter.registerType(Location.class);
+        converter.registerType(Poll.class);
+        converter.registerType(PollOption.class);
         converter.registerType(PublicDisplay.class);
         converter.registerType(Success.class);
         converter.registerType(SensedDevice.class);

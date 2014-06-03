@@ -811,6 +811,12 @@ function statusTest() {
     alert("Finished Status test.")
 }
 
+function pollTest() {
+    unitTest("read_my_polls", null, Error, null);
+    var session = getAdminSession();
+    unitTest("add_poll", new Poll("Lunch?", null, [new PollOption("Yes"), new PollOption("No")]), Success, session);
+}
+
 /**
  * Use this method to clean the DB.
  */
@@ -851,6 +857,8 @@ function cleanDB() {
     if (sensorList == null || sensorList.length != 0) {
         alert("DB was NOT CLEARED of WIFI SENSORS!");
     }
+    // Destroy polls
+    unitTest("remove_poll", new Poll(), Success, adminSession);
 
     // Destroy users
     unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
