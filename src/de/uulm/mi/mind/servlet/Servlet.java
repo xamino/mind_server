@@ -12,7 +12,7 @@ import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.task.TaskManager;
+import de.uulm.mi.mind.managers.TaskManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

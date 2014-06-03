@@ -7,7 +7,7 @@
         <servlet-class>de.uulm.mi.mind.servlet.Servlet</servlet-class>
     </servlet>
     <listener>
-        <listener-class>de.uulm.mi.mind.ServerManager</listener-class>
+        <listener-class>de.uulm.mi.mind.managers.ServerManager</listener-class>
     </listener>
     <servlet>
         <servlet-name>UploadServlet</servlet-name>
