@@ -3,6 +3,8 @@ package de.uulm.mi.mind.objects;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 
+import java.util.ArrayList;
+
 /**
  * Created by Tamino Hartmann on 6/3/14.
  */
@@ -10,7 +12,7 @@ public class PollOption implements Saveable, Sendable {
 
     private String key;
     private String optionValue;
-    private DataList<User> users = new DataList<>();
+    private ArrayList<String> users = new ArrayList<>();
 
     private PollOption() {
 
@@ -21,20 +23,20 @@ public class PollOption implements Saveable, Sendable {
         this.optionValue = optionValue;
     }
 
+    public ArrayList<String> getUsers() {
+        return users;
+    }
+
+    public void setUsers(ArrayList<String> users) {
+        this.users = users;
+    }
+
     public String getOptionValue() {
         return optionValue;
     }
 
     public void setOptionValue(String optionValue) {
         this.optionValue = optionValue;
-    }
-
-    public DataList<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(DataList<User> users) {
-        this.users = users;
     }
 
     @Override

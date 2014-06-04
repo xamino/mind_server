@@ -16,7 +16,7 @@ public class Poll implements Sendable, Saveable {
     private String question;
     private Date created;
     private Date end;
-    private User owner;
+    private String owner;
     private int allowedOptionSelections = 1;
     private PollState state;
     private String icon = "default";
@@ -28,6 +28,14 @@ public class Poll implements Sendable, Saveable {
     public Poll(String question, Date end) {
         this.question = question;
         this.end = end;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public Date getEnd() {
@@ -68,14 +76,6 @@ public class Poll implements Sendable, Saveable {
 
     public void setAllowedOptionSelections(int allowedOptionSelections) {
         this.allowedOptionSelections = allowedOptionSelections;
-    }
-
-    public User getOwner() {
-        return owner;
-    }
-
-    public void setOwner(User owner) {
-        this.owner = owner;
     }
 
     public Date getCreated() {

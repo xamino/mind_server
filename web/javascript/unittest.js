@@ -812,9 +812,10 @@ function statusTest() {
 }
 
 function pollTest() {
-    unitTest("read_my_polls", null, Error, null);
+    unitTest("read_all_polls", null, Error, null);
     var session = getAdminSession();
-    unitTest("add_poll", new Poll("Lunch?", null, [new PollOption("Yes"), new PollOption("No")]), Success, session);
+    unitTest("poll_add", new Poll("Lunch?", null, [new PollOption("Yes"), new PollOption("No")]), Success, session);
+    unitTest("read_all_polls", null, Array, session);
 }
 
 /**

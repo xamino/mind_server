@@ -16,6 +16,7 @@ import de.uulm.mi.mind.tasks.PollTask;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -71,7 +72,7 @@ public class PollAdd extends PollTask<Poll, Information> {
         // set poll state (ongoing because we created it)
         toSave.setState(PollState.ONGOING);
         // set owner to current user
-        toSave.setOwner(((User) active.getAuthenticated()));
+        toSave.setOwner(((User) active.getAuthenticated()).getEmail());
 
         // generate key for poll (required for db; we use a random hash)
         // this is done before the options are set because they require this key too
@@ -81,7 +82,7 @@ public class PollAdd extends PollTask<Poll, Information> {
         DataList<PollOption> options = poll.getOptions();
         for (PollOption option : options) {
             // ensure that no users are already set!
-            option.setUsers(new DataList<User>());
+            option.setUsers(new ArrayList<String>());
             // set key
             option.setKey(toSave.getKey() + ":" + option.getOptionValue());
         }
