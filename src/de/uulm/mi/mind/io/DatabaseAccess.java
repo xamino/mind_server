@@ -54,6 +54,4 @@ abstract class DatabaseAccess {
             session.create(adminProto);
         }
     }
-
-    public abstract Session openReadOnly();
 }

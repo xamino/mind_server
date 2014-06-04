@@ -62,7 +62,7 @@ class DatabaseController extends DatabaseAccess {
         }
         try {
             sessionContainer.store(data);
-            log.log(TAG, "Written to DB: " + data.toString());
+            //log.log(TAG, "Written to DB: " + data.toString());
             return true;
         } catch (Exception e) {
             return false;
@@ -114,11 +114,11 @@ class DatabaseController extends DatabaseAccess {
                     });
                 }
             }
-            log.log(TAG, "if " + (System.currentTimeMillis()-time) + "ms");
+            log.log(TAG, "if " + (System.currentTimeMillis() - time) + "ms");
             // Write query results to DataList
             time = System.currentTimeMillis();
             DataList<T> result = new DataList<>(queryResult);
-            log.log(TAG, "list copy " + (System.currentTimeMillis()-time) + "ms");
+            log.log(TAG, "list copy " + (System.currentTimeMillis() - time) + "ms");
 
             // log.error(TAG, "Read from DB: " + result.toString());
             return result;
@@ -126,11 +126,6 @@ class DatabaseController extends DatabaseAccess {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    @Override
-    public Session openReadOnly() {
-        return new Session(rootContainer, getInstance());
     }
 
     // todo look if we can use this
@@ -210,67 +205,6 @@ class DatabaseController extends DatabaseAccess {
         return rootContainer.ext().openSession();
     }
 
-    private void cleanOrphans(ObjectContainer rootContainer) {
-        ObjectSet<Location> set1 = rootContainer.query(new Predicate<Location>() {
-            @Override
-            public boolean match(Location o) {
-                return true;
-            }
-        });
-        ObjectSet<WifiMorsel> allDBMorsels = rootContainer.query(new Predicate<WifiMorsel>() {
-            @Override
-            public boolean match(WifiMorsel o) {
-                return true;
-            }
-        });
-        ObjectSet<Area> set3 = rootContainer.query(new Predicate<Area>() {
-            @Override
-            public boolean match(Area o) {
-                return o.getKey().equals("University");
-            }
-        });
-        Area university = set3.get(0);
-
-        int counter = 0;
-        for (Location location : set1) {
-            if (!university.getLocations().contains(location)) {
-                rootContainer.delete(location);
-                counter++;
-            }
-        }
-        log.log(TAG, "Orphaned Locations removed: " + counter);
-
-        int mCounter = 0;
-        int c = 0;
-        for (WifiMorsel dbMorsel : allDBMorsels) {
-            log.log(TAG, ++c + ": " + dbMorsel.toString());
-            boolean isOrphan = true;
-            for (Location location : university.getLocations()) {
-                for (WifiMorsel morsel : location.getWifiMorsels()) {
-                    if (morsel.getWifiMac().equals(dbMorsel.getWifiMac())
-                            && (morsel.getWifiLevel() == dbMorsel.getWifiLevel())
-                            && (morsel.getWifiChannel() == dbMorsel.getWifiChannel())
-                            && bothNullOrEqual(morsel.getDeviceModel(), dbMorsel.getDeviceModel())
-                            && (morsel.getWifiName().equals(dbMorsel.getWifiName()))) {
-                        isOrphan = false;
-                        //break;
-                    }
-                }
-                //if (!isOrphan) break;
-            }
-            if (isOrphan) {
-                rootContainer.delete(dbMorsel);
-                mCounter++;
-            }
-        }
-
-        log.log(TAG, "Orphaned Morsels removed: " + mCounter);
-
-    }
-
-    private boolean bothNullOrEqual(String deviceModel, String deviceModel1) {
-        return deviceModel == null && deviceModel1 == null || (deviceModel != null) && (deviceModel1 != null) && deviceModel.equals(deviceModel1);
-    }
 
     @Override
     public Session open() {
@@ -293,16 +227,16 @@ class DatabaseController extends DatabaseAccess {
         dbconfig.common().add(new UniqueFieldValueConstraint(User.class, "email"));
 
         dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
-        dbconfig.common().add(new UniqueFieldValueConstraint(Area.class,"ID"));
+        dbconfig.common().add(new UniqueFieldValueConstraint(Area.class, "ID"));
 
         dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
-        dbconfig.common().add(new UniqueFieldValueConstraint(PublicDisplay.class,"identification"));
+        dbconfig.common().add(new UniqueFieldValueConstraint(PublicDisplay.class, "identification"));
 
         dbconfig.common().objectClass(WifiSensor.class).objectField("identification").indexed(true);
-        dbconfig.common().add(new UniqueFieldValueConstraint(WifiSensor.class,"identification"));
+        dbconfig.common().add(new UniqueFieldValueConstraint(WifiSensor.class, "identification"));
 
         dbconfig.common().objectClass(Location.class).objectField("key").indexed(true);
-        dbconfig.common().add(new UniqueFieldValueConstraint(Location.class,"key"));
+        dbconfig.common().add(new UniqueFieldValueConstraint(Location.class, "key"));
 
         dbconfig.common().objectClass(WifiMorsel.class).objectField("wifiMac").indexed(true);
         // WifiMorsel is not unique
@@ -315,8 +249,8 @@ class DatabaseController extends DatabaseAccess {
     @Override
     public void destroy() {
         if (rootContainer != null) {
-            rootContainer.close();
-            log.log(TAG, "db4o shutdown");
+            boolean isShutDown = rootContainer.close();
+            log.log(TAG, "db4o shutdown:" + isShutDown);
         }
     }
 }
