@@ -1,6 +1,7 @@
 package de.uulm.mi.mind.io;
 
 import com.db4o.ObjectContainer;
+import com.db4o.ObjectSet;
 import com.db4o.query.Predicate;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.*;
@@ -60,7 +61,7 @@ public class DatabaseManager {
             public Data doOperations(Session session) {
                 // Initializing Database
                 session.reinit();
-                runMaintenance(session.getDb4oContainer()); // TODO
+                //runMaintenance(session.getDb4oContainer()); // TODO
                 return new Success("Reinitialized");
             }
         });
@@ -88,47 +89,14 @@ public class DatabaseManager {
     }
 
     private void runMaintenance(ObjectContainer rootContainer) {
+        // read objects directly from DB. these are truly existing
         log.log(TAG, "In DB Stats:");
-        List<User> dbUsers = rootContainer.query(new Predicate<User>() {
-            @Override
-            public boolean match(User o) {
-                return true;
-            }
-        });
-        log.log(TAG, "Users: " + dbUsers.size());
-        List<Area> dbAreas = rootContainer.query(new Predicate<Area>() {
-            @Override
-            public boolean match(Area o) {
-                return true;
-            }
-        });
-        log.log(TAG, "Areas: " + dbAreas.size());
-        List<Location> dbLocations = rootContainer.query(new Predicate<Location>() {
-            @Override
-            public boolean match(Location o) {
-                return true;
-            }
-        });
-        log.log(TAG, "Locations: " + dbLocations.size());
-        List<WifiMorsel> dbMorsels = rootContainer.query(new Predicate<WifiMorsel>() {
-            @Override
-            public boolean match(WifiMorsel o) {
-                return true;
-            }
-        });
-        log.log(TAG, "Morsels: " + dbMorsels.size());
+        log.log(TAG, "Users: " + rootContainer.query(User.class).size());
+        log.log(TAG, "Areas: " + rootContainer.query(Area.class).size());
+        log.log(TAG, "Locations: " + rootContainer.query(Location.class).size());
+        log.log(TAG, "Morsels: " + rootContainer.query(WifiMorsel.class).size());
 
-        /*
-
-        // duplicate area:
-        log.log(TAG, "Duplicate Check DB");
-        checkDuplicates(new ArrayList<>(dbAreas));
-        checkDuplicates(new ArrayList<>(dbLocations));
-        ArrayList<WifiMorsel> duplicateMorsels = checkDuplicates(new ArrayList<>(dbMorsels));
-        log.error(TAG, "Duplicate Morsels: " + duplicateMorsels.size());
-        //checkDuplicates(dbAreas);
-*/
-
+/*
         log.log(TAG, "In University Stats:");
         List<Area> set3 = rootContainer.query(new Predicate<Area>() {
             @Override
@@ -144,76 +112,145 @@ public class DatabaseManager {
                 wifs.addAll(location.getWifiMorsels());
             }
             log.log(TAG, "Morsels: " + wifs.size());
-
-            /*
-            //duplicates
-            checkDuplicates(new ArrayList<>(university.getLocations()));
-            duplicateMorsels = checkDuplicates(new ArrayList<>(wifs));
-            log.error(TAG, "Duplicate Morsels: " + duplicateMorsels.size());
-            */
-
-
         } else {
             log.log(TAG, "University does not exist!");
         }
 
+        */
 
-        // clean university
-        if (!(set3 == null || set3.isEmpty())) {
-            Area university = set3.get(0);
-            ArrayList<Location> duplicateLocations = checkDuplicates(new ArrayList<>(university.getLocations()));
-            for (Location duplicateLocation : duplicateLocations) {
-                List<Location> locs = read(new Location(duplicateLocation.getCoordinateX(), duplicateLocation.getCoordinateY()));
-                if (locs.size() < 2) {
-                    log.error(TAG, "Should be duplicate at least!");
-                } else {
-                    DataList<WifiMorsel> allmorsels = new DataList<>();
-                    for (int i = 0; i < locs.size(); i++) {
-                        allmorsels.addAll(locs.get(i).getWifiMorsels());
-                        rootContainer.delete(locs.get(i));
-                    }
-                    duplicateLocation.setWifiMorsels(allmorsels);
-                    rootContainer.store(duplicateLocation);
+        cleanDuplicates(rootContainer);
+        rootContainer.commit();
+        cleanNullLists(rootContainer);
+        rootContainer.commit();
+        cleanOrphans(rootContainer);
+        rootContainer.commit();
+        cleanNullLists(rootContainer);
+        rootContainer.commit();
+    }
+
+    private void cleanNullLists(ObjectContainer rootContainer) {
+        List<Area> dbAreas = rootContainer.query(Area.class);
+        for (Area dbArea : dbAreas) {
+            while (dbArea.getLocations().remove(null)) ;
+        }
+        List<Location> dbLocations = rootContainer.query(Location.class);
+        for (Location dbArea : dbLocations) {
+            while (dbArea.getWifiMorsels().remove(null)) ;
+        }
+    }
+
+    private void cleanDuplicates(ObjectContainer rootContainer) {
+        List<Location> dbLocations = rootContainer.query(Location.class);
+        ArrayList<Location> duplicateLocations = checkDuplicates(new ArrayList<>(dbLocations));
+        int counter = 0;
+        for (Location duplicateLocation : duplicateLocations) {
+            List<Location> locs = rootContainer.queryByExample(new Location(duplicateLocation.getCoordinateX(), duplicateLocation.getCoordinateY()));
+            if (locs.size() < 2) {
+                log.error(TAG, "Location should be duplicate at least!");
+            } else {
+                DataList<WifiMorsel> allmorsels = locs.get(0).getWifiMorsels();
+                for (int i = 1; i < locs.size(); i++) {
+                    allmorsels.addAll(locs.get(i).getWifiMorsels());
+                    rootContainer.delete(locs.get(i));
+                    counter++;
+                }
+                locs.get(0).setWifiMorsels(allmorsels);
+                rootContainer.store(locs.get(0));
+            }
+        }
+        log.log(TAG, counter + " duplicate Locations removed");
+        counter = 0;
+        List<WifiMorsel> dbMorsels = rootContainer.query(WifiMorsel.class);
+        ArrayList<WifiMorsel> duplicateMorsels = checkDuplicates(new ArrayList<>(dbMorsels));
+        for (WifiMorsel duplicateMorsel : duplicateMorsels) {
+            List<WifiMorsel> mors = rootContainer.queryByExample(duplicateMorsel);
+            if (mors.size() < 2) {
+                log.error(TAG, "Morsel should be duplicate at least!");
+            } else {
+                for (int i = 1; i < mors.size(); i++) {
+                    rootContainer.delete(mors.get(i));
+                    counter++;
                 }
             }
-
-/*
-            ArrayList<WifiMorsel> wifs = new ArrayList<>();
-            for (Location location : university.getLocations()) {
-                wifs.addAll(location.getWifiMorsels());
-                duplicateMorsels = checkDuplicates(new ArrayList<>(location.getWifiMorsels()));
-            }
-            duplicateMorsels = checkDuplicates(new ArrayList<>(wifs));*/
         }
+        log.log(TAG, counter + " duplicate Morsels removed");
+    }
+
+    private void cleanOrphans(ObjectContainer rootContainer) {
+        ObjectSet<Location> dbLocations = rootContainer.query(Location.class);
+        ObjectSet<WifiMorsel> dbMorsels = rootContainer.query(WifiMorsel.class);
+        ObjectSet<Area> set3 = rootContainer.query(new Predicate<Area>() {
+            @Override
+            public boolean match(Area o) {
+                return o.getKey().equals("University");
+            }
+        });
+        Area university = set3.get(0);
+        int counter = 0;
+        for (Location location : dbLocations) {
+            if (!university.getLocations().contains(location)) {
+                rootContainer.delete(location);
+                counter++;
+            }
+        }
+        log.log(TAG, "Orphaned Locations removed: " + counter);
+
+        int mCounter = 0;
+        int c = 0;
+        for (WifiMorsel dbMorsel : dbMorsels) {
+            //log.log(TAG, ++c + ": " + dbMorsel.toString());
+            boolean isOrphan = true;
+            for (Location location : university.getLocations()) {
+                for (WifiMorsel morsel : location.getWifiMorsels()) {
+                    if (morsel.getWifiMac().equals(dbMorsel.getWifiMac())
+                            && (morsel.getWifiLevel() == dbMorsel.getWifiLevel())
+                            && (morsel.getWifiChannel() == dbMorsel.getWifiChannel())
+                            && (morsel.getDeviceModel().equals(dbMorsel.getDeviceModel()))
+                            && (morsel.getWifiName().equals(dbMorsel.getWifiName()))
+                            && (morsel.getTimeStamp().equals(dbMorsel.getTimeStamp()))) {
+                        isOrphan = false;
+                    }
+                }
+            }
+            if (isOrphan) {
+                rootContainer.delete(dbMorsel);
+                mCounter++;
+            }
+        }
+
+        log.log(TAG, "Orphaned Morsels removed: " + mCounter);
+
     }
 
     private <T extends Saveable> ArrayList<T> checkDuplicates(ArrayList<T> dbObjects) {
         ArrayList<T> duplicates = new ArrayList<>();
         ArrayList<T> dbObjects2 = new ArrayList<>(dbObjects);
         for (T dbObject : dbObjects) {
-            ArrayList<T> duplicatesPlusOrig = new ArrayList<>();
-            for (T object : dbObjects2) {
+            int count = 0;
+            for (int i = dbObjects2.size() - 1; i >= 0; i--) {
                 if (dbObject instanceof WifiMorsel) {
                     WifiMorsel wifi1 = (WifiMorsel) dbObject;
-                    WifiMorsel wifi2 = (WifiMorsel) object;
+                    WifiMorsel wifi2 = (WifiMorsel) dbObjects2.get(i);
                     if (wifi1.getWifiMac().equals(wifi2.getWifiMac()) &&
                             wifi1.getDeviceModel().equals(wifi2.getDeviceModel()) &&
                             wifi1.getTimeStamp().equals(wifi2.getTimeStamp()) &&
                             wifi1.getWifiLevel() == wifi2.getWifiLevel() &&
                             wifi1.getWifiName().equals(wifi2.getWifiName()) &&
                             wifi1.getWifiChannel() == wifi2.getWifiChannel()) {
-                        duplicatesPlusOrig.add(object);
+                        dbObjects2.remove(i);
+                        count++;
                     }
-                } else if (object.getKey().equals(dbObject.getKey()))
-                    duplicatesPlusOrig.add(object);
+                } else if (dbObjects2.get(i).getKey().equals(dbObject.getKey())) {
+                    dbObjects2.remove(i);
+                    count++;
+                }
             }
-            if (duplicatesPlusOrig.size() > 1) {
-                dbObjects2.removeAll(duplicatesPlusOrig);
+            if (count > 1) {
                 duplicates.add(dbObject);
                 if (dbObject instanceof WifiMorsel) {
-                    log.error(TAG, "Duplicate: " + duplicatesPlusOrig.size() + " " + dbObject);
+                    //log.error(TAG, "Duplicate: " + count + " " + dbObject);
                 } else {
-                    log.error(TAG, "Duplicate: " + duplicatesPlusOrig.size() + " " + dbObject.getKey());
+                    //log.error(TAG, "Duplicate: " + count + " " + dbObject.getKey());
 
                 }
             }
