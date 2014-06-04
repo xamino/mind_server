@@ -16,7 +16,7 @@ import de.uulm.mi.mind.tasks.PollTask;
  * Task for removing a poll. Only the admin can delete any polls! Normal users can only delete the ones they are the
  * owner of.
  */
-public class RemovePoll extends PollTask<Poll, Information> {
+public class PollRemove extends PollTask<Poll, Information> {
     @Override
     public boolean validateInput(Poll object) {
         return true;
@@ -54,7 +54,7 @@ public class RemovePoll extends PollTask<Poll, Information> {
 
     @Override
     public String getTaskName() {
-        return "remove_poll";
+        return "poll_remove";
     }
 
     @Override

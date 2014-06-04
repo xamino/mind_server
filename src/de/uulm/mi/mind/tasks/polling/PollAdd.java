@@ -21,7 +21,7 @@ import java.util.Date;
 /**
  * Created by Tamino Hartmann on 6/3/14.
  */
-public class AddPoll extends PollTask<Poll, Information> {
+public class PollAdd extends PollTask<Poll, Information> {
 
     /**
      * Default offset of endtime from create time if no end time is given.
@@ -112,7 +112,7 @@ public class AddPoll extends PollTask<Poll, Information> {
 
     @Override
     public String getTaskName() {
-        return "add_poll";
+        return "poll_add";
     }
 
     @Override
