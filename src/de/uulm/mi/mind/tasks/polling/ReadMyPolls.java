@@ -19,7 +19,7 @@ public class ReadMyPolls extends PollTask<None, Sendable> {
 
     @Override
     public Sendable doWork(Active active, None object, boolean compact) {
-        Poll filter = new Poll(null);
+        Poll filter = new Poll();
         filter.setOwner(((User) active.getAuthenticated()));
         return database.read(filter);
     }

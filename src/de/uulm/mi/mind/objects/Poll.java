@@ -22,11 +22,7 @@ public class Poll implements Sendable, Saveable {
     private String icon = "default";
     private DataList<PollOption> options = new DataList<>();
 
-    private Poll() {
-    }
-
-    public Poll(String key) {
-        this.key = key;
+    public Poll() {
     }
 
     public Poll(String question, Date end) {

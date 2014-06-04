@@ -27,7 +27,7 @@ public class ReadAllPolls extends PollTask<None, Sendable> {
         return (Sendable) database.open(new Transaction() {
             @Override
             public Data doOperations(Session session) {
-                DataList<Poll> list = session.read(new Poll(null));
+                DataList<Poll> list = session.read(new Poll());
                 if (list == null) {
                     return new Error(Error.Type.DATABASE, "Reading of polls failed!");
                 }
