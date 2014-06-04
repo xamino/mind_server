@@ -1,12 +1,12 @@
 package de.uulm.mi.mind.tasks.user;
 
 import de.uulm.mi.mind.io.Configuration;
-import de.uulm.mi.mind.tasks.Task;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.enums.DeviceClass;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
+import de.uulm.mi.mind.tasks.Task;
 
 import java.util.*;
 
@@ -140,6 +140,9 @@ public class PositionFind extends Task<Arrival, Sendable> {
         // Modify database List to contain the average Morsel signal strengths for each location
         for (Location databaseLocation : dataBaseLocations) {
             DataList<WifiMorsel> averageMorsels = new DataList<>();
+            if (databaseLocation.getWifiMorsels() == null) {
+                continue;
+            }
             for (WifiMorsel morsel : databaseLocation.getWifiMorsels()) {
                 // if the morsel mac already exists, skip (contains calls equals)
                 if (averageMorsels.contains(morsel)) {

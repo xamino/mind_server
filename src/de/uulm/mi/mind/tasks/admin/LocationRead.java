@@ -1,12 +1,12 @@
 package de.uulm.mi.mind.tasks.admin;
 
-import de.uulm.mi.mind.tasks.LocationTask;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.Location;
 import de.uulm.mi.mind.objects.WifiMorsel;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.security.Active;
+import de.uulm.mi.mind.tasks.LocationTask;
 
 /**
  * Created by Tamino Hartmann on 5/21/14.
@@ -33,13 +33,17 @@ public class LocationRead extends LocationTask<Location, Sendable> {
         if (compact) {
             for (Location location1 : read) {
                 DataList<WifiMorsel> filteredMorsels = null;
-                for (WifiMorsel wifiMorsel : location1.getWifiMorsels()) {
-                    // morsel class from device is NOT same as the one in db
-                    if (wifiMorsel.getDeviceModel() == null || wifiMorsel.getDeviceModel().equals(deviceModelFilter)) {
-                        if (filteredMorsels == null) {
-                            filteredMorsels = new DataList<>();
+                if (location1.getWifiMorsels() == null) {
+                    continue;
+                } else {
+                    for (WifiMorsel wifiMorsel : location1.getWifiMorsels()) {
+                        // morsel class from device is NOT same as the one in db
+                        if (wifiMorsel.getDeviceModel() == null || wifiMorsel.getDeviceModel().equals(deviceModelFilter)) {
+                            if (filteredMorsels == null) {
+                                filteredMorsels = new DataList<>();
+                            }
+                            filteredMorsels.add(wifiMorsel);
                         }
-                        filteredMorsels.add(wifiMorsel);
                     }
                 }
                 location1.setWifiMorsels(filteredMorsels);
