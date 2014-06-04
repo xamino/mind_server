@@ -38,7 +38,7 @@ public class PollRemove extends PollTask<Poll, Information> {
             });
         }
         // otherwise, a user may only delete his own polls
-        if (!user.getKey().equals(object.getOwner().getKey())) {
+        if (!user.getKey().equals(object.getOwner())) {
             return new Error(Error.Type.SECURITY, "You may only delete polls that you are the owner of!");
         }
         return (Information) database.open(new Transaction() {
