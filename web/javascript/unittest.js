@@ -859,7 +859,7 @@ function cleanDB() {
         alert("DB was NOT CLEARED of WIFI SENSORS!");
     }
     // Destroy polls
-    unitTest("remove_poll", new Poll(), Success, adminSession);
+    unitTest("poll_remove", new Poll(), Success, adminSession);
 
     // Destroy users
     unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);
