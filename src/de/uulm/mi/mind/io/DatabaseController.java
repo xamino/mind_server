@@ -4,6 +4,7 @@ import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
 import com.db4o.config.EmbeddedConfiguration;
+import com.db4o.constraints.UniqueFieldValueConstraint;
 import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import de.uulm.mi.mind.objects.*;
@@ -79,7 +80,7 @@ class DatabaseController extends DatabaseAccess {
     @Override
     public <T extends Saveable> DataList<T> read(Session session, final T requestFilter) {
         ObjectContainer sessionContainer = session.getDb4oContainer();
-        log.pushTimer(this, "if");
+        long time = System.currentTimeMillis();
         try {
             ObjectSet<T> queryResult;
             // When unique key is empty, directly use the filter.
@@ -113,11 +114,11 @@ class DatabaseController extends DatabaseAccess {
                     });
                 }
             }
-            log.log(TAG, "if " + log.popTimer(this).time + "ms");
+            log.log(TAG, "if " + (System.currentTimeMillis()-time) + "ms");
             // Write query results to DataList
-            log.pushTimer(this, "list copy");
+            time = System.currentTimeMillis();
             DataList<T> result = new DataList<>(queryResult);
-            log.log(TAG, "list copy " + log.popTimer(this).time + "ms");
+            log.log(TAG, "list copy " + (System.currentTimeMillis()-time) + "ms");
 
             // log.error(TAG, "Read from DB: " + result.toString());
             return result;
@@ -125,6 +126,11 @@ class DatabaseController extends DatabaseAccess {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @Override
+    public Session openReadOnly() {
+        return new Session(rootContainer, getInstance());
     }
 
     // todo look if we can use this
@@ -282,12 +288,24 @@ class DatabaseController extends DatabaseAccess {
         dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);
         dbconfig.common().objectClass(Location.class).cascadeOnDelete(true);
         //dbconfig.common().optimizeNativeQueries(true);
+
         dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
+        dbconfig.common().add(new UniqueFieldValueConstraint(User.class, "email"));
+
         dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
+        dbconfig.common().add(new UniqueFieldValueConstraint(Area.class,"ID"));
+
         dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
+        dbconfig.common().add(new UniqueFieldValueConstraint(PublicDisplay.class,"identification"));
+
         dbconfig.common().objectClass(WifiSensor.class).objectField("identification").indexed(true);
+        dbconfig.common().add(new UniqueFieldValueConstraint(WifiSensor.class,"identification"));
+
         dbconfig.common().objectClass(Location.class).objectField("key").indexed(true);
+        dbconfig.common().add(new UniqueFieldValueConstraint(Location.class,"key"));
+
         dbconfig.common().objectClass(WifiMorsel.class).objectField("wifiMac").indexed(true);
+        // WifiMorsel is not unique
         rootContainer = Db4oEmbedded.openFile(dbconfig, dbFilePath);
 
         log.log(TAG, "db4o startup on " + dbFilePath);

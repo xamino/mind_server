@@ -812,7 +812,6 @@ function statusTest() {
 }
 
 function pollTest() {
-    unitTest("read_my_polls", null, Error, null);
     var session = getAdminSession();
     unitTest("poll_add", new Poll("Lunch?", null, [new PollOption("Yes"), new PollOption("No")]), Success, session);
 }

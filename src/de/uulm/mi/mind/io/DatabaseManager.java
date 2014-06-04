@@ -146,9 +146,11 @@ public class DatabaseManager {
      * @return
      */
     public <E extends Saveable> DataList<E> read(E filter) {
-        Session session = dba.open();
+        Session session = dba.openReadOnly();
+        long time = System.currentTimeMillis();
         DataList<E> ret = session.read(filter);
-        session.close();
+        log.log(TAG, "sessionRead " + (System.currentTimeMillis()-time) + "ms");
+        //session.close();
         return ret;
     }
 }

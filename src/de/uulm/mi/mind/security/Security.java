@@ -33,7 +33,7 @@ public class Security {
     /**
      * Tag used for all logging that happens within Security.
      */
-    private final String TAG = "Security";
+    private static final String TAG = "Security";
     /**
      * Session timeout in milliseconds. Cannot be changed during runtime!
      */
@@ -42,7 +42,7 @@ public class Security {
     /**
      * Instance of log used for the output.
      */
-    private Messenger log;
+    private static Messenger log;
     /**
      * Instance of database.
      */
@@ -273,7 +273,6 @@ public class Security {
      * @return The Authenticated freshly read if available, else null.
      */
     private Authenticated readDB(Authenticated authenticated) {
-
         DataList data;
         if (authenticated instanceof User) {
             data = database.read(new User(authenticated.readIdentification()));
