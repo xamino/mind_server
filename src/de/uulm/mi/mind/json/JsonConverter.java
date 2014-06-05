@@ -143,7 +143,7 @@ public class JsonConverter<E> {
                     Class clazz = collectionObject.getClass();
                     if (clazz.isPrimitive() || String.class.isAssignableFrom(clazz)) {
                         // primitives are written as-is
-                        jsonObject.append('"').append(collectionObject).append("\",");
+                        jsonObject.append(ESCAPE).append(collectionObject).append(ESCAPE).append(",");
                     } else {
                         // objects are recursively resolved
                         jsonObject.append(objectJson(((E) collectionObject))).append(",");
@@ -190,7 +190,7 @@ public class JsonConverter<E> {
             return writeObject(json);
         } catch (IOException e) {
             // e.printStackTrace();
-            log.error(TAG, "Failed!");
+            log.error(TAG, "Failed to create Java!");
             return null;
         }
     }
@@ -310,15 +310,24 @@ public class JsonConverter<E> {
                 throw new IOException(TAG + ": JsonConverter failed to convert java.util.Date back! Format required " +
                         "is yyyy-MM-dd HH:mm:ss");
             }
-        } else if ((clazz == Object[].class || DataList.class.isAssignableFrom(clazz)) && value.startsWith("[")) {
-            DataList objects = new DataList();
+        } else if (value.startsWith("[")) {
+            ArrayList objects = new ArrayList();
             // remove []
             value = value.substring(1, value.length() - 1);
             // must split value into objects
             while (!value.isEmpty()) {
                 int end = findEndBracket(value) + 1;
                 String nextObject = value.substring(0, end);
-                objects.add(writeObject(nextObject));
+                if (clazz == Object[].class || DataList.class.isAssignableFrom(clazz)) {
+                    // objects
+                    objects.add(writeObject(nextObject));
+                } else if (Collection.class.isAssignableFrom(clazz)) {
+                    // primitives (will always be string)
+                    objects.add(nextObject);
+                } else {
+                    log.error(TAG, "Failed in creating list – field may not expect list!");
+                    return null;
+                }
                 // remove finished object
                 // some vodoo required to correctly move the string over
                 if (value.length() <= end + 1) {
@@ -329,28 +338,14 @@ public class JsonConverter<E> {
             }
             if (clazz == Object[].class) {
                 return objects.toArray();
+            } else if (clazz == DataList.class) {
+                DataList dataList = new DataList();
+                for (Object object : objects)
+                    dataList.add(object);
+                return dataList;
             } else {
                 return objects;
             }
-        } else if (Collection.class.isAssignableFrom(clazz) && value.startsWith("[")) {
-            // catch primitive collections
-            ArrayList<String> objects = new ArrayList<>();
-            // remove []
-            value = value.substring(1, value.length() - 1);
-            // must split value into objects
-            while (!value.isEmpty()) {
-                int end = findEndBracket(value) + 1;
-                String nextValue = value.substring(0, end);
-                objects.add(nextValue);
-                // remove finished object
-                // some vodoo required to correctly move the string over
-                if (value.length() <= end + 1) {
-                    value = "";
-                } else {
-                    value = value.substring(end + 1);
-                }
-            }
-            return objects;
         } else {
             // this probably means object
             return writeObject(value);
