@@ -815,7 +815,18 @@ function pollTest() {
     unitTest("read_all_polls", null, Error, null);
     var session = getAdminSession();
     unitTest("poll_add", new Poll("Lunch?", null, [new PollOption("Yes"), new PollOption("No")]), Success, session);
-    unitTest("read_all_polls", null, Array, session);
+    var polls = unitTest("read_all_polls", null, Array, session);
+    if (polls == undefined) {
+        alert("No polls returned!");
+        return;
+    }
+    // set vote
+    var poll = polls[0];
+    // because we need to send back the key, we simply set the vote poll value to include only the one option
+    poll.options = [poll.options[0]];
+    unitTest("poll_vote", poll, Success, session);
+    // check that vote counted
+    var polls = unitTest("read_all_polls", null, Array, session);
 }
 
 /**
