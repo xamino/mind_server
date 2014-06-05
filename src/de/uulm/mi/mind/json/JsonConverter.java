@@ -143,7 +143,7 @@ public class JsonConverter<E> {
                     Class clazz = collectionObject.getClass();
                     if (clazz.isPrimitive() || String.class.isAssignableFrom(clazz)) {
                         // primitives are written as-is
-                        jsonObject.append(collectionObject).append(",");
+                        jsonObject.append('"').append(collectionObject).append("\",");
                     } else {
                         // objects are recursively resolved
                         jsonObject.append(objectJson(((E) collectionObject))).append(",");
