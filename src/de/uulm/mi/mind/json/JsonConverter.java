@@ -2,6 +2,7 @@ package de.uulm.mi.mind.json;
 
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.DataList;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -338,10 +339,8 @@ public class JsonConverter<E> {
             }
             if (clazz == Object[].class) {
                 return objects.toArray();
-            } else if (clazz == DataList.class) {
-                DataList dataList = new DataList();
-                for (Object object : objects)
-                    dataList.add(object);
+            } else if (clazz == DataList.class || clazz == Sendable.class) {
+                DataList dataList = new DataList(objects);
                 return dataList;
             } else {
                 return objects;

@@ -104,6 +104,9 @@ class DatabaseController extends DatabaseAccess {
                 } else if (requestFilter instanceof Location) {
                     query.descend("key").constrain(requestFilter.getKey());
                     queryResult = query.execute();
+                } else if (requestFilter instanceof Poll) {
+                    query.descend("key").constrain(requestFilter.getKey());
+                    queryResult = query.execute();
                 } else {
                     log.log(TAG, "Object Type " + requestFilter.getClass().getSimpleName() + " reading could be optimized.");
                     queryResult = sessionContainer.query(new Predicate<T>() {
@@ -221,6 +224,8 @@ class DatabaseController extends DatabaseAccess {
         dbconfig.common().objectClass(Area.class).cascadeOnUpdate(true);
         dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);
         dbconfig.common().objectClass(Location.class).cascadeOnDelete(true);
+        dbconfig.common().objectClass(Poll.class).cascadeOnUpdate(true);
+        dbconfig.common().objectClass(Poll.class).cascadeOnDelete(true);
         //dbconfig.common().optimizeNativeQueries(true);
 
         dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
@@ -237,6 +242,12 @@ class DatabaseController extends DatabaseAccess {
 
         dbconfig.common().objectClass(Location.class).objectField("key").indexed(true);
         dbconfig.common().add(new UniqueFieldValueConstraint(Location.class, "key"));
+
+        dbconfig.common().objectClass(Poll.class).objectField("key").indexed(true);
+        dbconfig.common().add(new UniqueFieldValueConstraint(Poll.class, "key"));
+
+        dbconfig.common().objectClass(PollOption.class).objectField("key").indexed(true);
+        dbconfig.common().add(new UniqueFieldValueConstraint(PollOption.class, "key"));
 
         dbconfig.common().objectClass(WifiMorsel.class).objectField("wifiMac").indexed(true);
         // WifiMorsel is not unique
