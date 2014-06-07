@@ -70,9 +70,10 @@ public class Servlet extends HttpServlet {
         } else {
             // set IP address in case we need it (warning: can be IPv4 OR IPv6!!!)
             arrival.setIpAddress(request.getRemoteAddr());
-            log.pushTimer(this, "tasks");
+
+            long time = System.currentTimeMillis();
             answer = TaskManager.getInstance().run(arrival);
-            log.log(TAG, "Task " + arrival.getTask() + " took " + log.popTimer(this).time + "ms.");
+            log.log(TAG, "Task " + arrival.getTask() + " took " + (System.currentTimeMillis()-time) + "ms.");
         }
 
         // Encapsulate answer:

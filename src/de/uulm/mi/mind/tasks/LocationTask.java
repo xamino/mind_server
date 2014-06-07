@@ -58,7 +58,7 @@ public abstract class LocationTask<I extends Sendable, O extends Sendable> exten
         DataList<Location> locations = session.read(new Location(0, 0, null));
         DataList<Area> areas = session.read(new Area(null));
 
-        log.pushTimer(this, "");
+        long time = System.currentTimeMillis();
         for (Area area : areas) {
             area.setLocations(new DataList<Location>());
             for (Location location : locations) {
@@ -73,7 +73,7 @@ public abstract class LocationTask<I extends Sendable, O extends Sendable> exten
             }
         }
 
-        log.log(TAG, "Updated Location <--> Area mapping. Took " + log.popTimer(this).time + "ms.");
+        log.log(TAG, "Updated Location <--> Area mapping. Took " + (System.currentTimeMillis() - time) + "ms.");
         return true;
     }
 

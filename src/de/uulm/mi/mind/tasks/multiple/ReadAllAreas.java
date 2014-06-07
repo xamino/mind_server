@@ -23,12 +23,15 @@ public class ReadAllAreas extends Task<None, Sendable> {
     @Override
     public Sendable doWork(Active active, None object, boolean compact) {
         final Area filter = new Area(null);
+        //long time = System.currentTimeMillis();
         DataList<Area> read = database.read(filter);
+        //log.log(TAG, "read All Areas from DB " + (System.currentTimeMillis() - time) + "ms");
 
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of area resulted in an error.");
         }
 
+        //time = System.currentTimeMillis();
         if (compact) {
             for (Area area : read) {
                 for (Location location : area.getLocations()) {
@@ -36,6 +39,7 @@ public class ReadAllAreas extends Task<None, Sendable> {
                 }
             }
         }
+        //log.log(TAG, "make all areas compact " + (System.currentTimeMillis() - time) + "ms");
         return read;
     }
 

@@ -130,6 +130,11 @@ class DatabaseControllerSQL extends DatabaseAccess {
         }
     }
 
+    @Override
+    public Session openRoot() {
+        return open();
+    }
+
     public boolean update(Session session, Saveable data) {
 
         log.log(TAG, "To update: " + data.toString());

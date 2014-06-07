@@ -117,11 +117,11 @@ class DatabaseController extends DatabaseAccess {
                     });
                 }
             }
-            log.log(TAG, "if " + (System.currentTimeMillis() - time) + "ms");
+            //log.log(TAG, "if " + (System.currentTimeMillis() - time) + "ms");
             // Write query results to DataList
             time = System.currentTimeMillis();
             DataList<T> result = new DataList<>(queryResult);
-            log.log(TAG, "list copy " + (System.currentTimeMillis() - time) + "ms");
+            //log.log(TAG, "list copy " + (System.currentTimeMillis() - time) + "ms");
 
             // log.error(TAG, "Read from DB: " + result.toString());
             return result;
@@ -129,6 +129,11 @@ class DatabaseController extends DatabaseAccess {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @Override
+    public Session openRoot() {
+        return new Session(rootContainer, this);
     }
 
     // todo look if we can use this
@@ -244,10 +249,10 @@ class DatabaseController extends DatabaseAccess {
         dbconfig.common().add(new UniqueFieldValueConstraint(Location.class, "key"));
 
         dbconfig.common().objectClass(Poll.class).objectField("key").indexed(true);
-        dbconfig.common().add(new UniqueFieldValueConstraint(Poll.class, "key"));
+        //dbconfig.common().add(new UniqueFieldValueConstraint(Poll.class, "key"));
 
         dbconfig.common().objectClass(PollOption.class).objectField("key").indexed(true);
-        dbconfig.common().add(new UniqueFieldValueConstraint(PollOption.class, "key"));
+        //dbconfig.common().add(new UniqueFieldValueConstraint(PollOption.class, "key"));
 
         dbconfig.common().objectClass(WifiMorsel.class).objectField("wifiMac").indexed(true);
         // WifiMorsel is not unique

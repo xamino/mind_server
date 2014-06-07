@@ -269,10 +269,37 @@ public class DatabaseManager {
         Session session = dba.open();
         long time = System.currentTimeMillis();
         DataList<E> ret = session.read(filter);
-        log.log(TAG, "sessionRead " + (System.currentTimeMillis() - time) + "ms");
+        log.log(TAG, "sessionRead " + (System.currentTimeMillis() - time) + "ms " + filter);
         time = System.currentTimeMillis();
+
+        //for (E e : ret) {
+        //  purge(e, session);
+
+            /*if (e instanceof Area && ((Area)e).getLocations() != null && !((Area) e).getLocations().isEmpty()) {
+                Location l = ((Area) e).getLocations().get(0);
+                if (l.getWifiMorsels() != null && !l.getWifiMorsels().isEmpty()) {
+                    log.log(TAG,"stored: " + session.getDb4oContainer().ext().isStored(l.getWifiMorsels().get(0)));
+                    log.log(TAG,"active: " + session.getDb4oContainer().ext().isActive(l.getWifiMorsels().get(0)));
+                }
+            }*/
+        //}
+
+
         session.close();
         log.log(TAG, "sessionClose " + (System.currentTimeMillis() - time) + "ms");
         return ret;
+    }
+
+    public void purge(Object o, Session session) {
+        session.getDb4oContainer().ext().purge(o); // TODO test if subobjects are purged too
+        if (o instanceof Area && ((Area) o).getLocations() != null && !((Area) o).getLocations().isEmpty()) {
+            for (Location location : ((Area) o).getLocations()) {
+                purge(location, session);
+            }
+        } else if (o instanceof Location && ((Location) o).getWifiMorsels() != null && !((Location) o).getWifiMorsels().isEmpty()) {
+            for (WifiMorsel morsel : ((Location) o).getWifiMorsels()) {
+                purge(morsel, session);
+            }
+        }
     }
 }

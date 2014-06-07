@@ -77,18 +77,18 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
 
         // Everything okay from here on out:
-        log.pushTimer(this, "rofl");
+        long time = System.currentTimeMillis();
         Location location = calculateLocation(requestLocation);
-        log.log(TAG, "calculateLocation " + log.popTimer(this).time + "ms");
+        log.log(TAG, "calculateLocation " + (System.currentTimeMillis() - time) + "ms");
         if (location == null) {
             // this means the location could not be found in the DB but user is at University
             return new Area("University");
         }
 
         // get best area for location to return
-        log.pushTimer(this, "");
+        time = System.currentTimeMillis();
         Area area = getBestArea(location);
-        log.log(TAG, "getBestArea " + log.popTimer(this).time + "ms");
+        log.log(TAG, "getBestArea " + (System.currentTimeMillis() - time) + "ms");
         if (area == null) {
             log.error(TAG, "NULL area for position_find – shouldn't happen as University should be returned at least!");
             return new Success(Success.Type.NOTE, "Your position could not be found.");
@@ -183,8 +183,12 @@ public class PositionFind extends Task<Arrival, Sendable> {
         // Then check how far wifi levels are apart. If it is below a tolerance value increase the goodness of that location.
         for (WifiMorsel currentRequestMorsel : requestWifiMorsels) {
             for (Location dataBaseLocation : dataBaseLocations) {
-
                 DataList<WifiMorsel> dataBaseLocationMorsels = dataBaseLocation.getWifiMorsels();
+
+                if(dataBaseLocationMorsels==null){
+                    log.error(TAG,"DB Location  "+dataBaseLocation.getKey()+" has null as Morsellist!");
+                    continue;
+                }
 
                 // check if request morsel is contained in the current Locations Morsels
                 int index;
@@ -267,7 +271,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
                     }
                 }
 
-                // Now there are only tholog.popTimer(this)se locations left, that have the same amount of matches AND the same levelDifferenceSum
+                // Now there are only those locations left, that have the same amount of matches AND the same levelDifferenceSum
                 //e.g. -50 is a stronger dBm value (better signal) than -90
                 if (sortedLocationCandidateList.size() > 1) {
                     //LAST CHANGE - MAX_VALUE TO MIN_VALUE & < TO >
@@ -327,13 +331,13 @@ public class PositionFind extends Task<Arrival, Sendable> {
     private Area getBestArea(Location location) {
         // Get all areas
 
-        log.pushTimer(this, "");
+        long time = System.currentTimeMillis();
         DataList<Area> all = database.read(new Area(null));
         if (all == null) {
             log.error(TAG, "All areas: dbCall == null – shouldn't happen, FIX!");
             return null;
         }
-        log.log(TAG, "read " + log.popTimer(this).time + "ms");
+        log.log(TAG, "read " + (System.currentTimeMillis()-time) + "ms");
 
         int x = all.indexOf(new Area("University"));
         Area finalArea = all.get(x);
