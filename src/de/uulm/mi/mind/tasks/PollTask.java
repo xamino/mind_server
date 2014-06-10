@@ -49,29 +49,30 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
             log.error(TAG, "Poll(s) could not be found!");
             return null;
         }
+        final DataList<Poll> toUpdate = new DataList<>();
         for (final Poll poll : data) {
-            boolean update = false;
             if (new Date().after(new Date(poll.getEnd().getTime() + ENDDELTA)) && poll.getState() != PollState.ENDED) {
                 log.log(TAG, "Ending poll " + poll.getQuestion() + "!");
                 poll.setState(PollState.ENDED);
-                update = true;
+                toUpdate.add(poll);
             } else if (new Date().after(poll.getEnd()) && poll.getState() != PollState.CLOSED) {
                 log.log(TAG, "Closing poll " + poll.getQuestion() + "!");
                 poll.setState(PollState.CLOSED);
-                update = true;
-            }
-            if (update) {
-                database.open(new Transaction() {
-                    @Override
-                    public Data doOperations(Session session) {
-                        if (!session.update(poll)) {
-                            log.error(TAG, "Failed to update poll on read for states!");
-                        }
-                        return null;
-                    }
-                });
+                toUpdate.add(poll);
             }
         }
+        // update toUpdate list
+        database.open(new Transaction() {
+            @Override
+            public Data doOperations(Session session) {
+                for (Poll poll : toUpdate) {
+                    if (!session.update(poll)) {
+                        log.error(TAG, "Failed to update poll <" + poll.getQuestion() + "> on read for states!");
+                    }
+                }
+                return null;
+            }
+        });
         // prepare objects we need
         return data;
     }
