@@ -827,13 +827,20 @@ function pollTest() {
     unitTest("poll_vote", poll, Success, session);
     // check that vote counted
     var polls = unitTest("read_all_polls", null, Array, session);
+
+    // delete all polls
+    unitTest("poll_remove", new Poll(), Success, session);
 }
 
 /**
  * Use this method to clean the DB.
  */
 function cleanDB() {
-    unitTest("registration", new User("special@admin.eu", "admin"), Success, null);
+    var reg = unitTest("registration", new User("special@admin.eu", "admin"), Success, null);
+    if (reg == null) {
+        alert("Aborting!");
+        return;
+    }
     var arrival = new Arrival("login", null, new User("special@admin.eu", "admin"));
     var adminSession = JSON.parse($.ajax({
         data: JSON.stringify(arrival),

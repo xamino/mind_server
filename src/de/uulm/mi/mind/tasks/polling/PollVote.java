@@ -27,6 +27,7 @@ public class PollVote extends PollTask<Poll, Information> {
         return !(!safeString(object.getKey()) || object.getOptions() == null);
     }
 
+    // todo input polloption – check that they are all unique too (Andy sent 2 same ones up :P)
     @Override
     public Information doWork(Active active, Poll vote, boolean compact) {
         // start by reading the original Poll so that we don't allow poll modifications here except the vote
