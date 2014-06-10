@@ -121,7 +121,7 @@ public class Poll implements Sendable, Saveable {
         p.setState(state);
 
         DataList<PollOption> pollOptions = new DataList<>();
-        for (PollOption pollOption : p.getOptions()) {
+        for (PollOption pollOption : options) {
             if(pollOption==null) continue;
             pollOptions.add((PollOption) pollOption.deepClone());
         }

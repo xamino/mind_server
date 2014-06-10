@@ -9,6 +9,7 @@ import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
+import de.uulm.mi.mind.objects.enums.DeviceClass;
 
 import java.util.List;
 

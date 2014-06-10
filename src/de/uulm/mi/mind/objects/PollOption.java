@@ -41,6 +41,15 @@ public class PollOption implements Saveable, Sendable {
     }
 
     @Override
+    public String toString() {
+        return "PollOption{" +
+                "key='" + key + '\'' +
+                ", optionValue='" + optionValue + '\'' +
+                ", users=" + users +
+                '}';
+    }
+
+    @Override
     public String getKey() {
         return this.key;
     }
