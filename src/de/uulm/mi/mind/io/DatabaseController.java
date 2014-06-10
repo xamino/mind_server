@@ -9,7 +9,6 @@ import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
-import de.uulm.mi.mind.objects.enums.DeviceClass;
 
 import java.util.List;
 
@@ -57,7 +56,7 @@ class DatabaseController extends DatabaseAccess {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
-        DataList<Saveable> readData = read(session, data);
+        DataList<Saveable> readData = read(session, data, 1); // TODO test 0
         if (readData != null && !readData.isEmpty()) {
             return false;
         }
@@ -185,7 +184,7 @@ class DatabaseController extends DatabaseAccess {
         if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
         try {
             DataList<Saveable> dataList;
-            if (!(dataList = read(session, data)).isEmpty()) {
+            if (!(dataList = read(session, data)).isEmpty()) { // TODO depth
                 sessionContainer.delete(dataList.get(0));
                 sessionContainer.store(data);
                 //log.log(TAG, "Updated in DB: " + data.toString());
@@ -208,7 +207,7 @@ class DatabaseController extends DatabaseAccess {
     public boolean delete(Session session, Saveable data) {
         ObjectContainer sessionContainer = session.getDb4oContainer();
         try {
-            DataList<Saveable> dataList = read(session, data);
+            DataList<Saveable> dataList = read(session, data); // TODO depth
 
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
