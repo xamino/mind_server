@@ -50,16 +50,17 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
         }
         for (final Poll poll : data) {
             boolean update = false;
-            if (new Date().after(poll.getEnd()) && poll.getState() != PollState.CLOSED) {
-                log.log(TAG, "Closing poll!");
-                poll.setState(PollState.CLOSED);
-                update = true;
-            } else if (new Date(poll.getEnd().getTime() + ENDDELTA).before(poll.getEnd()) && poll.getState() != PollState.ENDED) {
-                log.log(TAG, "Ending poll!");
+            if (new Date(poll.getEnd().getTime() + ENDDELTA).before(poll.getEnd()) && poll.getState() != PollState.ENDED) {
+                log.log(TAG, "Ending poll " + poll.getQuestion() + "!");
                 poll.setState(PollState.ENDED);
+                update = true;
+            } else if (new Date().after(poll.getEnd()) && poll.getState() != PollState.CLOSED) {
+                log.log(TAG, "Closing poll " + poll.getQuestion() + "!");
+                poll.setState(PollState.CLOSED);
                 update = true;
             }
             if (update) {
+                log.log(TAG, "Updating!");
                 database.open(new Transaction() {
                     @Override
                     public Data doOperations(Session session) {
