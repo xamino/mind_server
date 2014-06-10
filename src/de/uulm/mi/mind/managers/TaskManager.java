@@ -26,14 +26,17 @@ public class TaskManager {
     private final String FILESEPARATOR;
     private Messenger log;
     private Set<String> taskNames;
-    private HashMap<String, Task> taskObjects;
+    private HashMap<String, Task<Sendable, Sendable>> taskObjects;
 
+    /**
+     * Private constructor. Get an instance via getInstance(). Initializes the system variables and loads the tasks.
+     */
     private TaskManager() {
         log = Messenger.getInstance();
         TAG = "TaskManager";
         FILESEPARATOR = System.getProperty("file.separator");
         taskNames = new HashSet<>();
-        taskObjects = new HashMap<>();
+        taskObjects = new HashMap<String, Task<Sendable, Sendable>>();
         // now register initial tasks
         loadTasks("de.uulm.mi.mind.tasks.all");
         loadTasks("de.uulm.mi.mind.tasks.admin");
@@ -45,6 +48,11 @@ public class TaskManager {
         log.log(TAG, "Created.");
     }
 
+    /**
+     * Method for obtaining an instance.
+     *
+     * @return The instance to work with.
+     */
     public static TaskManager getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new TaskManager();
@@ -53,12 +61,26 @@ public class TaskManager {
     }
 
     /**
-     * Method that runs a received task.
+     * Reads all tasks and their permissions.
+     *
+     * @return A hashmap containing the task name and its permissions.
+     */
+    public static HashMap<String, Set<String>> readRights() {
+        HashMap<String, Task<Sendable, Sendable>> tasks = getInstance().taskObjects;
+        HashMap<String, Set<String>> answer = new HashMap<>();
+        for (Map.Entry<String, Task<Sendable, Sendable>> entry : tasks.entrySet()) {
+            answer.put(entry.getKey(), entry.getValue().getTaskPermission());
+        }
+        return answer;
+    }
+
+    /**
+     * Method that runs a received task. Task is checked that it exists, then security is checked, then input validation.
+     * Finally, the task is run and its answer returned.
      *
      * @param arrival The arrival object to use.
      * @return The answer to send back.
      */
-    // todo have input validation in the task abstract class that is called beforehand
     public Sendable run(Arrival arrival) {
         final String TASK = arrival.getTask().toLowerCase();
         // check that task exists
@@ -67,7 +89,7 @@ public class TaskManager {
             return new Error(Error.Type.TASK, "Task " + TASK + " is not available!");
         }
         // get task object
-        Task task = taskObjects.get(TASK);
+        Task<Sendable, Sendable> task = taskObjects.get(TASK);
         // make sure that the given object fits what the task wants
         Sendable sendable = prepareTaskObject(task, arrival);
         if (sendable == null) {
@@ -75,7 +97,7 @@ public class TaskManager {
             return new Error(Error.Type.WRONG_OBJECT, "Wrong object for " + TASK + " supplied!");
         }
         // check security permissions
-        Set permissibles = task.getTaskPermission();
+        Set<String> permissibles = task.getTaskPermission();
         if (permissibles == null || permissibles.isEmpty()) {
             // this is public tasks
             return doTask(task, null, sendable, arrival.isCompact());
@@ -87,7 +109,7 @@ public class TaskManager {
                 return new Error(Error.Type.SECURITY, "You do not have permission to use this task!");
             }
             // check for admin tasks
-            Sendable answer = null;
+            Sendable answer;
             // if the task is an admin task, we need to check especially
             if (task.isAdminTask()) {
                 // must be user
@@ -120,7 +142,7 @@ public class TaskManager {
      * @param compact  The compact value.
      * @return The answer of the task or an error.
      */
-    private Sendable doTask(Task task, Active active, Sendable sendable, boolean compact) {
+    private Sendable doTask(Task<Sendable, Sendable> task, Active active, Sendable sendable, boolean compact) {
         if (task.validateInput(sendable)) {
             return task.doWork(active, sendable, compact);
         }
@@ -136,7 +158,7 @@ public class TaskManager {
      * @param arrival The arrival to use.
      * @return The object to pass to the doWork method.
      */
-    private Sendable prepareTaskObject(Task task, Arrival arrival) {
+    private Sendable prepareTaskObject(Task<Sendable, Sendable> task, Arrival arrival) {
         // check if none is required
         if (task.getInputType().equals(None.class)) {
             return new None();
@@ -158,7 +180,7 @@ public class TaskManager {
      */
     private void loadTasks(String packageName) {
         // todo allow loading from config path
-        List<Class<Task>> tasks = new ArrayList<Class<Task>>();
+        List<Class<Task<Sendable, Sendable>>> tasks = new ArrayList<Class<Task<Sendable, Sendable>>>();
         URL root = Thread.currentThread().getContextClassLoader().getResource(packageName.replace(".", FILESEPARATOR));
         if (root == null) {
             log.error(TAG, "Root path is null! Does the directory for " + packageName + " exist?");
@@ -178,7 +200,7 @@ public class TaskManager {
             try {
                 cls = Class.forName(packageName + "." + className);
                 if (Task.class.isAssignableFrom(cls)) {
-                    tasks.add((Class<Task>) cls);
+                    tasks.add((Class<Task<Sendable, Sendable>>) cls);
                 }
             } catch (ClassNotFoundException e) {
                 log.error(TAG, "Class " + className + " could not be found! Skipping...");
@@ -186,10 +208,10 @@ public class TaskManager {
         }
         // Instantiate them and register
         int counter = 0;
-        for (Class<Task> task : tasks) {
-            Task toAdd = null;
+        for (Class<Task<Sendable, Sendable>> task : tasks) {
+            Task<Sendable, Sendable> toAdd = null;
             try {
-                toAdd = ((Task) task.getDeclaredConstructors()[0].newInstance());
+                toAdd = ((Task<Sendable, Sendable>) task.getDeclaredConstructors()[0].newInstance());
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 log.error(TAG, "Failed to get an instance of " + task.getSimpleName() + " via default constructor!");
                 continue;

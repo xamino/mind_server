@@ -323,6 +323,8 @@ public class JsonConverter<E> {
                     // objects
                     objects.add(writeObject(nextObject));
                 } else if (Collection.class.isAssignableFrom(clazz)) {
+                    // remove "" because always primitive (no further parsing)
+                    nextObject = nextObject.substring(1, nextObject.length() - 1);
                     // primitives (will always be string)
                     objects.add(nextObject);
                 } else {
