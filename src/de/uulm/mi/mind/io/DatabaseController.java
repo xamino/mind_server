@@ -69,6 +69,25 @@ class DatabaseController extends DatabaseAccess {
         }
     }
 
+
+    @Override
+    public Session openRoot() {
+        return new Session(rootContainer, this);
+    }
+
+    /**
+     * Reads an object from the database.
+     *
+     * @param requestFilter Filter of objects to be returned. An object constructed with default constructor (null,0 or false values) returns all instances.
+     *                      Changing an object parameter filters the returned objects.
+     * @param <T>           A DataType extending Data.
+     * @return A DataList of the specified filter parameter Type or null on error.
+     */
+    private <T extends Saveable> DataList<T> read(Session session, T requestFilter) {
+        return read(session, requestFilter, 5);
+    }
+
+
     /**
      * Reads an object from the database.
      *
@@ -78,7 +97,7 @@ class DatabaseController extends DatabaseAccess {
      * @return A DataList of the specified filter parameter Type or null on error.
      */
     @Override
-    public <T extends Saveable> DataList<T> read(Session session, final T requestFilter) {
+    public <T extends Saveable> DataList<T> read(Session session, final T requestFilter, int depth) {
         ObjectContainer sessionContainer = session.getDb4oContainer();
         long time = System.currentTimeMillis();
         try {
@@ -117,6 +136,13 @@ class DatabaseController extends DatabaseAccess {
                     });
                 }
             }
+
+            if (depth > 1)
+                for (T t : queryResult) {
+                    sessionContainer.activate(t, depth);
+                }
+
+
             //log.log(TAG, "if " + (System.currentTimeMillis() - time) + "ms");
             // Write query results to DataList
             time = System.currentTimeMillis();
@@ -129,11 +155,6 @@ class DatabaseController extends DatabaseAccess {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    @Override
-    public Session openRoot() {
-        return new Session(rootContainer, this);
     }
 
     // todo look if we can use this
@@ -225,6 +246,8 @@ class DatabaseController extends DatabaseAccess {
         String dbFilePath = contextPath + "WEB-INF/" + config.getDbName();
 
         EmbeddedConfiguration dbconfig = Db4oEmbedded.newConfiguration();
+        dbconfig.common().activationDepth(1);
+
         //dbconfig.common().diagnostic().addListener(new DiagnosticToConsole());
         dbconfig.common().objectClass(Area.class).cascadeOnUpdate(true);
         dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);

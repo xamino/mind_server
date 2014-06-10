@@ -138,4 +138,23 @@ public class Area implements Sendable, Saveable {
     public String getKey() {
         return ID;
     }
+
+    @Override
+    public Saveable deepClone() {
+        Area a = new Area(ID, null, topLeftX, topLeftY, width, height);
+
+        DataList<Location> locs = new DataList<>();
+
+        if(locations!=null) {
+            for (Location location : locations) {
+                if (location == null) continue;
+                locs.add((Location) location.deepClone());
+            }
+            a.setLocations(locs);
+        }
+        else{
+            a.setLocations(new DataList<Location>());
+        }
+        return a;
+    }
 }

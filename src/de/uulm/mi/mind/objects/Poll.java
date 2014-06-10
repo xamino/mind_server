@@ -110,6 +110,26 @@ public class Poll implements Sendable, Saveable {
         return this.key;
     }
 
+    @Override
+    public Saveable deepClone() {
+        Poll p = new Poll(question, end);
+        p.setAllowedOptionSelections(allowedOptionSelections);
+        p.setCreated(p.created);
+        p.setIcon(icon);
+        p.setKey(key);
+        p.setOwner(owner);
+        p.setState(state);
+
+        DataList<PollOption> pollOptions = new DataList<>();
+        for (PollOption pollOption : p.getOptions()) {
+            if(pollOption==null) continue;
+            pollOptions.add((PollOption) pollOption.deepClone());
+        }
+        p.setOptions(pollOptions);
+
+        return p;
+    }
+
     public void setKey(String key) {
         this.key = key;
     }

@@ -109,4 +109,11 @@ public class PublicDisplay implements Sendable, Authenticated, Saveable {
     public String getKey() {
         return identification;
     }
+
+    @Override
+    public Saveable deepClone() {
+        PublicDisplay pd = new PublicDisplay(identification, token, location, coordinateX, coordinateY);
+        pd.setAccessDate(lastAccess);
+        return pd;
+    }
 }

@@ -31,8 +31,6 @@ abstract class DatabaseAccess {
 
     abstract boolean create(Session session, Saveable data);
 
-    abstract <E extends Saveable> DataList<E> read(Session session, E data);
-
     void reinit(Session session) {
         final Configuration config = Configuration.getInstance();
         log.log(TAG, "Running DB init.");
@@ -56,4 +54,6 @@ abstract class DatabaseAccess {
     }
 
     public abstract Session openRoot();
+
+    public abstract <E extends Saveable> DataList<E> read(Session session, E data, int depth);
 }

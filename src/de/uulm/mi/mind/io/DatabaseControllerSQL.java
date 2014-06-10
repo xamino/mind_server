@@ -135,6 +135,11 @@ class DatabaseControllerSQL extends DatabaseAccess {
         return open();
     }
 
+    @Override
+    public <E extends Saveable> DataList<E> read(Session session, E data, int depth) {
+        return read(session,data); // TODO
+    }
+
     public boolean update(Session session, Saveable data) {
 
         log.log(TAG, "To update: " + data.toString());

@@ -39,7 +39,22 @@ public class Session {
     }
 
     public <E extends Saveable> DataList<E> read(E data) {
-        return dba.read(this, data);
+        return dba.read(this, data, 5);
+    }
+
+
+    /**
+     * @param data
+     * @param depth Depths of children to be returned.
+     *              0 = object fields are initialized to defaults,
+     *              1 object fields loaded, 2 children are initialized to defaults,
+     *              3 children field loaded etc;
+     *              e.g. 5 could be Area-DataList-Location-DataList-WifiMorsel loaded but no further DataList
+     * @param <E>
+     * @return
+     */
+    public <E extends Saveable> DataList<E> read(E data, int depth) {
+        return dba.read(this, data, depth);
     }
 
     public boolean update(Saveable data) {

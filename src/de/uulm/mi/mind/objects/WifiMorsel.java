@@ -65,6 +65,30 @@ public class WifiMorsel implements Sendable, Comparable, Saveable {
         this.wifiLevel = wifiLevel;
     }
 
+    public int getWifiChannel() {
+        return wifiChannel;
+    }
+
+    public void setWifiChannel(int wifiChannel) {
+        this.wifiChannel = wifiChannel;
+    }
+
+    public String getDeviceModel() {
+        return deviceModel;
+    }
+
+    public void setDeviceModel(String deviceModel) {
+        this.deviceModel = deviceModel;
+    }
+
+    public Date getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(Date timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
     @Override
     public String toString() {
         return "WifiMorsel{" +
@@ -103,32 +127,14 @@ public class WifiMorsel implements Sendable, Comparable, Saveable {
             return 0;
     }
 
-    public int getWifiChannel() {
-        return wifiChannel;
-    }
-
-    public void setWifiChannel(int wifiChannel) {
-        this.wifiChannel = wifiChannel;
-    }
 
     @Override
     public String getKey() {
         return null;
     }
 
-    public String getDeviceModel() {
-        return deviceModel;
-    }
-
-    public void setDeviceModel(String deviceModel) {
-        this.deviceModel = deviceModel;
-    }
-
-    public Date getTimeStamp() {
-        return timeStamp;
-    }
-
-    public void setTimeStamp(Date timeStamp) {
-        this.timeStamp = timeStamp;
+    @Override
+    public Saveable deepClone() {
+        return new WifiMorsel(wifiMac, wifiName, wifiLevel, wifiChannel, deviceModel, timeStamp);
     }
 }
