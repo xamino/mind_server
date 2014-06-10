@@ -1,10 +1,8 @@
 package de.uulm.mi.mind.tasks.polling;
 
-import de.uulm.mi.mind.io.Session;
-import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.objects.*;
-import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
+import de.uulm.mi.mind.objects.enums.PollState;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.tasks.PollTask;
@@ -22,18 +20,28 @@ public class ReadAllPolls extends PollTask<None, Sendable> {
         return true;
     }
 
+    /**
+     * Reads all polls that are ongoing and closed – meaning all polls except ended ones.
+     *
+     * @param active  The active user object to work with.
+     * @param object  The object requested.
+     * @param compact Whether a compact answer is wished for or not.
+     * @return The polls.
+     */
+    // todo ended polls can't be seen – when do we delete them?
     @Override
     public Sendable doWork(Active active, None object, boolean compact) {
-        return (Sendable) database.open(new Transaction() {
-            @Override
-            public Data doOperations(Session session) {
-                DataList<Poll> list = session.read(new Poll());
-                if (list == null) {
-                    return new Error(Error.Type.DATABASE, "Reading of polls failed!");
-                }
-                return list;
+        DataList<Poll> polls = readValidPoll(new Poll());
+        if (polls == null) {
+            return new Error(Error.Type.DATABASE, "Database read all polls failed!");
+        }
+        DataList<Poll> filteredPolls = new DataList<>();
+        for (Poll poll : polls) {
+            if (poll.getState() != PollState.ENDED) {
+                filteredPolls.add(poll);
             }
-        });
+        }
+        return filteredPolls;
     }
 
     @Override

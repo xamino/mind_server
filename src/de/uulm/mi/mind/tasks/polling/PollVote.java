@@ -27,13 +27,13 @@ public class PollVote extends PollTask<Poll, Information> {
         return !(!safeString(object.getKey()) || object.getOptions() == null || object.getOptions().size() == 0);
     }
 
-    // todo input polloption – check that they are all unique too (Andy sent 2 same ones up :P)
+    // todo input polloption – check that they are all unique too (Andy sent 2 s)
     @Override
     public Information doWork(Active active, Poll vote, boolean compact) {
         // start by reading the original Poll so that we don't allow poll modifications here except the vote
         Poll filter = new Poll();
         filter.setKey(vote.getKey());
-        DataList<Poll> data = database.read(filter);
+        DataList<Poll> data = readValidPoll(filter);
         if (data == null || data.size() != 1) {
             return new Error(Error.Type.DATABASE, "Poll could not be found!");
         }
