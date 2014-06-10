@@ -14,9 +14,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * Abstract class for basic PollTask functionality.
  * Created by Tamino Hartmann on 6/3/14.
  */
 abstract public class PollTask<I extends Sendable, O extends Sendable> extends Task<I, O> {
+
+    /**
+     * Time from end that poll switches from CLOSED to ENDED.
+     */
+    private final int ENDDELTA = 30 * 60 * 1000;
+
     @Override
     public Set<String> getTaskPermission() {
         Set<String> permissible = new HashSet<>();
@@ -43,11 +50,11 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
         }
         for (final Poll poll : data) {
             boolean update = false;
-            if (poll.getEnd().after(new Date()) && poll.getState() != PollState.CLOSED) {
+            if (new Date().after(poll.getEnd()) && poll.getState() != PollState.CLOSED) {
                 log.log(TAG, "Closing poll!");
                 poll.setState(PollState.CLOSED);
                 update = true;
-            } else if (poll.getEnd().after(new Date(poll.getEnd().getTime() + 30 * 60 * 1000)) && poll.getState() != PollState.ENDED) {
+            } else if (new Date(poll.getEnd().getTime() + ENDDELTA).before(poll.getEnd()) && poll.getState() != PollState.ENDED) {
                 log.log(TAG, "Ending poll!");
                 poll.setState(PollState.ENDED);
                 update = true;
