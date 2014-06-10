@@ -50,7 +50,7 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
         }
         for (final Poll poll : data) {
             boolean update = false;
-            if (new Date(poll.getEnd().getTime() + ENDDELTA).after(poll.getEnd()) && poll.getState() != PollState.ENDED) {
+            if (new Date().after(new Date(poll.getEnd().getTime() + ENDDELTA)) && poll.getState() != PollState.ENDED) {
                 log.log(TAG, "Ending poll " + poll.getQuestion() + "!");
                 poll.setState(PollState.ENDED);
                 update = true;
