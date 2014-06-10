@@ -185,8 +185,8 @@ public class PositionFind extends Task<Arrival, Sendable> {
             for (Location dataBaseLocation : dataBaseLocations) {
                 DataList<WifiMorsel> dataBaseLocationMorsels = dataBaseLocation.getWifiMorsels();
 
-                if(dataBaseLocationMorsels==null){
-                    log.error(TAG,"DB Location  "+dataBaseLocation.getKey()+" has null as Morsellist!");
+                if (dataBaseLocationMorsels == null) {
+                    log.error(TAG, "DB Location  " + dataBaseLocation.getKey() + " has null as Morsellist!");
                     continue;
                 }
 
@@ -215,14 +215,23 @@ public class PositionFind extends Task<Arrival, Sendable> {
 
         //FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
         int leastMatches = 2;
-        List<Location> locationsToRemove = new LinkedList<Location>();
+        ArrayList<Location> locationsToRemove = new ArrayList<>();
         for (Location location : locationMatchesMap.keySet()) {
             if (locationMatchesMap.get(location) < leastMatches) {
                 locationsToRemove.add(location);
             }
         }
+        // remove
         for (Location location : locationsToRemove) {
-            locationLevelDifferenceSumMap.remove(location);
+            // remove from both
+            locationMatchesMap.remove(location);
+            // if contained remove here too
+            if (locationLevelDifferenceSumMap.containsKey(location)) {
+                locationLevelDifferenceSumMap.remove(location);
+            } else {
+                // warn for us
+                log.error(TAG, "WARNING — location could not be found in locationLevelDifferenceMap!");
+            }
         }
         //END FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
 
@@ -338,7 +347,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
             log.error(TAG, "All areas: dbCall == null – shouldn't happen, FIX!");
             return null;
         }
-        log.log(TAG, "read " + (System.currentTimeMillis()-time) + "ms");
+        log.log(TAG, "read " + (System.currentTimeMillis() - time) + "ms");
 
         int x = all.indexOf(new Area("University"));
         Area finalArea = all.get(x);
