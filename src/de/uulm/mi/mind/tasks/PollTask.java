@@ -23,6 +23,7 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
      * Time from end that poll switches from CLOSED to ENDED.
      */
     private final int ENDDELTA = 30 * 60 * 1000;
+    private final String TAG = "PollTask";
 
     @Override
     public Set<String> getTaskPermission() {
