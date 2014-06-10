@@ -25,6 +25,21 @@ public class Poll implements Sendable, Saveable {
     public Poll() {
     }
 
+    @Override
+    public String toString() {
+        return "Poll{" +
+                "key='" + key + '\'' +
+                ", question='" + question + '\'' +
+                ", created=" + created +
+                ", end=" + end +
+                ", owner='" + owner + '\'' +
+                ", allowedOptionSelections=" + allowedOptionSelections +
+                ", state=" + state +
+                ", icon='" + icon + '\'' +
+                ", options=" + options +
+                '}';
+    }
+
     public Poll(String question, Date end) {
         this.question = question;
         this.end = end;
