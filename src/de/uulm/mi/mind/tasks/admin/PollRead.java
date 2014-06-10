@@ -16,7 +16,7 @@ public class PollRead extends AdminTask<Poll, Sendable> {
 
     @Override
     public Sendable doWork(Active active, Poll object, boolean compact) {
-        return database.read(object);
+        return database.read(object,3);
     }
 
     @Override

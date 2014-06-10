@@ -266,7 +266,7 @@ public class DatabaseManager {
      * @return
      */
     public <E extends Saveable> DataList<E> read(E filter) {
-        return read(filter, 5);
+        return read(filter, 1);
     }
 
     /**
@@ -280,7 +280,7 @@ public class DatabaseManager {
      * @param <E>
      * @return
      */
-    <E extends Saveable> DataList<E> read(E filter, int depth) {
+    public <E extends Saveable> DataList<E> read(E filter, int depth) {
         Session session = dba.openRoot();
         long time = System.currentTimeMillis();
         DataList<E> ret = session.read(filter, depth);

@@ -20,18 +20,17 @@ public class AreaRead extends AdminTask<Area, Sendable> {
 
     @Override
     public Sendable doWork(Active active, Area area, boolean compact) {
-        DataList<Area> read = database.read(area);
-        if (read == null) {
-            return new Error(Error.Type.DATABASE, "Reading of area resulted in an error.");
+        DataList<Area> read;
+        if(compact){
+            // If compact is set, purge all wifimorsels (only depth up locations loaded)
+           read = database.read(area,3);
+        }
+        else{
+            read = database.read(area,5);
         }
 
-        // If compact is set, purge all wifimorsels
-        if (compact) {
-            for (Area area1 : read) {
-                for (Location location : area1.getLocations()) {
-                    location.setWifiMorsels(new DataList<WifiMorsel>());
-                }
-            }
+        if (read == null) {
+            return new Error(Error.Type.DATABASE, "Reading of area resulted in an error.");
         }
 
         // get filtered Areas
