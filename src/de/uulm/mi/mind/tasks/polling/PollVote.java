@@ -24,7 +24,7 @@ public class PollVote extends PollTask<Poll, Information> {
     @Override
     public boolean validateInput(Poll object) {
         // we need the key and any one option to register a vote
-        return !(!safeString(object.getKey()) || object.getOptions() == null || object.getOptions().size() == 0);
+        return !(!safeString(object.getKey()) || object.getOptions() == null);
     }
 
     // todo input polloption – check that they are all unique too (Andy sent 2 s)
