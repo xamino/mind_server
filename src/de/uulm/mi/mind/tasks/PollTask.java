@@ -8,7 +8,6 @@ import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.Poll;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.enums.PollState;
-import de.uulm.mi.mind.objects.messages.Success;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -76,7 +75,7 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
                             log.error(TAG, "Failed to update poll <" + poll.getQuestion() + "> on read for states!");
                         }
                     }
-                    return new Success("up up up and away we gooooooOOOOOoooo!");
+                    return null;
                 }
             });
         }
