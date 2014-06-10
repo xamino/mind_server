@@ -35,11 +35,11 @@ function build() {
     send(new Arrival("display_read", session, new PublicDisplay()), function (data) {
         b_table('displays', data.object);
     });
+    send(new Arrival("poll_read", session, new Poll()), function (data) {
+        b_table('polls', data.object);
+    });
     send(new Arrival("sensor_read", session, new WifiSensor()), function (data) {
         b_table('sensors', data.object);
-    });
-    send(new Arrival("read_all_polls", session, new Poll()), function (data) {
-        b_table('polls', data.object);
     });
     // note that we compact this one (we'll get the morsels later):
     send(new Arrival("area_read", session, new Area(), true), function (data) {
@@ -64,13 +64,8 @@ function build() {
 function b_table(table_name, array) {
     var tableObject = document.getElementById(table_name);
     var properties = new Reflector(array[0]).getProperties();
-    var reflect = [];
     // filter
-    $.each(properties, function (index, item) {
-        if (item != '$type' && item != 'pwdHash' && item != 'token' && item != 'tokenHash') {
-            reflect.push(item);
-        }
-    });
+    var reflect = FilterProperties(properties);
     // build header
     var table = '<tr>';
     $.each(reflect, function (index, item) {
@@ -83,7 +78,7 @@ function b_table(table_name, array) {
         $.each(reflect, function (index, field) {
             // if array just count, don't put them all out
             if ($.isArray(object[field])) {
-                table += '<td>' + object[field].length + '* </td>';
+                table += '<td title="' + Formulate(object[field]) + '">' + object[field].length + '* </td>';
             } else {
                 table += '<td>' + object[field] + '</td>';
             }
@@ -93,6 +88,21 @@ function b_table(table_name, array) {
     tableObject.innerHTML = table;
 }
 
+function FilterProperties(properties) {
+    var reflect = [];
+    $.each(properties, function (index, item) {
+        if (item != '$type' && item != 'pwdHash' && item != 'token' && item != 'tokenHash') {
+            reflect.push(item);
+        }
+    });
+    return reflect;
+}
+
+/**
+ * Watch out, this is an object!
+ * @param obj
+ * @constructor
+ */
 var Reflector = function (obj) {
     this.getProperties = function () {
         var properties = [];
@@ -103,6 +113,34 @@ var Reflector = function (obj) {
         }
         return properties;
     };
+};
+
+/**
+ * @return {string}
+ */
+function Formulate(array) {
+    var answer = "Subobjects:\n";
+    // for each object
+    $.each(array, function (index2, object) {
+        // for each reflector
+        var properties = new Reflector(object).getProperties();
+        var reflect = FilterProperties(properties);
+        var second = true;
+        $.each(reflect, function (index, field) {
+            if (second) {
+                second = false;
+            } else {
+                answer += ", ";
+            }
+            if ($.isArray(object[field])) {
+                answer += reflect[index] + "=" + object[field].length + "*";
+            } else {
+                answer += reflect[index] + "=" + object[field];
+            }
+        });
+        answer += '\n';
+    });
+    return answer;
 }
 
 function private_logout() {
