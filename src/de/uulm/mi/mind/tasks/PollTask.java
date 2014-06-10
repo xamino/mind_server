@@ -8,6 +8,7 @@ import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.Poll;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.enums.PollState;
+import de.uulm.mi.mind.objects.messages.Success;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -50,7 +51,11 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
             return null;
         }
         final DataList<Poll> toUpdate = new DataList<>();
-        for (final Poll poll : data) {
+        for (Poll poll : data) {
+            // need to catch ended - closed - ended - ... :P
+            if (poll.getState() == PollState.ENDED) {
+                continue;
+            }
             if (new Date().after(new Date(poll.getEnd().getTime() + ENDDELTA)) && poll.getState() != PollState.ENDED) {
                 log.log(TAG, "Ending poll " + poll.getQuestion() + "!");
                 poll.setState(PollState.ENDED);
@@ -62,17 +67,19 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
             }
         }
         // update toUpdate list
-        database.open(new Transaction() {
-            @Override
-            public Data doOperations(Session session) {
-                for (Poll poll : toUpdate) {
-                    if (!session.update(poll)) {
-                        log.error(TAG, "Failed to update poll <" + poll.getQuestion() + "> on read for states!");
+        if (toUpdate.size() != 0) {
+            database.open(new Transaction() {
+                @Override
+                public Data doOperations(Session session) {
+                    for (Poll poll : toUpdate) {
+                        if (!session.update(poll)) {
+                            log.error(TAG, "Failed to update poll <" + poll.getQuestion() + "> on read for states!");
+                        }
                     }
+                    return new Success("up up up and away we gooooooOOOOOoooo!");
                 }
-                return null;
-            }
-        });
+            });
+        }
         // prepare objects we need
         return data;
     }
