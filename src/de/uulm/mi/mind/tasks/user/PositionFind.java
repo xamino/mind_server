@@ -1,6 +1,5 @@
 package de.uulm.mi.mind.tasks.user;
 
-import de.uulm.mi.mind.io.Configuration;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.enums.DeviceClass;
@@ -22,14 +21,14 @@ public class PositionFind extends Task<Arrival, Sendable> {
 
     @Override
     public boolean validateInput(Arrival object) {
-        return true;
+        return (object.getObject() instanceof Location);
     }
 
     @Override
     public Sendable doWork(Active active, Arrival object, boolean compact) {
         User user = ((User) active.getAuthenticated());
         // find the area
-        Sendable sendable = findPosition(object);
+        Sendable sendable = findPosition(((Location) object.getObject()));
         if (!(sendable instanceof Area)) {
             return sendable;
         }
@@ -58,22 +57,22 @@ public class PositionFind extends Task<Arrival, Sendable> {
     /**
      * Takes an Arrival object for its IP address and Location and calculates a position from that.
      *
-     * @param request Arrival object containing IP and Location.
+     * @param requestLocation Sensed location.
      * @return The Area with the calculated Location in it.
      */
-    private Sendable findPosition(Arrival request) {
-        Location requestLocation = ((Location) request.getObject());
+    private Sendable findPosition(Location requestLocation) {
         // First check if there is any AP measurement from the university
         boolean isAtUniversity = false;
+        String uniSSID = configuration.getUniversitySSID();
         for (WifiMorsel morsel : requestLocation.getWifiMorsels()) {
-            if (morsel.getWifiName().equals(Configuration.getInstance().getUniversitySSID())) {
+            if (morsel.getWifiName().equals(uniSSID)) {
                 isAtUniversity = true;
                 break;
             }
         }
 
         if (!isAtUniversity) {
-            return new Success(Success.Type.NOTE, "Your position could not be found, you don't seem to be at university.");
+            return new Success(Success.Type.NOTE, "Your position could not be found as you're not at the university.");
         }
 
         // Everything okay from here on out:
@@ -113,10 +112,11 @@ public class PositionFind extends Task<Arrival, Sendable> {
         // Morsels from the current request which are to be compared to the database values
         DataList<WifiMorsel> requestWifiMorsels = request.getWifiMorsels();
 
+        // STEP 1: Read and prepare device class
+
         // Should exists because we checked for existing uni wifi morsel before
         String requestDeviceModel = requestWifiMorsels.get(0).getDeviceModel();
         DeviceClass requestDeviceClass = DeviceClass.getClass(requestDeviceModel);
-
         // use default class if unknown
         if (requestDeviceClass == DeviceClass.UNKNOWN) {
             log.log(TAG, "Unknown Device: " + requestDeviceModel);
@@ -126,51 +126,17 @@ public class PositionFind extends Task<Arrival, Sendable> {
         // Get University Area containing all locations from database
         DataList<Area> read = database.read(new Area("University"));
 
-        if (read == null) {
+        if (read == null || read.isEmpty() || read.size() != 1) {
+            log.error(TAG, "Database could not read University Area!");
             return null;
         }
 
         // from here on only objects with a valid key == single ones are queried
-        else if (read.isEmpty() || read.size() != 1) {
-            return null;
-        }
         Area uniArea = read.get(0);
         DataList<Location> dataBaseLocations = uniArea.getLocations();
 
-        // Modify database List to contain the average Morsel signal strengths for each location
-        for (Location databaseLocation : dataBaseLocations) {
-            DataList<WifiMorsel> averageMorsels = new DataList<>();
-            if (databaseLocation.getWifiMorsels() == null) {
-                continue;
-            }
-            for (WifiMorsel morsel : databaseLocation.getWifiMorsels()) {
-                // if the morsel mac already exists, skip (contains calls equals)
-                if (averageMorsels.contains(morsel)) {
-                    continue;
-                }
-                // Morsel was not recorded with same device class, skip it
-                if (requestDeviceClass != DeviceClass.getClass(morsel.getDeviceModel())) {
-                    continue;
-                }
-                // this is the first occurrence of this morsel
-                // find all similar ones and average them out
-                int summedLevel = 0;
-                int counter = 0;
-                for (WifiMorsel specific : databaseLocation.getWifiMorsels()) {
-                    if (specific.equals(morsel)) {
-                        // found a hit for averaging
-                        summedLevel += specific.getWifiLevel();
-                        counter++;
-                    }
-                }
-                int average = (int) (((float) summedLevel) / ((float) counter));
-                //if (DeviceClass.isSimulatedClass(requestDeviceModel)) {
-                //   average += DeviceClass.getSimulatedDifference(requestDeviceModel);
-                //}
-                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel(), morsel.getTimeStamp()));
-            }
-            databaseLocation.setWifiMorsels(averageMorsels);
-        }
+        // prepare locations for finding match (remove useless MACs, calculate average)
+        dataBaseLocations = prepareLocations(dataBaseLocations, request, requestDeviceClass);
 
         // A Map that describes how many matches there are for this location
         HashMap<Location, Integer> locationMatchesMap = new HashMap<>();
@@ -237,6 +203,86 @@ public class PositionFind extends Task<Arrival, Sendable> {
 
 
         return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap);
+    }
+
+    /**
+     * Calls filterMacAddresses and averageMorselsForLocation correctly.
+     *
+     * @param fullLocations  The original full locations with way too many morsels.
+     * @param searchLocation The location we want to locate. Used as a filter.
+     * @return The averaged, reduced locations we'll work with.
+     */
+    private DataList<Location> prepareLocations(DataList<Location> fullLocations, final Location searchLocation, final DeviceClass deviceClass) {
+        // first filter for only those morsels with mac addresses we can use
+        for (int i = fullLocations.size() - 1; i >= 0; i--) {
+            Location filtered = filterMACandCLASS(fullLocations.get(i), searchLocation, deviceClass);
+            if (filtered == null) {
+                fullLocations.remove(i);
+                continue;
+            }
+            // average morsels
+            filtered.setWifiMorsels(averageMorselsForLocation(filtered.getWifiMorsels()));
+            // finally set
+            fullLocations.set(i, filtered);
+        }
+        // not full anymore, of course
+        return fullLocations;
+    }
+
+    /**
+     * Filters wifiMorsels to match MAC address from searchLocations.
+     *
+     * @param location       The location to filter.
+     * @param searchLocation The location we want to locate. Used as a filter.
+     * @return Null if no more morsels, else filtered location.
+     */
+    private Location filterMACandCLASS(Location location, final Location searchLocation, final DeviceClass deviceClass) {
+        DataList<WifiMorsel> toKeep = new DataList<>();
+        // find morsels to add
+        for (WifiMorsel check : location.getWifiMorsels()) {
+            for (WifiMorsel original : searchLocation.getWifiMorsels()) {
+                if (check.getWifiMac().equals(original.getWifiMac()) && deviceClass == DeviceClass.getClass(check.getDeviceModel())) {
+                    toKeep.add(check);
+                }
+            }
+        }
+        // if empty, we don't require this location anymore
+        if (toKeep.isEmpty()) {
+            return null;
+        }
+        location.setWifiMorsels(toKeep);
+        return location;
+    }
+
+    /**
+     * Averages the given locations based on MAC addresses.
+     *
+     * @param original The original list.
+     * @return The averaged list.
+     */
+    private DataList<WifiMorsel> averageMorselsForLocation(final DataList<WifiMorsel> original) {
+        DataList<WifiMorsel> averageMorsels = new DataList<>();
+        for (WifiMorsel morsel : original) {
+            // if the morsel mac already exists, skip (contains calls equals)
+            if (averageMorsels.contains(morsel)) {
+                continue;
+            }
+            // this is the first occurrence of this morsel
+            // find all similar ones and average them out
+            int summedLevel = 0;
+            int counter = 0;
+            for (WifiMorsel specific : original) {
+                if (specific.equals(morsel)) {
+                    // found a hit for averaging
+                    summedLevel += specific.getWifiLevel();
+                    counter++;
+                }
+            }
+            int average = (int) (((float) summedLevel) / ((float) counter));
+            averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(),
+                    morsel.getDeviceModel(), morsel.getTimeStamp()));
+        }
+        return averageMorsels;
     }
 
     /**
