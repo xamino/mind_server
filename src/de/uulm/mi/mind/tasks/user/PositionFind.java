@@ -221,8 +221,9 @@ public class PositionFind extends Task<Arrival, Sendable> {
                 locationsToRemove.add(location);
             }
         }
-        locationsToRemove.removeAll(locationsToRemove);
-        locationLevelDifferenceSumMap.remove(locationsToRemove);
+        for (Location location : locationsToRemove) {
+            locationLevelDifferenceSumMap.remove(location);
+        }
         //END FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
 
 

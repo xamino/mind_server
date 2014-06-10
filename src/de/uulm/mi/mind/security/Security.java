@@ -37,8 +37,7 @@ public class Security {
     /**
      * Session timeout in milliseconds. Cannot be changed during runtime!
      */
-    @SuppressWarnings("FieldCanBeLocal")
-    private final long TIMEOUT = 15 * 60 * 1000;
+    private final static long TIMEOUT = 15 * 60 * 1000;
     /**
      * Instance of log used for the output.
      */

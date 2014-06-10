@@ -22,20 +22,22 @@ public class ReadTasks extends AdminTask<None, Success> {
     public Success doWork(Active active, None object, boolean compact) {
         String answer = "";
         for (Map.Entry<String, Set<String>> entry : TaskManager.readRights().entrySet()) {
-            String temp = "public";
+            // String temp = "public";
+            StringBuilder stringBuilder = new StringBuilder();
             if (entry.getValue() != null && entry.getValue().size() != 0) {
-                temp = "";
                 boolean first = true;
                 for (String option : entry.getValue()) {
                     if (first) {
-                        temp += ""+ option;
+                        stringBuilder.append("").append(option);
                         first = false;
                     } else {
-                        temp += ", " + option;
+                        stringBuilder.append(", ").append(option);
                     }
                 }
+            } else {
+                stringBuilder.append("public");
             }
-            answer += "Task <" + entry.getKey() + "> is runnable for " + temp + ".\n";
+            answer += "Task <" + entry.getKey() + "> is runnable for " + stringBuilder.toString() + ".\n";
         }
         return new Success(Success.Type.NOTE, answer);
     }

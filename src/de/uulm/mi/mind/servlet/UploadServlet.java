@@ -187,7 +187,9 @@ public class UploadServlet extends HttpServlet {
                     imageName.substring(imageName.lastIndexOf("\\") + 1));
         }
         try {
-            new File(path).mkdir();
+            if (!(new File(path).mkdir())) {
+                log.error(TAG, "Failed to create directory!");
+            }
             item.write(file);
         } catch (Exception e) {
             e.printStackTrace();
