@@ -38,6 +38,7 @@ public class ReadAllPolls extends PollTask<None, Sendable> {
         DataList<Poll> filteredPolls = new DataList<>();
         for (Poll poll : polls) {
             if (poll.getState() != PollState.ENDED) {
+                log.log(TAG, "Adding " + poll.toString());
                 filteredPolls.add(poll);
             }
         }
