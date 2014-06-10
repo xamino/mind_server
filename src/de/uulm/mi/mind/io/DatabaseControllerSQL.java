@@ -174,7 +174,6 @@ class DatabaseControllerSQL extends DatabaseAccess {
         try {
             DataList<Saveable> dataList = read(session, data);
 
-            log.log(TAG, "Read Delete: " + dataList.toString());
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
                 return false;

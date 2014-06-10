@@ -93,13 +93,14 @@ public class Servlet extends HttpServlet {
      */
     private Arrival getRequest(HttpServletRequest request) throws IOException {
         BufferedReader reader = request.getReader();
-        String out = "";
+        StringBuilder stringBuffer = new StringBuilder();
         do {
             String value = reader.readLine();
             if (value == null || value.isEmpty())
                 break;
-            out += value;
+            stringBuffer.append(value);
         } while (true);
+        String out = stringBuffer.toString();
         // Better safe than sorry:
         if (out.isEmpty()) {
             return null;
