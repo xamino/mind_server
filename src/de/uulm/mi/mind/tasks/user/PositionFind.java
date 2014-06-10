@@ -124,7 +124,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
 
         // Get University Area containing all locations from database
-        DataList<Area> read = database.read(new Area("University"));
+        DataList<Area> read = database.read(new Area("University"), 5);
 
         if (read == null || read.isEmpty() || read.size() != 1) {
             log.error(TAG, "Database could not read University Area!");
@@ -386,9 +386,8 @@ public class PositionFind extends Task<Arrival, Sendable> {
      */
     private Area getBestArea(Location location) {
         // Get all areas
-
         long time = System.currentTimeMillis();
-        DataList<Area> all = database.read(new Area(null));
+        DataList<Area> all = database.read(new Area(null), 1); // only area itself without children requred
         if (all == null) {
             log.error(TAG, "All areas: dbCall == null – shouldn't happen, FIX!");
             return null;

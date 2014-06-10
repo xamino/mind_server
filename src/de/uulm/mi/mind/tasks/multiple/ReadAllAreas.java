@@ -1,10 +1,10 @@
 package de.uulm.mi.mind.tasks.multiple;
 
-import de.uulm.mi.mind.tasks.Task;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.security.Active;
+import de.uulm.mi.mind.tasks.Task;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +24,12 @@ public class ReadAllAreas extends Task<None, Sendable> {
     public Sendable doWork(Active active, None object, boolean compact) {
         final Area filter = new Area(null);
         //long time = System.currentTimeMillis();
-        DataList<Area> read = database.read(filter);
+        DataList<Area> read;
+        if (compact) {
+            read = database.read(filter, 3); // DataList<WifiMorsels> not loaded, null
+        } else {
+            read = database.read(filter, 5);
+        }
         //log.log(TAG, "read All Areas from DB " + (System.currentTimeMillis() - time) + "ms");
 
         if (read == null) {

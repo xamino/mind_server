@@ -77,4 +77,21 @@ public class Location implements Sendable, Saveable {
     public String getKey() {
         return key;
     }
+
+    @Override
+    public Saveable deepClone() {
+        Location loc = new Location(coordinateX, coordinateY);
+
+        if (wifiMorsels != null) {
+            DataList<WifiMorsel> morsels = new DataList<>();
+            for (WifiMorsel wifiMorsel : wifiMorsels) {
+                if (wifiMorsel == null) continue;
+                morsels.add((WifiMorsel) wifiMorsel.deepClone());
+            }
+            loc.setWifiMorsels(morsels);
+        } else {
+            loc.setWifiMorsels(new DataList<WifiMorsel>());
+        }
+        return loc;
+    }
 }

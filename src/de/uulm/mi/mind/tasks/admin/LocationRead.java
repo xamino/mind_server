@@ -24,7 +24,7 @@ public class LocationRead extends LocationTask<Location, Sendable> {
             deviceModelFilter = location.getWifiMorsels().get(0).getDeviceModel();
         }
         location.setWifiMorsels(null); // reset to not filter these
-        DataList<Location> read = database.read(location);
+        DataList<Location> read = database.read(location,5); // TODO extra db method for this call
         if (read == null) {
             return new Error(Error.Type.DATABASE, "Reading of location resulted in an error.");
         }

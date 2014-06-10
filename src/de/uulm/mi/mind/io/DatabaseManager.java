@@ -258,48 +258,41 @@ public class DatabaseManager {
         return duplicates;
     }
 
+
     /**
      * Opens a new session on the database only for this very read operation.
-     *
      * @param filter
      * @param <E>
      * @return
      */
     public <E extends Saveable> DataList<E> read(E filter) {
-        Session session = dba.open();
+        return read(filter, 1);
+    }
+
+    /**
+     * Opens a new session on the database only for this very read operation.
+     * @param filter
+     * @param depth Depths of children to be returned.
+     *              0 = object fields are initialized to defaults,
+     *              1 object fields loaded, 2 children are initialized to defaults,
+     *              3 children field loaded etc;
+     *              e.g. 5 could be Area-DataList-Location-DataList-WifiMorsel loaded but no further DataList
+     * @param <E>
+     * @return
+     */
+    public <E extends Saveable> DataList<E> read(E filter, int depth) {
+        Session session = dba.openRoot();
         long time = System.currentTimeMillis();
-        DataList<E> ret = session.read(filter);
+        DataList<E> ret = session.read(filter, depth);
         log.log(TAG, "sessionRead " + (System.currentTimeMillis() - time) + "ms " + filter);
         time = System.currentTimeMillis();
 
-        //for (E e : ret) {
-        //  purge(e, session);
-
-            /*if (e instanceof Area && ((Area)e).getLocations() != null && !((Area) e).getLocations().isEmpty()) {
-                Location l = ((Area) e).getLocations().get(0);
-                if (l.getWifiMorsels() != null && !l.getWifiMorsels().isEmpty()) {
-                    log.log(TAG,"stored: " + session.getDb4oContainer().ext().isStored(l.getWifiMorsels().get(0)));
-                    log.log(TAG,"active: " + session.getDb4oContainer().ext().isActive(l.getWifiMorsels().get(0)));
-                }
-            }*/
-        //}
-
-
-        session.close();
-        log.log(TAG, "sessionClose " + (System.currentTimeMillis() - time) + "ms");
-        return ret;
-    }
-
-    public void purge(Object o, Session session) {
-        session.getDb4oContainer().ext().purge(o); // TODO test if subobjects are purged too
-        if (o instanceof Area && ((Area) o).getLocations() != null && !((Area) o).getLocations().isEmpty()) {
-            for (Location location : ((Area) o).getLocations()) {
-                purge(location, session);
-            }
-        } else if (o instanceof Location && ((Location) o).getWifiMorsels() != null && !((Location) o).getWifiMorsels().isEmpty()) {
-            for (WifiMorsel morsel : ((Location) o).getWifiMorsels()) {
-                purge(morsel, session);
-            }
+        DataList<E> cloned = new DataList<>();
+        for (E e : ret) {
+            cloned.add((E) e.deepClone());
         }
+
+        log.log(TAG, "sessionClose " + (System.currentTimeMillis() - time) + "ms");
+        return cloned;
     }
 }
