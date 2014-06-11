@@ -257,19 +257,19 @@ class DatabaseController extends DatabaseAccess {
         //dbconfig.common().optimizeNativeQueries(true);
 
         dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
-        dbconfig.common().add(new UniqueFieldValueConstraint(User.class, "email"));
+        //dbconfig.common().add(new UniqueFieldValueConstraint(User.class, "email"));
 
         dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
-        dbconfig.common().add(new UniqueFieldValueConstraint(Area.class, "ID"));
+        //dbconfig.common().add(new UniqueFieldValueConstraint(Area.class, "ID"));
 
         dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
-        dbconfig.common().add(new UniqueFieldValueConstraint(PublicDisplay.class, "identification"));
+        //dbconfig.common().add(new UniqueFieldValueConstraint(PublicDisplay.class, "identification"));
 
         dbconfig.common().objectClass(WifiSensor.class).objectField("identification").indexed(true);
-        dbconfig.common().add(new UniqueFieldValueConstraint(WifiSensor.class, "identification"));
+        //dbconfig.common().add(new UniqueFieldValueConstraint(WifiSensor.class, "identification"));
 
         dbconfig.common().objectClass(Location.class).objectField("key").indexed(true);
-        dbconfig.common().add(new UniqueFieldValueConstraint(Location.class, "key"));
+        //dbconfig.common().add(new UniqueFieldValueConstraint(Location.class, "key"));
 
         dbconfig.common().objectClass(Poll.class).objectField("key").indexed(true);
         //dbconfig.common().add(new UniqueFieldValueConstraint(Poll.class, "key"));

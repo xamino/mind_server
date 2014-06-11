@@ -17,9 +17,9 @@ public class Poll implements Sendable, Saveable {
     private Date created;
     private Date end;
     private String owner;
-    private int allowedOptionSelections = 1;
+    private int allowedOptionSelections;
     private PollState state;
-    private String icon = "default";
+    private String icon;
     private DataList<PollOption> options = new DataList<>();
 
     public Poll() {
