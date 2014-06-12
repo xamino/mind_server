@@ -50,31 +50,4 @@ public abstract class LocationTask<I extends Sendable, O extends Sendable> exten
         location.setWifiMorsels(morsels);
         return location;
     }
-
-    /**
-     * Method that updates the Location <--> Area mapping.
-     */
-    protected boolean updateMapping(Session session) {
-        DataList<Location> locations = session.read(new Location(0, 0, null));
-        DataList<Area> areas = session.read(new Area(null));
-
-        long time = System.currentTimeMillis();
-        for (Area area : areas) {
-            area.setLocations(new DataList<Location>());
-            for (Location location : locations) {
-                if (area.contains(location.getCoordinateX(), location.getCoordinateY())) {
-                    area.addLocation(location);
-                }
-            }
-            // must write data back to DB
-            if (!session.update(area)) {
-                log.error(TAG, "Failed to update mapping in DB for " + area.getID() + "!");
-                return false;
-            }
-        }
-
-        log.log(TAG, "Updated Location <--> Area mapping. Took " + (System.currentTimeMillis() - time) + "ms.");
-        return true;
-    }
-
 }
