@@ -1,35 +1,43 @@
 package de.uulm.mi.mind.tasks.user;
 
-import de.uulm.mi.mind.io.Configuration;
-import de.uulm.mi.mind.tasks.Task;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.enums.DeviceClass;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
+import de.uulm.mi.mind.tasks.Task;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Tamino Hartmann
  */
 public class PositionFind extends Task<Arrival, Sendable> {
 
+    /**
+     * Level tolerance for wifimorsels against which to match.
+     */
+    private final static int LEVEL_TOLERANCE = 3;
+    /**
+     * Morsel number tolerance for negotiation of goodness.
+     */
+    private final static int MORSEL_TOLERANCE = 0;
     private final String LAST_POSITION = "lastPosition";
     private final String REAL_POSITION = "realPosition";
-    private final int tolerance = 3;
     private final String TAG = "PositionModule";
 
     @Override
     public boolean validateInput(Arrival object) {
-        return true;
+        return (object.getObject() instanceof Location);
     }
 
     @Override
     public Sendable doWork(Active active, Arrival object, boolean compact) {
         User user = ((User) active.getAuthenticated());
         // find the area
-        Sendable sendable = findPosition(object);
+        Sendable sendable = findPosition(((Location) object.getObject()));
         if (!(sendable instanceof Area)) {
             return sendable;
         }
@@ -58,37 +66,37 @@ public class PositionFind extends Task<Arrival, Sendable> {
     /**
      * Takes an Arrival object for its IP address and Location and calculates a position from that.
      *
-     * @param request Arrival object containing IP and Location.
+     * @param requestLocation Sensed location.
      * @return The Area with the calculated Location in it.
      */
-    private Sendable findPosition(Arrival request) {
-        Location requestLocation = ((Location) request.getObject());
+    private Sendable findPosition(Location requestLocation) {
         // First check if there is any AP measurement from the university
         boolean isAtUniversity = false;
+        String uniSSID = configuration.getUniversitySSID();
         for (WifiMorsel morsel : requestLocation.getWifiMorsels()) {
-            if (morsel.getWifiName().equals(Configuration.getInstance().getUniversitySSID())) {
+            if (morsel.getWifiName().equals(uniSSID)) {
                 isAtUniversity = true;
                 break;
             }
         }
 
         if (!isAtUniversity) {
-            return new Success(Success.Type.NOTE, "Your position could not be found, you don't seem to be at university.");
+            return new Success(Success.Type.NOTE, "Your position could not be found as you're not at the university.");
         }
 
         // Everything okay from here on out:
-        log.pushTimer(this, "rofl");
+        long time = System.currentTimeMillis();
         Location location = calculateLocation(requestLocation);
-        log.log(TAG, "calculateLocation " + log.popTimer(this).time + "ms");
+        log.log(TAG, "calculateLocation " + (System.currentTimeMillis() - time) + "ms");
         if (location == null) {
             // this means the location could not be found in the DB but user is at University
             return new Area("University");
         }
 
         // get best area for location to return
-        log.pushTimer(this, "");
+        time = System.currentTimeMillis();
         Area area = getBestArea(location);
-        log.log(TAG, "getBestArea " + log.popTimer(this).time + "ms");
+        log.log(TAG, "getBestArea " + (System.currentTimeMillis() - time) + "ms");
         if (area == null) {
             log.error(TAG, "NULL area for position_find – shouldn't happen as University should be returned at least!");
             return new Success(Success.Type.NOTE, "Your position could not be found.");
@@ -105,18 +113,17 @@ public class PositionFind extends Task<Arrival, Sendable> {
     }
 
     /**
-     * @param request
+     * General function for calculating a matched location from the database to the one given.
+     *
+     * @param request The location to match against.
      * @return Location if found, else null.
      */
 
     private Location calculateLocation(Location request) {
-        // Morsels from the current request which are to be compared to the database values
-        DataList<WifiMorsel> requestWifiMorsels = request.getWifiMorsels();
-
+        // STEP 1: Read and prepare device class
         // Should exists because we checked for existing uni wifi morsel before
-        String requestDeviceModel = requestWifiMorsels.get(0).getDeviceModel();
+        String requestDeviceModel = request.getWifiMorsels().get(0).getDeviceModel();
         DeviceClass requestDeviceClass = DeviceClass.getClass(requestDeviceModel);
-
         // use default class if unknown
         if (requestDeviceClass == DeviceClass.UNKNOWN) {
             log.log(TAG, "Unknown Device: " + requestDeviceModel);
@@ -124,195 +131,232 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
 
         // Get University Area containing all locations from database
-        DataList<Area> read = database.read(new Area("University"));
-
-        if (read == null) {
+        DataList<Area> read = database.read(new Area("University"), 5);
+        if (read == null || read.isEmpty() || read.size() != 1) {
+            log.error(TAG, "Database could not read University Area!");
             return null;
         }
+        DataList<Location> dataBaseLocations = read.get(0).getLocations();
 
-        // from here on only objects with a valid key == single ones are queried
-        else if (read.isEmpty() || read.size() != 1) {
-            return null;
-        }
-        Area uniArea = read.get(0);
-        DataList<Location> dataBaseLocations = uniArea.getLocations();
+        // prepare locations for finding match (remove useless MACs, calculate average)
+        dataBaseLocations = prepareLocations(dataBaseLocations, request, requestDeviceClass);
 
-        // Modify database List to contain the average Morsel signal strengths for each location
-        for (Location databaseLocation : dataBaseLocations) {
-            DataList<WifiMorsel> averageMorsels = new DataList<>();
-            for (WifiMorsel morsel : databaseLocation.getWifiMorsels()) {
-                // if the morsel mac already exists, skip (contains calls equals)
-                if (averageMorsels.contains(morsel)) {
-                    continue;
-                }
-                // Morsel was not recorded with same device class, skip it
-                if (requestDeviceClass != DeviceClass.getClass(morsel.getDeviceModel())) {
-                    continue;
-                }
-                // this is the first occurrence of this morsel
-                // find all similar ones and average them out
-                int summedLevel = 0;
-                int counter = 0;
-                for (WifiMorsel specific : databaseLocation.getWifiMorsels()) {
-                    if (specific.equals(morsel)) {
-                        // found a hit for averaging
-                        summedLevel += specific.getWifiLevel();
-                        counter++;
-                    }
-                }
-                int average = (int) (((float) summedLevel) / ((float) counter));
-                //if (DeviceClass.isSimulatedClass(requestDeviceModel)) {
-                //   average += DeviceClass.getSimulatedDifference(requestDeviceModel);
-                //}
-                averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(), morsel.getDeviceModel(), morsel.getTimeStamp()));
-            }
-            databaseLocation.setWifiMorsels(averageMorsels);
-        }
-
-        // A Map that describes how many matches there are for this location
-        HashMap<Location, Integer> locationMatchesMap = new HashMap<>();
-
-        //Map of the sum of all wifi levels under the tolerance for a location.
-        HashMap<Location, Integer> locationLevelDifferenceSumMap = new HashMap<>();
-
-
-        // For each request morsel, check if a morsel with the same mac address exists in a database location.
-        // Then check how far wifi levels are apart. If it is below a tolerance value increase the goodness of that location.
-        for (WifiMorsel currentRequestMorsel : requestWifiMorsels) {
-            for (Location dataBaseLocation : dataBaseLocations) {
-
-                DataList<WifiMorsel> dataBaseLocationMorsels = dataBaseLocation.getWifiMorsels();
-
-                // check if request morsel is contained in the current Locations Morsels
-                int index;
-                if ((index = dataBaseLocationMorsels.indexOf(currentRequestMorsel)) >= 0) {
-
-                    int levelDifference = Math.abs(currentRequestMorsel.getWifiLevel() - dataBaseLocationMorsels.get(index).getWifiLevel());
-                    // only morsels levels similar to the database levels are used in further processing
-                    if (levelDifference <= tolerance) {
-                        if (locationLevelDifferenceSumMap.get(dataBaseLocation) != null) {
-                            levelDifference += locationLevelDifferenceSumMap.get(dataBaseLocation);
-                        }
-                        locationLevelDifferenceSumMap.put(dataBaseLocation, levelDifference);
-
-                        int matchPointCounter = 1; // 1 for current match
-                        if (locationMatchesMap.get(dataBaseLocation) != null) {
-                            matchPointCounter += locationMatchesMap.get(dataBaseLocation);
-                        }
-                        locationMatchesMap.put(dataBaseLocation, matchPointCounter);
-                    }
-                }
-            }
-        }
-
+        // keep only wifimorsels that are near our request morsels using LEVEL_TOLERANCE
+        dataBaseLocations = trimToleranceMorsels(dataBaseLocations, request.getWifiMorsels());
 
         //FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
-        int leastMatches = 2;
-        List<Location> locationsToRemove = new LinkedList<Location>();
-        for (Location location : locationMatchesMap.keySet()) {
-            if (locationMatchesMap.get(location) < leastMatches) {
+        int leastMatches = 3;
+        ArrayList<Location> locationsToRemove = new ArrayList<>();
+        for (Location location : dataBaseLocations) {
+            if (location.getWifiMorsels().size() < leastMatches) {
                 locationsToRemove.add(location);
             }
         }
-        locationsToRemove.removeAll(locationsToRemove);
-        locationLevelDifferenceSumMap.remove(locationsToRemove);
+        // remove
+        for (Location location : locationsToRemove) {
+            // remove from both
+            dataBaseLocations.remove(location);
+        }
         //END FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
 
-
-        return getFinalMatch(locationMatchesMap, locationLevelDifferenceSumMap);
+        // now we check if we have to negotiate an answer
+        int test = 0;
+        Location location = null;
+        boolean negotiate = false;
+        for (Location check : dataBaseLocations) {
+            int goodness = check.getWifiMorsels().size();
+            // log.log(TAG, "Goodness of " + goodness + ".");
+            if (goodness > test) {
+                // this means we set a new maximum goodness match
+                negotiate = false;
+                // raise the bar, so to speak
+                test = goodness;
+                // remember
+                location = check;
+            } else if (inRange(goodness, test, MORSEL_TOLERANCE)) {
+                // if this is still set to true when we are done, then we have multiple good matches
+                negotiate = true;
+                // NOTE: inRange is here only below test, as goodness > test is checked before. This guarantees that
+                // location is set to the highest match no matter what.
+            }
+        }
+        // this means we have 2 or more of the same goodness
+        if (negotiate) {
+            log.log(TAG, "Negotiating!");
+            // find conflicts
+            ArrayList<Location> conflicts = new ArrayList<>();
+            for (Location baseLocation : dataBaseLocations) {
+                if (inRange(baseLocation.getWifiMorsels().size(), location.getWifiMorsels().size(), MORSEL_TOLERANCE)) {
+                    conflicts.add(baseLocation);
+                }
+            }
+            // get best match
+            location = negotiate(conflicts, request.getWifiMorsels());
+        }
+        return location;
     }
 
     /**
-     * Determines a final matching location.
+     * Helper function to check if unknown is near comparator with near being closer than range.
      *
-     * @param locationMatchesMap
-     * @param locationLevelDifferenceSumMap
-     * @return
+     * @param unknown    The value to check.
+     * @param comparator The point of origin.
+     * @param range      The range the value must be in to return true.
+     * @return True or false.
      */
-    private Location getFinalMatch(HashMap<Location, Integer> locationMatchesMap, HashMap<Location, Integer> locationLevelDifferenceSumMap) {
-        List<Location> sortedLocationCandidateList;
-        Location finalMatch = null;
-
-        if (locationMatchesMap.size() > 0) {
-
-            // Convert the HashMap to a List. It is sorted by the number of matches. Most matches are listed first.
-            sortedLocationCandidateList = locationMapToSortedList(locationMatchesMap);
-
-            //Trim list so it only contains non-best candidates
-            for (int i = 0; i < sortedLocationCandidateList.size() - 1; i++) {
-                if (locationMatchesMap.get(sortedLocationCandidateList.get(i)) > locationMatchesMap.get(sortedLocationCandidateList.get(i + 1))) {
-                    sortedLocationCandidateList = sortedLocationCandidateList.subList(i + 1, sortedLocationCandidateList.size());
-                }
-            }
-
-            for (Location loc : sortedLocationCandidateList) {
-                locationLevelDifferenceSumMap.remove(loc);
-            }
-
-            //locationLevelDifferenceSumMap now containes only the best candidates
-
-            //Reduce to a single match if there are still more than one candidates.
-            if (sortedLocationCandidateList.size() > 1) {
-                //sort points in respect of level
-                sortedLocationCandidateList = locationMapToSortedList(locationLevelDifferenceSumMap);
-                Collections.reverse(sortedLocationCandidateList); //reverse -> smallest to biggest
-
-                //Trim list so it only contains best candidates (smallest levelDifferenceSum)
-                for (int i = 0; i < sortedLocationCandidateList.size() - 1; i++) {
-                    if (locationLevelDifferenceSumMap.get(sortedLocationCandidateList.get(i)) < locationLevelDifferenceSumMap.get(sortedLocationCandidateList.get(i + 1))) {
-                        sortedLocationCandidateList = sortedLocationCandidateList.subList(0, i + 1);
-                    }
-                }
-
-                // Now there are only tholog.popTimer(this)se locations left, that have the same amount of matches AND the same levelDifferenceSum
-                //e.g. -50 is a stronger dBm value (better signal) than -90
-                if (sortedLocationCandidateList.size() > 1) {
-                    //LAST CHANGE - MAX_VALUE TO MIN_VALUE & < TO >
-                    int currentsum = Integer.MIN_VALUE;
-
-                    for (Location point : sortedLocationCandidateList) { //for each point with same diff level
-                        if (locationLevelDifferenceSumMap.get(point) > currentsum) {
-                            //get point with max total level
-                            currentsum = locationLevelDifferenceSumMap.get(point);
-                            finalMatch = point;
-                        }
-
-                    }
-                }
-            }
-
-            if (finalMatch == null && sortedLocationCandidateList.size() > 0) { //if no final match evaluted (e.g. only 1 match-point was found)
-                finalMatch = sortedLocationCandidateList.get(0);
-            }
-        }
-        // finalMatch is null if no matching location was found
-        return finalMatch;
+    private boolean inRange(int unknown, int comparator, int range) {
+        return !(unknown < comparator - range || unknown > comparator + range);
     }
 
     /**
-     * Converts a HashMap of a Location to a List and sorts the keys by their value. (descending)
+     * Given a location will compare its wifiMorsels against the request and return the location containing only
+     * the morsels that fit within the LEVEL_TOLERANCE. NOTE: The size of the wifiMorsel Datalist is the goodness of the
+     * answer!
+     *
+     * @param locations   The locations for which to trim the morsels.
+     * @param wifiMorsels The request morsels against which to check the trim morsels.
+     * @return The LEVEL_TOLERANCE filtered locations.
      */
-    private List<Location> locationMapToSortedList(HashMap<Location, Integer> unsortedMap) {
+    private DataList<Location> trimToleranceMorsels(DataList<Location> locations, DataList<WifiMorsel> wifiMorsels) {
+        DataList<Location> newLocations = new DataList<>();
+        for (Location location : locations) {
+            // find morsels to keep
+            DataList<WifiMorsel> toKeep = new DataList<>();
+            for (WifiMorsel original : wifiMorsels) {
+                for (WifiMorsel morsel : location.getWifiMorsels()) {
+                    // we're only interested in comparing same ones, but datalist.get(original) doesn't exist, so
+                    // we check that manually here
+                    if (!original.equals(morsel)) {
+                        continue;
+                    }
+                    int levelDifference = Math.abs(original.getWifiLevel() - morsel.getWifiLevel());
+                    if (levelDifference <= LEVEL_TOLERANCE) {
+                        toKeep.add(morsel);
+                    }
+                }
+            }
+            // only add if any remain :P
+            if (!toKeep.isEmpty()) {
+                // set
+                location.setWifiMorsels(toKeep);
+                newLocations.add(location);
+            }
+        }
+        return newLocations;
+    }
 
-        List<Location> sortedPoints = new LinkedList<>();
+    /**
+     * Given a list of locations with the same goodness value will return the one with the least variance from the
+     * original one.
+     *
+     * @param conflictLocations The list of possible locations that may fit.
+     * @param requestMatch      The location against which we compare the conflicting locations.
+     * @return The best fit location
+     */
+    private Location negotiate(ArrayList<Location> conflictLocations, final DataList<WifiMorsel> requestMatch) {
+        float bestMatch = Float.MAX_VALUE;
+        Location bestLocation = null;
+        // for each location
+        for (Location location : conflictLocations) {
+            int diffValueSum = 0;
+            for (WifiMorsel original : requestMatch) {
+                for (WifiMorsel morsel : location.getWifiMorsels()) {
+                    if (!original.equals(morsel)) {
+                        continue;
+                    }
+                    // add difference
+                    diffValueSum += Math.abs(original.getWifiLevel() - morsel.getWifiLevel());
+                }
+            }
+            // calculate bestMatch candidate
+            float candidate = diffValueSum / (float)location.getWifiMorsels().size();
+            if (candidate < bestMatch) {
+                // if yes, take
+                bestMatch = candidate;
+                bestLocation = location;
+            }
+        }
+        return bestLocation;
+    }
 
-        List<Integer> list = new LinkedList<>(unsortedMap.values());
-        Collections.sort(list);
-        Set<Location> keys = unsortedMap.keySet();
-        List<Location> usedPoints = new LinkedList<>();
+    /**
+     * Calls filterMacAddresses and averageMorselsForLocation correctly.
+     *
+     * @param fullLocations  The original full locations with way too many morsels.
+     * @param searchLocation The location we want to locate. Used as a filter.
+     * @return The averaged, reduced locations we'll work with.
+     */
+    private DataList<Location> prepareLocations(DataList<Location> fullLocations, final Location searchLocation, final DeviceClass deviceClass) {
+        DataList<Location> toKeep = new DataList<>();
+        // first filter for only those morsels with mac addresses we can use
+        for (Location fullLocation : fullLocations) {
+            Location filtered = filterMACandCLASS(fullLocation, searchLocation, deviceClass);
+            if (filtered == null) {
+                continue;
+            }
+            // average morsels
+            filtered.setWifiMorsels(averageMorselsForLocation(filtered.getWifiMorsels()));
+            // finally set
+            toKeep.add(filtered);
+        }
+        // not full anymore, of course
+        return toKeep;
+    }
 
-        for (int value : list) {
-            for (Location key : keys) {
-                if (!usedPoints.contains(key) && unsortedMap.get(key) == value) {
-                    sortedPoints.add(key);
-                    usedPoints.add(key);
+    /**
+     * Filters wifiMorsels to match MAC address from searchLocations.
+     *
+     * @param location       The location to filter.
+     * @param searchLocation The location we want to locate. Used as a filter.
+     * @return Null if no more morsels, else filtered location.
+     */
+    private Location filterMACandCLASS(Location location, final Location searchLocation, final DeviceClass deviceClass) {
+        DataList<WifiMorsel> toKeep = new DataList<>();
+        // find morsels to add
+        for (WifiMorsel check : location.getWifiMorsels()) {
+            for (WifiMorsel original : searchLocation.getWifiMorsels()) {
+                if (check.getWifiMac().equals(original.getWifiMac()) && deviceClass == DeviceClass.getClass(check.getDeviceModel())) {
+                    toKeep.add(check);
                 }
             }
         }
+        // if empty, we don't require this location anymore
+        if (toKeep.isEmpty()) {
+            return null;
+        }
+        location.setWifiMorsels(toKeep);
+        return location;
+    }
 
-        Collections.reverse(sortedPoints);
-
-        return sortedPoints;
+    /**
+     * Averages the given locations based on MAC addresses.
+     *
+     * @param original The original list.
+     * @return The averaged list.
+     */
+    private DataList<WifiMorsel> averageMorselsForLocation(final DataList<WifiMorsel> original) {
+        DataList<WifiMorsel> averageMorsels = new DataList<>();
+        for (WifiMorsel morsel : original) {
+            // if the morsel mac already exists, skip (contains calls equals)
+            if (averageMorsels.contains(morsel)) {
+                continue;
+            }
+            // this is the first occurrence of this morsel
+            // find all similar ones and average them out
+            int summedLevel = 0;
+            int counter = 0;
+            for (WifiMorsel specific : original) {
+                if (specific.equals(morsel)) {
+                    // found a hit for averaging
+                    summedLevel += specific.getWifiLevel();
+                    counter++;
+                }
+            }
+            int average = (int) (((float) summedLevel) / ((float) counter));
+            averageMorsels.add(new WifiMorsel(morsel.getWifiMac(), morsel.getWifiName(), average, morsel.getWifiChannel(),
+                    morsel.getDeviceModel(), morsel.getTimeStamp()));
+        }
+        return averageMorsels;
     }
 
     /**
@@ -323,14 +367,13 @@ public class PositionFind extends Task<Arrival, Sendable> {
      */
     private Area getBestArea(Location location) {
         // Get all areas
-
-        log.pushTimer(this, "");
-        DataList<Area> all = database.read(new Area(null));
+        long time = System.currentTimeMillis();
+        DataList<Area> all = database.read(new Area(null), 1); // only area itself without children requred
         if (all == null) {
             log.error(TAG, "All areas: dbCall == null – shouldn't happen, FIX!");
             return null;
         }
-        log.log(TAG, "read " + log.popTimer(this).time + "ms");
+        log.log(TAG, "read " + (System.currentTimeMillis() - time) + "ms");
 
         int x = all.indexOf(new Area("University"));
         Area finalArea = all.get(x);

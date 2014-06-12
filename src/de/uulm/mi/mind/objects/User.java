@@ -128,4 +128,17 @@ public class User implements Sendable, Saveable, Authenticated {
     public String getKey() {
         return this.email;
     }
+
+    @Override
+    public Saveable deepClone() {
+        User user = new User();
+        user.setAccessDate(lastAccess);
+        user.setPwdHash(pwdHash);
+        user.setAdmin(admin);
+        user.setEmail(email);
+        user.setName(name);
+        user.setPosition(position);
+        user.setStatus(status);
+        return user;
+    }
 }

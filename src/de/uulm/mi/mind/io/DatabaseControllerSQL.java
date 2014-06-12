@@ -130,6 +130,16 @@ class DatabaseControllerSQL extends DatabaseAccess {
         }
     }
 
+    @Override
+    public Session openRoot() {
+        return open();
+    }
+
+    @Override
+    public <E extends Saveable> DataList<E> read(Session session, E data, int depth) {
+        return read(session,data); // TODO
+    }
+
     public boolean update(Session session, Saveable data) {
 
         log.log(TAG, "To update: " + data.toString());
@@ -164,7 +174,6 @@ class DatabaseControllerSQL extends DatabaseAccess {
         try {
             DataList<Saveable> dataList = read(session, data);
 
-            log.log(TAG, "Read Delete: " + dataList.toString());
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
                 return false;

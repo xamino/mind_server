@@ -811,11 +811,36 @@ function statusTest() {
     alert("Finished Status test.")
 }
 
+function pollTest() {
+    unitTest("read_all_polls", null, Error, null);
+    var session = getAdminSession();
+    unitTest("poll_add", new Poll("Lunch?", null, [new PollOption("Yes"), new PollOption("No")]), Success, session);
+    var polls = unitTest("read_all_polls", null, Array, session);
+    if (polls == undefined) {
+        alert("No polls returned!");
+        return;
+    }
+    // set vote
+    var poll = polls[0];
+    // because we need to send back the key, we simply set the vote poll value to include only the one option
+    poll.options = [poll.options[0]];
+    unitTest("poll_vote", poll, Success, session);
+    // check that vote counted
+    var polls = unitTest("read_all_polls", null, Array, session);
+
+    // delete all polls
+    unitTest("poll_remove", new Poll(), Success, session);
+}
+
 /**
  * Use this method to clean the DB.
  */
 function cleanDB() {
-    unitTest("registration", new User("special@admin.eu", "admin"), Success, null);
+    var reg = unitTest("registration", new User("special@admin.eu", "admin"), Success, null);
+    if (reg == null) {
+        alert("Aborting!");
+        return;
+    }
     var arrival = new Arrival("login", null, new User("special@admin.eu", "admin"));
     var adminSession = JSON.parse($.ajax({
         data: JSON.stringify(arrival),
@@ -851,6 +876,8 @@ function cleanDB() {
     if (sensorList == null || sensorList.length != 0) {
         alert("DB was NOT CLEARED of WIFI SENSORS!");
     }
+    // Destroy polls
+    unitTest("poll_remove", new Poll(), Success, adminSession);
 
     // Destroy users
     unitTest("ADMIN_ANNIHILATE_USER", null, Success, adminSession);

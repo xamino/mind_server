@@ -5,7 +5,6 @@ import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**

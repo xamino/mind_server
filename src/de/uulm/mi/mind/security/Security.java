@@ -9,6 +9,8 @@ import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.PublicDisplay;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.WifiSensor;
+import de.uulm.mi.mind.objects.messages.Error;
+import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.objects.unsendable.TimedQueue;
 
 import java.math.BigInteger;
@@ -31,16 +33,15 @@ public class Security {
     /**
      * Tag used for all logging that happens within Security.
      */
-    private final String TAG = "Security";
+    private static final String TAG = "Security";
     /**
      * Session timeout in milliseconds. Cannot be changed during runtime!
      */
-    @SuppressWarnings("FieldCanBeLocal")
-    private final long TIMEOUT = 15 * 60 * 1000;
+    private final static long TIMEOUT = 15 * 60 * 1000;
     /**
      * Instance of log used for the output.
      */
-    private Messenger log;
+    private static Messenger log;
     /**
      * Instance of database.
      */
@@ -154,12 +155,7 @@ public class Security {
             return null;
         }
         // now get database object
-        Authenticated databaseSafe = (Authenticated) database.open(new Transaction() {
-            @Override
-            public Data doOperations(Session session) {
-                return readDB(session, active.getAuthenticated());
-            }
-        });
+        Authenticated databaseSafe = readDB(active.getAuthenticated());
 
         // check if the user is still legal
         if (databaseSafe == null) {
@@ -188,58 +184,51 @@ public class Security {
             log.log(TAG, "Unable to log in a NULL object or an object with NULL fields!");
             return null;
         }
-        
-        // generate the session
-        String session = new BigInteger(130, random).toString(32);
-        // build active
-        final Active active = new Active(session);
-
-        // now get database object
-        Authenticated databaseSafe = (Authenticated) database.open(new Transaction() {
+        // get safe object
+        final Authenticated databaseSafe = readDB(authenticated);
+        if (databaseSafe == null) {
+            log.log(TAG, "Login failed for " + authenticated.readIdentification() + " due to no found legal authenticated!");
+            return null;
+        }
+        // check that they are of the same type
+        if (authenticated.getClass() != databaseSafe.getClass()) {
+            log.log(TAG, "Login failed for " + authenticated.readIdentification() + " due to wrong user type!");
+            return null;
+        }
+        // check using BCrypt
+        if (!(BCrypt.checkpw(authenticated.readAuthentication(), databaseSafe.readAuthentication()))) {
+            log.log(TAG, "Login failed for " + authenticated.readIdentification() + " due to wrong password!");
+            return null;
+        }
+        // check whether first time login
+        boolean firstFlag = false;
+        if (databaseSafe.getAccessDate() == null) {
+            firstFlag = true;
+        }
+        // try to update last access time
+        databaseSafe.setAccessDate(new Date());
+        Data updateCheck = database.open(new Transaction() {
             @Override
             public Data doOperations(Session session) {
-                // get safe object
-                Authenticated databaseSafe = readDB(session, authenticated);
-                if (databaseSafe == null) {
-                    log.log(TAG, "Login failed for " + authenticated.readIdentification() + " due to no found legal authenticated!");
-                    return null;
+                if (session.update(databaseSafe)) {
+                    return new Success("");
                 }
-                // check that they are of the same type
-                if (authenticated.getClass() != databaseSafe.getClass()) {
-                    log.log(TAG, "Login failed for " + authenticated.readIdentification() + " due to wrong user type!");
-                    return null;
-                }
-                // check using BCrypt
-                if (!(BCrypt.checkpw(authenticated.readAuthentication(), databaseSafe.readAuthentication()))) {
-                    log.log(TAG, "Login failed for " + authenticated.readIdentification() + " due to wrong password!");
-                    return null;
-                }
-
-                // check whether first time login
-                boolean firstFlag = false;
-                if (databaseSafe.getAccessDate() == null) {
-                    firstFlag = true;
-                }
-                active.setUnused(firstFlag);
-
-
-                // try to update last access time
-                databaseSafe.setAccessDate(new Date());
-                if (!(session.update(databaseSafe))) {
-                    log.error(TAG, "Login failed for " + authenticated.readIdentification() + " due to error updating access time!");
-                    return null;
-                }
-                return databaseSafe;
+                return new Error(Error.Type.DATABASE, "");
             }
         });
-        if (databaseSafe == null) {
+        if (!(updateCheck instanceof Success)) {
+            log.error(TAG, "Login failed for " + authenticated.readIdentification() + " due to error updating access time!");
             return null;
         }
 
+        // generate the session
+        String session = new BigInteger(130, random).toString(32);
+        // build active
+        Active active = new Active(session);
         // set the important values
         active.setAuthenticated(databaseSafe);
         active.setTimestamp(System.currentTimeMillis());
-
+        active.setUnused(firstFlag);
         // add to list
         actives.add(session, active);
         log.log(TAG, "Login of " + authenticated.readIdentification() + ".");
@@ -260,7 +249,6 @@ public class Security {
         if (active.isInvalidate()) {
             // must destroy all session of the same user
             ArrayList<Active> remove = new ArrayList<>();
-            // remove.add(active); TODO why was this line here?
             for (Active check : actives.getValues()) {
                 if (check.getAuthenticated().readIdentification().equals(active.getAuthenticated().readIdentification())) {
                     remove.add(check);
@@ -283,21 +271,26 @@ public class Security {
      *
      * @return The Authenticated freshly read if available, else null.
      */
-    private Authenticated readDB(Session session, Authenticated authenticated) {
+    private Authenticated readDB(Authenticated authenticated) {
         DataList data;
         if (authenticated instanceof User) {
-            data = session.read(new User(authenticated.readIdentification()));
+            data = database.read(new User(authenticated.readIdentification()));
         } else if (authenticated instanceof PublicDisplay) {
-            data = session.read(new PublicDisplay(authenticated.readIdentification(), null, null, 0, 0));
+            data = database.read(new PublicDisplay(authenticated.readIdentification(), null, null, 0, 0));
         } else if (authenticated instanceof WifiSensor) {
-            data = session.read(new WifiSensor(authenticated.readIdentification(), null, null));
+            data = database.read(new WifiSensor(authenticated.readIdentification(), null, null));
         } else {
             log.error(TAG, "Read from DB failed because of wrong object given!");
             return null;
         }
-        if (!(data != null && data.size() == 1)) {
-            // log.error(TAG, "Read from DB failed because read object is either missing or ambiguous!");
+        if (data == null || data.size() == 0) {
+            // this means the object wasn't found
             return null;
+        }
+        if (data.size() != 1) {
+            // this is a DB error!
+            log.error(TAG, "Read from DB failed because read object is ambiguous!");
+            // return null;
         }
         return (Authenticated) data.get(0);
     }

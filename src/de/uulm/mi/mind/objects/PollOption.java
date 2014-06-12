@@ -3,6 +3,9 @@ package de.uulm.mi.mind.objects;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 /**
  * Created by Tamino Hartmann on 6/3/14.
  */
@@ -10,7 +13,7 @@ public class PollOption implements Saveable, Sendable {
 
     private String key;
     private String optionValue;
-    private DataList<User> users = new DataList<>();
+    private ArrayList<String> users = new ArrayList<>();
 
     private PollOption() {
 
@@ -21,6 +24,14 @@ public class PollOption implements Saveable, Sendable {
         this.optionValue = optionValue;
     }
 
+    public ArrayList<String> getUsers() {
+        return users;
+    }
+
+    public void setUsers(ArrayList<String> users) {
+        this.users = users;
+    }
+
     public String getOptionValue() {
         return optionValue;
     }
@@ -29,17 +40,25 @@ public class PollOption implements Saveable, Sendable {
         this.optionValue = optionValue;
     }
 
-    public DataList<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(DataList<User> users) {
-        this.users = users;
+    @Override
+    public String toString() {
+        return "PollOption{" +
+                "key='" + key + '\'' +
+                ", optionValue='" + optionValue + '\'' +
+                ", users=" + users +
+                '}';
     }
 
     @Override
     public String getKey() {
         return this.key;
+    }
+
+    @Override
+    public Saveable deepClone() {
+        PollOption p = new PollOption(key,optionValue);
+        p.setUsers(users); // TODO clone?
+        return p;
     }
 
     public void setKey(String key) {

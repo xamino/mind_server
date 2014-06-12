@@ -87,4 +87,11 @@ public class WifiSensor implements Authenticated, Sendable, Saveable {
     public String getKey() {
         return this.identification;
     }
+
+    @Override
+    public Saveable deepClone() {
+        WifiSensor w = new WifiSensor(identification, tokenHash, area);
+        w.setAccessDate(lastAccess);
+        return w;
+    }
 }

@@ -4,6 +4,7 @@ import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
 import com.db4o.config.EmbeddedConfiguration;
+import com.db4o.constraints.UniqueFieldValueConstraint;
 import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import de.uulm.mi.mind.objects.*;
@@ -55,17 +56,23 @@ class DatabaseController extends DatabaseAccess {
             return false;
         }
         // avoid duplicates by checking if there is already a result in DB
-        DataList<Saveable> readData = read(session, data);
+        DataList<Saveable> readData = read(session, data, 1); // TODO test 0
         if (readData != null && !readData.isEmpty()) {
             return false;
         }
         try {
             sessionContainer.store(data);
-            log.log(TAG, "Written to DB: " + data.toString());
+            //log.log(TAG, "Written to DB: " + data.toString());
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+
+    @Override
+    public Session openRoot() {
+        return new Session(rootContainer, this);
     }
 
     /**
@@ -76,10 +83,23 @@ class DatabaseController extends DatabaseAccess {
      * @param <T>           A DataType extending Data.
      * @return A DataList of the specified filter parameter Type or null on error.
      */
+    private <T extends Saveable> DataList<T> read(Session session, T requestFilter) {
+        return read(session, requestFilter, 5);
+    }
+
+
+    /**
+     * Reads an object from the database.
+     *
+     * @param requestFilter Filter of objects to be returned. An object constructed with default constructor (null,0 or false values) returns all instances.
+     *                      Changing an object parameter filters the returned objects.
+     * @param <T>           A DataType extending Data.
+     * @return A DataList of the specified filter parameter Type or null on error.
+     */
     @Override
-    public <T extends Saveable> DataList<T> read(Session session, final T requestFilter) {
+    public <T extends Saveable> DataList<T> read(Session session, final T requestFilter, int depth) {
         ObjectContainer sessionContainer = session.getDb4oContainer();
-        log.pushTimer(this, "if");
+        long time = System.currentTimeMillis();
         try {
             ObjectSet<T> queryResult;
             // When unique key is empty, directly use the filter.
@@ -103,6 +123,9 @@ class DatabaseController extends DatabaseAccess {
                 } else if (requestFilter instanceof Location) {
                     query.descend("key").constrain(requestFilter.getKey());
                     queryResult = query.execute();
+                } else if (requestFilter instanceof Poll) {
+                    query.descend("key").constrain(requestFilter.getKey());
+                    queryResult = query.execute();
                 } else {
                     log.log(TAG, "Object Type " + requestFilter.getClass().getSimpleName() + " reading could be optimized.");
                     queryResult = sessionContainer.query(new Predicate<T>() {
@@ -113,11 +136,18 @@ class DatabaseController extends DatabaseAccess {
                     });
                 }
             }
-            log.log(TAG, "if " + log.popTimer(this).time + "ms");
+
+            if (depth > 1)
+                for (T t : queryResult) {
+                    sessionContainer.activate(t, depth);
+                }
+
+
+            //log.log(TAG, "if " + (System.currentTimeMillis() - time) + "ms");
             // Write query results to DataList
-            log.pushTimer(this, "list copy");
+            time = System.currentTimeMillis();
             DataList<T> result = new DataList<>(queryResult);
-            log.log(TAG, "list copy " + log.popTimer(this).time + "ms");
+            //log.log(TAG, "list copy " + (System.currentTimeMillis() - time) + "ms");
 
             // log.error(TAG, "Read from DB: " + result.toString());
             return result;
@@ -154,7 +184,7 @@ class DatabaseController extends DatabaseAccess {
         if (data == null || data.getKey() == null || data.getKey().equals("")) return false;
         try {
             DataList<Saveable> dataList;
-            if (!(dataList = read(session, data)).isEmpty()) {
+            if (!(dataList = read(session, data)).isEmpty()) { // TODO depth
                 sessionContainer.delete(dataList.get(0));
                 sessionContainer.store(data);
                 //log.log(TAG, "Updated in DB: " + data.toString());
@@ -177,7 +207,7 @@ class DatabaseController extends DatabaseAccess {
     public boolean delete(Session session, Saveable data) {
         ObjectContainer sessionContainer = session.getDb4oContainer();
         try {
-            DataList<Saveable> dataList = read(session, data);
+            DataList<Saveable> dataList = read(session, data); // TODO depth
 
             // If the data isn't in the DB, the deletion wasn't required, but as the data isn't here, we return true.
             if (dataList == null) {
@@ -204,67 +234,6 @@ class DatabaseController extends DatabaseAccess {
         return rootContainer.ext().openSession();
     }
 
-    private void cleanOrphans(ObjectContainer rootContainer) {
-        ObjectSet<Location> set1 = rootContainer.query(new Predicate<Location>() {
-            @Override
-            public boolean match(Location o) {
-                return true;
-            }
-        });
-        ObjectSet<WifiMorsel> allDBMorsels = rootContainer.query(new Predicate<WifiMorsel>() {
-            @Override
-            public boolean match(WifiMorsel o) {
-                return true;
-            }
-        });
-        ObjectSet<Area> set3 = rootContainer.query(new Predicate<Area>() {
-            @Override
-            public boolean match(Area o) {
-                return o.getKey().equals("University");
-            }
-        });
-        Area university = set3.get(0);
-
-        int counter = 0;
-        for (Location location : set1) {
-            if (!university.getLocations().contains(location)) {
-                rootContainer.delete(location);
-                counter++;
-            }
-        }
-        log.log(TAG, "Orphaned Locations removed: " + counter);
-
-        int mCounter = 0;
-        int c = 0;
-        for (WifiMorsel dbMorsel : allDBMorsels) {
-            log.log(TAG, ++c + ": " + dbMorsel.toString());
-            boolean isOrphan = true;
-            for (Location location : university.getLocations()) {
-                for (WifiMorsel morsel : location.getWifiMorsels()) {
-                    if (morsel.getWifiMac().equals(dbMorsel.getWifiMac())
-                            && (morsel.getWifiLevel() == dbMorsel.getWifiLevel())
-                            && (morsel.getWifiChannel() == dbMorsel.getWifiChannel())
-                            && bothNullOrEqual(morsel.getDeviceModel(), dbMorsel.getDeviceModel())
-                            && (morsel.getWifiName().equals(dbMorsel.getWifiName()))) {
-                        isOrphan = false;
-                        //break;
-                    }
-                }
-                //if (!isOrphan) break;
-            }
-            if (isOrphan) {
-                rootContainer.delete(dbMorsel);
-                mCounter++;
-            }
-        }
-
-        log.log(TAG, "Orphaned Morsels removed: " + mCounter);
-
-    }
-
-    private boolean bothNullOrEqual(String deviceModel, String deviceModel1) {
-        return deviceModel == null && deviceModel1 == null || (deviceModel != null) && (deviceModel1 != null) && deviceModel.equals(deviceModel1);
-    }
 
     @Override
     public Session open() {
@@ -277,17 +246,39 @@ class DatabaseController extends DatabaseAccess {
         String dbFilePath = contextPath + "WEB-INF/" + config.getDbName();
 
         EmbeddedConfiguration dbconfig = Db4oEmbedded.newConfiguration();
+        dbconfig.common().activationDepth(1);
+
         //dbconfig.common().diagnostic().addListener(new DiagnosticToConsole());
         dbconfig.common().objectClass(Area.class).cascadeOnUpdate(true);
         dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);
         dbconfig.common().objectClass(Location.class).cascadeOnDelete(true);
+        dbconfig.common().objectClass(Poll.class).cascadeOnUpdate(true);
+        dbconfig.common().objectClass(Poll.class).cascadeOnDelete(true);
         //dbconfig.common().optimizeNativeQueries(true);
+
         dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
+        //dbconfig.common().add(new UniqueFieldValueConstraint(User.class, "email"));
+
         dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
+        //dbconfig.common().add(new UniqueFieldValueConstraint(Area.class, "ID"));
+
         dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
+        //dbconfig.common().add(new UniqueFieldValueConstraint(PublicDisplay.class, "identification"));
+
         dbconfig.common().objectClass(WifiSensor.class).objectField("identification").indexed(true);
+        //dbconfig.common().add(new UniqueFieldValueConstraint(WifiSensor.class, "identification"));
+
         dbconfig.common().objectClass(Location.class).objectField("key").indexed(true);
+        //dbconfig.common().add(new UniqueFieldValueConstraint(Location.class, "key"));
+
+        dbconfig.common().objectClass(Poll.class).objectField("key").indexed(true);
+        //dbconfig.common().add(new UniqueFieldValueConstraint(Poll.class, "key"));
+
+        dbconfig.common().objectClass(PollOption.class).objectField("key").indexed(true);
+        //dbconfig.common().add(new UniqueFieldValueConstraint(PollOption.class, "key"));
+
         dbconfig.common().objectClass(WifiMorsel.class).objectField("wifiMac").indexed(true);
+        // WifiMorsel is not unique
         rootContainer = Db4oEmbedded.openFile(dbconfig, dbFilePath);
 
         log.log(TAG, "db4o startup on " + dbFilePath);
@@ -297,8 +288,8 @@ class DatabaseController extends DatabaseAccess {
     @Override
     public void destroy() {
         if (rootContainer != null) {
-            rootContainer.close();
-            log.log(TAG, "db4o shutdown");
+            boolean isShutDown = rootContainer.close();
+            log.log(TAG, "db4o shutdown:" + isShutDown);
         }
     }
 }

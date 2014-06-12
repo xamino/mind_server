@@ -2,6 +2,7 @@ package de.uulm.mi.mind.json;
 
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.DataList;
+import de.uulm.mi.mind.objects.Interfaces.Sendable;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -92,7 +93,7 @@ public class JsonConverter<E> {
         Class objectClass = object.getClass();
         // Check if registered TYPE_KEY
         if (!typesClassString.containsKey(objectClass)) {
-            log.error(TAG, "Unregistered object! Register "+objectClass.getSimpleName()+"!");
+            log.error(TAG, "Unregistered object! Register " + objectClass.getSimpleName() + "!");
             throw new IOException("Unregistered TYPE_KEY! Unable to parse to JSON. Register "
                     + objectClass.getCanonicalName() + "!");
         }
@@ -115,9 +116,8 @@ public class JsonConverter<E> {
         }
         // JSON object start
         StringBuffer jsonObject = new StringBuffer();
-        jsonObject.append("{" + pack(TYPE_KEY, typesClassString.get(objectClass)));
+        jsonObject.append("{").append(pack(TYPE_KEY, typesClassString.get(objectClass)));
         // Now correctly handle each TYPE_KEY
-        // todo collection and array can contain primitive data
         for (Map.Entry<Field, Object> entry : fieldValueList.entrySet()) {
             // add comma
             jsonObject.append(",");
@@ -131,7 +131,7 @@ public class JsonConverter<E> {
             // collections && arrays
             else if (value instanceof Collection || value instanceof Object[]) {
                 // start array
-                jsonObject.append(ESCAPE + fieldName + ESCAPE + ":[");
+                jsonObject.append(ESCAPE).append(fieldName).append(ESCAPE).append(":[");
                 // collection
                 Object[] array;
                 if (value instanceof Collection) {
@@ -141,7 +141,14 @@ public class JsonConverter<E> {
                 }
                 // recursively solve
                 for (Object collectionObject : array) {
-                    jsonObject.append(objectJson(((E) collectionObject)) + ",");
+                    Class clazz = collectionObject.getClass();
+                    if (clazz.isPrimitive() || String.class.isAssignableFrom(clazz)) {
+                        // primitives are written as-is
+                        jsonObject.append(ESCAPE).append(collectionObject).append(ESCAPE).append(",");
+                    } else {
+                        // objects are recursively resolved
+                        jsonObject.append(objectJson(((E) collectionObject))).append(",");
+                    }
                 }
                 // remove last comma if placed
                 if (jsonObject.charAt(jsonObject.length() - 1) == ',') {
@@ -165,7 +172,7 @@ public class JsonConverter<E> {
             }
             // probably object (if not registered it will throw an IOException on recursion)
             else {
-                jsonObject.append(ESCAPE + fieldName + ESCAPE + ":" + objectJson(((E) value)));
+                jsonObject.append(ESCAPE).append(fieldName).append(ESCAPE).append(":").append(objectJson(((E) value)));
             }
         }
         // finish object
@@ -184,14 +191,12 @@ public class JsonConverter<E> {
             return writeObject(json);
         } catch (IOException e) {
             // e.printStackTrace();
-            log.error(TAG, "Failed!");
+            log.error(TAG, "Failed to create Java!");
             return null;
         }
     }
 
     private E writeObject(String jsonObject) throws IOException {
-        // todo check why android app requires this
-        // jsonObject = jsonObject.trim();
         // sanity: string starts and ends with {}
         if (!jsonObject.startsWith("{") || !jsonObject.endsWith("}")) {
             throw new IOException("String is not bracketed by {}!");
@@ -249,13 +254,9 @@ public class JsonConverter<E> {
      * @param value The string value to parse.
      * @return The parsed value.
      */
-    // todo catch arrays and collections of primitives
     private Object typeCastParse(Class clazz, String value) throws IOException {
         if (clazz == boolean.class) {
-            if (value.equals("null")) {
-                return false;
-            }
-            return Boolean.parseBoolean(value);
+            return !value.equals("null") && Boolean.parseBoolean(value);
         } else if (clazz == int.class) {
             if (value.equals("null")) {
                 return 0;
@@ -310,29 +311,39 @@ public class JsonConverter<E> {
                 throw new IOException(TAG + ": JsonConverter failed to convert java.util.Date back! Format required " +
                         "is yyyy-MM-dd HH:mm:ss");
             }
-        } else if (clazz == Object[].class || clazz.isInstance(Collection.class) || value.startsWith("[")) {
-            DataList objects = new DataList();
+        } else if (value.startsWith("[")) {
+            ArrayList objects = new ArrayList();
             // remove []
             value = value.substring(1, value.length() - 1);
             // must split value into objects
-            while (value.contains(",")) {
+            while (!value.isEmpty()) {
                 int end = findEndBracket(value) + 1;
                 String nextObject = value.substring(0, end);
-                objects.add(writeObject(nextObject));
+                if (clazz == Object[].class || DataList.class.isAssignableFrom(clazz)) { //TODO || clazz == Data.class ?
+                    // objects
+                    objects.add(writeObject(nextObject));
+                } else if (Collection.class.isAssignableFrom(clazz)) {
+                    // remove "" because always primitive (no further parsing)
+                    nextObject = nextObject.substring(1, nextObject.length() - 1);
+                    // primitives (will always be string)
+                    objects.add(nextObject);
+                } else {
+                    log.error(TAG, "Failed in creating list – field may not expect list!");
+                    return null;
+                }
                 // remove finished object
                 // some vodoo required to correctly move the string over
-                if (value.charAt(end - 1) == ',') {
-                    value = value.substring(end);
+                if (value.length() <= end + 1) {
+                    value = "";
                 } else {
-                    if (end + 1 >= value.length()) {
-                        value = "";
-                    } else {
-                        value = value.substring(end + 1);
-                    }
+                    value = value.substring(end + 1);
                 }
             }
             if (clazz == Object[].class) {
                 return objects.toArray();
+            } else if (clazz == DataList.class || clazz == Sendable.class) {
+                DataList dataList = new DataList(objects);
+                return dataList;
             } else {
                 return objects;
             }

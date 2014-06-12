@@ -83,7 +83,7 @@ function loginDisplay(identification, password, callback) {
 function logout() {
     var request = new Arrival("logout", session);
     send(request, function (data) {
-        alert(data.object.description);
+        alert("Could not be logged in - are you admin and is the password valid?");
     });
 }
 

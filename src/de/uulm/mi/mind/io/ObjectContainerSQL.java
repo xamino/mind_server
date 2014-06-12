@@ -307,9 +307,7 @@ class ObjectContainerSQL {
                 }
 
                 String valQuery = "";
-                if (val == null) {
-                    valQuery += null;
-                } else if (type == String.class || type.isEnum()) {
+                if (type == String.class || type.isEnum()) {
                     valQuery += STRESC + val + STRESC;
                 } else if (type == Date.class) {
                     valQuery += STRESC + new Timestamp(((Date) val).getTime()) + STRESC;

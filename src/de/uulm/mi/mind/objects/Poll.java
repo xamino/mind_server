@@ -12,26 +12,45 @@ import java.util.Date;
  */
 public class Poll implements Sendable, Saveable {
 
-    private String key = "";
+    private String key;
     private String question;
     private Date created;
     private Date end;
-    private User owner;
-    private int allowedOptionSelections = 1;
+    private String owner;
+    private int allowedOptionSelections;
     private PollState state;
-    private String icon = "default";
+    private String icon;
     private DataList<PollOption> options = new DataList<>();
 
-    private Poll() {
+    public Poll() {
     }
 
-    public Poll(String key) {
-        this.key = key;
+    @Override
+    public String toString() {
+        return "Poll{" +
+                "key='" + key + '\'' +
+                ", question='" + question + '\'' +
+                ", created=" + created +
+                ", end=" + end +
+                ", owner='" + owner + '\'' +
+                ", allowedOptionSelections=" + allowedOptionSelections +
+                ", state=" + state +
+                ", icon='" + icon + '\'' +
+                ", options=" + options +
+                '}';
     }
 
     public Poll(String question, Date end) {
         this.question = question;
         this.end = end;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public Date getEnd() {
@@ -74,14 +93,6 @@ public class Poll implements Sendable, Saveable {
         this.allowedOptionSelections = allowedOptionSelections;
     }
 
-    public User getOwner() {
-        return owner;
-    }
-
-    public void setOwner(User owner) {
-        this.owner = owner;
-    }
-
     public Date getCreated() {
         return created;
     }
@@ -97,6 +108,26 @@ public class Poll implements Sendable, Saveable {
     @Override
     public String getKey() {
         return this.key;
+    }
+
+    @Override
+    public Saveable deepClone() {
+        Poll p = new Poll(question, end);
+        p.setAllowedOptionSelections(allowedOptionSelections);
+        p.setCreated(p.created);
+        p.setIcon(icon);
+        p.setKey(key);
+        p.setOwner(owner);
+        p.setState(state);
+
+        DataList<PollOption> pollOptions = new DataList<>();
+        for (PollOption pollOption : options) {
+            if(pollOption==null) continue;
+            pollOptions.add((PollOption) pollOption.deepClone());
+        }
+        p.setOptions(pollOptions);
+
+        return p;
     }
 
     public void setKey(String key) {

@@ -70,9 +70,10 @@ public class Servlet extends HttpServlet {
         } else {
             // set IP address in case we need it (warning: can be IPv4 OR IPv6!!!)
             arrival.setIpAddress(request.getRemoteAddr());
-            log.pushTimer(this, "tasks");
+
+            long time = System.currentTimeMillis();
             answer = TaskManager.getInstance().run(arrival);
-            log.log(TAG, "Task " + arrival.getTask() + " took " + log.popTimer(this).time + "ms.");
+            log.log(TAG, "Task " + arrival.getTask() + " took " + (System.currentTimeMillis()-time) + "ms.");
         }
 
         // Encapsulate answer:
@@ -92,13 +93,14 @@ public class Servlet extends HttpServlet {
      */
     private Arrival getRequest(HttpServletRequest request) throws IOException {
         BufferedReader reader = request.getReader();
-        String out = "";
+        StringBuilder stringBuffer = new StringBuilder();
         do {
             String value = reader.readLine();
             if (value == null || value.isEmpty())
                 break;
-            out += value;
+            stringBuffer.append(value);
         } while (true);
+        String out = stringBuffer.toString();
         // Better safe than sorry:
         if (out.isEmpty()) {
             return null;
