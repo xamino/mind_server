@@ -2,13 +2,13 @@ package de.uulm.mi.mind.tasks.admin;
 
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
-import de.uulm.mi.mind.tasks.LocationTask;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Location;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
+import de.uulm.mi.mind.tasks.LocationTask;
 
 /**
  * @author Tamino Hartmann
@@ -27,17 +27,13 @@ public class LocationRemove extends LocationTask<Location, Information> {
                 // run all operations
                 boolean success1 = session.delete(location);
                 // area has changed, so redo mapping
-                boolean success2 = updateMapping(session);
 
-                if (success1 && success2) {
+                if (success1) {
                     return new Success("Location was deleted successfully.");
                 }
-
                 // Evaluate Error
-                if (!success1) {
+                else {
                     return new Error(Error.Type.DATABASE, "Deletion of location resulted in an error.");
-                } else { //!success2
-                    return new Error(Error.Type.DATABASE, "Deletion of location resulted in an error: The mapping could not be updated.");
                 }
             }
         });

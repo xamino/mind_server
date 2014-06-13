@@ -2,7 +2,6 @@ package de.uulm.mi.mind.tasks.admin;
 
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
-import de.uulm.mi.mind.tasks.LocationTask;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Location;
@@ -10,6 +9,7 @@ import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
+import de.uulm.mi.mind.tasks.LocationTask;
 
 /**
  * Created by Tamino Hartmann on 5/21/14.
@@ -36,17 +36,13 @@ public class LocationAdd extends LocationTask<Location, Information> {
                     // and create
                     boolean success1 = session.create(filteredLocation);
                     // area has changed, so redo mapping
-                    boolean success2 = updateMapping(session);
 
-                    if (success1 && success2) {
+                    if (success1) {
                         return new Success("Location was created successfully.");
                     }
-
                     // Evaluate Error
-                    if (!success1) {
+                    else {
                         return new Error(Error.Type.DATABASE, "Creation of location resulted in an error.");
-                    } else { //!success2
-                        return new Error(Error.Type.DATABASE, "Creation of location resulted in an error: The mapping could not be updated.");
                     }
 
                 } else {
@@ -56,18 +52,13 @@ public class LocationAdd extends LocationTask<Location, Information> {
                     // filter
                     exist = filterMorsels(exist);
                     boolean success1 = session.update(exist);
-                    // area has changed, so redo mapping
-                    boolean success2 = updateMapping(session);
 
-                    if (success1 && success2) {
+                    if (success1) {
                         return new Success("Location was not created but updated successfully as it existed already.");
                     }
-
                     // Evaluate Error
-                    if (!success1) {
+                    else {
                         return new Error(Error.Type.DATABASE, "Creation of location resulted in an error.");
-                    } else { //!success2
-                        return new Error(Error.Type.DATABASE, "Creation of location resulted in an error: The mapping could not be updated.");
                     }
                 }
             }
