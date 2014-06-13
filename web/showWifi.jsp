@@ -15,10 +15,12 @@
 
 <body onload="onLoadOfAdminPage();initShowWifi();">
 <div id="container">
+
     <div id="banner">
         <!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
         <h2>MIND</h2>
     </div>
+
 
     <div id="content">
 
@@ -30,6 +32,12 @@
 			
 			<select id="selectDevice" name=selectDevice>
 				<option>Choose...</option>
+			</select>
+			
+			<select id="selectType" name=selectDevice>
+				<option>One</option>
+				<option>Threshold</option>
+				<option>All_directions</option>
 			</select>
 			
 			<button onclick="drawLocations()">GO!</button>

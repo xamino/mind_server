@@ -222,7 +222,7 @@ function addUserIcon(user) {
     icon.src = "/images/custom_icons/icon_" + user.email;
 //	icon.src='/images/custom_icons/defaulticon.png';
     icon.onerror = function () {
-        this.src = '/images/custom_icons/defaulticon.png'; //Defualt icon
+        this.src = '/images/micons/defaulticon.png'; //Default icon
     };
 
     icon.onclick = function () {
