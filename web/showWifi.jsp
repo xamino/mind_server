@@ -34,6 +34,12 @@
 				<option>Choose...</option>
 			</select>
 			
+			<select id="selectType" name=selectDevice>
+				<option>One</option>
+				<option>Threshold</option>
+				<option>All_directions</option>
+			</select>
+			
 			<button onclick="drawLocations()">GO!</button>
 
             <!-- draw on map -->

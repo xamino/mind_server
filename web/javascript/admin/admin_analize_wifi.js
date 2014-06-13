@@ -4,8 +4,11 @@ var locations;
 var devices;
 var hotspots;
 
+var typeSelect;
+
 function initShowWifi(){
     var area = new Area("University", null, null, null, null, null);
+    typeSelect = document.getElementById("selectType");
     doTask("AREA_READ", area, filterLocationStuff);
 }
 
@@ -76,7 +79,6 @@ function drawLocations(){
 		locsToRemove[0].parentNode.removeChild(locsToRemove[0]);
 	}
 	
-	
 	var mapdiv = document.getElementById("map_png_div");
     var loc;
     
@@ -87,43 +89,135 @@ function drawLocations(){
     var green;
     var blue;
     var red = "FF";
-	for ( var i = 0; i < locations.length; i++) {
-		for ( var j = 0; j < locations[i].wifiMorsels.length; j++) {
-			if(locations[i].wifiMorsels[j].deviceModel == device &&
-					locations[i].wifiMorsels[j].wifiMac == hotspot){
-				
-				//DRAW
-	            loc = document.createElement("div");
-	            loc.className = "locationCircleAnalize";
-	            loc.style.marginLeft = (locations[i].coordinateX-10) + "px";
-	            loc.style.marginTop  = (locations[i].coordinateY-10) + "px";
-	            
-	            if(locations[i].wifiMorsels[j].wifiLevel<-50){
-	            	green = "FF";
-	            	if(locations[i].wifiMorsels[j].wifiLevel<-99){
-	            		blue = "00";
-	            	}else{
-	            		blue = getColorByDB(locations[i].wifiMorsels[j].wifiLevel);
-	            	}	            	
-	            }else{
-	            	blue = "00";
-	            	if(locations[i].wifiMorsels[j].wifiLevel>-1){
-	            		green = "00";
-	            	}else{
-	            		green = getColorByDB(locations[i].wifiMorsels[j].wifiLevel);	            		
-	            	}
-	            }
-	            
-	            loc.style.background = "#"+red+green+blue;
-	            
-	            mapdiv.appendChild(loc);
-				
+    
+    
+    var locs = locations;
+	var type = typeSelect.options[typeSelect.selectedIndex].text;
+	
+	if(type === "One"){
+		
+		for ( var i = 0; i < locs.length; i++) {
+			for ( var j = 0; j < locs[i].wifiMorsels.length; j++) {
+				if(locs[i].wifiMorsels[j].deviceModel == device &&
+						locs[i].wifiMorsels[j].wifiMac == hotspot){
+					
+					//DRAW
+					loc = document.createElement("div");
+					loc.className = "locationCircleAnalize";
+					loc.style.marginLeft = (locs[i].coordinateX-10) + "px";
+					loc.style.marginTop  = (locs[i].coordinateY-10) + "px";
+					
+					if(locs[i].wifiMorsels[j].wifiLevel<-50){
+						green = "FF";
+						if(locs[i].wifiMorsels[j].wifiLevel<-99){
+							blue = "00";
+						}else{
+							blue = getColorByDB(locs[i].wifiMorsels[j].wifiLevel);
+						}	            	
+					}else{
+						blue = "00";
+						if(locs[i].wifiMorsels[j].wifiLevel>-1){
+							green = "00";
+						}else{
+							green = getColorByDB(locs[i].wifiMorsels[j].wifiLevel);	            		
+						}
+					}
+					
+					loc.style.background = "#"+red+green+blue;
+					
+					mapdiv.appendChild(loc);	
+				}
 			}
-
 		}
+		
+	}else if(type === 'Threshold'){
+		alert("threshold");
+		for ( var i = 0; i < locs.length; i++) { //for each loc
+				
+			handledMacsOfLocation = new Array();
+
+			for ( var j = 0; j < locs[i].wifiMorsels.length; j++) { //for each morsel
+				//if morsel is from selected device and hotspot
+				if(locs[i].wifiMorsels[j].deviceModel == device &&
+						locs[i].wifiMorsels[j].wifiMac == hotspot &&
+						!macWasHandled(locs[i].wifiMorsels[j].wifiMac)){
+					
+					
+					var quadMorsels = getFourEqualMorsels(locs[i].wifiMorsels[j].wifiMac, 
+							locs[i].wifiMorsels);
+					
+					var offset = 0;
+					var width = 8;
+					
+					for ( var i = 0; i < quadMorsels.length; i++) {
+						
+						//DRAW
+						loc = document.createElement("div");
+						loc.className = "locationCircleAnalize";
+						loc.style.marginLeft = (locs[i].coordinateX-width/2+offset) + "px";
+						loc.style.marginTop  = (locs[i].coordinateY-width/2+offset) + "px";
+						
+						if(locs[i].wifiMorsels[j].wifiLevel<-50){
+							green = "FF";
+							if(locs[i].wifiMorsels[j].wifiLevel<-99){
+								blue = "00";
+							}else{
+								blue = getColorByDB(locs[i].wifiMorsels[j].wifiLevel);
+							}	            	
+						}else{
+							blue = "00";
+							if(locs[i].wifiMorsels[j].wifiLevel>-1){
+								green = "00";
+							}else{
+								green = getColorByDB(locs[i].wifiMorsels[j].wifiLevel);	            		
+							}
+						}
+						
+						loc.style.background = "#"+red+green+blue;
+						
+						mapdiv.appendChild(loc);	
+						
+						offset+=width;
+					}
+				}
+			}
+		}
+		
+	}else if(type === 'All_directions'){
+		
 	}
 	
+	
 }
+	
+
+
+var handledMacsOfLocation = new Array();
+
+function macWasHandled(mac){
+	for ( var i = 0; i < handledMacsOfLocation.length; i++) {
+		if(handledMacsOfLocation[i] == mac){
+			return true;
+		}
+	}
+	return false;
+}
+
+function getFourEqualMorsels(mac, morsels){
+	
+	var sameMacMorsels = new Array();	
+	
+	for ( var i = morsels.length; i >= 0; i--) {
+		if(morsels[i] == mac){
+			sameMacMorsels.push(morsels[i]);
+//			locs.splice(i,1);
+		}
+	}
+	return sameMacMorsels;
+//	currentLocMACs = new Array();
+}
+
+
 
 function getRoomByMac(mac){
 	if(mac == "00:aa:ab:02:32:06"){
@@ -138,7 +232,6 @@ function getRoomByMac(mac){
 		return "336";
 	}else if(mac == "00:aa:ab:02:2d:69"){
 		return "3305";
-		
 	}else if(mac == "20:cf:30:b7:e2:14"){
 		return "332_h";
 	}else if(mac == "00:23:cd:20:c9:0c"){
@@ -167,7 +260,6 @@ function getMacByRoom(room){
 		return "00:aa:ab:02:32:0a";
 	}else if(room == "3305"){
 		return "00:aa:ab:02:2d:69";
-		
 	}else if(room == "332_h"){
 		return "20:cf:30:b7:e2:14";
 	}else if(room == "331_h"){
