@@ -142,6 +142,22 @@ background-size: contain;*/
     float: right; /*Buttons at the right side*/
 }
 
+/* settings dialog above the polls*/
+#container_inner_content{
+	position: relative;
+}
+
+#current_polls, #show_display_settings, #show_app_settings{
+	position: absolute;
+	background: white;
+}
+
+#current_polls{
+	overflow-y: scroll;
+	top: 0px;
+    bottom: 0px;
+}
+
 #login_location {
     bottom: 0px;
     position: absolute;

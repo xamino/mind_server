@@ -55,6 +55,11 @@
             <br><!-- <div id="testy"></div>-->
             <br>
             <hr>
+            <h3>Area - Location - Mapping</h3>
+            If  you added new locations or new ares, you have to update the mapping.<br>
+            This operation could take a while.<br>
+            <input type="button" value="Update Mapping" onClick="updateMapping()">
+            <hr>
             <h3>Areas</h3>
             <br>Here you see all Areas which are currently in MIND.
             <br>To Remove one area, simply click 'Remove Location'. The area 'University' can't be removed.

@@ -76,17 +76,19 @@ function toggleDisplaySettings() {
  * toggle the slide effect on the public displays for the app settings
  */
 function toggleAppSettings() {
-    if ($('#show_display_settings').css('display') != 'none') { //check wether app settings are still open
-        $("#show_display_settings").toggle("slow", function () {
+    if ($('#show_display_settings').css('display') != 'none') { //check wether display settings are still open
+        $("#show_display_settings").slideToggle("slow", function () {
             $('#display_settings_img').css('background-image', 'url(../images/pd_icons/settings_default_350px.png)');
         });
     }
-    $("#show_app_settings").toggle("slow", function () {
+    $("#show_app_settings").slideToggle("slow", function () {
         if ($('#show_app_settings').css('display') != 'none') {
             $('#app_settings_img').css('background-image', 'url(../images/pd_icons/settings_clicked_350px.png)');
+            $('#current_polls').css('display', 'none');
         }
         if ($('#show_app_settings').css('display') != 'block') {
             $('#app_settings_img').css('background-image', 'url(../images/pd_icons/settings_default_350px.png)');
+            $('#current_polls').css('display', 'block');
         }
     });
 
