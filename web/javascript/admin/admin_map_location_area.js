@@ -494,6 +494,7 @@ function updateMapping(){
 	alert("This operation could take a while.");
     doTask("UPDATE_MAPPING", null, function (data){
     	alert("Mapping was been updated;");
+    	window.reload();
     });
 }
 
@@ -535,9 +536,9 @@ function writeAreas(data) {
             tablecontents += "<td>" + data.object[i].width + "</td>";
             tablecontents += "<td>" + data.object[i].height + "</td>";
             if (data.object[i].ID == "universe" || data.object[i].ID == "University") {
-                tablecontents += "<td><input type='submit' value='Remove Location' disabled='true' /></td>";
+                tablecontents += "<td><input type='submit' value='Remove Area' disabled='true' /></td>";
             } else {
-                tablecontents += "<td><input type='submit' value='Remove Location' onClick='removeAreaViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
+                tablecontents += "<td><input type='submit' value='Remove Area' onClick='removeAreaViaPopup(" + JSON.stringify(data.object[i]) + ")'/></td>";
             }
             tablecontents += "</tr>";
         }
@@ -786,7 +787,7 @@ function removeLocationViaPopup(data) {
 
             alert("The following location has been deleted:\n" +
                 "X-Coordinate: " + data.coordinateX +
-                "\nY_Coordinate: " + data.coordinateY);
+                "\nY-Coordinate: " + data.coordinateY);
             window.location.reload();
 
         });

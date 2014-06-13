@@ -24,6 +24,7 @@ var awayAreaExists = true;
 $(document).ready(function () {
     window.onresize = function () {
         mapResize();
+        getRemainingSpace();   //to find out size of remaining content (for polling) on resize
     };
 });
 

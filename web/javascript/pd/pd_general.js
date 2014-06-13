@@ -64,9 +64,11 @@ function toggleDisplaySettings() {
              var buttonwidth = $("#toggleFullscreen").width();
              $("#displayLogoutButton").css('position', 'absolute');
              $("#displayLogoutButton").css('right', (+buttonwidth + +50)+'px');*/
+            $('#current_polls').css('display', 'none');
         }
         if ($('#show_display_settings').css('display') != 'block') {
             $('#display_settings_img').css('background-image', 'url(../images/pd_icons/settings_default_350px.png)');
+            $('#current_polls').css('display', 'block');
         }
     });
 
@@ -109,6 +111,7 @@ function checkAwayArea() {
         var noAwayArea = "There is currently no away area (ID: 'Away') in the database. Add this area to see all necessary information.<br>Please contact the admin.";
         document.getElementById("awayArea_info").innerHTML = noAwayArea;
     }
+    getRemainingSpace();	//to find out size of remaining content (for polling) on reload
 //    });
 }
 
