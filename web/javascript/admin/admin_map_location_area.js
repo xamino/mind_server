@@ -490,6 +490,13 @@ $(document).on("mouseleave", "#map_png_div", function (e) {
 /*************** end of drawing on map *****************/
 
 
+function updateMapping(){
+	alert("This operation could take a while.");
+    doTask("UPDATE_MAPPING", null, function (data){
+    	alert("Mapping was been updated;");
+    });
+}
+
 /****************Admin - Area Management****************/
 
 /**

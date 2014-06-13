@@ -10,6 +10,7 @@
     <script src="javascript/run.js"></script>
     <script src="javascript/pd/displayMap.js"></script>
     <script src="javascript/pd/pd_general.js"></script>
+    <script src="javascript/pd/polling.js"></script>
     <script src="javascript/jquery.balloon.js"></script>
     <link href="${pageContext.request.contextPath}/css/public_display.css" rel="stylesheet" type="text/css">
 
@@ -52,48 +53,50 @@
         <p id="balloonIdle">0</p>
         <!-- <p id="userInfoOnUpdate">info</p>  -->
         <div id="awayArea_info"></div>
-
-        <div id="show_display_settings" style="display:none;">
-            <!-- <div id='settingsBrightness'>
-               <h3>Display Brightness</h3><br>
-               <div id="sliderdiv_brightness">
-                   <input id="slider_brightness" type="range" name="points" min="1" max="5" onchange="changeBrightness(this.value)">
-                   <p id="slidertext_brightness">Brightness: 3</p>
-               </div>
-           </div> -->
-            <div id='settingsRefresh'>
-                <hr>
-                <br>
-
-                <h3>Refresh Rate</h3><br>
-                From 5 sec (fastest rate) to 60 sec (slowest rate).<br>
-                <br>
-
-                <div id="sliderdiv_refresh">
-                    <input id="slider_refresh" type="range" name="points" min="1" max="5" value="2"
-                           onchange="changeRefreshRate(this.value)">
-                    <!--oninput,onchange="changeRefreshRate(this.value)"-->
-                    <p id="slidertext_refresh">Current Refresh Rate: every 10 sec</p>
-                </div>
-            </div>
-            <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->
-            <hr>
-            <br>
-
-            <div id="buttonsDiv">
-                <button type='button' id='displaySettingsBack' class="shadow" onclick='toggleDisplaySettings()'>Back
-                </button>
-                <!-- settingsBackButton() -->
-                <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display
-                </button>
-                <button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
-            </div>
-        </div>
-        <div id="show_app_settings" style="display:none;">
-            There are currently no apps on your system.
-            <hr>
-            <br>
-            <button type='button' id='appSettingsBack' class="shadow" onclick='toggleAppSettings()'>Back</button>
+		<div id="container_inner_content">
+			<div id="current_polls">dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>huiiiii</div>
+	        <div id="show_display_settings" style="display:none;">
+	            <!-- <div id='settingsBrightness'>
+	               <h3>Display Brightness</h3><br>
+	               <div id="sliderdiv_brightness">
+	                   <input id="slider_brightness" type="range" name="points" min="1" max="5" onchange="changeBrightness(this.value)">
+	                   <p id="slidertext_brightness">Brightness: 3</p>
+	               </div>
+	           </div> -->
+	            <div id='settingsRefresh'>
+	                <hr>
+	                <br>
+	
+	                <h3>Refresh Rate</h3><br>
+	                From 5 sec (fastest rate) to 60 sec (slowest rate).<br>
+	                <br>
+	
+	                <div id="sliderdiv_refresh">
+	                    <input id="slider_refresh" type="range" name="points" min="1" max="5" value="2"
+	                           onchange="changeRefreshRate(this.value)">
+	                    <!--oninput,onchange="changeRefreshRate(this.value)"-->
+	                    <p id="slidertext_refresh">Current Refresh Rate: every 10 sec</p>
+	                </div>
+	            </div>
+	            <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->
+	            <hr>
+	            <br>
+	
+	            <div id="buttonsDiv">
+	                <button type='button' id='displaySettingsBack' class="shadow" onclick='toggleDisplaySettings()'>Back
+	                </button>
+	                <!-- settingsBackButton() -->
+	                <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout Display
+	                </button>
+	                <button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
+	            </div>
+	        </div>
+	        <div id="show_app_settings" style="display:none;">
+	            There are currently no apps on your system.
+	            <hr>
+	            <br>
+	            <button type='button' id='appSettingsBack' class="shadow" onclick='toggleAppSettings()'>Back</button>
+	        </div>
         </div>
     </div>
     <div id="login_location">
