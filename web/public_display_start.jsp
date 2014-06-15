@@ -54,6 +54,7 @@
         <!-- <p id="userInfoOnUpdate">info</p>  -->
         <div id="awayArea_info"></div>
 		<div id="container_inner_content">
+			<hr>
 			<div id="current_polls">dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>huiiiii</div>
 	        <div id="show_display_settings" style="display:none;">
 	            <!-- <div id='settingsBrightness'>
