@@ -154,8 +154,7 @@ background-size: contain;*/
 
 #current_polls{
 	overflow-y: scroll;
-	top: 0px;
-    bottom: 0px;
+	width: 100%;
 }
 
 #login_location {
