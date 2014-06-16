@@ -50,13 +50,13 @@
         </div>
     </div>
     <div id="content_popup">
-        <p id="balloonIdle">0</p>
+        <p id="balloonIdle" style="visibility:hidden">0</p>
+        <div id="support">Support: mind@lists.uni-ulm.de</div>
         <!-- <p id="userInfoOnUpdate">info</p>  -->
         <div id="awayArea_info"></div>
 		<div id="container_inner_content">
-			<div id="current_polls">dcbdjbej
-			<!-- <br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>huiiiii</div>
-	        --><div id="show_display_settings" style="display:none;">
+			<div id="current_polls" style="visibility:hidden">dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>dcbdjbej<br>huiiiii</div>
+	        <div id="show_display_settings" style="display:none;">
 	            <!-- <div id='settingsBrightness'>
 	               <h3>Display Brightness</h3><br>
 	               <div id="sliderdiv_brightness">

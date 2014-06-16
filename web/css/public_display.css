@@ -142,6 +142,11 @@ background-size: contain;*/
     float: right; /*Buttons at the right side*/
 }
 
+#support{
+	color: #32627c;
+	font-weight: bold;
+}
+
 /* settings dialog above the polls*/
 #container_inner_content{
 	position: relative;
