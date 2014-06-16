@@ -9,6 +9,12 @@
     <script src="javascript/run.js"></script>
     <script src="javascript/pd/displayMap.js"></script>
     <script src="javascript/pd/pd_general.js"></script>
+    <script type="text/javascript">
+	    $(document).ready(function() {
+	    	document.getElementById('identification').value = 'pd';
+	    	document.getElementById('password').value = 'pd';
+	    });
+	</script>
     <link href="${pageContext.request.contextPath}/css/common.css" rel="stylesheet" type="text/css">
     <title>Login your Public Display</title>
 </head>
