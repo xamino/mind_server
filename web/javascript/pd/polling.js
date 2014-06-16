@@ -14,20 +14,33 @@ function getRemainingSpace(){
  * load all polls 
  */
 function loadPolls(){
-	doTask(read_all_polls, null, function (data){
-		if(data.object.length == 0){
+	doTask("read_all_polls", null, function (data){
+		if(data.object.length == null){
 			var noPollsInDatabase = "There are currently no polls.";
 			document.getElementById("current_polls").innerHTML = noPollsInDatabase;
-			alert("keine polls");
 		}else{
-			alert("polls");
+			var polls = "";
 			for (var i = 0; i < data.object.length; i++) {
-				var polls = "";
+				
 //				polls += "<div id='poll_"+i"'>"+data.object[i].icon+"<br>"+data.object[i].question+"</div>";
-//				polls += '<div id="poll_"+i''></div>';
+
+				polls += "<div id='poll_"+ i +"'>";
+				polls += data.object[i].icon+"  "+data.object[i].question+"<br>";
+				//if null
+				for(var j = 0; j < data.object.user.length; j++){
+					polls += data.object.user[j].icon; //User
+				}
+				
+					
+				polls += "<hr>";
+				polls += "</div>";
 		        document.getElementById("current_polls").innerHTML = polls;
 			
 			}
 		}
 	});
+}
+
+function addPollsToUser(){
+	
 }

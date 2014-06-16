@@ -153,8 +153,9 @@ background-size: contain;*/
 }
 
 #current_polls{
-	overflow-y: scroll;
+	overflow-y: auto;
 	width: 100%;
+	border: 1px solid #32627c;
 }
 
 #login_location {
