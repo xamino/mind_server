@@ -39,9 +39,9 @@
 				<option>Threshold</option>
 				<option>All_directions</option>
 			</select>
-			
+			<!-- 
 			<button onclick="drawLocations()">GO!</button>
-
+ 			-->
             <!-- draw on map -->
             <!-- <div id="map_div"></div>-->
             <div id="map_container_div" onmousedown="return false">
