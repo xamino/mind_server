@@ -505,7 +505,7 @@ public class JsonConverter<E> {
             // get char before – this works always because index starts at 1
             char charBefore = string.charAt(index - 1);
             // check if char before current one is escape symbol – if yes, continue
-            if (charBefore != '\\') {
+            if (charBefore == '\\') {
                 continue;
             }
             // else count levels
