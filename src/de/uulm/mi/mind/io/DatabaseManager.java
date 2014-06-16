@@ -96,7 +96,7 @@ public class DatabaseManager {
         log.log(TAG, "Locations: " + rootContainer.query(Location.class).size());
         log.log(TAG, "Morsels: " + rootContainer.query(WifiMorsel.class).size());
 
-/*
+
         log.log(TAG, "In University Stats:");
         List<Area> set3 = rootContainer.query(new Predicate<Area>() {
             @Override
@@ -109,15 +109,16 @@ public class DatabaseManager {
             log.log(TAG, "Locations: " + university.getLocations().size());
             ArrayList<WifiMorsel> wifs = new ArrayList<>();
             for (Location location : university.getLocations()) {
-                wifs.addAll(location.getWifiMorsels());
+                if (location != null && location.getWifiMorsels()!=null)
+                    wifs.addAll(location.getWifiMorsels());
             }
             log.log(TAG, "Morsels: " + wifs.size());
         } else {
             log.log(TAG, "University does not exist!");
         }
 
-        */
 
+/*
         cleanDuplicates(rootContainer);
         rootContainer.commit();
         cleanNullLists(rootContainer);
@@ -126,6 +127,7 @@ public class DatabaseManager {
         rootContainer.commit();
         cleanNullLists(rootContainer);
         rootContainer.commit();
+        */
     }
 
     private void cleanNullLists(ObjectContainer rootContainer) {
@@ -261,6 +263,7 @@ public class DatabaseManager {
 
     /**
      * Opens a new session on the database only for this very read operation.
+     *
      * @param filter
      * @param <E>
      * @return
@@ -271,12 +274,13 @@ public class DatabaseManager {
 
     /**
      * Opens a new session on the database only for this very read operation.
+     *
      * @param filter
-     * @param depth Depths of children to be returned.
-     *              0 = object fields are initialized to defaults,
-     *              1 object fields loaded, 2 children are initialized to defaults,
-     *              3 children field loaded etc;
-     *              e.g. 5 could be Area-DataList-Location-DataList-WifiMorsel loaded but no further DataList
+     * @param depth  Depths of children to be returned.
+     *               0 = object fields are initialized to defaults,
+     *               1 object fields loaded, 2 children are initialized to defaults,
+     *               3 children field loaded etc;
+     *               e.g. 5 could be Area-DataList-Location-DataList-WifiMorsel loaded but no further DataList
      * @param <E>
      * @return
      */
