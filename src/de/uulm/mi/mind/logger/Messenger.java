@@ -23,7 +23,14 @@ public class Messenger {
      * Super tag that is in all messages printed by Messenger.
      */
     private final String TAG = "Messenger";
+    /**
+     * Whether to display errors or not.
+     */
     private final boolean debug;
+    /**
+     * Max timer stack size. More timers can be set but Messenger will warn each time.
+     */
+    private final int MAX_STACK_SIZE = 32;
     /**
      * The stack with which the TimerResult objects are managed.
      */
@@ -34,7 +41,7 @@ public class Messenger {
      * Messenger, ust the getInstance Method.
      */
     private Messenger() {
-        this.timers = new HashMap<>();
+        this.timers = new HashMap<>(MAX_STACK_SIZE);
         this.debug = Configuration.getInstance().isDebug();
     }
 
@@ -79,8 +86,8 @@ public class Messenger {
      */
     public synchronized void pushTimer(Object object, final String label) {
         // Make sure that we don't keep too many objects:
-        if (timers.size() > 32) {
-            log("Messenger", "WARNING: Excessive amount of stacks required " +
+        if (timers.size() > MAX_STACK_SIZE) {
+            this.log("Messenger", "WARNING: Excessive amount of stacks required " +
                     "for timer function – possible memory leak!");
             Iterator<Map.Entry<Object, Stack<TimerResult>>> it = timers.entrySet().iterator();
             while (it.hasNext()) {
