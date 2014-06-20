@@ -147,6 +147,11 @@ background-size: contain;*/
 	font-weight: bold;
 }
 
+.poll_user{
+	width: 60px;
+	height: 60px;
+}
+
 /* settings dialog above the polls*/
 #container_inner_content{
 	position: relative;

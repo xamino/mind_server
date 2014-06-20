@@ -111,7 +111,6 @@ function checkAwayArea() {
         var noAwayArea = "There is currently no away area (ID: 'Away') in the database. Add this area to see all necessary information.<br>Please contact the admin.";
         document.getElementById("awayArea_info").innerHTML = noAwayArea;
     }
-    getRemainingSpace();	//to find out size of remaining content (for polling) on reload
 //    });
 }
 

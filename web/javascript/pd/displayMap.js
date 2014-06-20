@@ -65,7 +65,7 @@ function initPublicDisplayStuff() {
 
             computeIconSize();
 
-            refreshUserData();
+            updatePdData();
 //			loadTestUser();
             initInterval();
         });
@@ -112,7 +112,7 @@ function initInterval() {
         clearInterval(interval);
     }
     interval = setInterval(function () {
-        refreshUserData();
+        updatePdData();
     }, refreshRate * +1000);
 }
 
@@ -531,9 +531,13 @@ jQuery.fn.redraw = function () {
 
 var refreshCounter = 0;
 /**
- * This function should be called periodically to refresh the users location visually
+ * This function should be called periodically to update the users location, polls, etc. visually
  */
-function refreshUserData() {
+function updatePdData() {
+
+	checkAwayArea();	// check periodically on reload
+	getRemainingSpace();	//to find out size of remaining content (for polling) on reload
+	
     if (balloonIsOpen()) {
         return;
     }
