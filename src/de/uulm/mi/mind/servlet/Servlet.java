@@ -92,6 +92,7 @@ public class Servlet extends HttpServlet {
      * @throws IOException
      */
     private Arrival getRequest(HttpServletRequest request) throws IOException {
+        request.setCharacterEncoding("UTF-8");
         BufferedReader reader = request.getReader();
         StringBuilder stringBuffer = new StringBuilder();
         do {

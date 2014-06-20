@@ -24,6 +24,11 @@ public class PositionFind extends Task<Arrival, Sendable> {
      * Morsel number tolerance for negotiation of goodness.
      */
     private final static int MORSEL_TOLERANCE = 0;
+    /**
+     * this value holds the difference between the s4 mini and the s3 mini
+     * wifimorsels' levels (has to be subtracted from s4 mini to become s3 mini)
+     */
+    private final int S4MINI_S3MINI_DIFF = 9;
     private final String LAST_POSITION = "lastPosition";
     private final String REAL_POSITION = "realPosition";
     private final String TAG = "PositionModule";
@@ -118,7 +123,6 @@ public class PositionFind extends Task<Arrival, Sendable> {
      * @param request The location to match against.
      * @return Location if found, else null.
      */
-
     private Location calculateLocation(Location request) {
         // STEP 1: Read and prepare device class
         // Should exists because we checked for existing uni wifi morsel before
@@ -129,6 +133,18 @@ public class PositionFind extends Task<Arrival, Sendable> {
             log.log(TAG, "Unknown Device: " + requestDeviceModel);
             requestDeviceClass = DeviceClass.CLASS2;
         }
+        //S4 MINI TO S3 MINI CONVERSION
+        // if device class is Galaxy S4 mini
+        else if (requestDeviceClass == DeviceClass.CLASS7) {
+            //convert morsels to S3 mini morsels
+            for (WifiMorsel morsel : request.getWifiMorsels()) {
+                morsel.setWifiLevel(morsel.getWifiLevel() - S4MINI_S3MINI_DIFF);
+            }
+            //set class to S3 mini for later calculations
+            requestDeviceClass = DeviceClass.CLASS2;
+            //S4 mini will now be treated as S3 mini
+        }
+        //END S4 MINI TO S3 MINI CONVERSION
 
         // Get University Area containing all locations from database
         DataList<Area> read = database.read(new Area("University"), 5);
@@ -269,7 +285,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
                 }
             }
             // calculate bestMatch candidate
-            float candidate = diffValueSum / (float)location.getWifiMorsels().size();
+            float candidate = diffValueSum / (float) location.getWifiMorsels().size();
             if (candidate < bestMatch) {
                 // if yes, take
                 bestMatch = candidate;

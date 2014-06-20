@@ -15,27 +15,59 @@ import java.util.*;
 /**
  * @author Tamino Hartmann
  *         <p/>
+ *         Class for mapping Java objects to JSON objects and vice versa. Custom code because we require a static $type
+ *         field for identifiying the Java object type. A base Java class must be registered. Any specific object that
+ *         may be sent must also be registered after constructing an instance of this JsonConverter. Ideally write a
+ *         wrapper for this. Fields can be registered to be ignored, although the filter is applied to ALL objects.
  */
-// todo abstract away primitives and not-primitive-primitives (like Date)
 public class JsonConverter<E> {
-
+    /**
+     * Logging tag.
+     */
     private final String TAG = "JsonConverter";
+    /**
+     * The quotation mark to use as escape value for values.
+     */
     private final char ESCAPE = '"';
+    /**
+     * The basic type key written and read from JSON. Default is $type.
+     */
     private final String TYPE_KEY;
+    /**
+     * For converting dates to and from JSON.
+     */
     private SimpleDateFormat sdf;
+    /**
+     * Instance of log.
+     */
     private Messenger log;
     /**
      * Hashmap of the registered typesClassString that the converter will convert with $TYPE_KEY.
      */
     private HashMap<Class<? extends E>, String> typesClassString;
+    /**
+     * Hashmap of the registered typesClassString that the converter will convert with $TYPE_KEY. Mirrored for easy
+     * access. Both are kept in sync.
+     */
     private HashMap<String, Class<? extends E>> typesStringClass;
-
+    /**
+     * A set of fields that is ignored in both directions. Applied to all objects!
+     */
     private Set<String> ignoreFields;
 
+    /**
+     * JsonConverter default constructor. Type field is set to $type.
+     */
     public JsonConverter() {
         this("$type");
     }
 
+    /**
+     * JsonConverter constructor where the type key value can be manually set. Note that it must be unique to work
+     * reliably!
+     *
+     * @param typeKey The type key to set.
+     */
     public JsonConverter(String typeKey) {
         log = Messenger.getInstance();
         this.TYPE_KEY = typeKey;
@@ -86,6 +118,14 @@ public class JsonConverter<E> {
         }
     }
 
+    /**
+     * Abstracted away method for creating JSON objects from Java objects.
+     *
+     * @param object The object to convert.
+     * @param <S>    The base class type.
+     * @return The string of the object.
+     * @throws IOException If something went wrong.
+     */
     private <S extends E> String objectJson(S object) throws IOException {
         if (object == null) {
             throw new IOException(TAG + ": Null object passed!");
@@ -196,6 +236,13 @@ public class JsonConverter<E> {
         }
     }
 
+    /**
+     * Abstracted method for reading a Java object from a JSON string.
+     *
+     * @param jsonObject The JSON formatted string.
+     * @return The Java object identified and filled.
+     * @throws IOException If something went wrong.
+     */
     private E writeObject(String jsonObject) throws IOException {
         // sanity: string starts and ends with {}
         if (!jsonObject.startsWith("{") || !jsonObject.endsWith("}")) {
@@ -353,10 +400,24 @@ public class JsonConverter<E> {
         }
     }
 
+    /**
+     * Method for packing a value into ESCAPE.
+     *
+     * @param key   The key value to set.
+     * @param value The value to write to the key.
+     * @return The combined string.
+     */
     private String pack(String key, String value) {
         return ESCAPE + key + ESCAPE + ":" + ESCAPE + value + ESCAPE;
     }
 
+    /**
+     * Helper function for getting a hash map of key-value pairs of an object. Note that sub-objects are not resolved.
+     *
+     * @param jsonObject The JSON formatted string.
+     * @return The hash map containing all the key value pairs.
+     * @throws IOException If something went wrong.
+     */
     private HashMap<String, String> jsonValues(String jsonObject) throws IOException {
         HashMap<String, String> tree = new HashMap<>();
         // remove object brackets at start and end
@@ -401,12 +462,18 @@ public class JsonConverter<E> {
      * Helper function that will try to find the scope of the next value in the json-string. Detection is based upon
      * what the first char of the string is. Function is capable of keeping track of recursive objects and will try to
      * find the correct end mark. Legal marks are (with their end mark): "–", {–}, [–]. If none of these three, it will
-     * return the the index before the next comma (for example when the string looks like thus: "null, ...").
+     * return the the index before the next comma (for example when the string looks like thus: "null, ..."). Escaped
+     * values in strings are ignored.
      *
      * @param string The string upon which to work
      * @return The index.
      */
     private int findEndBracket(String string) {
+        // catch if the string is only one char long
+        if (string.length() < 2) {
+            log.error(TAG, "findEndBracket failed due to too small string!");
+            return string.length() - 1;
+        }
         // get starting char
         char begin = string.charAt(0);
         // set ending char we're searching for
@@ -434,16 +501,23 @@ public class JsonConverter<E> {
         int index = 1;
         int level = 0;
         for (; index < string.length(); index++) {
-            char check = string.charAt(index);
-            if (level == 0 && check == end) {
+            char charCheck = string.charAt(index);
+            // get char before – this works always because index starts at 1
+            char charBefore = string.charAt(index - 1);
+            // check if char before current one is escape symbol – if yes, continue
+            if (charBefore == '\\') {
+                continue;
+            }
+            // else count levels
+            if (level == 0 && charCheck == end) {
                 break;
-            } else if (check == begin) {
+            } else if (charCheck == begin) {
                 level++;
-            } else if (check == end) {
+            } else if (charCheck == end) {
                 level--;
             }
         }
         // System.out.println(string.substring(0, index + 1));
         return index;
     }
-}
+} // end JsonConverter
