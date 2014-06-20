@@ -28,9 +28,23 @@ public class Configuration {
     private String dbPassword;
     private String dbType;
     private String isDebug;
+    private String fileLogPath;
+    private String fileLogActive;
 
 
     private Configuration() {
+    }
+
+    /**
+     * Creates and returns a singleton Configuration object
+     *
+     * @return
+     */
+    public static Configuration getInstance() {
+        if (instance == null) {
+            instance = new Configuration();
+        }
+        return instance;
     }
 
     public void init(String servletPath) {
@@ -55,6 +69,8 @@ public class Configuration {
                 this.dbPassword = config.getProperty("DATABASE_PASSWORD");
                 this.dbType = config.getProperty("DATABASE_TYPE");
                 this.isDebug = config.getProperty("DEBUG");
+                this.fileLogPath = config.getProperty("FILE_LOG_PATH");
+                this.fileLogActive = config.getProperty("FILE_LOG_ACTIVE");
 
                 String wifiNames = config.getProperty("UNIVERSITY_SSID_FILTER");
                 if (wifiNames != null)
@@ -100,22 +116,14 @@ public class Configuration {
                 this.dbType = config.getProperty("DATABASE_TYPE");
             if (this.isDebug == null)
                 this.isDebug = config.getProperty("DEBUG");
+            if (this.fileLogPath == null)
+                this.fileLogPath = config.getProperty("FILE_LOG_PATH");
+            if (this.fileLogActive == null)
+                this.fileLogActive = config.getProperty("FILE_LOG_ACTIVE");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-    }
-
-    /**
-     * Creates and returns a singleton Configuration object
-     *
-     * @return
-     */
-    public static Configuration getInstance() {
-        if (instance == null) {
-            instance = new Configuration();
-        }
-        return instance;
     }
 
     public String getDbName() {
@@ -168,5 +176,13 @@ public class Configuration {
 
     public boolean isDebug() {
         return Boolean.valueOf(isDebug);
+    }
+
+    public boolean isFileLogActive() {
+        return Boolean.valueOf(this.fileLogActive);
+    }
+
+    public String getFileLogPath() {
+        return this.fileLogPath;
     }
 }
