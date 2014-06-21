@@ -1,5 +1,6 @@
 package de.uulm.mi.mind.tasks.user;
 
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.enums.DeviceClass;
@@ -50,22 +51,30 @@ public class PositionFind extends Task<Arrival, Sendable> {
         // pull these out here to make checking if they exist easier
         Area last = ((Area) active.readData(LAST_POSITION));
         Area real = ((Area) active.readData(REAL_POSITION));
+        boolean update = false;
         // this implements server-side fuzziness to avoid fluttering of position_find
         if (last == null || real == null) {
             // this means it is the first time in this session, so we don't apply fuzziness
             active.writeData(LAST_POSITION, area);
             active.writeData(REAL_POSITION, area);
             user.setPosition(area.getID());
-        } else if (last.getID().equals(area.getID())) {
+            update = true;
+        } else if (last.getID().equals(area.getID()) && !real.getID().equals(area.getID())) {
             // update user for position, but only if last was already the same and the previous db entry is different
             active.writeData(REAL_POSITION, area);
             user.setPosition(area.getID());
+            update = true;
         } else {
             // this means the area is different than the one before, so change last but not real:
             active.writeData(LAST_POSITION, area);
         }
+        // log on change only to keep spam down
+        if (update) {
+            log.error(TAG, "Updating log!");
+            FileLogWrapper.positionUpdate(((User) active.getAuthenticated()), area);
+        }
         // everything okay, return real position area (must be freshly read because we might have written to it)
-        return (Area) active.readData(REAL_POSITION);
+        return ((Area) active.readData(REAL_POSITION));
     }
 
     /**

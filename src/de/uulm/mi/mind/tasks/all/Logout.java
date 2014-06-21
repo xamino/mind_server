@@ -1,6 +1,6 @@
 package de.uulm.mi.mind.tasks.all;
 
-import de.uulm.mi.mind.logger.permanent.FileLog;
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.Arrival;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
@@ -25,7 +25,7 @@ public class Logout extends Task<Arrival, Information> {
         if (activeUser == null) {
             return new Success(Success.Type.NOTE, "Session is already not valid!");
         }
-        FileLog.getInstance().logObject(activeUser.getAuthenticated(), "LOGOUT");
+        FileLogWrapper.logout(activeUser.getAuthenticated());
         activeUser.invalidate();
         Security.finish(activeUser);
         return new Success("Logout successful.");
