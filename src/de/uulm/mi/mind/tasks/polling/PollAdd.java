@@ -2,6 +2,7 @@ package de.uulm.mi.mind.tasks.polling;
 
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Poll;
@@ -99,6 +100,9 @@ public class PollAdd extends PollTask<Poll, Information> {
         }
         toSave.setOptions(options);
         toSave.setAllowedOptionSelections(poll.getAllowedOptionSelections());
+
+        //log
+        FileLogWrapper.pollCreate(((User) active.getAuthenticated()), toSave);
 
         // save to db
         return (Information) database.open(new Transaction() {

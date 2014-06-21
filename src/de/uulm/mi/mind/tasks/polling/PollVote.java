@@ -2,6 +2,7 @@ package de.uulm.mi.mind.tasks.polling;
 
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Poll;
@@ -13,6 +14,8 @@ import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.tasks.PollTask;
+
+import java.util.ArrayList;
 
 /**
  * @author Tamino Hartmann
@@ -48,6 +51,9 @@ public class PollVote extends PollTask<Poll, Information> {
         if (vote.getOptions().size() > original.getAllowedOptionSelections()) {
             return new Error(Error.Type.ILLEGAL_VALUE, "You may only vote " + original.getAllowedOptionSelections() + " times!");
         }
+        // stores where the user voted for logging
+        ArrayList<String> optionsAdded = new ArrayList<>();
+        ArrayList<String> optionsRemoved = new ArrayList<>();
         // apply votes to original
         for (PollOption option : original.getOptions()) {
             // find same polloption
@@ -64,6 +70,7 @@ public class PollVote extends PollTask<Poll, Information> {
                     log.log(TAG, "Vote for " + option.getKey() + " removed for " + user.getEmail() + ".");
                     option.getUsers().remove(user.getEmail());
                 }
+                optionsRemoved.add(option.getOptionValue());
                 // continue with next option
                 continue;
             }
@@ -71,10 +78,13 @@ public class PollVote extends PollTask<Poll, Information> {
             if (!option.getUsers().contains(user.getEmail())) {
                 log.log(TAG, "Added new vote to " + original.getKey() + " for " + user.getEmail() + ".");
                 option.getUsers().add(user.getEmail());
+                optionsAdded.add(option.getOptionValue());
             } else {
                 log.log(TAG, "Vote for " + original.getKey() + " did not change.");
             }
         }
+        // log poll vote
+        FileLogWrapper.pollVote(user, original, optionsAdded, optionsRemoved);
         // done – save poll
         return (Information) database.open(new Transaction() {
             @Override

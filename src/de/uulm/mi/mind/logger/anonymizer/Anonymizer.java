@@ -30,6 +30,13 @@ public class Anonymizer {
         return INSTANCE;
     }
 
+    /**
+     * Gets a key for a Data object, creating a new one if one doesn't exist yet. Collisions are possible, if unlikely!
+     *
+     * @param data The data for which to generate a key.
+     * @param <E>  The data type.
+     * @return The key.
+     */
     public <E extends Data> String getKey(E data) {
         PointerMap<E> mapped = new PointerMap<>(data);
         // check if exists and if yes get the key
@@ -42,10 +49,22 @@ public class Anonymizer {
         return mapped.getKey();
     }
 
+    /**
+     * Removes a key if exists for the given object.
+     *
+     * @param data The object for which to unregister the key.
+     * @param <E>  The data type.
+     */
     public <E extends Data> void removeKey(E data) {
         store.remove(new PointerMap<>(data));
     }
 
+    /**
+     * Special class for storing an object<---->key mapping. Note that equals has been overwritten to give the
+     * expected behavior.
+     *
+     * @param <E> The data type of the pointer.
+     */
     private class PointerMap<E> {
         private E pointer;
         private String key;

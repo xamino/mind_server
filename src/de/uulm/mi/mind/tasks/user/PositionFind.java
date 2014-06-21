@@ -70,7 +70,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
         // log on change only to keep spam down
         if (update) {
-            log.error(TAG, "Updating log!");
+            // log.error(TAG, "Updating log!");
             FileLogWrapper.positionUpdate(((User) active.getAuthenticated()), area);
         }
         // everything okay, return real position area (must be freshly read because we might have written to it)
