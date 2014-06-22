@@ -2,6 +2,7 @@ package de.uulm.mi.mind.tasks.polling;
 
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Poll;
@@ -77,8 +78,7 @@ public class PollAdd extends PollTask<Poll, Information> {
         if (safeString(poll.getIcon())) {
             toSave.setIcon(poll.getIcon());
         } else {
-            // todo default icon?
-            toSave.setIcon("default");
+            toSave.setIcon("images/polling/default.png");
         }
         // set poll state (ongoing because we created it)
         toSave.setState(PollState.ONGOING);
@@ -99,6 +99,9 @@ public class PollAdd extends PollTask<Poll, Information> {
         }
         toSave.setOptions(options);
         toSave.setAllowedOptionSelections(poll.getAllowedOptionSelections());
+
+        //log
+        FileLogWrapper.pollCreate(((User) active.getAuthenticated()), toSave);
 
         // save to db
         return (Information) database.open(new Transaction() {

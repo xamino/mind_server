@@ -30,6 +30,7 @@ public class Configuration {
     private String isDebug;
     private String fileLogPath;
     private String fileLogActive;
+    private String fileLogAsync;
 
 
     private Configuration() {
@@ -71,6 +72,7 @@ public class Configuration {
                 this.isDebug = config.getProperty("DEBUG");
                 this.fileLogPath = config.getProperty("FILE_LOG_PATH");
                 this.fileLogActive = config.getProperty("FILE_LOG_ACTIVE");
+                this.fileLogAsync = config.getProperty("FILE_LOG_ASYNC");
 
                 String wifiNames = config.getProperty("UNIVERSITY_SSID_FILTER");
                 if (wifiNames != null)
@@ -116,10 +118,16 @@ public class Configuration {
                 this.dbType = config.getProperty("DATABASE_TYPE");
             if (this.isDebug == null)
                 this.isDebug = config.getProperty("DEBUG");
+            /*
+            // this is knowingly not loaded! FileLog will build the directory by itself if none is set by the user.
+            // note that this means that by default, the path will be built by the system!
             if (this.fileLogPath == null)
                 this.fileLogPath = config.getProperty("FILE_LOG_PATH");
+            */
             if (this.fileLogActive == null)
                 this.fileLogActive = config.getProperty("FILE_LOG_ACTIVE");
+            if (this.fileLogAsync == null)
+                this.fileLogAsync = config.getProperty("FILE_LOG_ASYNC");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -184,5 +192,9 @@ public class Configuration {
 
     public String getFileLogPath() {
         return this.fileLogPath;
+    }
+
+    public boolean getFileLogAsync() {
+        return Boolean.valueOf(this.fileLogAsync);
     }
 }

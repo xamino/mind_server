@@ -471,7 +471,9 @@ public class JsonConverter<E> {
     private int findEndBracket(String string) {
         // catch if the string is only one char long
         if (string.length() < 2) {
-            log.error(TAG, "findEndBracket failed due to too small string!");
+            // this can happen if a single number is sent without being bracketed by "". It'll work, but we'll warn
+            // to be sure.
+            log.error(TAG, "Warning: findEndBracket returned early due to small string! <" + string + ">");
             return string.length() - 1;
         }
         // get starting char

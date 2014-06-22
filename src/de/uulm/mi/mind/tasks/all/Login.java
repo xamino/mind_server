@@ -1,12 +1,13 @@
 package de.uulm.mi.mind.tasks.all;
 
-import de.uulm.mi.mind.tasks.Task;
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.Authenticated;
 import de.uulm.mi.mind.security.Security;
+import de.uulm.mi.mind.tasks.Task;
 
 import java.util.Set;
 
@@ -28,6 +29,7 @@ public class Login extends Task<Authenticated, Information> {
         if (activeUser == null) {
             return new Error(Error.Type.LOGIN, "Login failed. Check identification, authentication, and user type!");
         }
+        FileLogWrapper.login(activeUser.getAuthenticated());
         // otherwise we finish again directly by returning the session
         Security.finish(activeUser);
         // If it was the first login, we send a note instead of just a simple ok so the client can know

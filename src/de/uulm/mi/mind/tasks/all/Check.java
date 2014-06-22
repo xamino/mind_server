@@ -1,12 +1,12 @@
 package de.uulm.mi.mind.tasks.all;
 
-import de.uulm.mi.mind.tasks.Task;
 import de.uulm.mi.mind.objects.Arrival;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.Security;
+import de.uulm.mi.mind.tasks.Task;
 
 import java.util.Set;
 
