@@ -66,7 +66,7 @@ function initPublicDisplayStuff() {
             computeIconSize();
 
             updatePdData();
-//			loadTestUser();
+			loadTestUser();
             initInterval();
         });
     });
@@ -553,67 +553,68 @@ function updatePdData() {
 //TEST STUFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 function loadTestUser() {
-    var user1 = new User("a@a.a", null, "a", false);
+    var user1 = new User("b@b.b", "b", false);
     user1.status = "OCCUPIED";
-    user1.position = 3301;
+    user1.position = 333; //3301
 //	user1.iconRef = "crab.png";
 //	user1.x = 400;
 //	user1.y = 300;
-    var user2 = new User("c@c.c", null, "c", false);
-    user2.position = 3301;
+    var user2 = new User("c@c.c", "c", false);
+    user2.position = 333; //3301
     user2.status = "OCCUPIED";
 //	user2.iconRef = "cow.png";
 //	user2.x = 450;
 //	user2.y = 400;
-    var user3 = new User("d@d.d", null, "d", false);
-    user3.position = 3301;
+    var user3 = new User("d@d.d", "d", false);
+    user3.position = 333; //3301
     user3.status = "AVAILABLE";
 //	user3.iconRef = "rabbit.png";
 //	user3.x = 450;
 //	user3.y = 600;
-    var user4 = new User("e@e.e", null, "e", false);
-    user4.position = 3301;
+    var user4 = new User("e@e.e", "e", false);
+    user4.position = 333;//3301;
     user4.status = "AWAY";
 //	user4.iconRef = "sheep.png";
-    var user5 = new User("f@f.f", null, "f", false);
-    user5.position = 3304;
+    var user5 = new User("f@f.f", "f", false);
+    user5.position = 332;//3304;
     user5.status = "DO_NOT_DISTURB";
 //	user5.iconRef = "deer.png";
-    var user6 = new User("fa@f.f", null, "fa", false);
-    user6.position = 3304;
+    var user6 = new User("fa@f.f", "fa", false);
+    user6.position = 332; //3304;
     user6.status = "AVAILABLE";
-    var user7 = new User("fb@f.f", null, "fb", false);
-    user7.position = 3304;
+    var user7 = new User("fb@f.f", "fb", false);
+    user7.position = 332; //3304;
     user7.status = "AVAILABLE";
-    var user8 = new User("fc@f.f", null, "fc", false);
-    user8.position = 3304;
+    var user8 = new User("fc@f.f", "fc", false);
+    user8.position = 332;//3304;
     user8.status = "AVAILABLE";
-    var user9 = new User("fd@f.f", null, "fd", false);
-    user9.position = 3304;
+    var user9 = new User("fd@f.f", "fd", false);
+    user9.position = 332;//3304;
     user9.status = "AVAILABLE";
-    var user10 = new User("fe@f.f", null, "fe", false);
-    user10.position = 3304;
+    var user10 = new User("fe@f.f", "fe", false);
+    user10.position = 332;//3304;
     user10.status = "AVAILABLE";
-    var user11 = new User("ff@f.f", null, "ff", false);
-    user11.position = 3304;
+    var user11 = new User("ff@f.f", "ff", false);
+    user11.position = 332;//3304;
     user11.status = "AVAILABLE";
-    var user12 = new User("fg@f.f", null, "fg", false);
-    user12.position = 3304;
+    var user12 = new User("fg@f.f", "fg", false);
+    user12.position = 332;//3304;
     user12.status = "AVAILABLE";
 
+//    var testusers = new Array(user1, user2, user3);
     var testusers = new Array();
     testusers[user1.email] = user1;
     testusers[user2.email] = user2;
     testusers[user3.email] = user3;
-    testusers[user4.email] = user4;
-    testusers[user5.email] = user5;
-    testusers[user6.email] = user6;
-    testusers[user7.email] = user7;
-    testusers[user8.email] = user8;
-    testusers[user9.email] = user9;
-    testusers[user10.email] = user10;
-    testusers[user11.email] = user11;
-    testusers[user12.email] = user12;
+//    testusers[user4.email] = user4;
+//    testusers[user5.email] = user5;
+//    testusers[user6.email] = user6;
+//    testusers[user7.email] = user7;
+//    testusers[user8.email] = user8;
+//    testusers[user9.email] = user9;
+//    testusers[user10.email] = user10;
+//    testusers[user11.email] = user11;
+//    testusers[user12.email] = user12;
     updateUserListOnReceive(testusers);
 }
 
@@ -745,12 +746,39 @@ function balloonify(user) {
     }
     var positioning = verticalpos + " " + horizontalpos;
     var statusInfo = getInfoByStatus(user.status);
+    
+    var balloonContent = '<p id="balloonParagraph" style="background-color:' + statusInfo.color + ';">'
+    + '<strong>' + user.name + ' in ' + user.position + '</strong>'
+    + '<br>' + statusInfo.txt + '</p>';
+    
+	//add polls to user balloon
+	    //for each poll
+	    for ( var i = 0; i < userPerPoll[user.email+""].length; i++) {
+			//icon 
+	    	var icon = userPerPoll[user.email][i][0]+"";
+	    	var currentOption;
+	    	balloonContent += '<p id="balloonPolls">';
+	    	balloonContent += '<img style="width:20px; height:20px;"class="poll_user_icon" src="'+icon+'"><br>';
+	    	//for each checked option
+	    	for ( var j = 0; j < userPerPoll[user.email+""][i][1].length; j++) {
+	    		currentOption = userPerPoll[user.email+""][i][1][j]+"";
+	    		if(currentOption.length <= 15){
+	    			balloonContent += currentOption+"<br>";
+	    			
+	    		}else{
+	    			var balloonContentPart = currentOption.substr(0, 15);
+	    			balloonContent += balloonContentPart+" ...<br>";
+	    		}
+	    		
+			}
+	    	balloonContent += '</p>';
+		}
+
+    
     $(mod_id).showBalloon({
         position: positioning,
         showDuration: 250,
-        contents: '<p id="balloonParagraph" style="background-color:' + statusInfo.color + ';">'
-            + '<strong>' + user.name + ' in ' + user.position + '</strong>'
-            + '<br>' + statusInfo.txt + '</p>'
+        contents: balloonContent
         /*
          +'<p>Send me a message!</p>'
          //+'<input type="hidden" value="'+user.email+'" id="userBalloonID" />'

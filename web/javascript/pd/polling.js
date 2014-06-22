@@ -117,36 +117,124 @@ var user_polls = [];
  */
 function addPollsToUser(){
 
-	doTask("read_all_polls", null, function (data){
+	/*doTask("read_all_polls", null, function (data){
 		//no polls in database
 		if(data.object.length == 0){
 			//do nothing
 		//polls in database
 		}else{
-			var polls = "";
 			//all polls
 			var pollObjects = data.object;
 			for (var poll in pollObjects) {
-				var userPerPoll = [];
+				var userPerPoll = new Array();
+//				alert(""+JSON.stringify(userPerPoll));
 				for (var option in poll.options) {
+					alert("for");
 					for (var user in option.users) {
 						if (userPerPoll[user] == undefined) {
-							userPerPoll[user] =  [];
+							userPerPoll[user] =  new Array();
+							alert("drin");
 						}
+						alert("obere for");
 						userPerPoll[user].push(option);
 					}
 				}
 //				alert(""+JSON.stringify(userPerPoll));
-				for (var i =0; i < userPerPoll.length; i++) {
+				for (var i = 0; i < userPerPoll.length; i++) {
 					if (user_polls[userPerPoll[i].user] == undefined) {
-						user_polls[userPerPoll[i].user] = [];
+						user_polls[userPerPoll[i].user] = new Array();
+						alert("drin2");
 					}
+					alert("untere for");
 					user_polls[userPerPoll[i].user].push({icon: poll.icon, answers:userPerPoll[user]});
 				}
 			}
 			
 //			alert(""+JSON.stringify(user_polls));
 		}
+
+		});*/
+	
+	doTask("read_all_polls", null, function (data){
+		//no polls in database
+		if(data.object.length == 0){
+			//do nothing
+		//polls in database
+		}else{
+//			var pollObjects = data.object;
+			var userPerPoll = [];
+			//all polls
+			for (var i = 0; i < data.object.length; i++) {
+				
+//				alert("for1");
+//				alert(""+JSON.stringify(userPerPoll));
+				//options per poll
+				for (var j = 0; j < data.object[i].options.length; j++) {
+//					alert("for");
+					//users per options per poll
+					for (var k = 0; k < data.object[i].options[j].users.length; k++) {
+						//create user array
+						var user = data.object[i].options[j].users[k]+"";
+						if (userPerPoll[user] == undefined) {
+							userPerPoll[user] = [];
+						}
+						//add poll to user
+//						alert(data.object[i]+"");
+						if(userPerPoll[user][i] == undefined){
+							userPerPoll[user].push([]);
+							userPerPoll[user][userPerPoll[user].length-1][0] = data.object[i].icon;
+							userPerPoll[user][userPerPoll[user].length-1][1] = [];
+						}
+						//add option to current user
+						userPerPoll[user][userPerPoll[user].length-1][1].push(data.object[i].options[j].optionValue+"");
+						
+						
+
+//						var name = [];
+//						userPerPoll.push(user);
+//						alert(""+JSON.stringify(userPerPoll));
+//						alert(user+","+userPerPoll[user]+"\n"+userPerPoll[user][data.object[i]]+"\n"+);
+						/*if (userPerPoll[user] == undefined) {
+							userPerPoll[user] = [];
+							alert(""+JSON.stringify(userPerPoll));
+//							alert("drin");
+						}*/
+//						alert("obere for");
+//						userPerPoll[k].push(data.object[i].options[j]);
+//						var test = data.object[i].options[j];
+//						alert(""+JSON.stringify(test));
+//						alert(""+JSON.stringify(userPerPoll));
+					}
+				}
+//				alert(""+JSON.stringify(userPerPoll));
+				/*for (var i = 0; i < userPerPoll.length; i++) {
+					if (user_polls[userPerPoll[i].user] == undefined) {
+						user_polls[userPerPoll[i].user] = new Array();
+//						alert("drin2");
+					}
+//					alert("untere for");
+					user_polls[userPerPoll[i].user].push({icon: poll.icon, answers:userPerPoll[user]});
+				}*/
+			}
+			
+//			alert("#polls: "+data.object.length+" #answers of poll 1: "+data.object[0].options.length);
+			
+//			alert(userPerPoll.toString());
+//			alert(userPerPoll["l@l.l"].length);
+//			alert(""+JSON.stringify(userPerPoll));
+			
+//			alert(""+JSON.stringify(userPerPoll));
+//			alert(userPerPoll.toString());
+//			
+			var name = "l@l.l";
+//			alert(userPerPoll[name]);
+			
+//			alert("name: "+userPerPoll["l@l.l"]+
+//			"\n,poll:"+userPerPoll["l@l.l"][0]+
+//			"\n,poll icon:"+userPerPoll["l@l.l"][0][0]+
+//			"\n,poll answer length: "+ userPerPoll["l@l.l"][0][1].length);
+		}
+		
 
 		});
 	
