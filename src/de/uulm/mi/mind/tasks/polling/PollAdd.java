@@ -78,8 +78,7 @@ public class PollAdd extends PollTask<Poll, Information> {
         if (safeString(poll.getIcon())) {
             toSave.setIcon(poll.getIcon());
         } else {
-            // todo default icon?
-            toSave.setIcon("default");
+            toSave.setIcon("images/polling/default.png");
         }
         // set poll state (ongoing because we created it)
         toSave.setState(PollState.ONGOING);
