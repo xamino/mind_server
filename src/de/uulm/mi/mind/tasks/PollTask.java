@@ -44,7 +44,7 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
      * @return The datalist.
      */
     protected DataList<Poll> readValidPoll(Poll filter) {
-        DataList<Poll> data = database.read(filter, 4); // Poll, DataList, PollOption, UserList
+        DataList<Poll> data = database.read(filter, 5); // Poll, DataList, PollOption, UserList
         if (data == null) {
             log.error(TAG, "Poll(s) could not be found!");
             return null;
