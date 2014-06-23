@@ -34,6 +34,7 @@
         }
         if (active != null) {
             out.print(active.getSESSION());
+            Messenger.getInstance().log("PDLogin", "@ "+ip);
             Security.finish(active);
         }
 %>">
