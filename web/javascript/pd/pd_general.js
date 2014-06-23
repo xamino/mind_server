@@ -7,7 +7,7 @@ function onLoadOfPdPage() {
     trySession(sessionCookie, function () {
         trySession(sessionHtml, function () {
             alert("You have to be logged in. IP match might have missed!");
-            // window.location.href = "public_display_login.jsp";
+            window.location.href = "public_display_login.jsp";
         }, function () {
             session = sessionHtml;
             initPublicDisplayStuff();
