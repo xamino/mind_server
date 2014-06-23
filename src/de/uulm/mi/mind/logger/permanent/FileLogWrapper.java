@@ -86,17 +86,9 @@ public class FileLogWrapper {
         });
     }
 
-    public static void pollVote(User user, Poll poll, ArrayList<String> added, ArrayList<String> removed) {
+    public static void pollVote(User user, Poll poll, final ArrayList<String> added, final ArrayList<String> removed) {
         final String userKey = anonymizer.getKey(user);
         final String pollKey = anonymizer.getKey(poll);
-        StringBuilder builder = new StringBuilder();
-        for (String s : added) {
-            builder.append("+").append(s).append(" ");
-        }
-        for (String s : removed) {
-            builder.append("-").append(s).append(" ");
-        }
-        final String options = builder.toString();
         fileLog.log(new LogWorker() {
             @Override
             public LogObject logCreate() {
@@ -108,6 +100,14 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
+                        StringBuilder builder = new StringBuilder();
+                        for (String s : added) {
+                            builder.append("+").append(s).append(" ");
+                        }
+                        for (String s : removed) {
+                            builder.append("-").append(s).append(" ");
+                        }
+                        final String options = builder.toString();
                         return userKey + " @ " + pollKey + " : " + options;
                     }
                 };
