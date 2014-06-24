@@ -366,7 +366,7 @@ public class JsonConverter<E> {
             while (!value.isEmpty()) {
                 int end = findEndBracket(value) + 1;
                 String nextObject = value.substring(0, end);
-                if (clazz == Object[].class || DataList.class.isAssignableFrom(clazz)) { //TODO || clazz == Data.class ?
+                if (clazz == Object[].class || clazz.isAssignableFrom(DataList.class)) { //TODO || clazz == Data.class ?
                     // objects
                     objects.add(writeObject(nextObject));
                 } else if (Collection.class.isAssignableFrom(clazz)) {
