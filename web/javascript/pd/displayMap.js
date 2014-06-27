@@ -236,9 +236,18 @@ function addUserIcon(user) {
     icon = null;
 }
 
+/**
+ * This function removes a user icon and (if necessary) the user's poll icon
+ * if user becomes invisible
+ */
 function removeUserWithIcon(email) {
     var iconElement = document.getElementById('icon_' + email);
     if (iconElement != null) {
+    	//if poll icon exists
+    	var pollIconElement = document.getElementById("pollIcon_"+email);
+    	if(pollIconElement!=null){
+    		pollIconElement.parentNode.removeChild(pollIconElement);	//remove poll icon (like user)
+    	}
         iconElement.parentNode.removeChild(iconElement);
     }
     removeItem(users, email);
