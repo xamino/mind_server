@@ -4,17 +4,18 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    <script src="javascript/jquery-2.1.0.min.js"></script>
-    <script src="javascript/library.js"></script>
-    <script src="javascript/run.js"></script>
-    <script src="javascript/pd/displayMap.js"></script>
-    <script src="javascript/pd/pd_general.js"></script>
-    <script type="text/javascript">
+    <script src="javascript/jquery-2.1.0.min.js" type="text/javascript"></script>
+    <script src="javascript/library.js" type="text/javascript"></script>
+    <script src="javascript/run.js" type="text/javascript"></script>
+    <script src="javascript/pd/displayMap.js" type="text/javascript"></script>
+    <script src="javascript/pd/pd_general.js" type="text/javascript"></script>
+    <script src="javascript/pd/polling.js" type="text/javascript"></script>
+    <!-- <script type="text/javascript">
 	    $(document).ready(function() {
 	    	document.getElementById('identification').value = 'pd';
 	    	document.getElementById('password').value = 'pd';
 	    });
-	</script>
+	</script>-->
     <link href="${pageContext.request.contextPath}/css/common.css" rel="stylesheet" type="text/css">
     <title>Login your Public Display</title>
 </head>
@@ -45,8 +46,8 @@
                 <input type="submit" value="Login"/>
             </form>
         </div>
-
-    </div>
+	
+	</div>
 
     <div id="footer">
         <!-- TODO: nice Footer -->

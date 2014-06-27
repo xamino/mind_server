@@ -2,6 +2,7 @@ package de.uulm.mi.mind.tasks.polling;
 
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Poll;
@@ -29,6 +30,8 @@ public class PollAdd extends PollTask<Poll, Information> {
      */
     private final long DEFAULT_ENDOFFSET = 30 * 60 * 1000;
     private final int GENERATED_KEY_LENGTH = 8;
+    private final int QUESTION_LENGTH = 50;
+    private final int ANSWER_LENGTH = 25;
 
     @Override
     public boolean validateInput(Poll object) {
@@ -48,6 +51,15 @@ public class PollAdd extends PollTask<Poll, Information> {
     @Override
     public Information doWork(Active active, Poll poll, boolean compact) {
         final Poll toSave;
+        // check length of strings
+        if (poll.getQuestion().length() > QUESTION_LENGTH) {
+            return new Error(Error.Type.ILLEGAL_VALUE, "Question may be max " + QUESTION_LENGTH + " chars long!");
+        }
+        for (PollOption option : poll.getOptions()) {
+            if (option.getOptionValue().length() > ANSWER_LENGTH) {
+                return new Error(Error.Type.ILLEGAL_VALUE, "Option answer may be max " + ANSWER_LENGTH + " chars long!");
+            }
+        }
         // if no end date was sent along we use now + 30min
         if (poll.getEnd() == null) {
             Date end = new Date(System.currentTimeMillis() + DEFAULT_ENDOFFSET);
@@ -66,8 +78,7 @@ public class PollAdd extends PollTask<Poll, Information> {
         if (safeString(poll.getIcon())) {
             toSave.setIcon(poll.getIcon());
         } else {
-            // todo default icon?
-            toSave.setIcon("default");
+            toSave.setIcon("images/polling/default.png");
         }
         // set poll state (ongoing because we created it)
         toSave.setState(PollState.ONGOING);
@@ -88,6 +99,9 @@ public class PollAdd extends PollTask<Poll, Information> {
         }
         toSave.setOptions(options);
         toSave.setAllowedOptionSelections(poll.getAllowedOptionSelections());
+
+        //log
+        FileLogWrapper.pollCreate(((User) active.getAuthenticated()), toSave);
 
         // save to db
         return (Information) database.open(new Transaction() {

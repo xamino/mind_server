@@ -177,7 +177,7 @@ $(document).on("mousemove", "#map_png_div", function (e) {
                 if (x1 > x2) { //from right to left
                     if (y1 < y2) { //from top to bottom
                         $('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">' +
-                            '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
+                            '<tr><td>Id (i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
                             '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">' + (x1 - WIDTH + -4) + '</td></tr>' +
                             '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">' + y1 + '</td></tr>' +
                             '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">' + (WIDTH + +4) + '</td></tr>' +
@@ -189,7 +189,7 @@ $(document).on("mousemove", "#map_png_div", function (e) {
                         finalHeight = HEIGHT;
                     } else { //from bottom to top
                         $('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">' +
-                            '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
+                            '<tr><td>Id (i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
                             '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">' + (+x1 - +WIDTH + -2) + '</td></tr>' +
                             '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">' + y2 + '</td></tr>' +
                             '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">' + (WIDTH + +2) + '</td></tr>' +
@@ -203,7 +203,7 @@ $(document).on("mousemove", "#map_png_div", function (e) {
                 } else {	//left to right
                     if (y1 > y2) { //from bottom to top
                         $('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">' +
-                            '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
+                            '<tr><td>Id (i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
                             '<tr id="update_tdX"><td>X-Coordinate:</td><td id="xCorValue">' + (x1 + -2) + '</td></tr>' +
                             '<tr id="update_tdY"><td>Y-Coordinate:</td><td id="yCorValue">' + (y2 + -1) + '</td></tr>' +
                             '<tr id="update_tdWidth"><td>Width:</td><td id="widthValue">' + (WIDTH + +2) + '</td></tr>' +
@@ -215,7 +215,7 @@ $(document).on("mousemove", "#map_png_div", function (e) {
                         finalHeight = HEIGHT + +1;
                     } else { //from top to bottom
                         $('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">' +
-                            '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
+                            '<tr><td>Id (i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>' +
                             //a user has the possibility to modify the values --> error detection!
 //                    	'<tr><td>X-Coordinate:</td><td id="update_tdX"><input type="text" id="xCor" name="xCor" value="'+x1+'"></td></tr>'+
 //                    	'<tr><td>Y-Coordinate:</td><td id="update_tdY"><input type="text" id="yCor" name="yCor" value="'+y1+'"></td></tr>'+
@@ -450,7 +450,7 @@ $(document).on("mouseup", "#map_png_div", function (e) {
         //document.getElementById('addSomeStuff').appendChild('<tr><td><input type="submit" value="Add Area"></td><td></td></tr>');
 
         /* $('#areaForm').html('<table id="addSomeStuff" border="0" cellpadding="3" cellspacing="0">'+
-         '<tr><td>Id (numbers, i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
+         '<tr><td>Id (i.e. 331):</td><td><input type="text" id="id" name="id"></td></tr>'+
          //a user has the possibility to modify the values --> error detection!
          //     		'<tr><td>X-Coordinate:</td><td id="update_tdX"><input type="text" id="xCor" name="xCor" value="'+x1+'"></td></tr>'+
          //     		'<tr><td>Y-Coordinate:</td><td id="update_tdY"><input type="text" id="yCor" name="yCor" value="'+y1+'"></td></tr>'+

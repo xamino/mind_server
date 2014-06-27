@@ -1,22 +1,23 @@
-package de.uulm.mi.mind.tasks.admin;
+package de.uulm.mi.mind.tasks.polling;
 
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.Poll;
 import de.uulm.mi.mind.security.Active;
-import de.uulm.mi.mind.tasks.AdminTask;
+import de.uulm.mi.mind.tasks.PollTask;
 
 /**
  * @author Tamino Hartmann
  */
-public class PollRead extends AdminTask<Poll, Sendable> {
+public class PollRead extends PollTask<Poll, Sendable> {
     @Override
     public boolean validateInput(Poll object) {
-        return true;
+        // Since this method is meant to filter, we want an object
+        return object != null;
     }
 
     @Override
     public Sendable doWork(Active active, Poll object, boolean compact) {
-        return database.read(object,3);
+        return readValidPoll(object);
     }
 
     @Override

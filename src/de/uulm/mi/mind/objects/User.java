@@ -34,6 +34,10 @@ public class User implements Sendable, Saveable, Authenticated {
         this.admin = admin;
     }
 
+    public User(String email, String name) {
+        this(email, name, false);
+    }
+
     public String getPwdHash() {
         return pwdHash;
     }

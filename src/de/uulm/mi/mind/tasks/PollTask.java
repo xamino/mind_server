@@ -2,6 +2,7 @@ package de.uulm.mi.mind.tasks;
 
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
@@ -44,7 +45,7 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
      * @return The datalist.
      */
     protected DataList<Poll> readValidPoll(Poll filter) {
-        DataList<Poll> data = database.read(filter, 4); // Poll, DataList, PollOption, UserList
+        DataList<Poll> data = database.read(filter, 5); // Poll, DataList, PollOption, UserList
         if (data == null) {
             log.error(TAG, "Poll(s) could not be found!");
             return null;
@@ -59,6 +60,8 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
                 log.log(TAG, "Ending poll " + poll.getQuestion() + "!");
                 poll.setState(PollState.ENDED);
                 toUpdate.add(poll);
+                // log
+                FileLogWrapper.pollEnded(poll);
             } else if (new Date().after(poll.getEnd()) && poll.getState() != PollState.CLOSED) {
                 log.log(TAG, "Closing poll " + poll.getQuestion() + "!");
                 poll.setState(PollState.CLOSED);

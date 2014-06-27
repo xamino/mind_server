@@ -27,10 +27,14 @@ public class PublicDisplay implements Sendable, Authenticated, Saveable {
     private PublicDisplay() {
     }
 
-    public PublicDisplay(String identification, String token, String location, int coordinateX, int coordinateY) {
-        this.location = location;
+    public PublicDisplay(String identification, String token) {
         this.identification = identification;
         this.token = token;
+    }
+
+    public PublicDisplay(String identification, String token, String location, int coordinateX, int coordinateY) {
+        this(identification, token);
+        this.location = location;
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
     }

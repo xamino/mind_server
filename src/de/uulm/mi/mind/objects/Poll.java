@@ -114,7 +114,7 @@ public class Poll implements Sendable, Saveable {
     public Saveable deepClone() {
         Poll p = new Poll(question, end);
         p.setAllowedOptionSelections(allowedOptionSelections);
-        p.setCreated(p.created);
+        p.setCreated(created);
         p.setIcon(icon);
         p.setKey(key);
         p.setOwner(owner);

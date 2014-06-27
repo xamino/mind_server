@@ -65,7 +65,7 @@ function initPublicDisplayStuff() {
 
             computeIconSize();
 
-            refreshUserData();
+            updatePdData();
 //			loadTestUser();
             initInterval();
         });
@@ -112,7 +112,7 @@ function initInterval() {
         clearInterval(interval);
     }
     interval = setInterval(function () {
-        refreshUserData();
+        updatePdData();
     }, refreshRate * +1000);
 }
 
@@ -247,6 +247,7 @@ function removeUserWithIcon(email) {
 /**
  * This function sets a user icon's position and size
  * in consideration of the scale factor
+ * this function also sets a poll icon to a user, if the user has polls
  * @param user the user
  */
 function placeUserIcon(user) {
@@ -261,7 +262,6 @@ function placeUserIcon(user) {
 
         //refresh source (in case of icon swapping)
         icon.src = "/images/custom_icons/icon_" + user.email + "#" + new Date().getTime();
-        ;
 
         icon.style.width = displayedIconSize + "px";
         icon.style.left = Math.round(user.x - displayedIconSize / 2) + "px";
@@ -271,6 +271,35 @@ function placeUserIcon(user) {
         var statusinfo = getInfoByStatus(user.status);
         icon.className = 'micon ' + statusinfo.classname;
     }
+    
+    //set poll-icon above user-icon (on the map)
+    //check if user has a poll
+    if(userPollsList[user.email+""] != null){
+    	//user has a poll
+    	if(userPollsList[user.email+""]==="yes"){
+    		//set left and top like above plus 2/3 of user-icon size
+    		var left = Math.round(user.x - displayedIconSize / 2) + (Math.round(displayedIconSize / 3)*2);
+    		var top = Math.round(user.y - displayedIconSize / 2) +(Math.round(displayedIconSize / 3)*2);
+    		var poll_icon = document.getElementById("pollIcon_"+user.email);
+    		//if poll icon doesn't exist
+    		if(poll_icon==null){
+    			//create new poll-icon
+    			poll_icon = document.createElement("img");
+    			poll_icon.id = "pollIcon_"+user.email;
+    			poll_icon.className = "pollIcon_onMap";
+    			poll_icon.src = "/images/polling/polling.png";    			
+    			poll_icon.style.position = "absolute";
+    			poll_icon.style.cursor = "pointer";
+    			var divToAugment = document.getElementById("mapscroll");
+    			divToAugment.appendChild(poll_icon);
+    		}
+    		poll_icon.style.width =  Math.round(displayedIconSize / 3) + "px";
+    		poll_icon.style.height = Math.round(displayedIconSize / 3) + "px";
+    		poll_icon.style.left = left + "px";
+    		poll_icon.style.top = top + "px";    		
+    	}
+    	
+    }    
 }
 
 /**
@@ -424,6 +453,7 @@ function updateUserIconPlacement() {
 function updateUserListOnReceive(data) {
 
     var updatedUsersArray = data.object;
+//    alert(JSON.stringify(data.object)+"");
 
 //	users = new Array();
 //	for ( var i = 0; i < updatedUsersArray.length; i++) {
@@ -531,9 +561,13 @@ jQuery.fn.redraw = function () {
 
 var refreshCounter = 0;
 /**
- * This function should be called periodically to refresh the users location visually
+ * This function should be called periodically to update the users location, polls, etc. visually
  */
-function refreshUserData() {
+function updatePdData() {
+
+	checkAwayArea();	// check periodically on reload
+	getRemainingSpace();	//to find out size of remaining content (for polling) on reload
+	
     if (balloonIsOpen()) {
         return;
     }
@@ -549,68 +583,68 @@ function refreshUserData() {
 //TEST STUFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 function loadTestUser() {
-    var user1 = new User("a@a.a", null, "a", false);
+    var user1 = new User("b@b.b", "b", "b", false);
     user1.status = "OCCUPIED";
-    user1.position = 3301;
+    user1.position = 333; //3301
 //	user1.iconRef = "crab.png";
 //	user1.x = 400;
 //	user1.y = 300;
-    var user2 = new User("c@c.c", null, "c", false);
-    user2.position = 3301;
+    var user2 = new User("c@c.c", "c", "C", false);
+    user2.position = 333; //3301
     user2.status = "OCCUPIED";
 //	user2.iconRef = "cow.png";
 //	user2.x = 450;
 //	user2.y = 400;
-    var user3 = new User("d@d.d", null, "d", false);
-    user3.position = 3301;
+    var user3 = new User("d@d.d", "d", "D", false);
+    user3.position = 333; //3301
     user3.status = "AVAILABLE";
 //	user3.iconRef = "rabbit.png";
 //	user3.x = 450;
 //	user3.y = 600;
-    var user4 = new User("e@e.e", null, "e", false);
-    user4.position = 3301;
-    user4.status = "AWAY";
-//	user4.iconRef = "sheep.png";
-    var user5 = new User("f@f.f", null, "f", false);
-    user5.position = 3304;
-    user5.status = "DO_NOT_DISTURB";
-//	user5.iconRef = "deer.png";
-    var user6 = new User("fa@f.f", null, "fa", false);
-    user6.position = 3304;
-    user6.status = "AVAILABLE";
-    var user7 = new User("fb@f.f", null, "fb", false);
-    user7.position = 3304;
-    user7.status = "AVAILABLE";
-    var user8 = new User("fc@f.f", null, "fc", false);
-    user8.position = 3304;
-    user8.status = "AVAILABLE";
-    var user9 = new User("fd@f.f", null, "fd", false);
-    user9.position = 3304;
-    user9.status = "AVAILABLE";
-    var user10 = new User("fe@f.f", null, "fe", false);
-    user10.position = 3304;
-    user10.status = "AVAILABLE";
-    var user11 = new User("ff@f.f", null, "ff", false);
-    user11.position = 3304;
-    user11.status = "AVAILABLE";
-    var user12 = new User("fg@f.f", null, "fg", false);
-    user12.position = 3304;
-    user12.status = "AVAILABLE";
+//    var user4 = new User("e@e.e", "e", false);
+//    user4.position = 333;//3301;
+//    user4.status = "AWAY";
+////	user4.iconRef = "sheep.png";
+//    var user5 = new User("f@f.f", "f", false);
+//    user5.position = 332;//3304;
+//    user5.status = "DO_NOT_DISTURB";
+////	user5.iconRef = "deer.png";
+//    var user6 = new User("fa@f.f", "fa", false);
+//    user6.position = 332; //3304;
+//    user6.status = "AVAILABLE";
+//    var user7 = new User("fb@f.f", "fb", false);
+//    user7.position = 332; //3304;
+//    user7.status = "AVAILABLE";
+//    var user8 = new User("fc@f.f", "fc", false);
+//    user8.position = 332;//3304;
+//    user8.status = "AVAILABLE";
+//    var user9 = new User("fd@f.f", "fd", false);
+//    user9.position = 332;//3304;
+//    user9.status = "AVAILABLE";
+//    var user10 = new User("fe@f.f", "fe", false);
+//    user10.position = 332;//3304;
+//    user10.status = "AVAILABLE";
+//    var user11 = new User("ff@f.f", "ff", false);
+//    user11.position = 332;//3304;
+//    user11.status = "AVAILABLE";
+//    var user12 = new User("fg@f.f", "fg", false);
+//    user12.position = 332;//3304;
+//    user12.status = "AVAILABLE";
 
     var testusers = new Array();
     testusers[user1.email] = user1;
     testusers[user2.email] = user2;
     testusers[user3.email] = user3;
-    testusers[user4.email] = user4;
-    testusers[user5.email] = user5;
-    testusers[user6.email] = user6;
-    testusers[user7.email] = user7;
-    testusers[user8.email] = user8;
-    testusers[user9.email] = user9;
-    testusers[user10.email] = user10;
-    testusers[user11.email] = user11;
-    testusers[user12.email] = user12;
-    updateUserListOnReceive(testusers);
+//    testusers[user4.email] = user4;
+//    testusers[user5.email] = user5;
+//    testusers[user6.email] = user6;
+//    testusers[user7.email] = user7;
+//    testusers[user8.email] = user8;
+//    testusers[user9.email] = user9;
+//    testusers[user10.email] = user10;
+//    testusers[user11.email] = user11;
+//    testusers[user12.email] = user12;
+//    updateUserListOnReceive(testusers);
 }
 
 
@@ -697,6 +731,24 @@ function displayUserInfo(email) {
     }
 }
 
+
+
+
+/**
+ * check wether image exists
+ */
+function imageExists(image_url){
+
+    var http = new XMLHttpRequest();
+
+    http.open('HEAD', image_url, false);
+    http.send();
+
+    return http.status != 404;
+
+}
+
+
 //the modified id (for closing purposes) of the current opened balloon, null if no balloon is open 
 var openBalloonUserID = null;
 
@@ -741,12 +793,58 @@ function balloonify(user) {
     }
     var positioning = verticalpos + " " + horizontalpos;
     var statusInfo = getInfoByStatus(user.status);
+    
+    var balloonContent = '<p id="balloonParagraph" style="background-color:' + statusInfo.color + ';">'
+    + '<strong>' + user.name + ' in ' + user.position + '</strong>'
+    + '<br>' + statusInfo.txt + '</p>';
+        
+    //add polls to user balloon
+    if(userPerPoll[user.email+""] !== undefined){	//only if user has polls
+    	balloonContent += '<table class="table_polls">';
+	    //for each poll
+	    for ( var i = 0; i < userPerPoll[user.email+""].length; i++) {
+			//icon 
+	    	var icon = userPerPoll[user.email][i][0]+"";
+	    	var currentOption;
+	    	if(i==0){	//start the tr
+	    		balloonContent += '<tr>';
+	    	}
+	    	else if(i==4){	//start new tr (next line)
+	    		balloonContent += '</tr><tr>';
+    		}
+	    	
+	    	else if(i == 7 && userPerPoll[user.email+""].length != 8){	//set ... if user has more than 8 polls
+	    		balloonContent += '<td style="vertical-align:middle;">...</td>';
+	    		break;
+	    	}
+	    	balloonContent += '<td>';
+	    	balloonContent += '<img class="poll_user_icon" src="'+icon+'">';
+	    	balloonContent += '<br>';
+	    	//for each checked option (of one user)
+	    	for ( var j = 0; j < userPerPoll[user.email+""][i][1].length; j++) {
+	    		currentOption = userPerPoll[user.email+""][i][1][j]+"";
+	    		if(j == 4){	//only four answers
+	    			balloonContent += "...";
+	    			break;
+	    		}
+	    		//check if answer is too long
+	    		if(currentOption.length <= 15){
+	    			balloonContent += currentOption+"<br>";
+	    			
+	    		}else{
+	    			var balloonContentPart = currentOption.substr(0, 15);
+	    			balloonContent += balloonContentPart+" ...<br>";
+	    		}
+			}
+	    	balloonContent += '</td>';
+		}
+	    balloonContent += '</tr></table>';
+    }
+    
     $(mod_id).showBalloon({
         position: positioning,
         showDuration: 250,
-        contents: '<p id="balloonParagraph" style="background-color:' + statusInfo.color + ';">'
-            + '<strong>' + user.name + ' in ' + user.position + '</strong>'
-            + '<br>' + statusInfo.txt + '</p>'
+        contents: balloonContent
         /*
          +'<p>Send me a message!</p>'
          //+'<input type="hidden" value="'+user.email+'" id="userBalloonID" />'
@@ -772,7 +870,7 @@ function balloonify(user) {
          +'</form>'*/
     });
     document.getElementById("balloonParagraph").parentNode.id = "userBalloon";
-
+    
     //Increment the idle time counter every second
     if (idleInterval == null) {
         idleInterval = setInterval(timerIncrement, 1000);

@@ -2,6 +2,7 @@ package de.uulm.mi.mind.tasks.polling;
 
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Poll;
 import de.uulm.mi.mind.objects.User;
@@ -27,6 +28,9 @@ public class PollRemove extends PollTask<Poll, Information> {
         User user = ((User) active.getAuthenticated());
         // admin requires no further checks, we just hope he knows what he's doing :P
         if (user.isAdmin()) {
+            // log
+            FileLogWrapper.pollRemove(user, object);
+            // do
             return (Information) database.open(new Transaction() {
                 @Override
                 public Data doOperations(Session session) {
@@ -41,6 +45,9 @@ public class PollRemove extends PollTask<Poll, Information> {
         if (!user.getKey().equals(object.getOwner())) {
             return new Error(Error.Type.SECURITY, "You may only delete polls that you are the owner of!");
         }
+        //log
+        FileLogWrapper.pollRemove(user, object);
+        // do
         return (Information) database.open(new Transaction() {
             @Override
             public Data doOperations(Session session) {

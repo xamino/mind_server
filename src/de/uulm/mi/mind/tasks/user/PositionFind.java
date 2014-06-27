@@ -1,5 +1,6 @@
 package de.uulm.mi.mind.tasks.user;
 
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.*;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.enums.DeviceClass;
@@ -24,6 +25,11 @@ public class PositionFind extends Task<Arrival, Sendable> {
      * Morsel number tolerance for negotiation of goodness.
      */
     private final static int MORSEL_TOLERANCE = 0;
+    /**
+     * this value holds the difference between the s4 mini and the s3 mini
+     * wifimorsels' levels (has to be subtracted from s4 mini to become s3 mini)
+     */
+    private final int S4MINI_S3MINI_DIFF = 9;
     private final String LAST_POSITION = "lastPosition";
     private final String REAL_POSITION = "realPosition";
     private final String TAG = "PositionModule";
@@ -45,22 +51,30 @@ public class PositionFind extends Task<Arrival, Sendable> {
         // pull these out here to make checking if they exist easier
         Area last = ((Area) active.readData(LAST_POSITION));
         Area real = ((Area) active.readData(REAL_POSITION));
+        boolean update = false;
         // this implements server-side fuzziness to avoid fluttering of position_find
         if (last == null || real == null) {
             // this means it is the first time in this session, so we don't apply fuzziness
             active.writeData(LAST_POSITION, area);
             active.writeData(REAL_POSITION, area);
             user.setPosition(area.getID());
-        } else if (last.getID().equals(area.getID())) {
+            update = true;
+        } else if (last.getID().equals(area.getID()) && !real.getID().equals(area.getID())) {
             // update user for position, but only if last was already the same and the previous db entry is different
             active.writeData(REAL_POSITION, area);
             user.setPosition(area.getID());
+            update = true;
         } else {
             // this means the area is different than the one before, so change last but not real:
             active.writeData(LAST_POSITION, area);
         }
+        // log on change only to keep spam down
+        if (update) {
+            // log.error(TAG, "Updating log!");
+            FileLogWrapper.positionUpdate(((User) active.getAuthenticated()), area);
+        }
         // everything okay, return real position area (must be freshly read because we might have written to it)
-        return (Area) active.readData(REAL_POSITION);
+        return ((Area) active.readData(REAL_POSITION));
     }
 
     /**
@@ -113,12 +127,6 @@ public class PositionFind extends Task<Arrival, Sendable> {
     }
 
     /**
-     * this value holds the difference between the s4 mini and the s3 mini
-     * wifimorsels' levels (has to be subtracted from s4 mini to become s3 mini)
-     */
-    private final int S4MINI_S3MINI_DIFF = 9;
-    
-    /**
      * General function for calculating a matched location from the database to the one given.
      *
      * @param request The location to match against.
@@ -136,14 +144,14 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
         //S4 MINI TO S3 MINI CONVERSION
         // if device class is Galaxy S4 mini
-        else if(requestDeviceClass == DeviceClass.CLASS7){
-        	//convert morsels to S3 mini morsels 
-        	for (WifiMorsel morsel : request.getWifiMorsels()) {
-				morsel.setWifiLevel(morsel.getWifiLevel()-S4MINI_S3MINI_DIFF);
-			}
-        	//set class to S3 mini for later calculations
-        	requestDeviceClass = DeviceClass.CLASS2;
-        	//S4 mini will now be treated as S3 mini
+        else if (requestDeviceClass == DeviceClass.CLASS7) {
+            //convert morsels to S3 mini morsels
+            for (WifiMorsel morsel : request.getWifiMorsels()) {
+                morsel.setWifiLevel(morsel.getWifiLevel() - S4MINI_S3MINI_DIFF);
+            }
+            //set class to S3 mini for later calculations
+            requestDeviceClass = DeviceClass.CLASS2;
+            //S4 mini will now be treated as S3 mini
         }
         //END S4 MINI TO S3 MINI CONVERSION
 
@@ -286,7 +294,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
                 }
             }
             // calculate bestMatch candidate
-            float candidate = diffValueSum / (float)location.getWifiMorsels().size();
+            float candidate = diffValueSum / (float) location.getWifiMorsels().size();
             if (candidate < bestMatch) {
                 // if yes, take
                 bestMatch = candidate;

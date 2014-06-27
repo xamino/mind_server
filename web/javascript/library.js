@@ -77,8 +77,8 @@ function getURLParameter(parameterName) {
 function writeCookie(name, value) {
     var date, expires;
 //    if (days) {
-    date = new Date();			//h		m	 s		ms
-    date.setTime(date.getTime() + (24 * 60 * 60 * 1000));
+    date = new Date();			//  d	   h    m	 s	  ms
+    date.setTime(date.getTime() + (1000 * 24 * 60 * 60 * 1000));
     expires = "; expires=" + date.toGMTString();
 //            }else{
 //        expires = "";
