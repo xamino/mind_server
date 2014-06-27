@@ -461,6 +461,12 @@ function updateUserIconPlacement() {
  */
 function updateUserListOnReceive(data) {
 
+	//if any error occured (e.g. the server was down)
+	if(instanceOf(data.object,Error)){
+		//reload this page (causes the pd to login, thus receiving a new session)
+		window.location.relaod();
+	}
+	
     var updatedUsersArray = data.object;
 //    alert(JSON.stringify(data.object)+"");
 
