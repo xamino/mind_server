@@ -72,13 +72,14 @@ function initPublicDisplayStuff() {
     });
 }
 
-
+//COMMITED TO TEST OTHER STUFF
 document.addEventListener("click", function (event) {
 
-    var element = document.getElementsByTagName("html")[0];
+    //var element = document.getElementsByTagName("html")[0];
 
     if (event.target.id === 'toggleFullscreen') {
-        if (element.requestFullScreen) {
+    	alert("test");
+        /*if (element.requestFullScreen) {
 
             if (!document.fullScreen) {
                 element.requestFullscreen();
@@ -98,7 +99,7 @@ document.addEventListener("click", function (event) {
             } else {
                 document.webkitCancelFullScreen();
             }
-        }
+        }*/
     }
 
 });
@@ -462,10 +463,10 @@ function updateUserIconPlacement() {
 function updateUserListOnReceive(data) {
 
 	//if any error occured (e.g. the server was down)
-	if(instanceOf(data.object,Error)){
-		//reload this page (causes the pd to login, thus receiving a new session)
-		window.location.relaod();
-	}
+//	if(instanceOf(data.object,Error)){
+//		//reload this page (causes the pd to login, thus receiving a new session)
+//		window.location.relaod();
+//	}
 	
     var updatedUsersArray = data.object;
 //    alert(JSON.stringify(data.object)+"");
@@ -809,7 +810,7 @@ function balloonify(user) {
     var positioning = verticalpos + " " + horizontalpos;
     var statusInfo = getInfoByStatus(user.status);
     
-    var balloonContent = '<p id="balloonParagraph" style="background-color:' + statusInfo.color + ';">'
+    var balloonContent = '<p id="balloonParagraph" style="text-align:center; background-color:' + statusInfo.color + ';">'
     + '<strong>' + user.name + ' in ' + user.position + '</strong>'
     + '<br>' + statusInfo.txt + '</p>';
         

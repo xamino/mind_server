@@ -180,6 +180,17 @@ background-size: contain;*/
 #current_polls, #show_display_settings, #show_app_settings{
 	position: absolute;
 	background: white;
+	width:100%;
+}
+
+#div_qr_code{
+	width:100%;
+	height:200px;
+	background-image: url(../images/misc/mind_apk_qr.png);
+	background-position:center center;
+	background-repeat: no-repeat;
+	background-size: 200px 200px;
+	margin-bottom: 15px;
 }
 
 #current_polls{

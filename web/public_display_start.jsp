@@ -81,9 +81,7 @@
                    </div>
                </div> -->
                 <div id='settingsRefresh'>
-                    <hr>
-                    <br>
-
+                    
                     <h3>Refresh Rate</h3><br>
                     From 5 sec (fastest rate) to 60 sec (slowest rate).<br>
                     <br>
@@ -93,7 +91,7 @@
                                onchange="changeRefreshRate(this.value)">
                         <!--oninput,onchange="changeRefreshRate(this.value)"-->
                         <p id="slidertext_refresh">Current Refresh Rate: every 10 sec</p>
-                    </div>
+                    </div>                    
                 </div>
                 <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->
                 <hr>
@@ -110,7 +108,7 @@
                 </div>
             </div>
             <div id="show_app_settings" style="display:none;">
-                Polling:<br>
+                <h3>Polling:</h3><br>
 
                 <form name="pollOrders">
                     <input type=radio name="pollOrder" value="newest" onClick="pollSelection()"> Newest First<br>
@@ -118,7 +116,10 @@
                     (default)
                 </form>
                 <hr>
-                <br>
+                <h3>Get the App:</h3><br>
+                <div id="div_qr_code"></div>
+                <!-- <img id="qr_code" src="/images/misc/mind_apk_qr.png"/>-->
+                <hr>
                 <button type='button' id='appSettingsBack' class="shadow" onclick='toggleAppSettings()'>Back</button>
             </div>
         </div>
