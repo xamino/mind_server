@@ -17,7 +17,7 @@ public class PollRead extends PollTask<Poll, Sendable> {
 
     @Override
     public Sendable doWork(Active active, Poll object, boolean compact) {
-        return database.read(object, 5);
+        return readValidPoll(object);
     }
 
     @Override

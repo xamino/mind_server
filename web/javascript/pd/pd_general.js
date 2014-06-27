@@ -2,14 +2,34 @@
  * This function is called onLoad of each PD page.
  */
 function onLoadOfPdPage() {
-    session = readCookie("MIND_PD_C");
+    var sessionCookie = readCookie("MIND_PD_C");
+    var sessionHtml = document.body.getAttribute("lolcat");
+    trySession(sessionCookie, function () {
+        trySession(sessionHtml, function () {
+            alert("You have to be logged in. IP match might have missed!");
+            window.location.href = "public_display_login.jsp";
+        }, function () {
+            session = sessionHtml;
+            initPublicDisplayStuff();
+        })
+    }, function () {
+        session = sessionCookie;
+        initPublicDisplayStuff();
+    });
+}
+
+/**
+ * Small helper function.
+ * @param session Session to check.
+ * @param errorCallback Called on error.
+ * @param okayCallback Called if all okay.
+ */
+function trySession(session, errorCallback, okayCallback) {
     send(new Arrival("check", session), function (data) {
         if (instanceOf(data.object, Error)) {
-            alert("You have to be logged in.");
-            window.location.href = "public_display_login.jsp";
-
+            errorCallback();
         } else {
-            initPublicDisplayStuff();
+            okayCallback();
         }
     });
 }

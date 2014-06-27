@@ -10,6 +10,7 @@ $(document).ready(function () {
     // register button
     $('#update').click(build);
     $('#logout').click(private_logout);
+    $('#pollClean').click(cleanPolls);
 });
 
 /**
@@ -22,6 +23,23 @@ function check() {
         } else {
             build();
         }
+    });
+}
+
+/**
+ * Removes all ended polls and rebuilds the table.
+ */
+function cleanPolls() {
+    send(new Arrival("poll_clean", session, null), function (data) {
+        if (instanceOf(data.object, Error)) {
+            alert("Failed!");
+        } else {
+            // alert("Done – reloading table.");
+        }
+        // reload poll table
+        send(new Arrival("poll_read", session, new Poll()), function (data) {
+            b_table('polls', data.object);
+        });
     });
 }
 

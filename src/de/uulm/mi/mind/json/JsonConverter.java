@@ -230,7 +230,7 @@ public class JsonConverter<E> {
         try {
             return writeObject(json);
         } catch (IOException e) {
-            // e.printStackTrace();
+            e.printStackTrace();
             log.error(TAG, "Failed to create Java!");
             return null;
         }
@@ -366,14 +366,14 @@ public class JsonConverter<E> {
             while (!value.isEmpty()) {
                 int end = findEndBracket(value) + 1;
                 String nextObject = value.substring(0, end);
-                if (clazz == Object[].class || DataList.class.isAssignableFrom(clazz)) { //TODO || clazz == Data.class ?
-                    // objects
-                    objects.add(writeObject(nextObject));
-                } else if (Collection.class.isAssignableFrom(clazz)) {
+                if (clazz.isAssignableFrom(ArrayList.class)) {
                     // remove "" because always primitive (no further parsing)
                     nextObject = nextObject.substring(1, nextObject.length() - 1);
                     // primitives (will always be string)
                     objects.add(nextObject);
+                } else if (clazz == Object[].class || clazz.isAssignableFrom(DataList.class)) { //TODO || clazz == Data.class ?
+                    // objects
+                    objects.add(writeObject(nextObject));
                 } else {
                     log.error(TAG, "Failed in creating list – field may not expect list!");
                     return null;
