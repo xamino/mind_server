@@ -32,6 +32,9 @@ function instanceOf(object_a, object_b) {
     // null returns false
     if (object_a == undefined || object_b == undefined)
         return false;
+    // catch arrays
+    if (object_a.length != undefined)
+    	return false;
     // If null, might be class (if null, next step will return false)
     if (object_a.$type == undefined) {
         object_a = new object_a();
