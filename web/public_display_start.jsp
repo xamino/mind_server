@@ -44,6 +44,7 @@
 
     <!-- <img id="mapimg" class="mapcontent" src="images/map.png"/>-->
     <!-- <img class="micon" src="images/micons/crab.png"/> -->
+    <input type="button" name="call_button" id="callButton" onclick="callRoom()"/>
 </div>
 <!-- Slider not in use -->
 <!-- <div id="sliderdiv" style="position: absolute; top: 0px; left: 0px">

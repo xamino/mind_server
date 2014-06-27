@@ -121,20 +121,9 @@ function initInterval() {
  * This funciton computes the icon size by considering the smalles area height or width
  */
 function computeIconSize() {
-//	var smallest = 99999999;
-//	for ( var i = 0; i < areas.length; i++) {
-//		if(areas[i].width<smallest){smallest = areas[i].width;}
-//		if(areas[i].hegiht<smallest){smallest = areas[i].height;}
-//	}
-//	
-//	if(smallest<9999999){
-//		displayedIconSize = Math.round(iconByAreaFactor*smallest*factor);
-//	}
-//	if(displayedIconSize==0){
-//		displayedIconSize = defaultIconSize;
-//	}
+
     displayedIconSize = Math.round(displayedWidth * iconByMapWidthFactor);
-//	alert("iconsize: "+displayedIconSize);
+
 }
 
 /**
@@ -982,7 +971,15 @@ function balloonIsOpen() {
  * and handles balloon hiding in case of clicking on no icon
  */
 $(document).on("mousedown", "#mapscroll", function (event) {
-    if (!$(event.target).hasClass('micon')) { //if !(click on icon)
+
+	//if not clicked on call button
+	if($(event.target).attr('id')!='callButton'){
+		//check if relevant area (with pi-cam) was clicked
+		checkForAreaClick(event);
+	}
+	
+    
+	if (!$(event.target).hasClass('micon')) { //if !(click on icon)
         if (balloonIsOpen()) { //if balloon is open -> hide balloon
             removeBalloon();
             openBalloonUserID = null;
@@ -991,6 +988,63 @@ $(document).on("mousedown", "#mapscroll", function (event) {
 
 });
 
+/**
+ * areas in which a camera is availabe
+ */
+var camAreas = new Array(338,3303);
+
+/**
+ * checks if relevant area (with pi-cam) was clicked
+ */
+function checkForAreaClick(event){
+
+//	var output = "";
+	var id;
+	for ( var i = 0; i < camAreas.length; i++) {
+		id = camAreas[i];
+		//check on x axis
+		if( (+event.clientX) > (+areas[id].topLeftX)*factor && (+event.clientX) < +((+areas[id].topLeftX)+(+areas[id].width))*factor ){
+			//check on y axis
+			if( (+event.clientY) > (+areas[id].topLeftY)*factor && (+event.clientY) < +((+areas[id].topLeftY)+(+areas[id].height))*factor ){
+//				alert(+event.clientX +","+ +event.clientY +"::"+ 
+//						+(+areas[id].topLeftX)*factor +","+ ((+areas[id].topLeftX)+(+areas[id].width))*factor +
+//						"||"+ (+areas[id].topLeftY)*factor +","+ ((+areas[id].topLeftY)+(+areas[id].width))*factor +" ->clicked on area "+id);
+				
+				setupButton(id);
+				
+				return;
+			}
+		}
+	}
+	
+	hideButton();
+	
+}
+
+var roomToCall = "none";
+
+function setupButton(room){
+	roomToCall = room+"";
+	var btn = document.getElementById("callButton");
+	btn.value = "Call Room "+room;
+	btn.style.visibility = "visible";
+}
+
+function hideButton(){
+	var btn = document.getElementById("callButton");
+	btn.style.visibility = "hidden";
+	roomToCall = "none";
+}
+
+function callRoom(){
+	if(roomToCall=="none"){
+		alert("NO!");
+	}else{
+		//TODO
+		alert("calling room "+roomToCall);
+	}
+	
+}
 
 /**
  * This function is called when the Call button is clicked on the user's popup balloon
