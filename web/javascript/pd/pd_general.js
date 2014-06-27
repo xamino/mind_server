@@ -107,6 +107,7 @@ function checkAwayArea() {
 //
 //        areas = data.object;
 
+	
     if (!areaExists("Away")) {
         var noAwayArea = "There is currently no away area (ID: 'Away') in the database. Add this area to see all necessary information.<br>Please contact the admin.";
         document.getElementById("awayArea_info").innerHTML = noAwayArea;

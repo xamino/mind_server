@@ -51,7 +51,7 @@
     </div>
     <div id="content_popup">
         <p id="balloonIdle" style="visibility:hidden; height:0; margin:0;">0</p>
-        <div id="support">Support: mind@lists.uni-ulm.de</div>
+        <div id="support">Support: mind@lists.uni-ulm.de</div><hr>
         <!-- <p id="userInfoOnUpdate">info</p>  -->
         <div id="awayArea_info"></div>
 		<div id="container_inner_content">
@@ -104,7 +104,7 @@
 	        </div>
         </div>
     </div>
-    <div id="login_location">
+    <div id="login_location" style="visibility:hidden;">
         <!-- <div id="location">
         <a href="http://ran.ge/" title="Professional WordPress Development" id="location_img" class="pd_link"></a>
         <p>Location Force</p>

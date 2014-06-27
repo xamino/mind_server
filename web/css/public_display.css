@@ -148,8 +148,28 @@ background-size: contain;*/
 }
 
 .poll_user{
-	width: 60px;
-	height: 60px;
+	width: 48px;
+	height: 48px;
+}
+
+/* table with all polls from one user in the user balloon */
+.table_polls{
+	table-layout: auto;
+	/*width:auto;*/
+	border-spacing: 10px;
+}
+
+.table_polls td{
+	background-color: #CCCCCC;
+	padding: 10px;
+	/*width:20%;*/
+	vertical-align: top;
+	text-align: center;
+}
+
+.poll_user_icon{
+	width:72px;
+	height: 72px;
 }
 
 /* settings dialog above the polls*/
@@ -164,8 +184,9 @@ background-size: contain;*/
 
 #current_polls{
 	overflow-y: auto;
+	overflow-x:hidden;
 	width: 100%;
-	border: 1px solid #32627c;
+	/*border: 1px solid #32627c;*/
 }
 
 #login_location {
