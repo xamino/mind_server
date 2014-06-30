@@ -29,7 +29,7 @@
         String ip = request.getRemoteAddr();
         Active active = null;
         // WARNING:
-        if(ip.startsWith("134.60.128.")) {
+        if(ip.startsWith("134.60.12")) {
             active = Security.begin(new PublicDisplay("pd", "pd"), null);
         }
         if (active != null) {
