@@ -17,9 +17,8 @@
         <!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
         <h2>MIND</h2>
     </div>
-
     <div id="content">
-        <div id="text-content">
+	    <div id="text-content">
             You have to be logged in to work with mind.
         </div>
         <div id="login">

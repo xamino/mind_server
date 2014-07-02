@@ -18,6 +18,13 @@ html, body {
     background-size: contain;
 }
 
+#callButton {
+	visibility: hidden;
+	position: absolute;
+	right: 25%;
+	bottom:0;
+}
+
 /* map scroll stuff */
 /*#mapscroll {
     overflow:hidden;

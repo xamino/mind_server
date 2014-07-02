@@ -16,6 +16,9 @@
     <script src="javascript/pd/pd_general.js"></script>
     <script src="javascript/pd/polling.js"></script>
     <script src="javascript/jquery.balloon.js"></script>
+    <script type="text/javascript">
+
+	</script>
     <link href="${pageContext.request.contextPath}/css/public_display.css" rel="stylesheet" type="text/css">
 
     <%
@@ -44,6 +47,9 @@
 
     <!-- <img id="mapimg" class="mapcontent" src="images/map.png"/>-->
     <!-- <img class="micon" src="images/micons/crab.png"/> -->
+    <!-- <input type="button" name="call_button" id="callButton" onclick="callRoom()"/>
+    <input type="submit" value="Open Popup" onclick="javascript:callPopup('public_display_popup_call.jsp')"/> -->
+    <input type="submit" name="call_button" id="callButton" onclick="javascript:callRoom('public_display_popup_call.jsp')"/>
 </div>
 <!-- Slider not in use -->
 <!-- <div id="sliderdiv" style="position: absolute; top: 0px; left: 0px">
