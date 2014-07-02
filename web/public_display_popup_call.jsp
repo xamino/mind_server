@@ -7,9 +7,9 @@
     <script src="javascript/jquery-2.1.0.min.js"></script>
     <script src="javascript/library.js"></script>
     <script src="javascript/run.js"></script>
-    <title>Add User</title>
+    <title>Call</title>
 </head>
-<body>
+<body style="background:#CCCCCC;">
 <!-- close popup if it's not focused -->
 <script language="javascript" type="text/javascript">
 window.onblur = function(){window.close();};
@@ -30,7 +30,7 @@ window.onblur = function(){window.close();};
             <td><input name="password" id="password" size=40 type="text"/></td>
         </tr>
     </table>
-    <input type="button" name="back" value="Back" onclick="window.close()"/>
+    <input type="button" name="back" value="Cancel Call" onclick="window.close()"/>
     <input type="submit" value="Add User"/>
 </form>
 

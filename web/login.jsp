@@ -17,9 +17,17 @@
         <!-- <img src="someImage.jpg" alt="banner" width="100%" height="100px"/> <!-- TODO: Banner-Image -->
         <h2>MIND</h2>
     </div>
-
+    <script type="text/javascript">
+    function callPopup(url){
+    	newwindow = window.open(url,'','toolbar=0,location=0,directories=0,menubar=0,scrollbars=1,resizable=0,width=640,height=480, top=300,left=500');
+    	//if (window.focus) {newwindow.focus();}
+        //if (!newwindow.closed) {newwindow.focus();}
+		return false;
+    }
+	</script>
     <div id="content">
-        <div id="text-content">
+		<input type="submit" value="Open Popup" onclick="javascript:callPopup('public_display_popup_call.jsp')"/>
+	    <div id="text-content">
             You have to be logged in to work with mind.
         </div>
         <div id="login">
