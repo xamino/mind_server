@@ -16,7 +16,6 @@ import java.util.ArrayList;
 public class FileLogWrapper {
 
     private static FileLog fileLog = FileLog.getInstance();
-    // todo generate a new anonymizer when the day changes
     private static Anonymizer anonymizer = Anonymizer.getInstance();
     private static String SESSIONFILE = "session";
     private static String POSITIONFILE = "position";
@@ -72,7 +71,6 @@ public class FileLogWrapper {
                 };
             }
         });
-        anonymizer.removeKey(data);
     }
 
     public static void positionUpdate(final User user, final Area area) {
@@ -181,6 +179,26 @@ public class FileLogWrapper {
                     public String getContent() {
                         final String pollKey = anonymizer.getKey(poll);
                         return "xxx " + pollKey + " ended";
+                    }
+                };
+            }
+        });
+    }
+
+    public static void timeout(final Authenticated data) {
+        fileLog.log(new LogWorker() {
+            @Override
+            public LogObject logCreate() {
+                return new LogObject() {
+                    @Override
+                    public String getFileName() {
+                        return SESSIONFILE;
+                    }
+
+                    @Override
+                    public String getContent() {
+                        final String key = anonymizer.getKey(data);
+                        return "~~~ " + data.getClass().getSimpleName() + " " + key + " timeout";
                     }
                 };
             }

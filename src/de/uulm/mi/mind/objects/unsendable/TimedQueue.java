@@ -25,6 +25,7 @@ public class TimedQueue<E, F> {
      * Stores the time for each object.
      */
     private HashMap<E, Long> time;
+    private Remove<E, F> removeCallback;
 
     /**
      * Constructor with timeout specified.
@@ -57,6 +58,10 @@ public class TimedQueue<E, F> {
      * @param key The key to remove.
      */
     public void remove(E key) {
+        // check callback
+        if (removeCallback != null && keys.contains(key)) {
+            removeCallback.doOnRemove(key, objects.get(key));
+        }
         keys.remove(key);
         objects.remove(key);
         time.remove(key);
@@ -96,7 +101,11 @@ public class TimedQueue<E, F> {
             }
         }
         for (E key : keyRemove) {
-            this.remove(key);
+            // check callback
+            if (removeCallback != null && keys.contains(key)) {
+                removeCallback.doOnRemove(key, objects.get(key));
+            }
+            remove(key);
         }
     }
 
@@ -121,6 +130,20 @@ public class TimedQueue<E, F> {
     }
 
     public Collection<F> getValues() {
-        return (Collection) objects.values();
+        return (Collection<F>) objects.values();
+    }
+
+    public void registerRemoveCallback(Remove<E, F> onRemove) {
+        this.removeCallback = onRemove;
+    }
+
+    /**
+     * Interface for voluntary removal hook.
+     *
+     * @param <E>
+     * @param <F>
+     */
+    public interface Remove<E, F> {
+        public void doOnRemove(E key, F object);
     }
 }

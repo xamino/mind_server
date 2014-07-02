@@ -27,6 +27,7 @@ public class User implements Sendable, Saveable, Authenticated {
     private Status status;
     private String pwdHash;
     private Date lastAccess;
+    private String unique;
 
     private User() {
     }
@@ -57,13 +58,13 @@ public class User implements Sendable, Saveable, Authenticated {
         return pwdHash;
     }
 
-    public void setPwdHash(String pwdHash) {
-        this.pwdHash = pwdHash;
-    }
-
     /* public String getPosition() {
         return position;
     }*/
+
+    public void setPwdHash(String pwdHash) {
+        this.pwdHash = pwdHash;
+    }
 
     public void setPosition(String position) {
         this.position = position;
@@ -109,6 +110,7 @@ public class User implements Sendable, Saveable, Authenticated {
         back.setLog(this.isLog());
         back.setName(this.name);
         back.setStatus(this.status);
+        back.setUnique(this.unique);
         return back;
     }
 
@@ -160,6 +162,15 @@ public class User implements Sendable, Saveable, Authenticated {
         user.setName(name);
         user.setPosition(position);
         user.setStatus(status);
+        user.setUnique(unique);
         return user;
+    }
+
+    public String getUnique() {
+        return unique;
+    }
+
+    public void setUnique(String unique) {
+        this.unique = unique;
     }
 }

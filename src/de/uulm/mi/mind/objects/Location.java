@@ -14,6 +14,7 @@ public class Location implements Sendable, Saveable {
      * Contains WifiMorsel
      */
     private DataList<WifiMorsel> wifiMorsels;
+    private String unique;
 
     private Location() {
         key = null;
@@ -81,6 +82,7 @@ public class Location implements Sendable, Saveable {
     @Override
     public Saveable deepClone() {
         Location loc = new Location(coordinateX, coordinateY);
+        loc.setUnique(unique);
 
         if (wifiMorsels != null) {
             DataList<WifiMorsel> morsels = new DataList<>();
@@ -93,5 +95,13 @@ public class Location implements Sendable, Saveable {
             loc.setWifiMorsels(new DataList<WifiMorsel>());
         }
         return loc;
+    }
+
+    public String getUnique() {
+        return unique;
+    }
+
+    public void setUnique(String unique) {
+        this.unique = unique;
     }
 }

@@ -30,6 +30,7 @@ public class AllowLogging extends Task<None, Information> {
             // no need for db if already set
             return new Success(Success.Type.NOTE, "Logging was already allowed.");
         }
+        // set value
         user.setLog(true);
         return ((Information) database.open(new Transaction() {
             @Override

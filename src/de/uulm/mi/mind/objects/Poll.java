@@ -21,8 +21,14 @@ public class Poll implements Sendable, Saveable {
     private PollState state;
     private String icon;
     private DataList<PollOption> options = new DataList<>();
+    private String unique;
 
     public Poll() {
+    }
+
+    public Poll(String question, Date end) {
+        this.question = question;
+        this.end = end;
     }
 
     @Override
@@ -38,11 +44,6 @@ public class Poll implements Sendable, Saveable {
                 ", icon='" + icon + '\'' +
                 ", options=" + options +
                 '}';
-    }
-
-    public Poll(String question, Date end) {
-        this.question = question;
-        this.end = end;
     }
 
     public String getOwner() {
@@ -110,6 +111,10 @@ public class Poll implements Sendable, Saveable {
         return this.key;
     }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     @Override
     public Saveable deepClone() {
         Poll p = new Poll(question, end);
@@ -119,10 +124,11 @@ public class Poll implements Sendable, Saveable {
         p.setKey(key);
         p.setOwner(owner);
         p.setState(state);
+        p.setUnique(unique);
 
         DataList<PollOption> pollOptions = new DataList<>();
         for (PollOption pollOption : options) {
-            if(pollOption==null) continue;
+            if (pollOption == null) continue;
             pollOptions.add((PollOption) pollOption.deepClone());
         }
         p.setOptions(pollOptions);
@@ -130,7 +136,11 @@ public class Poll implements Sendable, Saveable {
         return p;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public String getUnique() {
+        return unique;
+    }
+
+    public void setUnique(String unique) {
+        this.unique = unique;
     }
 }

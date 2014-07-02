@@ -4,6 +4,7 @@ import de.uulm.mi.mind.io.DatabaseManager;
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.PublicDisplay;
@@ -41,7 +42,7 @@ public class Security {
     /**
      * Instance of log used for the output.
      */
-    private static Messenger log;
+    private Messenger log;
     /**
      * Instance of database.
      */
@@ -59,10 +60,17 @@ public class Security {
      * Constructor. Security handles its instance by itself, simply use the public methods.
      */
     private Security() {
-        this.log = Messenger.getInstance();
+        log = Messenger.getInstance();
         this.database = DatabaseManager.getInstance();
         this.random = new SecureRandom();
         this.actives = new TimedQueue<>(TIMEOUT);
+        // add callback to log session timeouts
+        actives.registerRemoveCallback(new TimedQueue.Remove<String, Active>() {
+            @Override
+            public void doOnRemove(String key, Active object) {
+                FileLogWrapper.timeout(object.getAuthenticated());
+            }
+        });
         log.log(TAG, "Created new instance.");
     }
 
