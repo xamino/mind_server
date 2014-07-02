@@ -1036,7 +1036,7 @@ function hideButton(){
 	roomToCall = "none";
 }
 
-function callRoom(){
+/*function callRoom(){
 	if(roomToCall=="none"){
 		alert("NO!");
 	}else{
@@ -1044,6 +1044,18 @@ function callRoom(){
 		alert("calling room "+roomToCall);
 	}
 	
+}*/
+
+function callRoom(url){
+	if(roomToCall=="none"){
+		alert("Choose a valid room");
+	}else{
+		newwindow = window.open(url,'','toolbar=0,location=0,directories=0,menubar=0,scrollbars=1,resizable=0,width=640,height=480, top=300,left=500');
+		//if (window.focus) {newwindow.focus();}
+	    //if (!newwindow.closed) {newwindow.focus();}
+		//roomToCall
+	}
+	return false;
 }
 
 /**
