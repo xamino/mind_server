@@ -2,6 +2,7 @@ package de.uulm.mi.mind.logger.anonymizer;
 
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
+import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.security.Authenticated;
 
 import java.math.BigInteger;
@@ -15,6 +16,7 @@ import java.util.Random;
 public class Anonymizer {
 
     private static Anonymizer INSTANCE;
+    private final String DISALLOWED = "unknown";
     private ArrayList<PointerMap> store;
     private Random random;
 
@@ -38,6 +40,10 @@ public class Anonymizer {
      * @return The key.
      */
     public <E extends Data> String getKey(E data) {
+        // check if user may be logged
+        if (data instanceof User && !((User) data).isLog()) {
+            return DISALLOWED;
+        }
         PointerMap<E> mapped = new PointerMap<>(data);
         // check if exists and if yes get the key
         if (store.contains(mapped)) {

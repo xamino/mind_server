@@ -16,7 +16,14 @@ public class User implements Sendable, Saveable, Authenticated {
     private String name;
     private String email;
     private String position;
+    /**
+     * Controls whether a user has administrative access.
+     */
     private boolean admin;
+    /**
+     * Controls whether a user may be logged anonymously in the FileLog.
+     */
+    private boolean log;
     private Status status;
     private String pwdHash;
     private Date lastAccess;
@@ -36,6 +43,14 @@ public class User implements Sendable, Saveable, Authenticated {
 
     public User(String email, String name) {
         this(email, name, false);
+    }
+
+    public boolean isLog() {
+        return log;
+    }
+
+    public void setLog(boolean log) {
+        this.log = log;
     }
 
     public String getPwdHash() {
@@ -91,6 +106,7 @@ public class User implements Sendable, Saveable, Authenticated {
         back.setAccessDate(this.lastAccess);
         back.setPwdHash("");
         back.setAdmin(this.isAdmin());
+        back.setLog(this.isLog());
         back.setName(this.name);
         back.setStatus(this.status);
         return back;
@@ -139,6 +155,7 @@ public class User implements Sendable, Saveable, Authenticated {
         user.setAccessDate(lastAccess);
         user.setPwdHash(pwdHash);
         user.setAdmin(admin);
+        user.setLog(log);
         user.setEmail(email);
         user.setName(name);
         user.setPosition(position);
