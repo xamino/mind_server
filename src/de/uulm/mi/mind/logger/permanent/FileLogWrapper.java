@@ -87,7 +87,31 @@ public class FileLogWrapper {
                     public String getContent() {
                         final String userKey = anonymizer.getKey(user);
                         final String areaKey = anonymizer.getKey(area);
-                        return userKey + " @ " + areaKey;
+                        return "uuu " + userKey + " @ " + areaKey;
+                    }
+                };
+            }
+        });
+    }
+
+    public static void positionError(final User user, final Area area) {
+        fileLog.log(new LogWorker() {
+            @Override
+            public LogObject logCreate() {
+                return new LogObject() {
+                    @Override
+                    public String getFileName() {
+                        return POSITIONFILE;
+                    }
+
+                    @Override
+                    public String getContent() {
+                        String userKey = anonymizer.getKey(user);
+                        String areaKey = "UNKNOWN";
+                        if (area != null) {
+                            areaKey = anonymizer.getKey(area);
+                        }
+                        return "xxx " + userKey + " @ " + areaKey + " is wrong";
                     }
                 };
             }

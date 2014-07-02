@@ -5,15 +5,12 @@ import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.security.Active;
-import de.uulm.mi.mind.tasks.Task;
-
-import java.util.HashSet;
-import java.util.Set;
+import de.uulm.mi.mind.tasks.UserTask;
 
 /**
  * @author Tamino Hartmann
  */
-public class MapEmailName extends Task<DataList, Sendable> {
+public class MapEmailName extends UserTask<DataList, Sendable> {
 
     private String TAG = "MapEmailName";
 
@@ -50,13 +47,6 @@ public class MapEmailName extends Task<DataList, Sendable> {
     }
 
     @Override
-    public Set<String> getTaskPermission() {
-        Set<String> permissible = new HashSet<>();
-        permissible.add(User.class.getSimpleName());
-        return permissible;
-    }
-
-    @Override
     public Class<DataList> getInputType() {
         return DataList.class;
     }
@@ -64,10 +54,5 @@ public class MapEmailName extends Task<DataList, Sendable> {
     @Override
     public Class<Sendable> getOutputType() {
         return Sendable.class;
-    }
-
-    @Override
-    public boolean isAdminTask() {
-        return false;
     }
 }

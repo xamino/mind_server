@@ -2,7 +2,6 @@ package de.uulm.mi.mind.tasks.user;
 
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
-import de.uulm.mi.mind.tasks.Task;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
@@ -10,14 +9,12 @@ import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.security.BCrypt;
-
-import java.util.HashSet;
-import java.util.Set;
+import de.uulm.mi.mind.tasks.UserTask;
 
 /**
  * Created by Tamino Hartmann.
  */
-public class UserUpdate extends Task<User, Information> {
+public class UserUpdate extends UserTask<User, Information> {
     @Override
     public boolean validateInput(User object) {
         return safeString(object.getKey());
@@ -72,13 +69,6 @@ public class UserUpdate extends Task<User, Information> {
     }
 
     @Override
-    public Set<String> getTaskPermission() {
-        Set<String> permissible = new HashSet<>();
-        permissible.add(User.class.getSimpleName());
-        return permissible;
-    }
-
-    @Override
     public Class<User> getInputType() {
         return User.class;
     }
@@ -86,10 +76,5 @@ public class UserUpdate extends Task<User, Information> {
     @Override
     public Class<Information> getOutputType() {
         return Information.class;
-    }
-
-    @Override
-    public boolean isAdminTask() {
-        return false;
     }
 }

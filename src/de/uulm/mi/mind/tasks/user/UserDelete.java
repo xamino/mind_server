@@ -2,7 +2,6 @@ package de.uulm.mi.mind.tasks.user;
 
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
-import de.uulm.mi.mind.tasks.Task;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.User;
@@ -10,14 +9,12 @@ import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
-
-import java.util.HashSet;
-import java.util.Set;
+import de.uulm.mi.mind.tasks.UserTask;
 
 /**
  * Created by Tamino Hartmann.
  */
-public class UserDelete extends Task<None, Information> {
+public class UserDelete extends UserTask<None, Information> {
     @Override
     public boolean validateInput(None object) {
         return true;
@@ -49,13 +46,6 @@ public class UserDelete extends Task<None, Information> {
     }
 
     @Override
-    public Set<String> getTaskPermission() {
-        Set<String> permissible = new HashSet<>();
-        permissible.add(User.class.getSimpleName());
-        return permissible;
-    }
-
-    @Override
     public Class<None> getInputType() {
         return None.class;
     }
@@ -63,10 +53,5 @@ public class UserDelete extends Task<None, Information> {
     @Override
     public Class<Information> getOutputType() {
         return Information.class;
-    }
-
-    @Override
-    public boolean isAdminTask() {
-        return false;
     }
 }

@@ -6,16 +6,14 @@ import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.enums.DeviceClass;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
-import de.uulm.mi.mind.tasks.Task;
+import de.uulm.mi.mind.tasks.UserTask;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Tamino Hartmann
  */
-public class PositionFind extends Task<Arrival, Sendable> {
+public class PositionFind extends UserTask<Arrival, Sendable> {
 
     /**
      * Level tolerance for wifimorsels against which to match.
@@ -418,13 +416,6 @@ public class PositionFind extends Task<Arrival, Sendable> {
     }
 
     @Override
-    public Set<String> getTaskPermission() {
-        Set<String> permissible = new HashSet<>();
-        permissible.add(User.class.getSimpleName());
-        return permissible;
-    }
-
-    @Override
     public Class<Arrival> getInputType() {
         return Arrival.class;
     }
@@ -432,10 +423,5 @@ public class PositionFind extends Task<Arrival, Sendable> {
     @Override
     public Class<Sendable> getOutputType() {
         return Sendable.class;
-    }
-
-    @Override
-    public boolean isAdminTask() {
-        return false;
     }
 }
