@@ -28,6 +28,7 @@ public class WifiSensor implements Authenticated, Sendable, Saveable {
      * Last time the sensor logged in.
      */
     private Date lastAccess;
+    private String unique;
 
     private WifiSensor() {
     }
@@ -92,6 +93,15 @@ public class WifiSensor implements Authenticated, Sendable, Saveable {
     public Saveable deepClone() {
         WifiSensor w = new WifiSensor(identification, tokenHash, area);
         w.setAccessDate(lastAccess);
+        w.setUnique(unique);
         return w;
+    }
+
+    public String getUnique() {
+        return unique;
+    }
+
+    public void setUnique(String unique) {
+        this.unique = unique;
     }
 }

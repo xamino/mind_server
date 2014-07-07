@@ -286,17 +286,17 @@ public class DatabaseManager {
      */
     public <E extends Saveable> DataList<E> read(E filter, int depth) {
         Session session = dba.openRoot();
-        long time = System.currentTimeMillis();
+        // long time = System.currentTimeMillis();
         DataList<E> ret = session.read(filter, depth);
-        log.log(TAG, "sessionRead " + (System.currentTimeMillis() - time) + "ms " + filter);
-        time = System.currentTimeMillis();
+        // log.log(TAG, "sessionRead " + (System.currentTimeMillis() - time) + "ms " + filter);
+        // time = System.currentTimeMillis();
 
         DataList<E> cloned = new DataList<>();
         for (E e : ret) {
             cloned.add((E) e.deepClone());
         }
 
-        log.log(TAG, "sessionClose " + (System.currentTimeMillis() - time) + "ms");
+        // log.log(TAG, "sessionClose " + (System.currentTimeMillis() - time) + "ms");
         return cloned;
     }
 }

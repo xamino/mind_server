@@ -6,16 +6,14 @@ import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.enums.DeviceClass;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
-import de.uulm.mi.mind.tasks.Task;
+import de.uulm.mi.mind.tasks.UserTask;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Tamino Hartmann
  */
-public class PositionFind extends Task<Arrival, Sendable> {
+public class PositionFind extends UserTask<Arrival, Sendable> {
 
     /**
      * Level tolerance for wifimorsels against which to match.
@@ -155,6 +153,8 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
         //END S4 MINI TO S3 MINI CONVERSION
 
+        long timer = System.currentTimeMillis();
+
         // Get University Area containing all locations from database
         DataList<Area> read = database.read(new Area("University"), 5);
         if (read == null || read.isEmpty() || read.size() != 1) {
@@ -163,8 +163,15 @@ public class PositionFind extends Task<Arrival, Sendable> {
         }
         DataList<Location> dataBaseLocations = read.get(0).getLocations();
 
+        timer -= System.currentTimeMillis();
+        System.out.println("read university: " + timer);
+        timer = System.currentTimeMillis();
+
         // prepare locations for finding match (remove useless MACs, calculate average)
         dataBaseLocations = prepareLocations(dataBaseLocations, request, requestDeviceClass);
+
+        timer -= System.currentTimeMillis();
+        System.out.println("prepare locations: " + timer);
 
         // keep only wifimorsels that are near our request morsels using LEVEL_TOLERANCE
         dataBaseLocations = trimToleranceMorsels(dataBaseLocations, request.getWifiMorsels());
@@ -218,6 +225,7 @@ public class PositionFind extends Task<Arrival, Sendable> {
             // get best match
             location = negotiate(conflicts, request.getWifiMorsels());
         }
+
         return location;
     }
 
@@ -313,6 +321,9 @@ public class PositionFind extends Task<Arrival, Sendable> {
      */
     private DataList<Location> prepareLocations(DataList<Location> fullLocations, final Location searchLocation, final DeviceClass deviceClass) {
         DataList<Location> toKeep = new DataList<>();
+
+        long time = System.currentTimeMillis();
+
         // first filter for only those morsels with mac addresses we can use
         for (Location fullLocation : fullLocations) {
             Location filtered = filterMACandCLASS(fullLocation, searchLocation, deviceClass);
@@ -324,6 +335,9 @@ public class PositionFind extends Task<Arrival, Sendable> {
             // finally set
             toKeep.add(filtered);
         }
+
+        System.out.println("blub @ " + (System.currentTimeMillis() - time));
+
         // not full anymore, of course
         return toKeep;
     }
@@ -340,8 +354,11 @@ public class PositionFind extends Task<Arrival, Sendable> {
         // find morsels to add
         for (WifiMorsel check : location.getWifiMorsels()) {
             for (WifiMorsel original : searchLocation.getWifiMorsels()) {
-                if (check.getWifiMac().equals(original.getWifiMac()) && deviceClass == DeviceClass.getClass(check.getDeviceModel())) {
-                    toKeep.add(check);
+                // note: checking FIRST for MAC is a factor of 100x faster! DO NOT CHANGE!
+                if (check.getWifiMac().equals(original.getWifiMac())) {
+                    if (deviceClass == DeviceClass.getClass(check.getDeviceModel())) {
+                        toKeep.add(check);
+                    }
                 }
             }
         }
@@ -418,13 +435,6 @@ public class PositionFind extends Task<Arrival, Sendable> {
     }
 
     @Override
-    public Set<String> getTaskPermission() {
-        Set<String> permissible = new HashSet<>();
-        permissible.add(User.class.getSimpleName());
-        return permissible;
-    }
-
-    @Override
     public Class<Arrival> getInputType() {
         return Arrival.class;
     }
@@ -432,10 +442,5 @@ public class PositionFind extends Task<Arrival, Sendable> {
     @Override
     public Class<Sendable> getOutputType() {
         return Sendable.class;
-    }
-
-    @Override
-    public boolean isAdminTask() {
-        return false;
     }
 }
