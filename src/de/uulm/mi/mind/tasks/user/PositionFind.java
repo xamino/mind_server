@@ -153,6 +153,7 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
         }
         //END S4 MINI TO S3 MINI CONVERSION
 
+        long timer = System.currentTimeMillis();
         // Get University Area containing all locations from database
         DataList<Area> read = database.read(new Area("University"), 5);
         if (read == null || read.isEmpty() || read.size() != 1) {
@@ -161,11 +162,23 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
         }
         DataList<Location> dataBaseLocations = read.get(0).getLocations();
 
+        timer -= System.currentTimeMillis();
+        System.out.println("read university: "+timer);
+        timer = System.currentTimeMillis();
+
         // prepare locations for finding match (remove useless MACs, calculate average)
         dataBaseLocations = prepareLocations(dataBaseLocations, request, requestDeviceClass);
 
+        timer -= System.currentTimeMillis();
+        System.out.println("prepare locations: "+timer);
+        timer = System.currentTimeMillis();
+
         // keep only wifimorsels that are near our request morsels using LEVEL_TOLERANCE
         dataBaseLocations = trimToleranceMorsels(dataBaseLocations, request.getWifiMorsels());
+
+        timer -= System.currentTimeMillis();
+        System.out.println("trim tolerance: "+timer);
+        timer = System.currentTimeMillis();
 
         //FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
         int leastMatches = 3;
@@ -181,6 +194,10 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
             dataBaseLocations.remove(location);
         }
         //END FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
+
+        timer -= System.currentTimeMillis();
+        System.out.println("filter: "+timer);
+        timer = System.currentTimeMillis();
 
         // now we check if we have to negotiate an answer
         int test = 0;
@@ -216,6 +233,10 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
             // get best match
             location = negotiate(conflicts, request.getWifiMorsels());
         }
+
+        timer -= System.currentTimeMillis();
+        System.out.println("negotiation: "+timer);
+
         return location;
     }
 
