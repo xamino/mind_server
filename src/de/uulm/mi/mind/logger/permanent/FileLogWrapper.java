@@ -252,4 +252,24 @@ public class FileLogWrapper {
             }
         });
     }
+
+    public static void statusUpdate(final User user) {
+        fileLog.log(new LogWorker() {
+            @Override
+            public LogObject logCreate() {
+                return new LogObject() {
+                    @Override
+                    public String getFileName() {
+                        return POSITIONFILE;
+                    }
+
+                    @Override
+                    public String getContent() {
+                        final String key = anonymizer.getKey(user);
+                        return "sss " + key + " set status to " + user.getStatus();
+                    }
+                };
+            }
+        });
+    }
 }
