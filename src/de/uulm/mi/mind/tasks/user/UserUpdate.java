@@ -2,6 +2,7 @@ package de.uulm.mi.mind.tasks.user;
 
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
@@ -43,8 +44,9 @@ public class UserUpdate extends UserTask<User, Information> {
         if (safeString(sentUser.getName())) {
             user.setName(sentUser.getName());
         }
-        if (sentUser.getStatus() != null) {
+        if (sentUser.getStatus() != null && !sentUser.getStatus().equals(user.getStatus())) {
             user.setStatus(sentUser.getStatus());
+            FileLogWrapper.statusUpdate(user);
         }
 
 
