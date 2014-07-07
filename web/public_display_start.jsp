@@ -49,7 +49,8 @@
     <!-- <img class="micon" src="images/micons/crab.png"/> -->
     <!-- <input type="button" name="call_button" id="callButton" onclick="callRoom()"/>
     <input type="submit" value="Open Popup" onclick="javascript:callPopup('public_display_popup_call.jsp')"/> -->
-    <input type="submit" name="call_button" id="callButton" onclick="javascript:callRoom('public_display_popup_call.jsp')"/>
+    <!-- call button -->
+    <!-- <input type="submit" name="call_button" id="callButton" onclick="javascript:callRoom('public_display_popup_call.jsp')"/> -->
 </div>
 <!-- Slider not in use -->
 <!-- <div id="sliderdiv" style="position: absolute; top: 0px; left: 0px">
