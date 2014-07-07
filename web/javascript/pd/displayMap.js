@@ -114,6 +114,7 @@ function initInterval() {
     }
     interval = setInterval(function () {
         updatePdData();
+//        checkBrightnessSetting();
     }, refreshRate * +1000);
 }
 
