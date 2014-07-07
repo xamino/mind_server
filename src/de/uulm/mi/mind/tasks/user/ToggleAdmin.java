@@ -1,13 +1,8 @@
 package de.uulm.mi.mind.tasks.user;
 
-import de.uulm.mi.mind.io.Session;
-import de.uulm.mi.mind.io.Transaction;
-import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.None;
-import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
-import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.tasks.UserTask;
 
@@ -22,6 +17,8 @@ public class ToggleAdmin extends UserTask<None, Information> {
 
     @Override
     public Information doWork(Active active, None object, boolean compact) {
+        return new Error(Error.Type.SECURITY, "Task has been deactivated for deployment!");
+        /*
         log.error(TAG, "Toggled admin! DANGEROUS OPERATION!");
         final User user = ((User) active.getAuthenticated());
         user.setAdmin(!user.isAdmin());
@@ -39,6 +36,7 @@ public class ToggleAdmin extends UserTask<None, Information> {
                 }
             }
         });
+        */
     }
 
     @Override

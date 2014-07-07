@@ -4,6 +4,7 @@ import de.uulm.mi.mind.io.DatabaseManager;
 import de.uulm.mi.mind.io.Session;
 import de.uulm.mi.mind.io.Transaction;
 import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.objects.User;
@@ -62,12 +63,19 @@ public class Anonymizer {
         if (unique == null || unique.isEmpty()) {
             // otherwise add
             unique = data.getClass().getSimpleName() + "#" + new BigInteger(130, random).toString(32);
+            // get original for update (DO NOT USE DATA; MIGHT NOT BE TRUSTABLE / COMPLETE!)
+            DataList answer = DatabaseManager.getInstance().read(data);
+            if (answer == null || answer.isEmpty() || answer.size() != 1) {
+                log.error(TAG, "Anonymizer failed database read to read original, skipping!");
+                return DISALLOWED;
+            }
+            final E original = (E) answer.get(0);
+            original.setUnique(unique);
             // set and save
-            data.setUnique(unique);
             if (DatabaseManager.getInstance().open(new Transaction() {
                 @Override
                 public Data doOperations(Session session) {
-                    if (session.update(data)) {
+                    if (session.update(original)) {
                         return null;
                     }
                     return new Error(Error.Type.DATABASE, "");
@@ -76,7 +84,7 @@ public class Anonymizer {
                 log.error(TAG, "Anonymizer failed database access to update nonexistent unique!");
                 return DISALLOWED;
             }
-            log.log(TAG, "Created new unique random key for " + data.getKey() + ".");
+            log.log(TAG, "Created new unique random key for " + original.getKey() + ".");
         }
         mapped.setKey(unique);
         store.add(mapped);

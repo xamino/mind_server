@@ -153,8 +153,6 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
         }
         //END S4 MINI TO S3 MINI CONVERSION
 
-        long timer = System.currentTimeMillis();
-
         // Get University Area containing all locations from database
         DataList<Area> read = database.read(new Area("University"), 5);
         if (read == null || read.isEmpty() || read.size() != 1) {
@@ -163,15 +161,8 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
         }
         DataList<Location> dataBaseLocations = read.get(0).getLocations();
 
-        timer -= System.currentTimeMillis();
-        System.out.println("read university: " + timer);
-        timer = System.currentTimeMillis();
-
         // prepare locations for finding match (remove useless MACs, calculate average)
         dataBaseLocations = prepareLocations(dataBaseLocations, request, requestDeviceClass);
-
-        timer -= System.currentTimeMillis();
-        System.out.println("prepare locations: " + timer);
 
         // keep only wifimorsels that are near our request morsels using LEVEL_TOLERANCE
         dataBaseLocations = trimToleranceMorsels(dataBaseLocations, request.getWifiMorsels());
@@ -322,8 +313,6 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
     private DataList<Location> prepareLocations(DataList<Location> fullLocations, final Location searchLocation, final DeviceClass deviceClass) {
         DataList<Location> toKeep = new DataList<>();
 
-        long time = System.currentTimeMillis();
-
         // first filter for only those morsels with mac addresses we can use
         for (Location fullLocation : fullLocations) {
             Location filtered = filterMACandCLASS(fullLocation, searchLocation, deviceClass);
@@ -335,8 +324,6 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
             // finally set
             toKeep.add(filtered);
         }
-
-        System.out.println("blub @ " + (System.currentTimeMillis() - time));
 
         // not full anymore, of course
         return toKeep;
