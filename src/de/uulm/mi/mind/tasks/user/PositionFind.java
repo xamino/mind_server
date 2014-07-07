@@ -154,6 +154,7 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
         //END S4 MINI TO S3 MINI CONVERSION
 
         long timer = System.currentTimeMillis();
+
         // Get University Area containing all locations from database
         DataList<Area> read = database.read(new Area("University"), 5);
         if (read == null || read.isEmpty() || read.size() != 1) {
@@ -163,22 +164,17 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
         DataList<Location> dataBaseLocations = read.get(0).getLocations();
 
         timer -= System.currentTimeMillis();
-        System.out.println("read university: "+timer);
+        System.out.println("read university: " + timer);
         timer = System.currentTimeMillis();
 
         // prepare locations for finding match (remove useless MACs, calculate average)
         dataBaseLocations = prepareLocations(dataBaseLocations, request, requestDeviceClass);
 
         timer -= System.currentTimeMillis();
-        System.out.println("prepare locations: "+timer);
-        timer = System.currentTimeMillis();
+        System.out.println("prepare locations: " + timer);
 
         // keep only wifimorsels that are near our request morsels using LEVEL_TOLERANCE
         dataBaseLocations = trimToleranceMorsels(dataBaseLocations, request.getWifiMorsels());
-
-        timer -= System.currentTimeMillis();
-        System.out.println("trim tolerance: "+timer);
-        timer = System.currentTimeMillis();
 
         //FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
         int leastMatches = 3;
@@ -194,10 +190,6 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
             dataBaseLocations.remove(location);
         }
         //END FILTER - REMOVE ALL MATCHES WITH LESS THAN #leastMatches
-
-        timer -= System.currentTimeMillis();
-        System.out.println("filter: "+timer);
-        timer = System.currentTimeMillis();
 
         // now we check if we have to negotiate an answer
         int test = 0;
@@ -233,9 +225,6 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
             // get best match
             location = negotiate(conflicts, request.getWifiMorsels());
         }
-
-        timer -= System.currentTimeMillis();
-        System.out.println("negotiation: "+timer);
 
         return location;
     }
@@ -332,6 +321,9 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
      */
     private DataList<Location> prepareLocations(DataList<Location> fullLocations, final Location searchLocation, final DeviceClass deviceClass) {
         DataList<Location> toKeep = new DataList<>();
+
+        long time = System.currentTimeMillis();
+
         // first filter for only those morsels with mac addresses we can use
         for (Location fullLocation : fullLocations) {
             Location filtered = filterMACandCLASS(fullLocation, searchLocation, deviceClass);
@@ -343,6 +335,9 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
             // finally set
             toKeep.add(filtered);
         }
+
+        System.out.println("blub @ " + (System.currentTimeMillis() - time));
+
         // not full anymore, of course
         return toKeep;
     }
@@ -359,8 +354,11 @@ public class PositionFind extends UserTask<Arrival, Sendable> {
         // find morsels to add
         for (WifiMorsel check : location.getWifiMorsels()) {
             for (WifiMorsel original : searchLocation.getWifiMorsels()) {
-                if (check.getWifiMac().equals(original.getWifiMac()) && deviceClass == DeviceClass.getClass(check.getDeviceModel())) {
-                    toKeep.add(check);
+                // note: checking FIRST for MAC is a factor of 100x faster! DO NOT CHANGE!
+                if (check.getWifiMac().equals(original.getWifiMac())) {
+                    if (deviceClass == DeviceClass.getClass(check.getDeviceModel())) {
+                        toKeep.add(check);
+                    }
                 }
             }
         }
