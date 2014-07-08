@@ -39,7 +39,7 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        final String key = anonymizer.getKey(data);
+                        final String key = anonymizer.getKey(data, true);
                         return "+++ " + data.getClass().getSimpleName() + " " + key;
                     }
                 };
@@ -65,7 +65,7 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        final String key = anonymizer.getKey(data);
+                        final String key = anonymizer.getKey(data, true);
                         return "--- " + data.getClass().getSimpleName() + " " + key;
                     }
                 };
@@ -85,8 +85,8 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        final String userKey = anonymizer.getKey(user);
-                        final String areaKey = anonymizer.getKey(area);
+                        final String userKey = anonymizer.getKey(user, true);
+                        final String areaKey = anonymizer.getKey(area, true);
                         return "uuu " + userKey + " @ " + areaKey;
                     }
                 };
@@ -106,10 +106,10 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        String userKey = anonymizer.getKey(user);
+                        String userKey = anonymizer.getKey(user, true);
                         String areaKey = "UNKNOWN";
                         if (area != null) {
-                            areaKey = anonymizer.getKey(area);
+                            areaKey = anonymizer.getKey(area, true);
                         }
                         return "xxx " + userKey + " @ " + areaKey + " is wrong";
                     }
@@ -130,10 +130,10 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        String userKey = anonymizer.getKey(user);
+                        String userKey = anonymizer.getKey(user, true);
                         String areaKey = "UNKNOWN";
                         if (area != null) {
-                            areaKey = anonymizer.getKey(area);
+                            areaKey = anonymizer.getKey(area, true);
                         }
                         return "ooo " + userKey + " @ " + areaKey + " is okay";
                     }
@@ -161,9 +161,10 @@ public class FileLogWrapper {
                         for (String s : removed) {
                             builder.append("-").append(s).append(" ");
                         }
-                        final String options = builder.toString();
-                        final String userKey = anonymizer.getKey(user);
-                        final String pollKey = anonymizer.getKey(poll);
+                        String options = builder.toString();
+                        String userKey = anonymizer.getKey(user, true);
+                        // database read here okay becuase pollOption changes, not poll
+                        String pollKey = anonymizer.getKey(poll, true);
                         return userKey + " @ " + pollKey + " : " + options;
                     }
                 };
@@ -171,6 +172,7 @@ public class FileLogWrapper {
         });
     }
 
+    // CAREFUL: MUST BE CALLED AFTER THE OBJECT EXISTS! (so not before session.write())
     public static void pollCreate(final User user, final Poll poll) {
         fileLog.log(new LogWorker() {
             @Override
@@ -183,8 +185,8 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        final String userKey = anonymizer.getKey(user);
-                        final String pollKey = anonymizer.getKey(poll);
+                        String userKey = anonymizer.getKey(user, true);
+                        String pollKey = anonymizer.getKey(poll, true);
                         return "+++ " + pollKey + " by " + userKey + ": " + poll.getQuestion();
                     }
                 };
@@ -204,8 +206,8 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        final String userKey = anonymizer.getKey(user);
-                        final String pollKey = anonymizer.getKey(poll);
+                        final String userKey = anonymizer.getKey(user, true);
+                        final String pollKey = anonymizer.getKey(poll, true);
                         return "--- " + pollKey + " by " + userKey;
                     }
                 };
@@ -225,7 +227,7 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        final String pollKey = anonymizer.getKey(poll);
+                        final String pollKey = anonymizer.getKey(poll, true);
                         return "xxx " + pollKey + " ended";
                     }
                 };
@@ -245,7 +247,7 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        final String key = anonymizer.getKey(data);
+                        final String key = anonymizer.getKey(data, true);
                         return "~~~ " + data.getClass().getSimpleName() + " " + key + " timeout";
                     }
                 };
@@ -265,7 +267,7 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        final String key = anonymizer.getKey(user);
+                        final String key = anonymizer.getKey(user, true);
                         return "sss " + key + " set status to " + user.getStatus();
                     }
                 };

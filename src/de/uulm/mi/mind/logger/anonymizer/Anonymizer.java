@@ -23,6 +23,7 @@ public class Anonymizer {
 
     private static Anonymizer INSTANCE;
     private final String DISALLOWED = "unknown";
+    private final String TEMPORARY = "temporary";
     private final String TAG = "Anonymizer";
     private ArrayList<PointerMap> store;
     private Random random;
@@ -44,11 +45,13 @@ public class Anonymizer {
     /**
      * Gets a key for a Data object, creating a new one if one doesn't exist yet. Collisions are possible, if unlikely!
      *
-     * @param data The data for which to generate a key.
-     * @param <E>  The data type.
+     * @param data         The data for which to generate a key.
+     * @param readDatabase Read original object form database if unique doesn't exist. Can be dangerous if the object
+     *                     doesn't exist yet, so use true wisely (only after guaranteed database existence)!
+     * @param <E>          The data type.
      * @return The key.
      */
-    public <E extends Saveable> String getKey(final E data) {
+    public <E extends Saveable> String getKey(final E data, boolean readDatabase) {
         // check if user may be logged
         if (data instanceof User && !((User) data).isLog()) {
             return DISALLOWED;
@@ -61,10 +64,15 @@ public class Anonymizer {
         // check if hash already exists
         String unique = data.getUnique();
         if (unique == null || unique.isEmpty()) {
+            // if reading from DB is not allowed, we return temp
+            if (!readDatabase) {
+                log.log(TAG, "Anonymizer using temporary as object not in database yet!");
+                return TEMPORARY;
+            }
             // otherwise add
             unique = data.getClass().getSimpleName() + "#" + new BigInteger(130, random).toString(32);
             // get original for update (DO NOT USE DATA; MIGHT NOT BE TRUSTABLE / COMPLETE!)
-            DataList answer = DatabaseManager.getInstance().read(data);
+            DataList answer = DatabaseManager.getInstance().read(data, 10);
             if (answer == null || answer.isEmpty() || answer.size() != 1) {
                 log.error(TAG, "Anonymizer failed database read to read original, skipping!");
                 return DISALLOWED;
