@@ -23,6 +23,7 @@ public class PublicDisplay implements Sendable, Authenticated, Saveable {
     private int coordinateX;
     private int coordinateY;
     private Date lastAccess;
+    private String unique;
 
     private PublicDisplay() {
     }
@@ -118,6 +119,15 @@ public class PublicDisplay implements Sendable, Authenticated, Saveable {
     public Saveable deepClone() {
         PublicDisplay pd = new PublicDisplay(identification, token, location, coordinateX, coordinateY);
         pd.setAccessDate(lastAccess);
+        pd.setUnique(unique);
         return pd;
+    }
+
+    public String getUnique() {
+        return unique;
+    }
+
+    public void setUnique(String unique) {
+        this.unique = unique;
     }
 }

@@ -41,7 +41,6 @@
             Security.finish(active);
         }
 %>">
-
 <!-- MAP DISPLAY STUFF -->
 <div id="mapscroll">
 
@@ -49,7 +48,8 @@
     <!-- <img class="micon" src="images/micons/crab.png"/> -->
     <!-- <input type="button" name="call_button" id="callButton" onclick="callRoom()"/>
     <input type="submit" value="Open Popup" onclick="javascript:callPopup('public_display_popup_call.jsp')"/> -->
-    <input type="submit" name="call_button" id="callButton" onclick="javascript:callRoom('public_display_popup_call.jsp')"/>
+    <!-- call button -->
+    <!-- <input type="submit" name="call_button" id="callButton" onclick="javascript:callRoom('public_display_popup_call.jsp')"/> -->
 </div>
 <!-- Slider not in use -->
 <!-- <div id="sliderdiv" style="position: absolute; top: 0px; left: 0px">
@@ -102,15 +102,21 @@
                 <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->
                 <hr>
                 <br>
-
+				
+				<div id="sliderdiv_brightness">
+	                   <input id="slider_brightness" type="range" name="points" min="1" max="5" value="1"
+	                          onchange="changeBrightness(this.value)">
+	                   <p id="slidertext_brightness">Current Brightness: 100%</p>
+                </div>  
+                <hr>
+                <br>
                 <div id="buttonsDiv">
                     <button type='button' id='displaySettingsBack' class="shadow" onclick='toggleDisplaySettings()'>Back
                     </button>
-                    <!-- settingsBackButton() -->
-                    <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout
+                    <!-- <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout
                         Display
                     </button>
-                    <button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>
+                    <button type="button" id='toggleFullscreen' class="shadow">toggleFullscreen</button>-->
                 </div>
             </div>
             <div id="show_app_settings" style="display:none;">
@@ -148,5 +154,6 @@
     </div>
 
 </div>
+<div id="darkener"></div> <!-- end darkener -->
 </body>
 </html>

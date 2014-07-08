@@ -28,6 +28,7 @@ public class WifiMorsel implements Sendable, Comparable, Saveable {
     private String deviceModel;
 
     private Date timeStamp;
+    private String unique;
 
     private WifiMorsel() {
     }
@@ -127,7 +128,6 @@ public class WifiMorsel implements Sendable, Comparable, Saveable {
             return 0;
     }
 
-
     @Override
     public String getKey() {
         return null;
@@ -135,6 +135,16 @@ public class WifiMorsel implements Sendable, Comparable, Saveable {
 
     @Override
     public Saveable deepClone() {
-        return new WifiMorsel(wifiMac, wifiName, wifiLevel, wifiChannel, deviceModel, timeStamp);
+        WifiMorsel w = new WifiMorsel(wifiMac, wifiName, wifiLevel, wifiChannel, deviceModel, timeStamp);
+        w.setUnique(unique);
+        return w;
+    }
+
+    public String getUnique() {
+        return unique;
+    }
+
+    public void setUnique(String unique) {
+        this.unique = unique;
     }
 }

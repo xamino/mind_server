@@ -114,6 +114,7 @@ function initInterval() {
     }
     interval = setInterval(function () {
         updatePdData();
+//        checkBrightnessSetting();
     }, refreshRate * +1000);
 }
 
@@ -456,7 +457,7 @@ function updateUserListOnReceive(data) {
 	if(instanceOf(data.object,Error)){
 		//reload this page (causes the pd to login, thus receiving a new session)
 		alert(data.object);
-		window.location.relaod();
+		window.location.reload();
 	}
 	
     var updatedUsersArray = data.object;

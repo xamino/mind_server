@@ -135,3 +135,95 @@ function checkAwayArea() {
 //    });
 }
 
+function changeBrightness(value){
+	
+	switch (value) {
+    case '1':
+        document.getElementById("darkener").style.backgroundColor = "rgba(0,0,0,0.0)";
+        document.getElementById("slidertext_brightness").innerHTML = 'Current Brightness: 100%';
+        break;
+    case '2':
+    	document.getElementById("darkener").style.backgroundColor = "rgba(0,0,0,0.2)";
+        document.getElementById("slidertext_brightness").innerHTML = 'Current Brightness: 80%';
+        break;
+    case '3':
+    	document.getElementById("darkener").style.backgroundColor = "rgba(0,0,0,0.4)";
+        document.getElementById("slidertext_brightness").innerHTML = 'Current Brightness: 60%';
+        break;
+    case '4':
+        document.getElementById("darkener").style.backgroundColor = "rgba(0,0,0,0.6)";
+        document.getElementById("slidertext_brightness").innerHTML = 'Current Brightness: 40%';
+        break;
+    case '5':
+    	document.getElementById("darkener").style.backgroundColor = "rgba(0,0,0,0.8)";
+        document.getElementById("slidertext_brightness").innerHTML = 'Current Brightness: 20%';
+        break;
+    default:
+        break;
+	}
+
+}
+
+/* not finished yet */
+/*
+//$( "body" ).mouseup(function() {
+var lastTimestamp = 0;
+$(document).on('mouseup', 'body', function(){
+//  alert("up - "+lastTimestamp);
+  lastTimestamp = event.timeStamp;  
+});
+
+$(document).on('mousedown', 'body', function(){
+	changeBrightness(lastBrightness);
+	document.getElementById('slider_brightness').value = lastBrightness;
+});
+
+
+$( document ).ready(function(){
+	var startBrightness = document.getElementById('slider_brightness').value;
+//	alert(startBrightness);
+});
+
+var currTimestamp = 0, diff = 0;
+var brightnessValue;
+var lastBrightness = brightnessValue;
+function checkBrightnessSetting(){
+	currTimestamp = Date.now();
+	if(lastTimestamp == 0){
+		lastTimestamp = currTimestamp;
+	}
+//	alert("curr: "+currTimestamp+", last: "+lastTimestamp);
+	diff = +currTimestamp - +lastTimestamp;
+//	alert(diff+" --- "+currTimestamp);
+	if(diff > (6000 * 5)){
+//		alert("change");
+		lastTimestamp = currTimestamp;
+		brightnessValue = document.getElementById('slider_brightness').value;
+		switch(brightnessValue){
+		case '1':
+			changeBrightness(3);
+			document.getElementById('slider_brightness').value = 3;
+			break;
+		case '2':
+			changeBrightness(4);
+			document.getElementById('slider_brightness').value = 4;
+			break;
+		case '3':
+			changeBrightness(5);
+			document.getElementById('slider_brightness').value = 5;
+			break;
+		case '4':
+			changeBrightness(5);
+			document.getElementById('slider_brightness').value = 5;
+			break;
+		case '5':
+			changeBrightness(5);
+			document.getElementById('slider_brightness').value = 5;
+			break;
+		default:
+			break;
+		}
+		
+//		alert("test "+brightnessValue);
+	}
+}*/

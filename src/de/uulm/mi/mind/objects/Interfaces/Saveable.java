@@ -1,7 +1,5 @@
 package de.uulm.mi.mind.objects.Interfaces;
 
-import java.io.Serializable;
-
 /**
  * @author Tamino Hartmann
  */
@@ -14,4 +12,8 @@ public interface Saveable extends Data {
     public String getKey();
 
     public Saveable deepClone();
+
+    public String getUnique();
+
+    public void setUnique(String unique);
 }

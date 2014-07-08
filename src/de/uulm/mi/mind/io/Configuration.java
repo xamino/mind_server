@@ -118,12 +118,8 @@ public class Configuration {
                 this.dbType = config.getProperty("DATABASE_TYPE");
             if (this.isDebug == null)
                 this.isDebug = config.getProperty("DEBUG");
-            /*
-            // this is knowingly not loaded! FileLog will build the directory by itself if none is set by the user.
-            // note that this means that by default, the path will be built by the system!
             if (this.fileLogPath == null)
                 this.fileLogPath = config.getProperty("FILE_LOG_PATH");
-            */
             if (this.fileLogActive == null)
                 this.fileLogActive = config.getProperty("FILE_LOG_ACTIVE");
             if (this.fileLogAsync == null)

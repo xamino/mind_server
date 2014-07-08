@@ -4,7 +4,6 @@ import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Created by Tamino Hartmann on 6/3/14.
@@ -14,6 +13,7 @@ public class PollOption implements Saveable, Sendable {
     private String key;
     private String optionValue;
     private ArrayList<String> users = new ArrayList<>();
+    private String unique;
 
     private PollOption() {
 
@@ -54,14 +54,23 @@ public class PollOption implements Saveable, Sendable {
         return this.key;
     }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     @Override
     public Saveable deepClone() {
-        PollOption p = new PollOption(key,optionValue);
+        PollOption p = new PollOption(key, optionValue);
         p.setUsers(users); // TODO clone?
+        p.setUnique(unique);
         return p;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public String getUnique() {
+        return unique;
+    }
+
+    public void setUnique(String unique) {
+        this.unique = unique;
     }
 }

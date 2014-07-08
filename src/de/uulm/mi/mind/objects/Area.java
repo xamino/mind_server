@@ -22,6 +22,7 @@ public class Area implements Sendable, Saveable {
      */
     private int topLeftX, topLeftY;
     private int width, height;
+    private String unique;
 
     private Area() {
     }
@@ -142,19 +143,27 @@ public class Area implements Sendable, Saveable {
     @Override
     public Saveable deepClone() {
         Area a = new Area(ID, null, topLeftX, topLeftY, width, height);
+        a.setUnique(unique);
 
         DataList<Location> locs = new DataList<>();
 
-        if(locations!=null) {
+        if (locations != null) {
             for (Location location : locations) {
                 if (location == null) continue;
                 locs.add((Location) location.deepClone());
             }
             a.setLocations(locs);
-        }
-        else{
+        } else {
             a.setLocations(new DataList<Location>());
         }
         return a;
+    }
+
+    public String getUnique() {
+        return unique;
+    }
+
+    public void setUnique(String unique) {
+        this.unique = unique;
     }
 }

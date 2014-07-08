@@ -3,15 +3,12 @@ package de.uulm.mi.mind.tasks.user;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.security.Active;
-import de.uulm.mi.mind.tasks.Task;
-
-import java.util.HashSet;
-import java.util.Set;
+import de.uulm.mi.mind.tasks.UserTask;
 
 /**
  * Created by Tamino Hartmann..
  */
-public class UserRead extends Task<None, User> {
+public class UserRead extends UserTask<None, User> {
     @Override
     public boolean validateInput(None object) {
         return true;
@@ -28,13 +25,6 @@ public class UserRead extends Task<None, User> {
     }
 
     @Override
-    public Set<String> getTaskPermission() {
-        Set<String> permissible = new HashSet<>();
-        permissible.add(User.class.getSimpleName());
-        return permissible;
-    }
-
-    @Override
     public Class<None> getInputType() {
         return None.class;
     }
@@ -42,10 +32,5 @@ public class UserRead extends Task<None, User> {
     @Override
     public Class<User> getOutputType() {
         return User.class;
-    }
-
-    @Override
-    public boolean isAdminTask() {
-        return false;
     }
 }

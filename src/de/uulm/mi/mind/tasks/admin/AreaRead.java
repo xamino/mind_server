@@ -1,16 +1,16 @@
 package de.uulm.mi.mind.tasks.admin;
 
-import de.uulm.mi.mind.tasks.AdminTask;
 import de.uulm.mi.mind.objects.Area;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
-import de.uulm.mi.mind.objects.Location;
-import de.uulm.mi.mind.objects.WifiMorsel;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.security.Active;
+import de.uulm.mi.mind.tasks.AdminTask;
 
 /**
  * Created by Tamino Hartmann on 5/21/14.
+ * <p/>
+ * Task for reading any and all areas freely from the db for the admin.
  */
 public class AreaRead extends AdminTask<Area, Sendable> {
     @Override
@@ -21,12 +21,11 @@ public class AreaRead extends AdminTask<Area, Sendable> {
     @Override
     public Sendable doWork(Active active, Area area, boolean compact) {
         DataList<Area> read;
-        if(compact){
-            // If compact is set, purge all wifimorsels (only depth up locations loaded)
-           read = database.read(area,3);
-        }
-        else{
-            read = database.read(area,5);
+        if (compact) {
+            // If compact is set, purge all wifimorsels (only depth of locations loaded)
+            read = database.read(area, 3);
+        } else {
+            read = database.read(area, 5);
         }
 
         if (read == null) {

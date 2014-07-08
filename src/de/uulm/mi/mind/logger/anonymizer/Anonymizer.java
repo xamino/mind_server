@@ -1,8 +1,14 @@
 package de.uulm.mi.mind.logger.anonymizer;
 
+import de.uulm.mi.mind.io.DatabaseManager;
+import de.uulm.mi.mind.io.Session;
+import de.uulm.mi.mind.io.Transaction;
+import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.objects.User;
+import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.security.Authenticated;
 
 import java.math.BigInteger;
@@ -17,12 +23,15 @@ public class Anonymizer {
 
     private static Anonymizer INSTANCE;
     private final String DISALLOWED = "unknown";
+    private final String TAG = "Anonymizer";
     private ArrayList<PointerMap> store;
     private Random random;
+    private Messenger log;
 
     private Anonymizer() {
         random = new Random();
         store = new ArrayList<>();
+        log = Messenger.getInstance();
     }
 
     public synchronized static Anonymizer getInstance() {
@@ -39,7 +48,7 @@ public class Anonymizer {
      * @param <E>  The data type.
      * @return The key.
      */
-    public <E extends Data> String getKey(E data) {
+    public <E extends Saveable> String getKey(final E data) {
         // check if user may be logged
         if (data instanceof User && !((User) data).isLog()) {
             return DISALLOWED;
@@ -49,8 +58,35 @@ public class Anonymizer {
         if (store.contains(mapped)) {
             return store.get(store.indexOf(mapped)).getKey();
         }
-        // otherwise add
-        mapped.setKey(data.getClass().getSimpleName() + "#" + new BigInteger(130, random).toString(32));
+        // check if hash already exists
+        String unique = data.getUnique();
+        if (unique == null || unique.isEmpty()) {
+            // otherwise add
+            unique = data.getClass().getSimpleName() + "#" + new BigInteger(130, random).toString(32);
+            // get original for update (DO NOT USE DATA; MIGHT NOT BE TRUSTABLE / COMPLETE!)
+            DataList answer = DatabaseManager.getInstance().read(data);
+            if (answer == null || answer.isEmpty() || answer.size() != 1) {
+                log.error(TAG, "Anonymizer failed database read to read original, skipping!");
+                return DISALLOWED;
+            }
+            final E original = (E) answer.get(0);
+            original.setUnique(unique);
+            // set and save
+            if (DatabaseManager.getInstance().open(new Transaction() {
+                @Override
+                public Data doOperations(Session session) {
+                    if (session.update(original)) {
+                        return null;
+                    }
+                    return new Error(Error.Type.DATABASE, "");
+                }
+            }) instanceof Error) {
+                log.error(TAG, "Anonymizer failed database access to update nonexistent unique!");
+                return DISALLOWED;
+            }
+            log.log(TAG, "Created new unique random key for " + original.getKey() + ".");
+        }
+        mapped.setKey(unique);
         store.add(mapped);
         return mapped.getKey();
     }
@@ -61,7 +97,7 @@ public class Anonymizer {
      * @param data The object for which to unregister the key.
      * @param <E>  The data type.
      */
-    public <E extends Data> void removeKey(E data) {
+    public <E extends Saveable> void removeKey(E data) {
         store.remove(new PointerMap<>(data));
     }
 

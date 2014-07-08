@@ -16,7 +16,6 @@ import java.util.ArrayList;
 public class FileLogWrapper {
 
     private static FileLog fileLog = FileLog.getInstance();
-    // todo generate a new anonymizer when the day changes
     private static Anonymizer anonymizer = Anonymizer.getInstance();
     private static String SESSIONFILE = "session";
     private static String POSITIONFILE = "position";
@@ -72,7 +71,6 @@ public class FileLogWrapper {
                 };
             }
         });
-        anonymizer.removeKey(data);
     }
 
     public static void positionUpdate(final User user, final Area area) {
@@ -89,7 +87,55 @@ public class FileLogWrapper {
                     public String getContent() {
                         final String userKey = anonymizer.getKey(user);
                         final String areaKey = anonymizer.getKey(area);
-                        return userKey + " @ " + areaKey;
+                        return "uuu " + userKey + " @ " + areaKey;
+                    }
+                };
+            }
+        });
+    }
+
+    public static void positionError(final User user, final Area area) {
+        fileLog.log(new LogWorker() {
+            @Override
+            public LogObject logCreate() {
+                return new LogObject() {
+                    @Override
+                    public String getFileName() {
+                        return POSITIONFILE;
+                    }
+
+                    @Override
+                    public String getContent() {
+                        String userKey = anonymizer.getKey(user);
+                        String areaKey = "UNKNOWN";
+                        if (area != null) {
+                            areaKey = anonymizer.getKey(area);
+                        }
+                        return "xxx " + userKey + " @ " + areaKey + " is wrong";
+                    }
+                };
+            }
+        });
+    }
+
+    public static void positionOkay(final User user, final Area area) {
+        fileLog.log(new LogWorker() {
+            @Override
+            public LogObject logCreate() {
+                return new LogObject() {
+                    @Override
+                    public String getFileName() {
+                        return POSITIONFILE;
+                    }
+
+                    @Override
+                    public String getContent() {
+                        String userKey = anonymizer.getKey(user);
+                        String areaKey = "UNKNOWN";
+                        if (area != null) {
+                            areaKey = anonymizer.getKey(area);
+                        }
+                        return "ooo " + userKey + " @ " + areaKey + " is okay";
                     }
                 };
             }
@@ -181,6 +227,46 @@ public class FileLogWrapper {
                     public String getContent() {
                         final String pollKey = anonymizer.getKey(poll);
                         return "xxx " + pollKey + " ended";
+                    }
+                };
+            }
+        });
+    }
+
+    public static void timeout(final Authenticated data) {
+        fileLog.log(new LogWorker() {
+            @Override
+            public LogObject logCreate() {
+                return new LogObject() {
+                    @Override
+                    public String getFileName() {
+                        return SESSIONFILE;
+                    }
+
+                    @Override
+                    public String getContent() {
+                        final String key = anonymizer.getKey(data);
+                        return "~~~ " + data.getClass().getSimpleName() + " " + key + " timeout";
+                    }
+                };
+            }
+        });
+    }
+
+    public static void statusUpdate(final User user) {
+        fileLog.log(new LogWorker() {
+            @Override
+            public LogObject logCreate() {
+                return new LogObject() {
+                    @Override
+                    public String getFileName() {
+                        return POSITIONFILE;
+                    }
+
+                    @Override
+                    public String getContent() {
+                        final String key = anonymizer.getKey(user);
+                        return "sss " + key + " set status to " + user.getStatus();
                     }
                 };
             }
