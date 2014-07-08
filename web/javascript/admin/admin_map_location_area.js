@@ -490,11 +490,11 @@ $(document).on("mouseleave", "#map_png_div", function (e) {
 /*************** end of drawing on map *****************/
 
 
-function updateMapping(){
-	alert("This operation could take a while.");
-    doTask("UPDATE_MAPPING", null, function (data){
-    	alert("Mapping was been updated;");
-    	window.reload();
+function updateMapping() {
+    alert("This operation could take a while.");
+    doTask("UPDATE_MAPPING", null, function (data) {
+        alert("Mapping was been updated;");
+        window.reload();
     });
 }
 
@@ -506,7 +506,7 @@ function updateMapping(){
 function loadAreas() {
     //String ID, DataList<Location> locations, int topLeftX, int topLeftY, int width, int height
     var areas = new Area(null, null, 0, 0, 0, 0);
-    doTask("AREA_READ", areas, writeAreas);
+    send(new Arrival("area_read", session, areas, true), writeAreas);
 }
 
 function writeAreas(data) {
@@ -618,10 +618,10 @@ var allAreas;
  */
 function drawAreas() {
     var areas = new Area(null, null, 0, 0, 0, 0);
-    doTask("AREA_READ", areas, function (data) {
+    send(new Arrival("area_read", session, areas, true), function (data) {
         allAreas = data.object;
         if (data.object.length == 1) {
-
+            // todo ???
         }
         else {
             for (var i = 0; i < data.object.length; i++) {
@@ -720,7 +720,7 @@ function editArea(id) {
 function loadLocations() {
 //    var locations = new Location(0, 0, null);
     var area = new Area("University", null, null, null, null, null);
-    doTask("AREA_READ", area, writeLocations);
+    send(new Arrival("area_read", session, area, true), writeLocations);
 }
 
 function writeLocations(data) {
