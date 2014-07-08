@@ -1046,7 +1046,8 @@ function hideButton(){
 	
 }*/
 
-function callRoom(url){
+function callRoom(/*url*/){
+	url = 'http://134.60.128.44/index.html';
 	if(roomToCall=="none"){
 		alert("Choose a valid room");
 	}else{
