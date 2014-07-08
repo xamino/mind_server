@@ -504,9 +504,7 @@ function updateMapping() {
  * loads all areas on load of page admin_import_map_location.jsp
  */
 function loadAreas() {
-    //String ID, DataList<Location> locations, int topLeftX, int topLeftY, int width, int height
-    var areas = new Area(null, null, 0, 0, 0, 0);
-    send(new Arrival("area_read", session, areas, true), writeAreas);
+    send(new Arrival("area_read", session, new Area(), true), writeAreas);
 }
 
 function writeAreas(data) {
@@ -545,10 +543,8 @@ function writeAreas(data) {
 
         tablecontents += "</table>";
         document.getElementById("table_space_areas").innerHTML = tablecontents;
-        drawAreas();
-
+        drawAreas(data);
     }
-
 }
 
 
@@ -616,38 +612,31 @@ var allAreas;
  * draw all areas on the given map in admin_import_map_location.jsp
  * areas are clickable
  */
-function drawAreas() {
-    var areas = new Area(null, null, 0, 0, 0, 0);
-    send(new Arrival("area_read", session, areas, true), function (data) {
-        allAreas = data.object;
-        if (data.object.length == 1) {
-            // todo ???
-        }
-        else {
-            for (var i = 0; i < data.object.length; i++) {
-                var id = data.object[i].ID;
-                if (id == "universe" || id == "University") {
-                    // don't do anything --> University isn't been drawn
-                }
-                else {
-                    var x = data.object[i].topLeftX;
-                    var y = data.object[i].topLeftY;
-                    var width = data.object[i].width;
-                    var height = data.object[i].height;
-
-
-                    var div = document.getElementById("map_png_div");
-                    var clickedArea = "";
-                    clickedArea += '<div id="' + id + '" onClick="clickOnArea(' + id + ')" style=" cursor:pointer; background-color: #990099; border: 2px solid black; opacity: .5; filter: alpha(opacity=50); position:absolute; margin-top:' + (+y + +2) + 'px; margin-left: ' + (+x + +2) + 'px; width: ' + (+width - +4) + 'px; height: ' + (+height - +4) + 'px;"></div>';
-                    div.innerHTML = div.innerHTML + clickedArea;	//#C2DFFF
-
-                }
+function drawAreas(data) {
+    allAreas = data.object;
+    if (allAreas.length == 1) {
+        // todo ???
+    }
+    else {
+        for (var i = 0; i < allAreas.length; i++) {
+            var id = allAreas[i].ID;
+            if (id == "universe" || id == "University") {
+                // don't do anything --> University isn't been drawn
             }
+            else {
+                var x = allAreas[i].topLeftX;
+                var y = allAreas[i].topLeftY;
+                var width = allAreas[i].width;
+                var height = allAreas[i].height;
 
-        }
 
-    });
-
+                var div = document.getElementById("map_png_div");
+                var clickedArea = "";
+                clickedArea += '<div id="' + id + '" onClick="clickOnArea(' + id + ')" style=" cursor:pointer; background-color: #990099; border: 2px solid black; opacity: .5; filter: alpha(opacity=50); position:absolute; margin-top:' + (+y + +2) + 'px; margin-left: ' + (+x + +2) + 'px; width: ' + (+width - +4) + 'px; height: ' + (+height - +4) + 'px;"></div>';
+                div.innerHTML = div.innerHTML + clickedArea;	//#C2DFFF
+            }
+        } // for end
+    }
 }
 
 /**
@@ -719,7 +708,7 @@ function editArea(id) {
  */
 function loadLocations() {
 //    var locations = new Location(0, 0, null);
-    var area = new Area("University", null, null, null, null, null);
+    var area = new Area("University");
     send(new Arrival("area_read", session, area, true), writeLocations);
 }
 

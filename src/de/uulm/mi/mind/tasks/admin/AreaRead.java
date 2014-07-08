@@ -9,6 +9,8 @@ import de.uulm.mi.mind.tasks.AdminTask;
 
 /**
  * Created by Tamino Hartmann on 5/21/14.
+ * <p/>
+ * Task for reading any and all areas freely from the db for the admin.
  */
 public class AreaRead extends AdminTask<Area, Sendable> {
     @Override
@@ -19,12 +21,11 @@ public class AreaRead extends AdminTask<Area, Sendable> {
     @Override
     public Sendable doWork(Active active, Area area, boolean compact) {
         DataList<Area> read;
-        if(compact){
+        if (compact) {
             // If compact is set, purge all wifimorsels (only depth of locations loaded)
-           read = database.read(area,3);
-        }
-        else{
-            read = database.read(area,5);
+            read = database.read(area, 3);
+        } else {
+            read = database.read(area, 5);
         }
 
         if (read == null) {
