@@ -15,7 +15,8 @@ function getRemainingSpace(){
 
 var userPollsList = [];
 /**
- * load all polls 
+ * load all polls (initiates to start the placement on the display in the callback)
+ * @param callback, callbackdata
  */
 function loadPolls(callback, callbackdata){
 	userPollsList = [];
