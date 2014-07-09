@@ -49,7 +49,7 @@ public class PollAdd extends PollTask<Poll, Information> {
     }
 
     @Override
-    public Information doWork(Active active, Poll poll, boolean compact) {
+    public Information doWork(final Active active, Poll poll, boolean compact) {
         final Poll toSave;
         // check length of strings
         if (poll.getQuestion().length() > QUESTION_LENGTH) {
@@ -100,15 +100,14 @@ public class PollAdd extends PollTask<Poll, Information> {
         toSave.setOptions(options);
         toSave.setAllowedOptionSelections(poll.getAllowedOptionSelections());
 
-        //log
-        FileLogWrapper.pollCreate(((User) active.getAuthenticated()), toSave);
-
         // save to db
         return (Information) database.open(new Transaction() {
             @Override
             public Data doOperations(Session session) {
                 boolean success = session.create(toSave);
                 if (success) {
+                    //log
+                    FileLogWrapper.pollCreate(((User) active.getAuthenticated()), toSave);
                     return new Success("Poll created!");
                 } else {
                     return new Error(Error.Type.DATABASE, "Failed to create poll!");

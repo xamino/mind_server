@@ -27,6 +27,8 @@ public class JsonWrapper {
         converter.registerType(User.class);
         converter.registerType(WifiMorsel.class);
         converter.registerType(WifiSensor.class);
+        // fields to ignore
+        converter.ignoreField("unique"); // ignore because not required from outside, only for FileLog
     }
 
     public static JsonWrapper getInstance() {
