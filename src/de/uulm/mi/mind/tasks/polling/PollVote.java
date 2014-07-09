@@ -69,8 +69,9 @@ public class PollVote extends PollTask<Poll, Information> {
                 while (option.getUsers().contains(user.getEmail())) {
                     log.log(TAG, "Vote for " + option.getKey() + " removed for " + user.getEmail() + ".");
                     option.getUsers().remove(user.getEmail());
+                    // only add to remove if really remove
+                    optionsRemoved.add(option.getOptionValue());
                 }
-                optionsRemoved.add(option.getOptionValue());
                 // continue with next option
                 continue;
             }
@@ -78,6 +79,7 @@ public class PollVote extends PollTask<Poll, Information> {
             if (!option.getUsers().contains(user.getEmail())) {
                 log.log(TAG, "Added new vote to " + original.getKey() + " for " + user.getEmail() + ".");
                 option.getUsers().add(user.getEmail());
+                // for log
                 optionsAdded.add(option.getOptionValue());
             } else {
                 log.log(TAG, "Vote for " + original.getKey() + " did not change.");

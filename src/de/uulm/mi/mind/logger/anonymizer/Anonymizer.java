@@ -9,10 +9,10 @@ import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Saveable;
 import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.security.Authenticated;
+import de.uulm.mi.mind.objects.messages.Success;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -21,17 +21,17 @@ import java.util.Random;
  */
 public class Anonymizer {
 
+    public static final String DISALLOWED = "unknown";
+    public static final String TEMPORARY = "temporary";
     private static Anonymizer INSTANCE;
-    private final String DISALLOWED = "unknown";
-    private final String TEMPORARY = "temporary";
     private final String TAG = "Anonymizer";
-    private ArrayList<PointerMap> store;
+    private HashMap<String, String> keyUniqueMap;
     private Random random;
     private Messenger log;
 
     private Anonymizer() {
         random = new Random();
-        store = new ArrayList<>();
+        keyUniqueMap = new HashMap<>();
         log = Messenger.getInstance();
     }
 
@@ -45,123 +45,96 @@ public class Anonymizer {
     /**
      * Gets a key for a Data object, creating a new one if one doesn't exist yet. Collisions are possible, if unlikely!
      *
-     * @param data         The data for which to generate a key.
-     * @param readDatabase Read original object form database if unique doesn't exist. Can be dangerous if the object
-     *                     doesn't exist yet, so use true wisely (only after guaranteed database existence)!
-     * @param <E>          The data type.
+     * @param data The data for which to generate a key.
+     * @param <E>  The data type.
      * @return The key.
      */
-    public <E extends Saveable> String getKey(final E data, boolean readDatabase) {
+    public <E extends Saveable> String getKey(final E data) {
+        // safety
+        if (data == null) {
+            log.error(TAG, "WARNING: called with null object!");
+            return DISALLOWED;
+        }
         // check if user may be logged
         if (data instanceof User && !((User) data).isLog()) {
             return DISALLOWED;
         }
-        PointerMap<E> mapped = new PointerMap<>(data);
-        // check if exists and if yes get the key
-        if (store.contains(mapped)) {
-            return store.get(store.indexOf(mapped)).getKey();
+        // check if hash doesn't exist
+        if (!keyUniqueMap.containsKey(data.getKey())) {
+            log.log(TAG, "Unique not cached, reading / creating from db.");
+            // if successful, return new key
+            if (makeUnique(data)) {
+                // in this case add too
+                keyUniqueMap.put(data.getKey(), data.getUnique());
+                return data.getUnique();
+            }
+            // else disallowed
+            return DISALLOWED;
         }
-        // check if hash already exists
-        String unique = data.getUnique();
-        if (unique == null || unique.isEmpty()) {
-            // if reading from DB is not allowed, we return temp
-            if (!readDatabase) {
-                log.log(TAG, "Anonymizer using temporary as object not in database yet!");
-                return TEMPORARY;
-            }
-            // otherwise add
-            unique = data.getClass().getSimpleName() + "#" + new BigInteger(130, random).toString(32);
-            // get original for update (DO NOT USE DATA; MIGHT NOT BE TRUSTABLE / COMPLETE!)
-            DataList answer = DatabaseManager.getInstance().read(data, 10);
-            if (answer == null || answer.isEmpty() || answer.size() != 1) {
-                log.error(TAG, "Anonymizer failed database read to read original, skipping!");
-                return DISALLOWED;
-            }
-            final E original = (E) answer.get(0);
-            original.setUnique(unique);
-            // set and save
-            if (DatabaseManager.getInstance().open(new Transaction() {
+        return keyUniqueMap.get(data.getKey());
+    }
+
+    /**
+     * Creates the unique if it doesn't exist. Returns true if a unique existed or now exists, otherwise false.
+     *
+     * @param data The object for which to create unique.
+     * @param <E>  Extends saveable but we don't care any exacter.
+     * @return True if unique exists, otherwise false.
+     */
+    public <E extends Saveable> boolean makeUnique(final E data) {
+        // don't do anything if null
+        if (data.getKey() == null || data.getKey().isEmpty()) {
+            log.error(TAG, "Key is null or empty!");
+            return false;
+        }
+        // read from database
+        final E shortOriginal = readData(data, false);
+        if (shortOriginal == null) {
+            log.error(TAG, "Failed to read object!");
+            return false;
+        }
+        // check if available
+        if (shortOriginal.getUnique() == null || shortOriginal.getUnique().isEmpty()) {
+            // if not, generate and save new unique
+            final String unique = data.getClass().getSimpleName() + "#" + new BigInteger(130, random).toString();
+            // write to data so side effect is correct
+            data.setUnique(unique);
+            // update it
+            return DatabaseManager.getInstance().open(new Transaction() {
                 @Override
                 public Data doOperations(Session session) {
-                    if (session.update(original)) {
-                        return null;
+                    // we need to read the full one because otherwise we loose data
+                    E fullOriginal = readData(shortOriginal, true);
+                    if (fullOriginal != null) {
+                        fullOriginal.setUnique(unique);
+                        if (session.update(fullOriginal)) {
+                            // all okay!
+                            log.log(TAG, "Created new unique for " + shortOriginal.getKey() + ".");
+                            return new Success("");
+                        }
                     }
-                    return new Error(Error.Type.DATABASE, "");
+                    // this means something went wrong
+                    log.error(TAG, "Update for unique failed!");
+                    return new Error(Error.Type.DATABASE, "Update failed!");
                 }
-            }) instanceof Error) {
-                log.error(TAG, "Anonymizer failed database access to update nonexistent unique!");
-                return DISALLOWED;
-            }
-            log.log(TAG, "Created new unique random key for " + original.getKey() + ".");
+            }) instanceof Success;
         }
-        mapped.setKey(unique);
-        store.add(mapped);
-        return mapped.getKey();
+        return true;
     }
 
     /**
-     * Removes a key if exists for the given object.
+     * Small database helper function.
      *
-     * @param data The object for which to unregister the key.
-     * @param <E>  The data type.
+     * @param saveable
+     * @param deep
+     * @return
      */
-    public <E extends Saveable> void removeKey(E data) {
-        store.remove(new PointerMap<>(data));
-    }
-
-    /**
-     * Special class for storing an object<---->key mapping. Note that equals has been overwritten to give the
-     * expected behavior.
-     *
-     * @param <E> The data type of the pointer.
-     */
-    private class PointerMap<E> {
-        private E pointer;
-        private String key;
-
-        private PointerMap(E pointer) {
-            this.pointer = pointer;
+    private <S extends Saveable> S readData(S saveable, boolean deep) {
+        DatabaseManager database = DatabaseManager.getInstance();
+        DataList<S> temp = database.read(saveable, (deep ? 10 : 1));
+        if (temp == null || temp.size() != 1) {
+            return null;
         }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            PointerMap that = (PointerMap) o;
-            // todo this kind of sucks, how do we do this better?
-            // now some logic for the subtypes
-            if (pointer.getClass() != that.pointer.getClass()) {
-                return false;
-            }
-            if (pointer instanceof Authenticated && that.pointer instanceof Authenticated) {
-                return ((Authenticated) pointer).readIdentification()
-                        .equals(((Authenticated) that.pointer).readIdentification());
-            } else if (pointer instanceof Saveable && that.pointer instanceof Saveable) {
-                return ((Saveable) pointer).getKey().equals(((Saveable) that.pointer).getKey());
-            }
-            // here we hope that something sensible has been implemented :P
-            return pointer.equals(that.pointer);
-        }
-
-        @Override
-        public int hashCode() {
-            return pointer.hashCode();
-        }
-
-        public E getPointer() {
-            return pointer;
-        }
-
-        public void setPointer(E pointer) {
-            this.pointer = pointer;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public void setKey(String key) {
-            this.key = key;
-        }
+        return temp.get(0);
     }
 }
