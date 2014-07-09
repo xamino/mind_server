@@ -8,7 +8,7 @@ function getRemainingSpace(){
 	var supportHeight = $('#balloonIdle').height();
 	var remaining_height = parseInt(contentHeight - awayAreaHeight - supportHeight - 200 - 32 - 5); //-400 if privacy/login is shown
 	$('#current_polls').css('height', remaining_height);
-	loadPolls();
+//	loadPolls();
 	addPollsToUser();
 }
 
@@ -17,7 +17,7 @@ var userPollsList = [];
 /**
  * load all polls 
  */
-function loadPolls(){
+function loadPolls(callback, callbackdata){
 	userPollsList = [];
 	doTask("read_all_polls", null, function (data){
 		//no polls in database
@@ -121,7 +121,10 @@ function loadPolls(){
 			}
 
 		}
+		//to secure that check is always first and after that (!) is the update of the icon placement
+		callback(callbackdata);
 	});
+	
 }
 
 var user_polls = [];
@@ -168,7 +171,6 @@ function addPollsToUser(){
 			
 		}
 	});
-	
 	
 }
 

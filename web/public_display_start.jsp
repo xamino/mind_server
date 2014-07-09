@@ -9,6 +9,7 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <meta HTTP-EQUIV="CACHE-CONTROL" content="NO-CACHE">
     <script src="javascript/jquery-2.1.0.min.js"></script>
     <script src="javascript/library.js"></script>
     <script src="javascript/run.js"></script>

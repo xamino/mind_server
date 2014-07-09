@@ -172,7 +172,8 @@ function mapResize() {
         for (var email in users) {
             users[email].x = Math.round(+changeFactor * +users[email].x);
             users[email].y = Math.round(+changeFactor * +users[email].y);
-            placeUserIcon(users[email]);
+            loadPolls(placeUserIcon, users[email]);
+            
         }
     }
 
@@ -276,10 +277,10 @@ function placeUserIcon(user) {
     //check if user has a poll
     if(userPollsList[user.email+""] != null){
     	//user has a poll
-    	if(userPollsList[user.email+""]==="yes"){
+    	if(userPollsList[user.email+""]=="yes"){
     		//set left and top like above plus 2/3 of user-icon size
-    		var left = Math.round(user.x - displayedIconSize / 2) + (Math.round(displayedIconSize / 3)*2);
-    		var top = Math.round(user.y - displayedIconSize / 2) +(Math.round(displayedIconSize / 3)*2);
+    		var left = Math.round(user.x - (+displayedIconSize) / (+2)) + (Math.round((+displayedIconSize) / (+3))*(+2));
+    		var top = Math.round(user.y - (+displayedIconSize) / (+2)) +(Math.round((+displayedIconSize) / (+3))*(+2));
     		var poll_icon = document.getElementById("pollIcon_"+user.email);
     		//if poll icon doesn't exist
     		if(poll_icon==null){
@@ -293,8 +294,8 @@ function placeUserIcon(user) {
     			var divToAugment = document.getElementById("mapscroll");
     			divToAugment.appendChild(poll_icon);
     		}
-    		poll_icon.style.width =  Math.round(displayedIconSize / 3) + "px";
-    		poll_icon.style.height = Math.round(displayedIconSize / 3) + "px";
+    		poll_icon.style.width =  Math.round((+displayedIconSize) / (+3)) + "px";
+    		poll_icon.style.height = Math.round((+displayedIconSize) / (+3)) + "px";
     		poll_icon.style.left = left + "px";
     		poll_icon.style.top = top + "px";    		
     	}
@@ -442,7 +443,7 @@ function setUserIconCoordsByArea() {
  */
 function updateUserIconPlacement() {
     for (var email in users) {
-        placeUserIcon(users[email]);
+    	loadPolls(placeUserIcon, users[email]);
     }
 }
 
@@ -973,11 +974,12 @@ function balloonIsOpen() {
  */
 $(document).on("mousedown", "#mapscroll", function (event) {
 
-	//if not clicked on call button
-	if($(event.target).attr('id')!='callButton'){
-		//check if relevant area (with pi-cam) was clicked
-		checkForAreaClick(event);
-	}
+	//TODO: ONLY FOR JPEG
+//	//if not clicked on call button
+//	if($(event.target).attr('id')!='callButton'){
+//		//check if relevant area (with pi-cam) was clicked
+//		checkForAreaClick(event);
+//	}
 	
     
 	if (!$(event.target).hasClass('micon')) { //if !(click on icon)
