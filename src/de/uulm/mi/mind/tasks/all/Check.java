@@ -1,9 +1,6 @@
 package de.uulm.mi.mind.tasks.all;
 
-import de.uulm.mi.mind.logger.permanent.FileLog;
-import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.Arrival;
-import de.uulm.mi.mind.objects.PublicDisplay;
 import de.uulm.mi.mind.objects.messages.Error;
 import de.uulm.mi.mind.objects.messages.Information;
 import de.uulm.mi.mind.objects.messages.Success;
@@ -28,10 +25,6 @@ public class Check extends Task<Arrival, Information> {
         Active activeUser = Security.begin(null, object.getSessionHash());
         if (activeUser == null) {
             return new Error(Error.Type.SECURITY, "Session invalid!");
-        }
-        // log ip of public displays
-        else if (activeUser.getAuthenticated() instanceof PublicDisplay) {
-            FileLogWrapper.logIP(object.getIpAddress());
         }
         Security.finish(activeUser);
         return new Success("Session is valid.");

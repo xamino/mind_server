@@ -289,7 +289,7 @@ public class FileLogWrapper {
         });
     }
 
-    public static void logIP(final String ipAddress) {
+    public static void logAccess(final String type, final String ipAddress, final String task) {
         fileLog.log(new LogWorker() {
             @Override
             public LogObject logCreate() {
@@ -301,7 +301,7 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        return "device @ " + ipAddress;
+                        return type + " @ " + ipAddress + " --> " + task;
                     }
                 };
             }
