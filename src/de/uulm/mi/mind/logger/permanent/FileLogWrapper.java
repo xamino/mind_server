@@ -20,6 +20,7 @@ public class FileLogWrapper {
     private static String SESSIONFILE = "session";
     private static String POSITIONFILE = "position";
     private static String POLLFILE = "polling";
+    private static String IPFILE = "ips";
 
     /**
      * Given an Authenticated, log its login.
@@ -282,6 +283,25 @@ public class FileLogWrapper {
                     public String getContent() {
                         final String key = anonymizer.getKey(user);
                         return "sss " + key + " set status to " + user.getStatus();
+                    }
+                };
+            }
+        });
+    }
+
+    public static void logIP(final String ipAddress) {
+        fileLog.log(new LogWorker() {
+            @Override
+            public LogObject logCreate() {
+                return new LogObject() {
+                    @Override
+                    public String getFileName() {
+                        return IPFILE;
+                    }
+
+                    @Override
+                    public String getContent() {
+                        return "device @ " + ipAddress;
                     }
                 };
             }

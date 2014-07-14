@@ -579,6 +579,9 @@ var refreshCounter = 0;
  */
 function updatePdData() {
 
+    //send check
+    send(new Arrival("check", session));
+
 	checkAwayArea();	// check periodically on reload
 	getRemainingSpace();	//to find out size of remaining content (for polling) on reload
 	
