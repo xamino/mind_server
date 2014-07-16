@@ -66,6 +66,8 @@ abstract public class PollTask<I extends Sendable, O extends Sendable> extends T
                 log.log(TAG, "Closing poll " + poll.getQuestion() + "!");
                 poll.setState(PollState.CLOSED);
                 toUpdate.add(poll);
+                // log
+                FileLogWrapper.pollClosed(poll);
             }
         }
         // update toUpdate list

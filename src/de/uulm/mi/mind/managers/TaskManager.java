@@ -1,6 +1,7 @@
 package de.uulm.mi.mind.managers;
 
 import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
 import de.uulm.mi.mind.objects.Arrival;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.None;
@@ -99,6 +100,8 @@ public class TaskManager {
         // check security permissions
         Set<String> permissibles = task.getTaskPermission();
         if (permissibles == null || permissibles.isEmpty()) {
+            // log access
+            FileLogWrapper.logAccess("unknown", arrival.getIpAddress(), arrival.getTask());
             // this is public tasks
             return doTask(task, null, sendable, arrival.isCompact());
         } else {
@@ -108,6 +111,8 @@ public class TaskManager {
                 log.error(TAG, "Illegal task " + TASK + " tried!");
                 return new Error(Error.Type.SECURITY, "You do not have permission to use this task!");
             }
+            // log access
+            FileLogWrapper.logAccess(active.getAuthenticated().getClass().getSimpleName(), arrival.getIpAddress(), arrival.getTask());
             // check for admin tasks
             Sendable answer;
             // if the task is an admin task, we need to check especially

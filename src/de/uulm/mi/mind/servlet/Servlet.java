@@ -6,13 +6,13 @@ package de.uulm.mi.mind.servlet;
 
 import de.uulm.mi.mind.json.JsonWrapper;
 import de.uulm.mi.mind.logger.Messenger;
+import de.uulm.mi.mind.managers.TaskManager;
 import de.uulm.mi.mind.objects.Arrival;
 import de.uulm.mi.mind.objects.Departure;
 import de.uulm.mi.mind.objects.Interfaces.Data;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.None;
 import de.uulm.mi.mind.objects.messages.Error;
-import de.uulm.mi.mind.managers.TaskManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -73,7 +73,7 @@ public class Servlet extends HttpServlet {
 
             long time = System.currentTimeMillis();
             answer = TaskManager.getInstance().run(arrival);
-            log.log(TAG, "Task " + arrival.getTask() + " took " + (System.currentTimeMillis()-time) + "ms.");
+            log.log(TAG, "Task " + arrival.getTask() + " took " + (System.currentTimeMillis() - time) + "ms.");
         }
 
         // Encapsulate answer:

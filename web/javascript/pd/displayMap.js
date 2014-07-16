@@ -26,6 +26,11 @@ $(document).ready(function () {
         mapResize();
         getRemainingSpace();   //to find out size of remaining content (for polling) on resize
     };
+    // force hard refresh after 2 hours
+    // todo check what time we for this to work smoothly
+    setTimeout(function () {
+        window.location.reload();
+    }, 2*60*60*1000);
 });
 
 /**
@@ -579,6 +584,9 @@ var refreshCounter = 0;
  * This function should be called periodically to update the users location, polls, etc. visually
  */
 function updatePdData() {
+
+    //send check
+    send(new Arrival("check", session));
 
 	checkAwayArea();	// check periodically on reload
 	getRemainingSpace();	//to find out size of remaining content (for polling) on reload
