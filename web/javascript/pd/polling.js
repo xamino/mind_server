@@ -96,25 +96,28 @@ function loadPolls(callback, callbackdata){
 			
 			document.getElementById("current_polls").innerHTML = polls;
 			//sort - poll with newest creation date first 
-			if(newestFirst == true && endingFirst == false){
+			var checkSelection = localStorage.getItem('pollSelect'); 
+			if(checkSelection == 'newestFirst'){
 				var elems = $.makeArray($(".sortedPolls_newest"));
 				elems.sort(function(a, b) {
-					var test = a.getAttribute('data-datetime_created')+"";
-					var test2 = b.getAttribute('data-datetime_created')+"";
-//					alert("a: "+test+"b: "+test2);
-				    return new Date( a.getAttribute('data-datetime_created') ) > new Date( b.getAttribute('data-datetime_created') );
+					var date = new Date(a.getAttribute('data-datetime_created'));
+					var date2 = new Date(b.getAttribute('data-datetime_created'));
+//				    return new Date( a.getAttribute('data-datetime_created') ) > new Date( b.getAttribute('data-datetime_created') );
+				    return  (date > date2);
+
 				});
+				elems.reverse();
 				$("#current_polls").html(elems);
 				//remove last hr
 				$('#current_polls hr').slice(-1).remove();
 			//sort - poll with first ending first (default)
-			}else if(newestFirst == false && endingFirst == true || newestFirst == false && endingFirst == false){	//sort - ending first
+			}else if(checkSelection == 'endingFirst'){
 				var elems = $.makeArray($(".sortedPolls_newest"));
 				elems.sort(function(a, b) {
-					var test = a.getAttribute('data-datetime_end')+"";
-					var test2 = b.getAttribute('data-datetime_end')+"";
-//					alert("a: "+test+"b: "+test2);
-				    return new Date( a.getAttribute('data-datetime_end') ) > new Date( b.getAttribute('data-datetime_end') );
+					var date = new Date(a.getAttribute('data-datetime_end'));
+					var date2 = new Date(b.getAttribute('data-datetime_end'));
+//				    return new Date( a.getAttribute('data-datetime_end') ) > new Date( b.getAttribute('data-datetime_end') );
+					return (date > date2);
 				});
 				$("#current_polls").html(elems);
 				//remove last hr
@@ -189,8 +192,7 @@ function imageExists(image_url){
 
 }
 
-var newestFirst = false;
-var endingFirst = false;
+
 /**
  * poll - order
  * checks which radio button is checked
@@ -198,13 +200,9 @@ var endingFirst = false;
 function pollSelection(){
 
     if (document.pollOrders.elements[0].checked){
-//    	alert(document.pollOrders.elements[0].value);
-    	newestFirst = true;
-    	endingFirst = false;
+    	pollSelectVar = localStorage.setItem('pollSelect', 'newestFirst');
     }
     else{
-//    	alert(document.pollOrders.elements[1].value);
-    	endingFirst = true;
-    	newestFirst = false;
+    	pollSelectVar = localStorage.setItem('pollSelect', 'endingFirst');
     }
 }

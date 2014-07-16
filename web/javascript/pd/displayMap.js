@@ -300,7 +300,13 @@ function placeUserIcon(user) {
     		poll_icon.style.top = top + "px";    		
     	}
     	
-    }    
+    }else{
+    	//remove poll icon if it exists
+    	var pollIconElement = document.getElementById("pollIcon_"+user.email);
+    	if(pollIconElement!=null){
+    		pollIconElement.parentNode.removeChild(pollIconElement);	//remove poll icon (like user)
+    	}
+    }
 }
 
 /**
@@ -1163,26 +1169,35 @@ function changeRefreshRate(value) {
 
     switch (value) {
         case '1':
-        {
             refreshRate = 5;
+//            alert("in 1");
             document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 5 sec';
+            localStorage.setItem('refreshRate', 1+"");
             break;
-        }
         case '2':
             refreshRate = 10;
+//            alert("in 2");
             document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 10 sec';
+            localStorage.setItem('refreshRate', 2+"");
             break;
         case '3':
             refreshRate = 15;
+//            alert("in 3");
             document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 15 sec';
+            localStorage.setItem('refreshRate', 3+"");
+//            alert( localStorage.getItem(refreshRate));
             break;
         case '4':
             refreshRate = 30;
+//            alert("in 4");
             document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 30 sec';
+            localStorage.setItem('refreshRate', 4+"");
             break;
         case '5':
             refreshRate = 60;
+//            alert("in 5");
             document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 60 sec';
+            localStorage.setItem('refreshRate', 5+"");
             break;
         default:
             break;
