@@ -282,6 +282,7 @@ public class JsonConverter<E> {
                 log.error(TAG, "Field " + entry.getKey() + " does not exist for object " + typeValue + "!");
                 continue;
             }
+            // todo catch final fields and static finals
             f.setAccessible(true);
             Object parsedValue = typeCastParse(f.getType(), entry.getValue());
             try {

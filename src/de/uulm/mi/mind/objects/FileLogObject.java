@@ -9,9 +9,6 @@ import de.uulm.mi.mind.objects.Interfaces.Sendable;
  */
 public class FileLogObject implements Sendable, LogObject {
 
-    // already in use elsewhere, here for convenience
-    public final static String SESSIONFILE = "session", POSITIONFILE = "position", POLLFILE = "polling", IPFILE = "ips";
-
     private String file;
     private String message;
 
