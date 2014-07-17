@@ -21,8 +21,7 @@ import java.util.Set;
 public class LogTask extends Task<FileLogObject, Sendable> {
     @Override
     public boolean validateInput(FileLogObject object) {
-        return object.getFileName() != null && !object.getFileName().isEmpty() && object.getContent() != null &&
-                !object.getContent().isEmpty();
+        return safeString(object.getFileName()) && safeString(object.getContent());
     }
 
     @Override

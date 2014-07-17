@@ -19,7 +19,7 @@ import de.uulm.mi.mind.tasks.UserTask;
 public class InactiveLog extends UserTask<FileLogObject, Sendable> {
     @Override
     public boolean validateInput(FileLogObject object) {
-        return object.getContent() != null && !object.getContent().isEmpty();
+        return safeString(object.getContent());
     }
 
     @Override
