@@ -23,7 +23,10 @@ public class Arrival implements Sendable {
      * Stores the IP address of the client for this access.
      */
     private String ipAddress;
-
+    /**
+     * Seldom used string where device type is written if available.
+     */
+    private String deviceType;
     private boolean compact;
 
     private Arrival() {
@@ -33,6 +36,14 @@ public class Arrival implements Sendable {
         this.sessionHash = sessionHash;
         this.task = task;
         this.object = object;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 
     public String getIpAddress() {

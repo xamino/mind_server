@@ -5,6 +5,7 @@ import de.uulm.mi.mind.logger.permanent.FileLog;
 import de.uulm.mi.mind.logger.permanent.LogObject;
 import de.uulm.mi.mind.logger.permanent.LogWorker;
 import de.uulm.mi.mind.objects.Area;
+import de.uulm.mi.mind.objects.Arrival;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
@@ -13,17 +14,17 @@ import de.uulm.mi.mind.tasks.UserTask;
 /**
  * @author Tamino Hartmann
  */
-public class LogPositionError extends UserTask<Area, Sendable> {
+public class LogPositionError extends UserTask<Arrival, Sendable> {
 
     private final String REAL_POSITION = "realPosition";
 
     @Override
-    public boolean validateInput(Area object) {
-        return true;
+    public boolean validateInput(Arrival object) {
+        return object.getObject() instanceof Area;
     }
 
     @Override
-    public Sendable doWork(final Active active, final Area object, boolean compact) {
+    public Sendable doWork(final Active active, final Arrival object, boolean compact) {
         FileLog.getInstance().log(new LogWorker() {
             @Override
             public LogObject logCreate() {
@@ -36,8 +37,8 @@ public class LogPositionError extends UserTask<Area, Sendable> {
                     @Override
                     public String getContent() {
                         String userKey = Anonymizer.getInstance().getKey(active.getAuthenticated());
-                        String areaKey = Anonymizer.getInstance().getKey(object);
-                        return "xxx " + userKey + " @ " + areaKey + " is wrong";
+                        String areaKey = Anonymizer.getInstance().getKey(((Area) object.getObject()));
+                        return "xxx " + userKey + " @ " + areaKey + " is wrong >> " + object.getDeviceType();
                     }
                 };
             }
@@ -51,8 +52,8 @@ public class LogPositionError extends UserTask<Area, Sendable> {
     }
 
     @Override
-    public Class<Area> getInputType() {
-        return Area.class;
+    public Class<Arrival> getInputType() {
+        return Arrival.class;
     }
 
     @Override
