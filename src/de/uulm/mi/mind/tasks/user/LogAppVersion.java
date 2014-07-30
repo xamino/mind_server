@@ -36,7 +36,7 @@ public class LogAppVersion extends UserTask<FileLogObject, Information> {
                 };
             }
         });
-        return new Success("Inactivity has been logged.");
+        return new Success("App version has been logged.");
     }
 
     @Override
