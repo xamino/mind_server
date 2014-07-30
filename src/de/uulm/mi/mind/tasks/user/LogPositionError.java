@@ -1,9 +1,11 @@
 package de.uulm.mi.mind.tasks.user;
 
-import de.uulm.mi.mind.logger.permanent.FileLogWrapper;
+import de.uulm.mi.mind.logger.anonymizer.Anonymizer;
+import de.uulm.mi.mind.logger.permanent.FileLog;
+import de.uulm.mi.mind.logger.permanent.LogObject;
+import de.uulm.mi.mind.logger.permanent.LogWorker;
 import de.uulm.mi.mind.objects.Area;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
-import de.uulm.mi.mind.objects.User;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.tasks.UserTask;
@@ -21,8 +23,25 @@ public class LogPositionError extends UserTask<Area, Sendable> {
     }
 
     @Override
-    public Sendable doWork(Active active, Area object, boolean compact) {
-        FileLogWrapper.positionError(((User) active.getAuthenticated()), object);
+    public Sendable doWork(final Active active, final Area object, boolean compact) {
+        FileLog.getInstance().log(new LogWorker() {
+            @Override
+            public LogObject logCreate() {
+                return new LogObject() {
+                    @Override
+                    public String getFileName() {
+                        return "position";
+                    }
+
+                    @Override
+                    public String getContent() {
+                        String userKey = Anonymizer.getInstance().getKey(active.getAuthenticated());
+                        String areaKey = Anonymizer.getInstance().getKey(object);
+                        return "xxx " + userKey + " @ " + areaKey + " is wrong";
+                    }
+                };
+            }
+        });
         return new Success("Error has been logged.");
     }
 
