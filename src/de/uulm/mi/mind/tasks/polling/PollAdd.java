@@ -35,17 +35,14 @@ public class PollAdd extends PollTask<Poll, Information> {
 
     @Override
     public boolean validateInput(Poll object) {
-        // check options
-        if (object.getOptions() == null || object.getOptions().isEmpty()) {
-            return false;
-        }
+        // we don't check how many options exist because can be used as message
         for (PollOption option : object.getOptions()) {
             if (!safeString(option.getOptionValue())) {
                 return false;
             }
         }
-        // we check: question, allowed options must be at least 1
-        return safeString(object.getQuestion()) && object.getAllowedOptionSelections() > 0;
+        // we check: question
+        return safeString(object.getQuestion());
     }
 
     @Override
