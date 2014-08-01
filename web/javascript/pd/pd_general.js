@@ -6,7 +6,8 @@ function onLoadOfPdPage() {
     var sessionHtml = document.body.getAttribute("lolcat");
     trySession(sessionCookie, function () {
         trySession(sessionHtml, function () {
-            alert("You have to be logged in. IP match might have missed!");
+            alert("You have to be logged in. Credentials might be incorrect, the PD might not exist, or the IP match" +
+                "might have missed. Please contact an administrator if the issue persists!");
             window.location.href = "public_display_login.jsp";
         }, function () {
             session = sessionHtml;
