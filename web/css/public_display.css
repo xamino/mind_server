@@ -340,3 +340,19 @@ background-size: contain;*/
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=4, OffY=4, Color='#444')";
 }
+
+.status_div_color_miconAvailable{
+	background-color: rgb(0, 255, 0);
+}
+
+.status_div_color_miconOccupied{
+	background-color: rgb(30, 35, 255);
+}
+
+.status_div_color_miconDnD{
+	background-color: rgb(255, 0, 0);
+}
+
+.status_div_color_miconAway{
+	background-color: rgb(120, 120, 120);
+}
