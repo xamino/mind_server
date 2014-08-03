@@ -342,7 +342,7 @@ function placeUserIcon(user) {
         	setTimeout(function () {
             	flasher.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
             	setTimeout(function () {
-                	flasher.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                	flasher.style.backgroundColor = 'rgba(255, 255, 255, 0.0)';
                 	setTimeout(function () {
                 		icon.style.display = "none";
                 		setTimeout(function () {
@@ -731,8 +731,7 @@ var refreshCounter = 0;
  * This function should be called periodically to update the users location, polls, etc. visually
  */
 function updatePdData() {
-	//TODO remove
-	flashPolls();
+//	flashPolls();
 	
     //send check
     send(new Arrival("check", session));
@@ -751,6 +750,9 @@ function updatePdData() {
 //        document.getElementById("balloonIdle").innerHTML = refreshCounter;
 //    }
     send(new Arrival("read_all_positions", session), updateUserListOnReceive);
+    setTimeout(function (){
+    	flashPolls();
+    }, 5000);
 }
 
 
@@ -1723,13 +1725,10 @@ function flashPolls(){
 		//for each previous poll
 		for (var icon in previousPollCounter) {
 			if(temporalPollCounter[icon]==null){ //if poll no longer available (poll removed)
-				alert("poll: remove: "+icon);
 				previousPollCounter[icon] = 0;
 			}else{ //previous poll counter of poll with icon 'icon' is updated
-				alert("poll: update: "+icon);
 				//if more icons of one type with icon 'icon' than before
 				if((+temporalPollCounter[icon])-(+previousPollCounter[icon]) > 0){
-					alert("poll: more than before: "+icon);
 					newPollIcons.push(icon);
 				}
 				previousPollCounter[icon] = temporalPollCounter[icon];
@@ -1738,14 +1737,64 @@ function flashPolls(){
 		}
 		//for each remaining new poll
 		for (var icon in temporalPollCounter){
-			alert("poll: is new: "+icon);
 			newPollIcons.push(icon);
 			previousPollCounter[icon] = temporalPollCounter[icon];
 		}
 		
-		alert("poll: new poll icons size: "+newPollIcons.length);
-		
 		//TODO flash
+		var flasher2 = document.getElementById("flash_div_2");
+		var rgbColor = "";
+		
+		var icon_flash_div = document.getElementById('icon_flash_div');
+		/*icon_flash_div.style.display = "block";
+		icon_flash_div.style.margin = "auto";*/
+		icon_flash_div.style.position = "absolute";
+		icon_flash_div.style.top = "365px";
+		
+		
+		var temp_icon_flash_img;
+		for(var i = 0; i < newPollIcons.length; i++){
+			temp_icon_flash_img = document.createElement('img');
+			temp_icon_flash_img.src = newPollIcons[i];
+			temp_icon_flash_img.style.width = "350px";
+			temp_icon_flash_img.style.height = "350px";
+			temp_icon_flash_img.style.margin = "20px";
+			icon_flash_div.appendChild(temp_icon_flash_img);
+		}
+		
+		var width_div = icon_flash_div.offsetWidth;
+		icon_flash_div.style.left = ((+1920/+2) - (+width_div/+2))+"px";
+		
+//		flasher2.appendChild(icon_flash_div);
+		
+		if(newPollIcons.length == 0){
+			return;
+		}
+		else if(newPollIcons.length > 1){	//'rgba(247, 207, 18, 0.8)';
+			rgbColor = "rgba(255, 255, 0, ";
+		}else if(newPollIcons.length == 1){
+			if(endsWith(newPollIcons[0], 'default.png')){
+				rgbColor = "rgba(255, 255, 0, ";
+			}else if(endsWith(newPollIcons[0], 'kicker.png')){
+				rgbColor = "rgba(0, 255, 0, ";
+			}else if(endsWith(newPollIcons[0], 'meeting.png')){
+				rgbColor = "rgba(30, 35, 255, ";
+			}else if(endsWith(newPollIcons[0], 'lunch.png')){
+				rgbColor = "rgba(255, 0, 0, ";
+			}
+		}
+		flasher2.style.backgroundColor = rgbColor+"0.8)";
+		setTimeout(function () {
+        	flasher2.style.backgroundColor = rgbColor+"0.5)";
+        	setTimeout(function () {
+            	flasher2.style.backgroundColor = rgbColor+"0.3)";
+            	setTimeout(function () {
+                	flasher2.style.backgroundColor = rgbColor+"0.0)";
+                	icon_flash_div.innerHTML ="";
+                }, 500);
+            }, 500);
+        }, 1500);
+		
 		
 		newPollIcons = [];
 	});

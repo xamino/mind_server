@@ -172,5 +172,6 @@
 </div>
 <div id="darkener"></div>
 <div id="flash_div"></div>
+<div id="flash_div_2" style="position:absolute; left:0; top:0; width:100%; height:100%;"><div id="icon_flash_div"></div></div>
 </body>
 </html>
