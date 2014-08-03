@@ -75,6 +75,13 @@ public class Anonymizer {
     }
 
     /**
+     * Method that resets the cache. Used for example when a unique is removed to purge data inconsistencies.
+     */
+    public void resetCache() {
+        keyUniqueMap.clear();
+    }
+
+    /**
      * Creates the unique if it doesn't exist. Returns true if a unique existed or now exists, otherwise false.
      *
      * @param data The object for which to create unique.
@@ -96,7 +103,7 @@ public class Anonymizer {
         // check if available
         if (shortOriginal.getUnique() == null || shortOriginal.getUnique().isEmpty()) {
             // if not, generate and save new unique
-            final String unique = data.getClass().getSimpleName() + "#" + new BigInteger(130, random).toString();
+            final String unique = data.getClass().getSimpleName() + "#" + new BigInteger(130, random).toString(32);
             // write to data so side effect is correct
             data.setUnique(unique);
             // update it

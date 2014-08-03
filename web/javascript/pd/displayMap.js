@@ -10,7 +10,7 @@ var iconByMapWidthFactor = 0.08; //the factor by which the icon size is set -> d
 var defaultIconSize = 110; //if something goes wrong when setting the icon size - defaultIconSize will be applied
 var factor = 1; //the size-factor by which the displayed image deviates from the original image
 //TODO read from server
-var refreshRate = 10; //the refresh rate for locating - in seconds
+var refreshRate = 15; //the refresh rate for locating - in seconds
 var interval; //the interval of location refreshing
 var balloonClosingTime = 7;
 var mapDiv;
@@ -323,6 +323,43 @@ function placeUserIcon(user) {
     if (icon == null) { //user has no icon image yet
         addUserIcon(user);
         icon = document.getElementById("icon_" + user.email);
+        
+        //flash div if new user shows up
+        var flasher = document.getElementById("flash_div");
+        //display bright
+        brightUp();
+        flasher.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';	//'rgba(247, 207, 18, 0.8)';
+        
+        //display flashs and icons blink
+        setTimeout(function () {
+        	flasher.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+        	setTimeout(function () {
+            	flasher.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+            	setTimeout(function () {
+                	flasher.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                	setTimeout(function () {
+                		icon.style.display = "none";
+                		setTimeout(function () {
+                    		icon.style.display = "block";
+                    		setTimeout(function () {
+                        		icon.style.display = "none";
+                        		setTimeout(function () {
+                            		icon.style.display = "block";
+                            		setTimeout(function () {
+                                		icon.style.display = "none";
+                                		setTimeout(function () {
+                                    		icon.style.display = "block";
+                                    	}, 300);
+                                	}, 300);
+                            	}, 300);
+                        	}, 300);
+                    	}, 300);
+                	}, 300);
+                }, 500);
+            }, 500);
+        }, 1500);
+        
+ 
     }
 
     if (icon != null) {
@@ -1615,28 +1652,28 @@ function changeRefreshRate(value) {
 
     switch (value) {
         case '1':
-            refreshRate = 5;
+            refreshRate = 10;
 //            alert("in 1");
-            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 5 sec';
+            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 10 sec';
             localStorage.setItem('refreshRate', 1+"");
             break;
         case '2':
-            refreshRate = 10;
+            refreshRate = 15;
 //            alert("in 2");
-            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 10 sec';
+            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 15 sec';
             localStorage.setItem('refreshRate', 2+"");
             break;
         case '3':
-            refreshRate = 15;
+            refreshRate = 30;
 //            alert("in 3");
-            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 15 sec';
+            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 30 sec';
             localStorage.setItem('refreshRate', 3+"");
 //            alert( localStorage.getItem(refreshRate));
             break;
         case '4':
-            refreshRate = 30;
+            refreshRate = 45;
 //            alert("in 4");
-            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 30 sec';
+            document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 45 sec';
             localStorage.setItem('refreshRate', 4+"");
             break;
         case '5':

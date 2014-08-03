@@ -246,23 +246,4 @@ public class FileLogWrapper {
             }
         });
     }
-
-    public static void logAccess(final String type, final String ipAddress, final String task) {
-        fileLog.log(new LogWorker() {
-            @Override
-            public LogObject logCreate() {
-                return new LogObject() {
-                    @Override
-                    public String getFileName() {
-                        return IPFILE;
-                    }
-
-                    @Override
-                    public String getContent() {
-                        return type + " @ " + ipAddress + " --> " + task;
-                    }
-                };
-            }
-        });
-    }
 }

@@ -192,7 +192,7 @@ function setSettings(){
 	}
 	else if(mapRotateVar == '180' || mapRotateVar == '0'){	//switch auto brightness on	
 		setMapRotation();
-	
+	}
 	//app settings
 	//poll order
 	pollSelectVar = localStorage.getItem('pollSelect');
@@ -221,27 +221,27 @@ function changeBrightness(value){
     case '1':
         document.getElementById("darkener").style.backgroundColor = "rgba(0,0,0,0.0)";
         document.getElementById("slidertext_brightness").innerHTML = 'Current Brightness: 100%';
-        localStorage.setItem('lastBrightness', 1+"");
+        localStorage.setItem('lastBrightness', 1);
         break;
     case '2':
     	document.getElementById("darkener").style.backgroundColor = "rgba(0,0,0,0.2)";
         document.getElementById("slidertext_brightness").innerHTML = 'Current Brightness: 80%';
-        localStorage.setItem('lastBrightness', 2+"");
+        localStorage.setItem('lastBrightness', 2);
         break;
     case '3':
     	document.getElementById("darkener").style.backgroundColor = "rgba(0,0,0,0.4)";
         document.getElementById("slidertext_brightness").innerHTML = 'Current Brightness: 60%';
-        localStorage.setItem('lastBrightness', 3+"");
+        localStorage.setItem('lastBrightness', 3);
         break;
     case '4':
         document.getElementById("darkener").style.backgroundColor = "rgba(0,0,0,0.6)";
         document.getElementById("slidertext_brightness").innerHTML = 'Current Brightness: 40%';
-        localStorage.setItem('lastBrightness', 4+"");
+        localStorage.setItem('lastBrightness', 4);
         break;
     case '5':
     	document.getElementById("darkener").style.backgroundColor = "rgba(0,0,0,0.8)";
         document.getElementById("slidertext_brightness").innerHTML = 'Current Brightness: 20%';
-        localStorage.setItem('lastBrightness', 5+"");
+        localStorage.setItem('lastBrightness', 5);
         break;
     default:
         break;
@@ -255,13 +255,17 @@ var lastBrightnessVar;
  * checks whether user interacts with the display
  */
 $(document).on('mousedown', 'body', function(){
+	brightUp();
+});
+
+function brightUp(){
 	lastBrightnessVar = localStorage.getItem('lastBrightness');
 	if(lastBrightnessVar == null){	//may never been called
 		lastBrightnessVar = 1+"";
 	}
 	changeBrightness(lastBrightnessVar);	//change to last Brightness (setted by user)
 	clearTimeout(brightnessTimeout);
-});
+}
 
 var brightnessTimeout;
 var time = 1000 * 60 * 15;
@@ -271,7 +275,6 @@ $(document).on('mouseup', 'body', function(){if(autoBrightVar == 'on'){
 		time);}
 });
 
-}
 
 
 /**
