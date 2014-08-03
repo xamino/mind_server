@@ -3,8 +3,10 @@ var originalHeight; //the native height of the map-image in pixels
 var displayedWidth; //the current width of the displayed map-image in pixels
 var displayedHeight; //the current height of the map-image in pixels
 var displayedIconSize = 0; //the native size of the icon in pixels
-var iconByAreaFactor = 0.45; //the factor by which the icon size is set -> (smallest area width or height)*iconByAreaFactor
-var iconByMapWidthFactor = 0.06; //the factor by which the icon size is set -> displayedWidth*iconByAreaFactor
+//var iconByAreaFactor = 0.45; //the factor by which the icon size is set -> (smallest area width or height)*iconByAreaFactor
+//var iconByMapWidthFactor = 0.06; //the factor by which the icon size is set -> displayedWidth*iconByMapWidthFactor
+var iconByMapWidthFactor = 0.08; //the factor by which the icon size is set -> displayedWidth*iconByMapWidthFactor
+
 var defaultIconSize = 110; //if something goes wrong when setting the icon size - defaultIconSize will be applied
 var factor = 1; //the size-factor by which the displayed image deviates from the original image
 //TODO read from server
@@ -12,13 +14,19 @@ var refreshRate = 15; //the refresh rate for locating - in seconds
 var interval; //the interval of location refreshing
 var balloonClosingTime = 7;
 var mapDiv;
+
 //var widthFactor=1; //the factor by which the width of the displayed image deviates from the original image width
 //var heigthFactor=1; //the factor by which the height of the displayed image deviates from the original image height
 //var zoomValue = 30; //holds the width value for each zoom-step in pixels
 
 var users; //the current (to be) displayed users;
 var sortedEmails; //the current user's emails, sorted by areas
-var areas = new Array(); //an array of areas - contains all areas that have already been used/needed
+
+var areas = new Array(); //the currently used areas (standard or rotated)
+var areasStd = new Array(); //an array of areas - contains all areas that have already been used/needed
+var areasRotated = new Array(); //an array of rotated areas - contains all rotated areas that have already been used/needed
+var mapInverted = false; //true when map is rotated by 180° and is inverted - false in default position
+
 var awayAreaExists = true;
 
 $(document).ready(function () {
@@ -51,8 +59,11 @@ function initPublicDisplayStuff() {
         //TODO if no areas found -> ??
 
         for (var i = 0; i < areasArray.length; i++) {
-            areas[areasArray[i].ID] = areasArray[i];
+            areasStd[areasArray[i].ID] = areasArray[i];
         }
+        
+        generateRotatedAreas();
+        setAreasRotation(false);
 
         checkAwayArea();
 
@@ -73,6 +84,10 @@ function initPublicDisplayStuff() {
             updatePdData();
 //			loadTestUser();
             initInterval();
+            
+            //determines if this room participates in streaming and (if so) generates streaming data (rooms with pi cams # IPs)
+            //TODO JPEG
+            //generateStreamData();
         });
     });
 }
@@ -182,6 +197,52 @@ function mapResize() {
         }
     }
 
+}
+
+function generateRotatedAreas(){
+//	alert("generateRotatedAreas");
+	for(var ID in areasStd) {
+		//copy area
+		areasRotated[ID] = new Area(ID, areasStd[ID].locations, areasStd[ID].topLeftX, areasStd[ID].topLeftY, areasStd[ID].width, areasStd[ID].height);
+		//if is away area -> translate to top
+		if(ID+""=="Away"){
+			areasRotated[ID].topLeftX = (+areasStd[ID].topLeftX)+(+53);
+			areasRotated[ID].topLeftY = areasStd[ID].topLeftY;
+		}else if(ID+""=="University"){
+			areasRotated[ID].topLeftX = areasStd[ID].topLeftX;
+			areasRotated[ID].topLeftY = areasStd[ID].topLeftY;
+		}
+		//if is other area -> rotate by 180°
+		else{
+			areasRotated[ID].topLeftX = +1440-(+((+areasStd[ID].topLeftX)+(+areasStd[ID].width)));
+			areasRotated[ID].topLeftY = +1080-(+((+areasStd[ID].topLeftY)+(+areasStd[ID].height))) - +250;			
+		}
+//		alert(ID+"\n"+
+//				areasStd[ID].topLeftX+" to "+areasRotated[ID].topLeftX+"\n"+
+//				areasStd[ID].topLeftY+" to "+areasRotated[ID].topLeftY);
+	}
+}
+
+function updateAreasRotation(inverted){
+	setAreasRotation(inverted);
+	
+    //set individual user icon coordinates considering area
+    setUserIconCoordsByArea();
+    //display all currently tracked users
+    updateUserIconPlacement();
+}
+
+/**
+ * sets the rotation of the used areas
+ * @param inverted if inverted == true -> inverted areas are applied; else standard areas
+ */
+function setAreasRotation(inverted){
+	if(inverted){
+		areas = areasRotated;
+	}else{
+		areas = areasStd;
+	}
+	mapInverted = inverted;
 }
 
 /**
@@ -373,7 +434,7 @@ function placeUserIcon(user) {
  */
 function setUserIconCoordsByArea() {
 
-    if (Object.keys(users).length <= 0) {
+    if (Object.keys(users)==null || Object.keys(users).length <= 0) {
         return;
     }
 
@@ -566,7 +627,6 @@ function updateUserListOnReceive(data) {
         if (!areaExists(users[email].position)) {
             removeUserWithIcon(email);
         }
-
     }
 
     //set individual user icon coordinates considering area
@@ -631,26 +691,65 @@ jQuery.fn.redraw = function () {
 //	return -1;
 //}
 
+//String.prototype.endsWith = function(suffix) {
+//    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+//};
+
+function endsWith(str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
+
+/**
+ * checks for map and area rotation consistency and updates areas)
+ * sets the current area rotations depending on the background image of the map
+ */
+function checkMapRotation(){
+	//if background image exists
+	if(document.getElementById("mapscroll")!=null && 
+			document.getElementById("mapscroll").style.backgroundImage != null){
+		
+		//if inverted map image is set
+		if(endsWith(document.getElementById("mapscroll").style.backgroundImage+"","map_180)")){
+//			alert("is 180 map");
+			if(!mapInverted){
+				setAreasRotation(true);
+			}			
+		}
+		//if standard map image is set
+		else{
+//			alert("is 0 map");
+			if(mapInverted){
+				setAreasRotation(false);
+			}
+			
+		}
+	}
+}
+
 var refreshCounter = 0;
 /**
  * This function should be called periodically to update the users location, polls, etc. visually
  */
 function updatePdData() {
-
+	//TODO remove
+	flashPolls();
+	
     //send check
     send(new Arrival("check", session));
 
 	checkAwayArea();	// check periodically on reload
 	getRemainingSpace();	//to find out size of remaining content (for polling) on reload
 	
+	checkMapRotation();
+	
     if (balloonIsOpen()) {
         return;
     }
 
-    refreshCounter = +refreshCounter + 1;
-    if (document.getElementById("balloonIdle") != null) {
-        document.getElementById("balloonIdle").innerHTML = refreshCounter;
-    }
+    //refreshCounter = +refreshCounter + 1;
+//    if (document.getElementById("balloonIdle") != null) {
+//        document.getElementById("balloonIdle").innerHTML = refreshCounter;
+//    }
     send(new Arrival("read_all_positions", session), updateUserListOnReceive);
 }
 
@@ -736,7 +835,7 @@ function getAreaById(id) {
 }
 
 function areaExists(id) {
-    if (areas[id] == null) {
+    if (areasStd[id] == null) {
         return false;
     } else {
         return true;
@@ -1040,13 +1139,14 @@ function balloonIsOpen() {
  */
 $(document).on("mousedown", "#mapscroll", function (event) {
 
-	//TODO: ONLY FOR JPEG
-//	//if not clicked on call button
-//	if($(event.target).attr('id')!='callButton'){
-//		//check if relevant area (with pi-cam) was clicked
-//		checkForAreaClick(event);
-//	}
-	
+	//if this display participates in streaming and not clicked on call button
+//	if(participateInStreaming){ TODO JPEG
+//		if($(event.target).attr('id')!='callButton'){
+//			//check if relevant area (with pi-cam) was clicked
+//			checkForAreaClick(event);
+//		}		
+//	} TODO JPEG
+
     
 	if (!$(event.target).hasClass('micon')) { //if !(click on icon)
         if (balloonIsOpen()) { //if balloon is open -> hide balloon
@@ -1057,75 +1157,413 @@ $(document).on("mousedown", "#mapscroll", function (event) {
 
 });
 
-/**
- * areas in which a camera is availabe
- */
-var camAreas = new Array(338,3303);
 
-/**
- * checks if relevant area (with pi-cam) was clicked
- */
-function checkForAreaClick(event){
+//TODO JPEG
+//
+/////////////////////////////////////// JPEG STREAMER /////////////////////////////////////
+//
+//	
+///**
+// * checks if relevant area (with pi-cam) was clicked
+// */
+//function checkForAreaClick(event){
+//
+////	var output = "";
+//	var id;
+//	for ( var i = 0; i < camAreas.length; i++) {
+//		id = camAreas[i];
+//		//check on x axis
+//		if( (+event.clientX) > (+areas[id].topLeftX)*factor && (+event.clientX) < +((+areas[id].topLeftX)+(+areas[id].width))*factor ){
+//			//check on y axis
+//			if( (+event.clientY) > (+areas[id].topLeftY)*factor && (+event.clientY) < +((+areas[id].topLeftY)+(+areas[id].height))*factor ){
+////				alert(+event.clientX +","+ +event.clientY +"::"+ 
+////						+(+areas[id].topLeftX)*factor +","+ ((+areas[id].topLeftX)+(+areas[id].width))*factor +
+////						"||"+ (+areas[id].topLeftY)*factor +","+ ((+areas[id].topLeftY)+(+areas[id].width))*factor +" ->clicked on area "+id);
+//				
+//				setupButton(id);
+//				
+//				return;
+//			}
+//		}
+//	}
+//	
+//	hideButton();
+//}
+//
+//
+//var roomToCall = "none";
+//
+//function setupButton(room){
+//
+//	
+//	roomToCall = room+"";
+//	var btn = document.getElementById("callButton");
+//	btn.value = "Call Room "+room;
+//	btn.style.visibility = "visible";
+//}
+//
+//function hideButton(){
+//	var btn = document.getElementById("callButton");
+//	btn.style.visibility = "hidden";
+//	roomToCall = "none";
+//}
+//
+//
+//var streamingPopup;
+//var localIP = "";
+//var localURL = "";
+//var participateInStreaming = false;
+//
+///**
+// * areas in which a camera is availabe
+// */
+//var camAreas;
+//var areaToIP;
+//
+//function generateStreamData(){
+//	camAreas = new Array(332,337,331,333);
+//	areaToIP = new Array();
+//	//TODO
+//	areaToIP["332"] = "134.60.128.44";
+//	areaToIP["337"] = "134.60.128.47";
+//	areaToIP["331"] = "134.60.156.63";
+//	areaToIP["333"] = "134.60.172.39";
+//	
+//	setMyIP();
+//}
+//
+//function setMyIP() {
+//    if (window.XMLHttpRequest) xmlhttp = new XMLHttpRequest();
+//    else xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+//
+//    xmlhttp.open("GET","http://api.hostip.info/get_html.php",false);
+//    xmlhttp.send();
+//
+//    hostipInfo = xmlhttp.responseText.split("\n");
+//
+//    for (var i=0; hostipInfo.length >= i; i++) {
+//    	if(hostipInfo[i]!=null){
+//    		ipAddress = hostipInfo[i].split(":");
+//    		if ( ipAddress[0] == "IP" ){
+//    			localIP = $.trim(ipAddress[1]+"");
+//    			myIPcallback();
+//    			return;
+//    		}    		
+//    	}
+//    }
+//    localIP = '';
+//}
+//
+//function myIPcallback(){
+//	alert("callback '"+localIP+"' - area is "+getRoomByIP(localIP));
+//	
+//	//if pd participates in streaming -> open socket for server push purposes
+//	if(getRoomByIP(localIP)!=null){
+//		participateInStreaming = true;
+//		localURL  = 'http://'+localIP+':80';
+////		alert("participating in stream with localURL: "+localURL);
+////		postToServer("test");
+//		ws = new WebSocket("ws://134.60.156.63:8080/streamerServlet/"+localIP);
+//		ws.onopen = function(){
+//		};
+//		
+//		ws.onmessage = function(message){
+////			alert("message received: '"+message.data+"'");
+//			if(getRoomByIP(message.data+"")!=null){
+//				receiveCall(message.data+"");
+//			}
+//			//if other participant cancelded (format: "canceled:+'ip'"
+//			else if(message.data.substring(0,9)=="canceled:"){
+//				var canceledParticipantIP = message.data.substring(9);
+//				//alert("cancel message received: "+message.data);
+//				if(!callAccepted){
+////					alert("call not yet accepted");
+//					closeStreamingPopup();
+//				}
+//				//if callee canceled
+//				else if(ipToCall == canceledParticipantIP){
+//					displayCanceled();
+//				}
+//				//if caller canceled
+//				else if(callerIP == canceledParticipantIP){
+//					displayCanceled();
+//				}
+//			}
+//		}; 
+//	}
+//}
+//
+////WEB SOCKET
+//var ws;
+//
+//function postToServer(txt){
+////	alert("post to server: "+txt);
+//	ws.send(txt);
+////	document.getElementById("msg").value = "";
+//}
+//function closeConnect(){
+//	ws.close();
+//}
+//
+////END WEB SOCKET
+//
+//
+//function getRoomByIP(ip){
+//	for(var area in areaToIP) {
+//		if(areaToIP[area]+""==ip+""){
+//			return area;
+//		}
+//	}
+//	return null;
+//}
+//
+//function displayCanceled(){
+//	if(streamingPopup!=null && streamingPopup.document.getElementById("headLine")!=null){
+//		streamingPopup.document.getElementById("headLine").innerHTML = streamingPopup.document.getElementById("headLine").innerHTML+" - ROOM CANCELED";
+//	}	;
+//}
+//
+//var callerIP = null;
+//
+//function receiveCall(caller_IP){
+//	callerIP = $.trim(caller_IP);
+//	var callerRoom = getRoomByIP(callerIP);
+//	if(callerRoom==null){return;}
+//	if(localIP==null||localIP==""){return;}
+//	
+//	var callerURL = 'http://'+callerIP+':80/watcher.html';
+////	localURL  = 'http://'+localIP+':80';
+////	var localURL  = 'http://134.60.128.44';
+//	
+//	streamingPopup = window.open('','','toolbar=0,location=0,directories=0,menubar=0,'+
+//	'scrollbars=1,resizable=0,width=840,height=620, top=0,left=0');
+//	if(streamingPopup==null){return;}
+//	streamingPopup.document.write('<center><h1 id="headLine">Looking into room '+callerRoom+'</h1><center>');
+//	streamingPopup.document.write('<iframe id="remoteCamView" height="350" allowTransparency="true" frameborder="0" '+
+//		 'scrolling="yes" style="width:100%;" src="'+callerURL+'" type= "text/javascript"></iframe>');
+//	streamingPopup.document.write('<iframe id="myCamControl" height="150" allowTransparency="true" frameborder="0" '+
+//		 'scrolling="yes" style="width:100%;" src="'+localURL+'" type= "text/javascript"></iframe>');
+//
+//	//cancel button
+//	var cancelButton = document.createElement('input');
+//	cancelButton.setAttribute('type','button');
+//	cancelButton.setAttribute('name','CANCEL');
+//	cancelButton.setAttribute('value','CANCEL');
+//	cancelButton.onclick = function () {
+//		closeStreamingPopup();
+//	};
+//	streamingPopup.document.body.appendChild(cancelButton);
+//	
+//	//accept button
+//	var acceptButton = document.createElement('input');
+//	acceptButton.setAttribute('type','button');
+//	acceptButton.setAttribute('name','ACCEPT');
+//	acceptButton.setAttribute('value','ACCEPT');
+//	acceptButton.onclick = function () {
+//		acceptCall();
+//	};
+//	streamingPopup.document.body.appendChild(acceptButton);
+//	
+//	//make me "visible" for the callee
+////	sendLocalCommand("streamBlurry");
+//	streamingPopup.document.getElementById("myCamControl").onload = function() {
+//		streamMeBlurry();
+//	};
+//}
+//
+//var ipToCall = null;
+//
+//function callRoom(){
+//
+//	//TODO check if no call currently receiving
+//	
+//	ipToCall = areaToIP[roomToCall+""];
+//
+//	if(roomToCall=="none" || ipToCall == null || ipToCall == ""){
+//		alert("Choose a valid room");
+//		return;
+//	}
+//	if(localIP==null){return;}
+//
+//	//call accepted always true as caller
+//	callAccepted = true;
+//	
+//	//notify callee about call
+//	postToServer(ipToCall);
+//	
+//	var calleeURL = "http://"+ipToCall+":80/watcher.html";
+//
+//	streamingPopup = window.open('','','toolbar=0,location=0,directories=0,menubar=0,'+
+//			'scrollbars=1,resizable=0,width=840,height=620, top=0,left=0');
+//	//remote view
+//	streamingPopup.document.write('<center><h1 id="headLine">Looking into room '+roomToCall+'</h1><center>');
+//	streamingPopup.document.write('<iframe id="remoteCamView" height="350" allowTransparency="true" frameborder="0" '+
+//			 'scrolling="yes" style="width:100%;" src="'+calleeURL+'" type= "text/javascript"></iframe>');
+//	//local control
+//	streamingPopup.document.write('<p>local cam control:</p>');
+//	streamingPopup.document.write('<iframe id="myCamControl" height="100" allowTransparency="true" frameborder="0" '+
+//			 'scrolling="yes" style="width:100%;" src="'+localURL+'" type= "text/javascript"></iframe>');	
+//	
+//	//add close button - closes the popup and stops the camera
+//	var cancelButton = document.createElement('input');
+//	cancelButton.setAttribute('type','button');
+//	cancelButton.setAttribute('name','CANCEL');
+//	cancelButton.setAttribute('value','CANCEL');
+//	cancelButton.onclick = function () {
+//		closeStreamingPopup();
+//	};
+//	streamingPopup.document.body.appendChild(cancelButton);
+//
+//	//start streaming once local cam control is loaded
+//	streamingPopup.document.getElementById("myCamControl").onload = function() {
+//		streamMeClearly();
+//	};
+//
+//}
+//
+//
+//
+//
+//var callAccepted = false;
+///**
+// * accepting a call turns on my camera (if not yet running - however, it should be running already)
+// * and applies settings for a clear sight to my camera
+// */
+//function acceptCall(){
+//	callAccepted = true;
+//	//make me visible for the callee
+//	sendLocalCommand("streamClearly");
+//}
+//
+///**
+// * sets the camera to blurry, stops the camera
+// * and closes the popup
+// */
+//function closeStreamingPopup(){
+//	sendLocalCommand("cancelCall");
+////	if(callAccepted){
+//		if(callerIP!=null){
+//			postToServer("cancel:"+callerIP);	
+//		}else if(ipToCall!=null){
+//			postToServer("cancel:"+ipToCall);
+//		}			
+////	}
+//	setTimeout("closePopup()", 2500);
+//}
+//
+////closes the streaming popup and resets fields
+//function closePopup(){
+//	//reset fields
+//	callerIP = null;
+//	ipToCall = null;
+//	callAccepted = false;
+//	
+//	streamingPopup.close();
+//}
+//
+//
+//function streamMeClearly(){
+//	sendLocalCommand("streamClearly");
+//}
+//function streamMeBlurry(){
+//	sendLocalCommand("streamBlurry");
+//}
+///**
+// * API function for sending a command to the raspberry's cam web interface
+// * @param cmd
+// */
+//function sendLocalCommand(cmd){
+//	streamingPopup.document.getElementById("myCamControl").contentWindow.postMessage(cmd,localURL);
+//}
+//
+//function blurMe(){
+//	sendLocalCommand("px 0048 0027 25 25 0240 0135");
+//}
+//
+//function clearMe(){
+//	sendLocalCommand("px 1296 0730 25 25 2592 1944");
+//}
+//
+//
+///* XHR STUFF
+////Create the XHR object.
+//function createCORSPostRequest(url, params) {
+//  var xhr = new XMLHttpRequest();
+//  if ("withCredentials" in xhr) {
+//    // XHR for Chrome/Firefox/Opera/Safari.
+//    xhr.open('POST', url, true);
+//    xhr.onreadystatechange = function() {if (xhr.readyState==4) alert("It worked!");};
+////    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+////    xhr.setRequestHeader("Content-length", params.length);
+////    xhr.setRequestHeader("Connection", "close");
+//    xhr.send(params);
+//    
+//  } else if (typeof XDomainRequest != "undefined") {
+//    // XDomainRequest for IE.
+//    xhr = new XDomainRequest();
+//    xhr.open(method, url);
+//  } else {
+//    // CORS not supported.
+//    xhr = null;
+//  }
+//  return xhr;
+//}
+//
+//
+////Create the XHR object.
+//function createCORSGetRequest(url) {
+//  var xhr = new XMLHttpRequest();
+//  if ("withCredentials" in xhr) {
+//    // XHR for Chrome/Firefox/Opera/Safari.
+//    xhr.open(method, url, true);
+//  } else if (typeof XDomainRequest != "undefined") {
+//    // XDomainRequest for IE.
+//    xhr = new XDomainRequest();
+//    xhr.open('GET', url);
+//  } else {
+//    // CORS not supported.
+//    xhr = null;
+//  }
+//  return xhr;
+//}
+//
+//// Helper method to parse the title tag from the response.
+//function getTitle(text) {
+//  return text.match('<title>(.*)?</title>')[1];
+//}
+//
+//// Make the actual CORS request.
+//function makeCorsRequest(method, url) {
+//  // All HTML5 Rocks properties support CORS.
+////  var url = 'http://updates.html5rocks.com';
+//
+//  var xhr = createCORSRequest(method, url);
+//  
+////  xhr.setRequestHeader('Pi_Cam_Control', 'stop');
+////  xhr.withCredentials = true;
+//  if (!xhr) {
+//    alert('CORS not supported');
+//    return;
+//  }
+//
+//  // Response handlers.
+//  xhr.onload = function() {
+//	  var text = xhr.responseText;
+//	  var title = getTitle(text);
+//	  alert('Response from CORS request to ' + url + ': ' + title);
+//  };
+//
+//  xhr.onerror = function() {
+//	  alert('Woops, there was an error making the request.');
+//  };
+//
+//  xhr.send();
+//}
+//*/
+//
+/////////////////////////////////////// END JPEG STREAMER /////////////////////////////////////
 
-//	var output = "";
-	var id;
-	for ( var i = 0; i < camAreas.length; i++) {
-		id = camAreas[i];
-		//check on x axis
-		if( (+event.clientX) > (+areas[id].topLeftX)*factor && (+event.clientX) < +((+areas[id].topLeftX)+(+areas[id].width))*factor ){
-			//check on y axis
-			if( (+event.clientY) > (+areas[id].topLeftY)*factor && (+event.clientY) < +((+areas[id].topLeftY)+(+areas[id].height))*factor ){
-//				alert(+event.clientX +","+ +event.clientY +"::"+ 
-//						+(+areas[id].topLeftX)*factor +","+ ((+areas[id].topLeftX)+(+areas[id].width))*factor +
-//						"||"+ (+areas[id].topLeftY)*factor +","+ ((+areas[id].topLeftY)+(+areas[id].width))*factor +" ->clicked on area "+id);
-				
-				setupButton(id);
-				
-				return;
-			}
-		}
-	}
-	
-	hideButton();
-	
-}
-
-var roomToCall = "none";
-
-function setupButton(room){
-	roomToCall = room+"";
-	var btn = document.getElementById("callButton");
-	btn.value = "Call Room "+room;
-	btn.style.visibility = "visible";
-}
-
-function hideButton(){
-	var btn = document.getElementById("callButton");
-	btn.style.visibility = "hidden";
-	roomToCall = "none";
-}
-
-/*function callRoom(){
-	if(roomToCall=="none"){
-		alert("NO!");
-	}else{
-		//TODO
-		alert("calling room "+roomToCall);
-	}
-	
-}*/
-
-function callRoom(url){
-	if(roomToCall=="none"){
-		alert("Choose a valid room");
-	}else{
-		newwindow = window.open(url,'','toolbar=0,location=0,directories=0,menubar=0,scrollbars=1,resizable=0,width=640,height=480, top=300,left=500');
-		//if (window.focus) {newwindow.focus();}
-	    //if (!newwindow.closed) {newwindow.focus();}
-		//roomToCall
-	}
-	return false;
-}
+//TODO JPEG
 
 /**
  * This function is called when the Call button is clicked on the user's popup balloon
@@ -1263,4 +1701,52 @@ function changeRefreshRate(value) {
             break;
     }
     initInterval();
+    
+}
+
+var temporalPollCounter = new Array();
+var previousPollCounter = new Array();
+var newPollIcons = new Array();
+
+function flashPolls(){
+	doTask("read_all_polls", null, function (data){
+		
+		for (var i = 0; i < data.object.length; i++) {
+			//add all curentpolls
+			if(temporalPollCounter[data.object[i].icon] == null){
+				temporalPollCounter[data.object[i].icon] = 1;
+			}else{
+				temporalPollCounter[data.object[i].icon] = (+temporalPollCounter[data.object[i].icon])+(+1);
+			}			
+		}
+		
+		//for each previous poll
+		for (var icon in previousPollCounter) {
+			if(temporalPollCounter[icon]==null){ //if poll no longer available (poll removed)
+				alert("poll: remove: "+icon);
+				previousPollCounter[icon] = 0;
+			}else{ //previous poll counter of poll with icon 'icon' is updated
+				alert("poll: update: "+icon);
+				//if more icons of one type with icon 'icon' than before
+				if((+temporalPollCounter[icon])-(+previousPollCounter[icon]) > 0){
+					alert("poll: more than before: "+icon);
+					newPollIcons.push(icon);
+				}
+				previousPollCounter[icon] = temporalPollCounter[icon];
+				delete temporalPollCounter[icon];
+			}
+		}
+		//for each remaining new poll
+		for (var icon in temporalPollCounter){
+			alert("poll: is new: "+icon);
+			newPollIcons.push(icon);
+			previousPollCounter[icon] = temporalPollCounter[icon];
+		}
+		
+		alert("poll: new poll icons size: "+newPollIcons.length);
+		
+		//TODO flash
+		
+		newPollIcons = [];
+	});
 }

@@ -341,8 +341,8 @@ function setMapRotation(){
 	mapContainer = document.getElementById("mapscroll");
 	mapRotate = localStorage.getItem('mapRotation');
 	imageURL = "/images/map_180";
-	if(mapRotate == '180'){
-		if(imageExists(imageURL) == false){
+	if(mapRotate == '180'){	//map has to be 180°
+		if(imageExists(imageURL) == false){	//error map remains 0°
 //		mapContainer.style.backgroundImage = "url('/images/map_180')", "url('/images/map')";
 //		mapContainer.style.onerror = function () {
 			alert("There is currently no rotated image. Please contact the admin.");
@@ -350,11 +350,14 @@ function setMapRotation(){
 			mapContainer.style.backgroundImage = "url('/images/map')"; //Default Map-Image
 		}else{
 			mapContainer.style.backgroundImage = "url('/images/map_180')";
-		}
+			updateAreasRotation(true);
+		}// map is rotated (180°)
 	}else if(mapRotate == '0'){
 		mapContainer.style.backgroundImage = "url('/images/map')";
-	}
+		updateAreasRotation(false);
+	}// map is rotated (0°)
 }
+
 
 
 /**

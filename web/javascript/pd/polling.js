@@ -13,6 +13,7 @@ function getRemainingSpace(){
 }
 
 
+
 var userPollsList = [];
 /**
  * load all polls (initiates to start the placement on the display in the callback)
@@ -29,7 +30,9 @@ function loadPolls(callback, callbackdata){
 		}else{
 			var polls = "";
 			//all polls
-			for (var i = 0; i < data.object.length; i++) {	
+			temporalPollCounter = [];
+			for (var i = 0; i < data.object.length; i++) {			
+				
 				polls += "<div class='sortedPolls_newest' id='poll_"+ i +"' data-datetime_created='"+data.object[i].created+"' data-datetime_end='"+data.object[i].end+"'>";
 				polls += "<table><tr><td><img style='width:144px;' src="+data.object[i].icon+"></td>";	//changed from 72 to 144px
 				//cut if too long
@@ -125,6 +128,7 @@ function loadPolls(callback, callbackdata){
 			}
 
 		}
+		
 		//to secure that check is always first and after that (!) is the update of the icon placement
 		callback(callbackdata);
 	});
