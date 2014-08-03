@@ -20,6 +20,7 @@ public class FileLogWrapper {
     private static String SESSIONFILE = "session";
     private static String POSITIONFILE = "position";
     private static String POLLFILE = "polling";
+    private static String IPFILE = "ips";
 
     /**
      * Given an Authenticated, log its login.
@@ -94,54 +95,6 @@ public class FileLogWrapper {
         });
     }
 
-    public static void positionError(final User user, final Area area) {
-        fileLog.log(new LogWorker() {
-            @Override
-            public LogObject logCreate() {
-                return new LogObject() {
-                    @Override
-                    public String getFileName() {
-                        return POSITIONFILE;
-                    }
-
-                    @Override
-                    public String getContent() {
-                        String userKey = anonymizer.getKey(user);
-                        String areaKey = "UNKNOWN";
-                        if (area != null) {
-                            areaKey = anonymizer.getKey(area);
-                        }
-                        return "xxx " + userKey + " @ " + areaKey + " is wrong";
-                    }
-                };
-            }
-        });
-    }
-
-    public static void positionOkay(final User user, final Area area) {
-        fileLog.log(new LogWorker() {
-            @Override
-            public LogObject logCreate() {
-                return new LogObject() {
-                    @Override
-                    public String getFileName() {
-                        return POSITIONFILE;
-                    }
-
-                    @Override
-                    public String getContent() {
-                        String userKey = anonymizer.getKey(user);
-                        String areaKey = "UNKNOWN";
-                        if (area != null) {
-                            areaKey = anonymizer.getKey(area);
-                        }
-                        return "ooo " + userKey + " @ " + areaKey + " is okay";
-                    }
-                };
-            }
-        });
-    }
-
     public static void pollVote(final User user, final Poll poll, final ArrayList<String> added, final ArrayList<String> removed) {
         fileLog.log(new LogWorker() {
             @Override
@@ -161,16 +114,17 @@ public class FileLogWrapper {
                         for (String s : removed) {
                             builder.append("-").append(s).append(" ");
                         }
-                        final String options = builder.toString();
-                        final String userKey = anonymizer.getKey(user);
-                        final String pollKey = anonymizer.getKey(poll);
-                        return userKey + " @ " + pollKey + " : " + options;
+                        String options = builder.toString();
+                        String userKey = anonymizer.getKey(user);
+                        String pollKey = anonymizer.getKey(poll);
+                        return "    " + userKey + " @ " + pollKey + " : " + options;
                     }
                 };
             }
         });
     }
 
+    // CAREFUL: MUST BE CALLED AFTER THE OBJECT EXISTS! (so not before session.write())
     public static void pollCreate(final User user, final Poll poll) {
         fileLog.log(new LogWorker() {
             @Override
@@ -183,8 +137,8 @@ public class FileLogWrapper {
 
                     @Override
                     public String getContent() {
-                        final String userKey = anonymizer.getKey(user);
-                        final String pollKey = anonymizer.getKey(poll);
+                        String userKey = anonymizer.getKey(user);
+                        String pollKey = anonymizer.getKey(poll);
                         return "+++ " + pollKey + " by " + userKey + ": " + poll.getQuestion();
                     }
                 };
@@ -226,7 +180,27 @@ public class FileLogWrapper {
                     @Override
                     public String getContent() {
                         final String pollKey = anonymizer.getKey(poll);
-                        return "xxx " + pollKey + " ended";
+                        return "sss " + pollKey + " --> ended";
+                    }
+                };
+            }
+        });
+    }
+
+    public static void pollClosed(final Poll poll) {
+        fileLog.log(new LogWorker() {
+            @Override
+            public LogObject logCreate() {
+                return new LogObject() {
+                    @Override
+                    public String getFileName() {
+                        return POLLFILE;
+                    }
+
+                    @Override
+                    public String getContent() {
+                        final String pollKey = anonymizer.getKey(poll);
+                        return "sss " + pollKey + " --> closed";
                     }
                 };
             }
@@ -267,6 +241,25 @@ public class FileLogWrapper {
                     public String getContent() {
                         final String key = anonymizer.getKey(user);
                         return "sss " + key + " set status to " + user.getStatus();
+                    }
+                };
+            }
+        });
+    }
+
+    public static void logAccess(final String type, final String ipAddress, final String task) {
+        fileLog.log(new LogWorker() {
+            @Override
+            public LogObject logCreate() {
+                return new LogObject() {
+                    @Override
+                    public String getFileName() {
+                        return IPFILE;
+                    }
+
+                    @Override
+                    public String getContent() {
+                        return type + " @ " + ipAddress + " --> " + task;
                     }
                 };
             }

@@ -71,7 +71,7 @@ function loginDisplay(identification, password, callback) {
         // callback simply saves the session
         session = data.object.description;
         writeCookie("MIND_PD_C", session);
-        //alert("PD_session: " + session);
+        // alert("PD_session: " + session);
         callback();
     });
 

@@ -4,56 +4,54 @@ import de.uulm.mi.mind.logger.anonymizer.Anonymizer;
 import de.uulm.mi.mind.logger.permanent.FileLog;
 import de.uulm.mi.mind.logger.permanent.LogObject;
 import de.uulm.mi.mind.logger.permanent.LogWorker;
-import de.uulm.mi.mind.objects.Area;
-import de.uulm.mi.mind.objects.Arrival;
+import de.uulm.mi.mind.objects.FileLogObject;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
 import de.uulm.mi.mind.objects.messages.Success;
 import de.uulm.mi.mind.security.Active;
 import de.uulm.mi.mind.tasks.UserTask;
 
 /**
- * @author Tamino Hartmann
+ * Created by Tamino Hartmann on 7/17/14.
+ * <p/>
+ * Logs time that the app screen has remained off. For this task to work, send a FileLogObject where only the content
+ * will be read. It should contain the time the smartphone has been inactive.
  */
-public class LogPositionOkay extends UserTask<Arrival, Sendable> {
-
+public class InactiveLog extends UserTask<FileLogObject, Sendable> {
     @Override
-    public boolean validateInput(Arrival object) {
-        return object.getObject() instanceof Area;
+    public boolean validateInput(FileLogObject object) {
+        return safeString(object.getContent());
     }
 
     @Override
-    public Sendable doWork(final Active active, final Arrival object, boolean compact) {
-        // note that we don't check if REAL_POSITION is not null: this is done because no position can be wrong too;
-        // we catch that in the FileLogWrapper
+    public Sendable doWork(final Active active, final FileLogObject object, boolean compact) {
         FileLog.getInstance().log(new LogWorker() {
             @Override
             public LogObject logCreate() {
                 return new LogObject() {
                     @Override
                     public String getFileName() {
-                        return "position";
+                        return "activity";
                     }
 
                     @Override
                     public String getContent() {
                         String userKey = Anonymizer.getInstance().getKey(active.getAuthenticated());
-                        String areaKey = Anonymizer.getInstance().getKey(((Area) object.getObject()));
-                        return "ooo " + userKey + " @ " + areaKey + " is okay >> " + object.getDeviceType();
+                        return userKey + " inactive for " + object.getContent();
                     }
                 };
             }
         });
-        return new Success("Okay has been logged.");
+        return new Success("Inactivity has been logged.");
     }
 
     @Override
     public String getTaskName() {
-        return "log_position_okay";
+        return "inactive_log";
     }
 
     @Override
-    public Class<Arrival> getInputType() {
-        return Arrival.class;
+    public Class<FileLogObject> getInputType() {
+        return FileLogObject.class;
     }
 
     @Override

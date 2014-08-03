@@ -21,7 +21,12 @@ var mapDiv;
 
 var users; //the current (to be) displayed users;
 var sortedEmails; //the current user's emails, sorted by areas
-var areas = new Array(); //an array of areas - contains all areas that have already been used/needed
+
+var areas = new Array(); //the currently used areas (standard or rotated)
+var areasStd = new Array(); //an array of areas - contains all areas that have already been used/needed
+var areasRotated = new Array(); //an array of rotated areas - contains all rotated areas that have already been used/needed
+var mapInverted = false; //true when map is rotated by 180° and is inverted - false in default position
+
 var awayAreaExists = true;
 
 $(document).ready(function () {
@@ -29,6 +34,11 @@ $(document).ready(function () {
         mapResize();
         getRemainingSpace();   //to find out size of remaining content (for polling) on resize
     };
+    // force hard refresh after 2 hours
+    // todo check what time we for this to work smoothly
+    setTimeout(function () {
+        window.location.reload();
+    }, 2*60*60*1000);
 });
 
 /**
@@ -49,8 +59,10 @@ function initPublicDisplayStuff() {
         //TODO if no areas found -> ??
 
         for (var i = 0; i < areasArray.length; i++) {
-            areas[areasArray[i].ID] = areasArray[i];
+            areasStd[areasArray[i].ID] = areasArray[i];
         }
+        
+        setAreasRotation(false);
 
         checkAwayArea();
 
@@ -179,16 +191,41 @@ function mapResize() {
         for (var email in users) {
             users[email].x = Math.round(+changeFactor * +users[email].x);
             users[email].y = Math.round(+changeFactor * +users[email].y);
-            placeUserIcon(users[email]);
+            loadPolls(placeUserIcon, users[email]);
+            
         }
     }
 
 }
 
-function rotateAreas(){
+function generateRotatedAreas(){
 	for(var ID in areas) {
-//		if(area)
+		//copy area
+		areasRotated[ID] = new Area(ID, areas[ID].locations, areas[ID].topLeftX, areas[ID].topLeftY, areas[ID].width, areas[ID].height);
+		//if is away area -> translate to top
+		if(ID+""=="AWAY"){
+			areasRotated[ID].topLeftX = 53;
+			areasRotated[ID].topLeftY = 0;
+		}
+		//if is other area -> rotate by 180°
+		else{
+			areasRotated[ID].topLeftX = 1440-(areas[ID].topLeftX+areas[ID].width);
+			areasRotated[ID].topLeftY = 1080-(areas[ID].topLeftY+areas[ID].height);
+		}
 	}
+}
+
+/**
+ * sets the rotation of the used areas
+ * @param inverted if inverted == true -> inverted areas are applied; else standard areas
+ */
+function setAreasRotation(inverted){
+	if(inverted){
+		areas = areasRotated;
+	}else{
+		areas = areasStd;
+	}
+	mapInverted = inverted;
 }
 
 /**
@@ -289,10 +326,10 @@ function placeUserIcon(user) {
     //check if user has a poll
     if(userPollsList[user.email+""] != null){
     	//user has a poll
-    	if(userPollsList[user.email+""]==="yes"){
+    	if(userPollsList[user.email+""]=="yes"){
     		//set left and top like above plus 2/3 of user-icon size
-    		var left = Math.round(user.x - displayedIconSize / 2) + (Math.round(displayedIconSize / 3)*2);
-    		var top = Math.round(user.y - displayedIconSize / 2) +(Math.round(displayedIconSize / 3)*2);
+    		var left = Math.round(user.x - (+displayedIconSize) / (+2)) + (Math.round((+displayedIconSize) / (+3))*(+2));
+    		var top = Math.round(user.y - (+displayedIconSize) / (+2)) +(Math.round((+displayedIconSize) / (+3))*(+2));
     		var poll_icon = document.getElementById("pollIcon_"+user.email);
     		//if poll icon doesn't exist
     		if(poll_icon==null){
@@ -306,13 +343,19 @@ function placeUserIcon(user) {
     			var divToAugment = document.getElementById("mapscroll");
     			divToAugment.appendChild(poll_icon);
     		}
-    		poll_icon.style.width =  Math.round(displayedIconSize / 3) + "px";
-    		poll_icon.style.height = Math.round(displayedIconSize / 3) + "px";
+    		poll_icon.style.width =  Math.round((+displayedIconSize) / (+3)) + "px";
+    		poll_icon.style.height = Math.round((+displayedIconSize) / (+3)) + "px";
     		poll_icon.style.left = left + "px";
     		poll_icon.style.top = top + "px";    		
     	}
     	
-    }    
+    }else{
+    	//remove poll icon if it exists
+    	var pollIconElement = document.getElementById("pollIcon_"+user.email);
+    	if(pollIconElement!=null){
+    		pollIconElement.parentNode.removeChild(pollIconElement);	//remove poll icon (like user)
+    	}
+    }
 }
 
 /**
@@ -455,7 +498,7 @@ function setUserIconCoordsByArea() {
  */
 function updateUserIconPlacement() {
     for (var email in users) {
-        placeUserIcon(users[email]);
+    	loadPolls(placeUserIcon, users[email]);
     }
 }
 
@@ -515,7 +558,6 @@ function updateUserListOnReceive(data) {
         if (!areaExists(users[email].position)) {
             removeUserWithIcon(email);
         }
-
     }
 
     //set individual user icon coordinates considering area
@@ -580,14 +622,24 @@ jQuery.fn.redraw = function () {
 //	return -1;
 //}
 
+function checkMapRotation(){
+	alert(document.getElementById("mapscroll").style.backgroundImage);
+//	if(document.getElementById("mapscroll").style.backgroundImage == "")
+}
+
 var refreshCounter = 0;
 /**
  * This function should be called periodically to update the users location, polls, etc. visually
  */
 function updatePdData() {
 
+    //send check
+    send(new Arrival("check", session));
+
 	checkAwayArea();	// check periodically on reload
 	getRemainingSpace();	//to find out size of remaining content (for polling) on reload
+	
+	checkMapRotation();
 	
     if (balloonIsOpen()) {
         return;
@@ -682,7 +734,7 @@ function getAreaById(id) {
 }
 
 function areaExists(id) {
-    if (areas[id] == null) {
+    if (areasStd[id] == null) {
         return false;
     } else {
         return true;
@@ -756,9 +808,9 @@ function displayUserInfo(email) {
 
 
 /**
- * check wether image exists
+ * check whether image exists
  */
-function imageExists(image_url){
+/*function imageExists(image_url){
 
     var http = new XMLHttpRequest();
 
@@ -767,7 +819,7 @@ function imageExists(image_url){
 
     return http.status != 404;
 
-}
+}*/
 
 
 //the modified id (for closing purposes) of the current opened balloon, null if no balloon is open 
@@ -993,7 +1045,7 @@ $(document).on("mousedown", "#mapscroll", function (event) {
 //			checkForAreaClick(event);
 //		}		
 //	} TODO JPEG
-	
+
     
 	if (!$(event.target).hasClass('micon')) { //if !(click on icon)
         if (balloonIsOpen()) { //if balloon is open -> hide balloon
@@ -1514,36 +1566,38 @@ function changeRefreshRate(value) {
 
     switch (value) {
         case '1':
-        {
             refreshRate = 5;
+//            alert("in 1");
             document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 5 sec';
+            localStorage.setItem('refreshRate', 1+"");
             break;
-        }
         case '2':
             refreshRate = 10;
+//            alert("in 2");
             document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 10 sec';
+            localStorage.setItem('refreshRate', 2+"");
             break;
         case '3':
             refreshRate = 15;
+//            alert("in 3");
             document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 15 sec';
+            localStorage.setItem('refreshRate', 3+"");
+//            alert( localStorage.getItem(refreshRate));
             break;
         case '4':
             refreshRate = 30;
+//            alert("in 4");
             document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 30 sec';
+            localStorage.setItem('refreshRate', 4+"");
             break;
         case '5':
             refreshRate = 60;
+//            alert("in 5");
             document.getElementById("slidertext_refresh").innerHTML = 'Current Refresh Rate: every 60 sec';
+            localStorage.setItem('refreshRate', 5+"");
             break;
         default:
             break;
     }
     initInterval();
 }
-
-/*
- function changeBrightness(value){
-
- document.getElementById("slidertext_brightness").innerHTML = "Brightness: "+value;
-
- }*/

@@ -35,21 +35,18 @@ public class PollAdd extends PollTask<Poll, Information> {
 
     @Override
     public boolean validateInput(Poll object) {
-        // check options
-        if (object.getOptions() == null || object.getOptions().isEmpty()) {
-            return false;
-        }
+        // we don't check how many options exist because can be used as message
         for (PollOption option : object.getOptions()) {
             if (!safeString(option.getOptionValue())) {
                 return false;
             }
         }
-        // we check: question, allowed options must be at least 1
-        return safeString(object.getQuestion()) && object.getAllowedOptionSelections() > 0;
+        // we check: question
+        return safeString(object.getQuestion());
     }
 
     @Override
-    public Information doWork(Active active, Poll poll, boolean compact) {
+    public Information doWork(final Active active, Poll poll, boolean compact) {
         final Poll toSave;
         // check length of strings
         if (poll.getQuestion().length() > QUESTION_LENGTH) {
@@ -100,15 +97,14 @@ public class PollAdd extends PollTask<Poll, Information> {
         toSave.setOptions(options);
         toSave.setAllowedOptionSelections(poll.getAllowedOptionSelections());
 
-        //log
-        FileLogWrapper.pollCreate(((User) active.getAuthenticated()), toSave);
-
         // save to db
         return (Information) database.open(new Transaction() {
             @Override
             public Data doOperations(Session session) {
                 boolean success = session.create(toSave);
                 if (success) {
+                    //log
+                    FileLogWrapper.pollCreate(((User) active.getAuthenticated()), toSave);
                     return new Success("Poll created!");
                 } else {
                     return new Error(Error.Type.DATABASE, "Failed to create poll!");

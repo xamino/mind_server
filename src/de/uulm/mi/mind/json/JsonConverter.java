@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -145,6 +146,11 @@ public class JsonConverter<E> {
                 if (ignoreFields.contains(field.getName())) {
                     continue;
                 }
+                // ignore final fields
+                if (Modifier.isFinal(field.getModifiers())) {
+                    log.error(TAG, "WARNING: Field " + field.getName() + " is final, skipping!");
+                    continue;
+                }
                 // otherwise try to make the field accessible and set it
                 try {
                     field.setAccessible(true);  // otherwise private won't work
@@ -279,7 +285,12 @@ public class JsonConverter<E> {
                 f = objectClass.getDeclaredField(entry.getKey());
             } catch (NoSuchFieldException e) {
                 // Silently ignore but warn
-                log.error(TAG, "Field " + entry.getKey() + " does not exist for object " + typeValue + "!");
+                log.error(TAG, "WARNING: Field " + entry.getKey() + " does not exist for object " + typeValue + "!");
+                continue;
+            }
+            // catch final fields and static finals
+            if (Modifier.isFinal(f.getModifiers())) {
+                log.error(TAG, "WARNING: Field " + entry.getKey() + " is final, ignoring!");
                 continue;
             }
             f.setAccessible(true);

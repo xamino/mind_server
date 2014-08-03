@@ -9,6 +9,7 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <meta HTTP-EQUIV="CACHE-CONTROL" content="NO-CACHE">
     <script src="javascript/jquery-2.1.0.min.js"></script>
     <script src="javascript/library.js"></script>
     <script src="javascript/run.js"></script>
@@ -29,7 +30,7 @@
 
     <title>Public Display</title>
 </head>
-<body onload="onLoadOfPdPage()" lolcat="<%
+<body onload="onLoadOfPdPage(), setSettings()" lolcat="<%
         String ip = request.getRemoteAddr();
         Active active = null;
         // WARNING:
@@ -105,14 +106,28 @@
                 <br>
 				
 				<div id="sliderdiv_brightness">
+					<h3>Brightness</h3><br>
+					Change Brightness of the Display (100% - 80% - 60% - 40% - 20%)<br>
+					<br>
 	                   <input id="slider_brightness" type="range" name="points" min="1" max="5" value="1"
 	                          onchange="changeBrightness(this.value)">
 	                   <p id="slidertext_brightness">Current Brightness: 100%</p>
                 </div>  
                 <hr>
                 <br>
+                <h3>Auto Brightness</h3><br>
+                Switch automatic brightness settings (after 15 minutes) on/off<br>
+                <br>
+                <form name="autoBrights">
+                    <input type=radio name="autoBright" value="brightOn" onClick="autoBrightOn_Off()"> On<br>
+                    <input type=radio name="autoBright" value="brightOff" onClick="autoBrightOn_Off()"> Off
+                </form>
+                <hr>
+                <br>
                 <div id="buttonsDiv">
                     <button type='button' id='displaySettingsBack' class="shadow" onclick='toggleDisplaySettings()'>Back
+                    </button>
+                    <button type='button' id='displaySettingsRotateMap' class="shadow" onclick='rotateMap()'>Rotate Map (180°)
                     </button>
                     <!-- <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout
                         Display
@@ -122,11 +137,11 @@
             </div>
             <div id="show_app_settings" style="display:none;">
                 <h3>Polling:</h3><br>
-
+				Show the POlls with the first ending or the newest first.<br>
+				<br>
                 <form name="pollOrders">
                     <input type=radio name="pollOrder" value="newest" onClick="pollSelection()"> Newest First<br>
                     <input type=radio name="pollOrder" value="ending" onClick="pollSelection()"> Next Ending First
-                    (default)
                 </form>
                 <hr>
                 <h3>Get the App:</h3><br>
