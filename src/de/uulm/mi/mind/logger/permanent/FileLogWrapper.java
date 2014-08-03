@@ -95,48 +95,6 @@ public class FileLogWrapper {
         });
     }
 
-    public static void positionError(final User user, final Area area) {
-        fileLog.log(new LogWorker() {
-            @Override
-            public LogObject logCreate() {
-                return new LogObject() {
-                    @Override
-                    public String getFileName() {
-                        return POSITIONFILE;
-                    }
-
-                    @Override
-                    public String getContent() {
-                        String userKey = anonymizer.getKey(user);
-                        String areaKey = anonymizer.getKey(area);
-                        return "xxx " + userKey + " @ " + areaKey + " is wrong";
-                    }
-                };
-            }
-        });
-    }
-
-    public static void positionOkay(final User user, final Area area) {
-        fileLog.log(new LogWorker() {
-            @Override
-            public LogObject logCreate() {
-                return new LogObject() {
-                    @Override
-                    public String getFileName() {
-                        return POSITIONFILE;
-                    }
-
-                    @Override
-                    public String getContent() {
-                        String userKey = anonymizer.getKey(user);
-                        String areaKey = anonymizer.getKey(area);
-                        return "ooo " + userKey + " @ " + areaKey + " is okay";
-                    }
-                };
-            }
-        });
-    }
-
     public static void pollVote(final User user, final Poll poll, final ArrayList<String> added, final ArrayList<String> removed) {
         fileLog.log(new LogWorker() {
             @Override
