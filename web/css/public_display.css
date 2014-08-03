@@ -298,7 +298,7 @@ background-size: contain;*/
 }
 
 .miconDnD {
-    -webkit-filter: drop-shadow(0px 0px 6px rgba(225, 0, 0, 1.0));
+    -webkit-filter: drop-shadow(0px 0px 10px rgba(225, 0, 0, 1.0));
     filter: url(micon-shadow.xml#drop-shadow_miconDnD);
     -ms-filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
     filter: "progid:DXImageTransform.Microsoft.Dropshadow(OffX=12, OffY=12, Color='#444')";
