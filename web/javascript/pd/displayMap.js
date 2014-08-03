@@ -25,7 +25,7 @@ var sortedEmails; //the current user's emails, sorted by areas
 var areas = new Array(); //the currently used areas (standard or rotated)
 var areasStd = new Array(); //an array of areas - contains all areas that have already been used/needed
 var areasRotated = new Array(); //an array of rotated areas - contains all rotated areas that have already been used/needed
-var mapInverted = false; //true when map is rotated by 180° and is inverted - false in default position
+var mapInverted = false; //true when map is rotated by 180ï¿½ and is inverted - false in default position
 
 var awayAreaExists = true;
 
@@ -212,7 +212,7 @@ function generateRotatedAreas(){
 			areasRotated[ID].topLeftX = areasStd[ID].topLeftX;
 			areasRotated[ID].topLeftY = areasStd[ID].topLeftY;
 		}
-		//if is other area -> rotate by 180°
+		//if is other area -> rotate by 180ï¿½
 		else{
 			areasRotated[ID].topLeftX = +1440-(+((+areasStd[ID].topLeftX)+(+areasStd[ID].width)));
 			areasRotated[ID].topLeftY = +1080-(+((+areasStd[ID].topLeftY)+(+areasStd[ID].height))) - +250;			
@@ -732,9 +732,6 @@ var refreshCounter = 0;
  */
 function updatePdData() {
 //	flashPolls();
-	
-    //send check
-    send(new Arrival("check", session));
 
 	checkAwayArea();	// check periodically on reload
 	getRemainingSpace();	//to find out size of remaining content (for polling) on reload
