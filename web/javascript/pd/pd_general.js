@@ -347,11 +347,11 @@ function setMapRotation(){
 			mapContainer.style.backgroundImage = "url('/images/map')"; //Default Map-Image
 		}else{
 			mapContainer.style.backgroundImage = "url('/images/map_180')";
-			setAreasRotation(true);
+			updateAreasRotation(true);
 		}// map is rotated (180°)
 	}else if(mapRotate == '0'){
 		mapContainer.style.backgroundImage = "url('/images/map')";
-		setAreasRotation(false);
+		updateAreasRotation(false);
 	}// map is rotated (0°)
 }
 

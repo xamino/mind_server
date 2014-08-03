@@ -62,6 +62,7 @@ function initPublicDisplayStuff() {
             areasStd[areasArray[i].ID] = areasArray[i];
         }
         
+        generateRotatedAreas();
         setAreasRotation(false);
 
         checkAwayArea();
@@ -199,20 +200,36 @@ function mapResize() {
 }
 
 function generateRotatedAreas(){
-	for(var ID in areas) {
+//	alert("generateRotatedAreas");
+	for(var ID in areasStd) {
 		//copy area
-		areasRotated[ID] = new Area(ID, areas[ID].locations, areas[ID].topLeftX, areas[ID].topLeftY, areas[ID].width, areas[ID].height);
+		areasRotated[ID] = new Area(ID, areasStd[ID].locations, areasStd[ID].topLeftX, areasStd[ID].topLeftY, areasStd[ID].width, areasStd[ID].height);
 		//if is away area -> translate to top
-		if(ID+""=="AWAY"){
-			areasRotated[ID].topLeftX = 53;
-			areasRotated[ID].topLeftY = 0;
+		if(ID+""=="Away"){
+			areasRotated[ID].topLeftX = (+areasStd[ID].topLeftX)+(+53);
+			areasRotated[ID].topLeftY = areasStd[ID].topLeftY;
+		}else if(ID+""=="University"){
+			areasRotated[ID].topLeftX = areasStd[ID].topLeftX;
+			areasRotated[ID].topLeftY = areasStd[ID].topLeftY;
 		}
 		//if is other area -> rotate by 180°
 		else{
-			areasRotated[ID].topLeftX = 1440-(areas[ID].topLeftX+areas[ID].width);
-			areasRotated[ID].topLeftY = 1080-(areas[ID].topLeftY+areas[ID].height);
+			areasRotated[ID].topLeftX = +1440-(+((+areasStd[ID].topLeftX)+(+areasStd[ID].width)));
+			areasRotated[ID].topLeftY = +1080-(+((+areasStd[ID].topLeftY)+(+areasStd[ID].height))) - +250;			
 		}
+//		alert(ID+"\n"+
+//				areasStd[ID].topLeftX+" to "+areasRotated[ID].topLeftX+"\n"+
+//				areasStd[ID].topLeftY+" to "+areasRotated[ID].topLeftY);
 	}
+}
+
+function updateAreasRotation(inverted){
+	setAreasRotation(inverted);
+	
+    //set individual user icon coordinates considering area
+    setUserIconCoordsByArea();
+    //display all currently tracked users
+    updateUserIconPlacement();
 }
 
 /**
@@ -365,7 +382,7 @@ function placeUserIcon(user) {
  */
 function setUserIconCoordsByArea() {
 
-    if (Object.keys(users).length <= 0) {
+    if (Object.keys(users)==null || Object.keys(users).length <= 0) {
         return;
     }
 
@@ -622,9 +639,39 @@ jQuery.fn.redraw = function () {
 //	return -1;
 //}
 
+//String.prototype.endsWith = function(suffix) {
+//    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+//};
+
+function endsWith(str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
+
+/**
+ * checks for map and area rotation consistency and updates areas)
+ * sets the current area rotations depending on the background image of the map
+ */
 function checkMapRotation(){
-	alert(document.getElementById("mapscroll").style.backgroundImage);
-//	if(document.getElementById("mapscroll").style.backgroundImage == "")
+	//if background image exists
+	if(document.getElementById("mapscroll")!=null && 
+			document.getElementById("mapscroll").style.backgroundImage != null){
+		
+		//if inverted map image is set
+		if(endsWith(document.getElementById("mapscroll").style.backgroundImage+"","map_180)")){
+//			alert("is 180 map");
+			if(!mapInverted){
+				setAreasRotation(true);
+			}			
+		}
+		//if standard map image is set
+		else{
+//			alert("is 0 map");
+			if(mapInverted){
+				setAreasRotation(false);
+			}
+			
+		}
+	}
 }
 
 var refreshCounter = 0;
@@ -632,7 +679,9 @@ var refreshCounter = 0;
  * This function should be called periodically to update the users location, polls, etc. visually
  */
 function updatePdData() {
-
+	//TODO remove
+	flashPolls();
+	
     //send check
     send(new Arrival("check", session));
 
@@ -645,10 +694,10 @@ function updatePdData() {
         return;
     }
 
-    refreshCounter = +refreshCounter + 1;
-    if (document.getElementById("balloonIdle") != null) {
-        document.getElementById("balloonIdle").innerHTML = refreshCounter;
-    }
+    //refreshCounter = +refreshCounter + 1;
+//    if (document.getElementById("balloonIdle") != null) {
+//        document.getElementById("balloonIdle").innerHTML = refreshCounter;
+//    }
     send(new Arrival("read_all_positions", session), updateUserListOnReceive);
 }
 
@@ -1600,4 +1649,52 @@ function changeRefreshRate(value) {
             break;
     }
     initInterval();
+    
+}
+
+var temporalPollCounter = new Array();
+var previousPollCounter = new Array();
+var newPollIcons = new Array();
+
+function flashPolls(){
+	doTask("read_all_polls", null, function (data){
+		
+		for (var i = 0; i < data.object.length; i++) {
+			//add all curentpolls
+			if(temporalPollCounter[data.object[i].icon] == null){
+				temporalPollCounter[data.object[i].icon] = 1;
+			}else{
+				temporalPollCounter[data.object[i].icon] = (+temporalPollCounter[data.object[i].icon])+(+1);
+			}			
+		}
+		
+		//for each previous poll
+		for (var icon in previousPollCounter) {
+			if(temporalPollCounter[icon]==null){ //if poll no longer available (poll removed)
+				alert("poll: remove: "+icon);
+				previousPollCounter[icon] = 0;
+			}else{ //previous poll counter of poll with icon 'icon' is updated
+				alert("poll: update: "+icon);
+				//if more icons of one type with icon 'icon' than before
+				if((+temporalPollCounter[icon])-(+previousPollCounter[icon]) > 0){
+					alert("poll: more than before: "+icon);
+					newPollIcons.push(icon);
+				}
+				previousPollCounter[icon] = temporalPollCounter[icon];
+				delete temporalPollCounter[icon];
+			}
+		}
+		//for each remaining new poll
+		for (var icon in temporalPollCounter){
+			alert("poll: is new: "+icon);
+			newPollIcons.push(icon);
+			previousPollCounter[icon] = temporalPollCounter[icon];
+		}
+		
+		alert("poll: new poll icons size: "+newPollIcons.length);
+		
+		//TODO flash
+		
+		newPollIcons = [];
+	});
 }
