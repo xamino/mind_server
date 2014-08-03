@@ -135,6 +135,7 @@ function checkAwayArea() {
 //    });
 }
 
+
 function changeBrightness(value){
 	
 	switch (value) {

@@ -14,6 +14,7 @@
     <script src="javascript/run.js"></script>
     <script src="javascript/pd/displayMap.js"></script>
     <script src="javascript/pd/pd_general.js"></script>
+    <script src="javascript/pd/streaming.js"></script>
     <script src="javascript/pd/polling.js"></script>
     <script src="javascript/jquery.balloon.js"></script>
     <script type="text/javascript">
@@ -46,8 +47,8 @@
 
     <!-- <img id="mapimg" class="mapcontent" src="images/map.png"/>-->
     <!-- <img class="micon" src="images/micons/crab.png"/> -->
-    <!-- <input type="button" name="call_button" id="callButton" onclick="callRoom()"/>
-    <input type="submit" value="Open Popup" onclick="javascript:callPopup('public_display_popup_call.jsp')"/> -->
+     <input type="button" name="call_button" id="callButton" onclick="callRoom()"/>
+   <!-- <input type="submit" value="Open Popup" onclick="javascript:callPopup('public_display_popup_call.jsp')"/> -->
     <!-- call button -->
     <!-- <input type="submit" name="call_button" id="callButton" onclick="javascript:callRoom('public_display_popup_call.jsp')"/> -->
 </div>
