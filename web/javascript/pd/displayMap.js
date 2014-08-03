@@ -758,9 +758,9 @@ function displayUserInfo(email) {
 
 
 /**
- * check wether image exists
+ * check whether image exists
  */
-function imageExists(image_url){
+/*function imageExists(image_url){
 
     var http = new XMLHttpRequest();
 
@@ -769,7 +769,7 @@ function imageExists(image_url){
 
     return http.status != 404;
 
-}
+}*/
 
 
 //the modified id (for closing purposes) of the current opened balloon, null if no balloon is open 
@@ -1212,10 +1212,3 @@ function changeRefreshRate(value) {
     }
     initInterval();
 }
-
-/*
- function changeBrightness(value){
-
- document.getElementById("slidertext_brightness").innerHTML = "Brightness: "+value;
-
- }*/

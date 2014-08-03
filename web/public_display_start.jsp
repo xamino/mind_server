@@ -126,6 +126,8 @@
                 <div id="buttonsDiv">
                     <button type='button' id='displaySettingsBack' class="shadow" onclick='toggleDisplaySettings()'>Back
                     </button>
+                    <button type='button' id='displaySettingsRotateMap' class="shadow" onclick='rotateMap()'>Rotate Map (180°)
+                    </button>
                     <!-- <button type='button' id='displayLogoutButton' class="shadow" onclick='logoutDisplay()'>Logout
                         Display
                     </button>

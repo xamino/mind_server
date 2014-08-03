@@ -143,6 +143,7 @@ function checkAwayArea() {
 var lastRefreshVar;
 var autoBrightVar;
 var lastBrightness = 1+"";
+var mapRotateVar;
 var pollSelectVar;
 /**
  * set settings made by user (with localStorage)
@@ -160,7 +161,7 @@ function setSettings(){
 		document.autoBrights.autoBright[0].checked=true;
 		document.autoBrights.autoBright[1].checked=false;
 //		localStorage.setItem('autoBright', 'on');
-	}else{	//switch auto brightness on
+	}else{	//switch auto brightness off
 		document.autoBrights.autoBright[1].checked=true;
 		document.autoBrights.autoBright[0].checked=false;
 //		localStorage.setItem('autoBright', 'off');
@@ -182,9 +183,18 @@ function setSettings(){
 	}
 	$('#slider_refresh').val(lastRefreshVar);
 	changeRefreshRate(lastRefreshVar);
+
+	//set Rotation
+	mapRotateVar = localStorage.getItem('mapRotation');
+	if(mapRotateVar != '0' && mapRotateVar != '180' || mapRotateVar == '0'){
+		localStorage.setItem('mapRotation', '0');
+		setMapRotation();
+	}
+	else if(mapRotateVar == '180' || mapRotateVar == '0'){	//switch auto brightness on	
+		setMapRotation();
 	
 	//app settings
-	//autoBrightness on/off
+	//poll order
 	pollSelectVar = localStorage.getItem('pollSelect');
 	if(pollSelectVar != 'newestFirst' && pollSelectVar != 'endingFirst'){
 		pollSelectVar = 'endingFirst';	//default
@@ -261,6 +271,8 @@ $(document).on('mouseup', 'body', function(){if(autoBrightVar == 'on'){
 		time);}
 });
 
+}
+
 
 /**
  * sets the brightness automatically (after timeout)
@@ -303,3 +315,55 @@ function autoBrightOn_Off(){
     }
 }
 
+var mapRotation;
+/**
+ * map rotation via Button click (0°/180°)
+ */
+function rotateMap(){
+	mapRotation = localStorage.getItem('mapRotation');
+	if(mapRotation == '0'){
+		localStorage.setItem('mapRotation', '180');
+		setMapRotation();
+	}else if (mapRotation == '180'){
+		localStorage.setItem('mapRotation', '0');
+		setMapRotation();
+	}
+}
+
+var mapContainer, mapRotate, imageURL;
+/**
+ * rotates the map if necessary (0°/180°)
+ */
+function setMapRotation(){
+	mapContainer = document.getElementById("mapscroll");
+	mapRotate = localStorage.getItem('mapRotation');
+	imageURL = "/images/map_180";
+	if(mapRotate == '180'){
+		if(imageExists(imageURL) == false){
+//		mapContainer.style.backgroundImage = "url('/images/map_180')", "url('/images/map')";
+//		mapContainer.style.onerror = function () {
+			alert("There is currently no rotated image. Please contact the admin.");
+			localStorage.setItem('mapRotation', '0');
+			mapContainer.style.backgroundImage = "url('/images/map')"; //Default Map-Image
+		}else{
+			mapContainer.style.backgroundImage = "url('/images/map_180')";
+		}
+	}else if(mapRotate == '0'){
+		mapContainer.style.backgroundImage = "url('/images/map')";
+	}
+}
+
+
+/**
+ * check whether image exists
+ */
+function imageExists(image_url){
+
+    var http = new XMLHttpRequest();
+
+    http.open('HEAD', image_url, false);
+    http.send();
+
+    return http.status != 404;
+
+}
