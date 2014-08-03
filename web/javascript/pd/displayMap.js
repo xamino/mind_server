@@ -300,12 +300,14 @@ function addUserIcon(user) {
  */
 function removeUserWithIcon(email) {
     var iconElement = document.getElementById('icon_' + email);
+    var statusElement = document.getElementById("status_"+email);
     if (iconElement != null) {
     	//if poll icon exists
     	var pollIconElement = document.getElementById("pollIcon_"+email);
     	if(pollIconElement!=null){
     		pollIconElement.parentNode.removeChild(pollIconElement);	//remove poll icon (like user)
     	}
+    	statusElement.parentNode.removeChild(statusElement);
         iconElement.parentNode.removeChild(iconElement);
     }
     removeItem(users, email);
@@ -323,6 +325,10 @@ function placeUserIcon(user) {
     if (icon == null) { //user has no icon image yet
         addUserIcon(user);
         icon = document.getElementById("icon_" + user.email);
+        //colored status div
+        var statusDiv = document.createElement("div"); 
+        statusDiv.id = "status_"+user.email;
+        document.getElementById("mapscroll").appendChild(statusDiv);
         
         //flash div if new user shows up
         var flasher = document.getElementById("flash_div");
@@ -374,6 +380,15 @@ function placeUserIcon(user) {
         //apply visual effect regarding user status
         var statusinfo = getInfoByStatus(user.status);
         icon.className = 'micon ' + statusinfo.classname;
+        //modify status div
+        var statusDiv = document.getElementById("status_"+user.email);
+        statusDiv.style.position = "absolute";
+        statusDiv.style.width = displayedIconSize + "px";
+        statusDiv.style.height = (displayedIconSize/6) + "px";
+        statusDiv.style.left = Math.round(user.x - displayedIconSize / 2) + "px";
+        statusDiv.style.top = (Math.round(user.y - displayedIconSize / 2)) + ((displayedIconSize/6)*5) + "px";
+        statusDiv.className = 'status_div_color_' + statusinfo.classname;
+//        statusDiv.style.backgroundColor = "red";
     }
     
     //set poll-icon above user-icon (on the map)
