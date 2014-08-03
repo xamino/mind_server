@@ -64,12 +64,12 @@
     <div id="settings">
         <div id="app_settings">
             <a href="#" id="app_settings_img" onclick="toggleAppSettings()"></a> <!-- appSettingsClicked() -->
-            <p>App Settings</p>
+            <span>App Settings</span>
         </div>
         <div id="display_settings">
             <a href="#" id="display_settings_img" onclick="toggleDisplaySettings()"></a>
             <!-- displaySettingsClicked() -->
-            <p>Display Settings</p>
+            <span>Display Settings</span>
         </div>
     </div>
     <div id="content_popup">
@@ -90,14 +90,14 @@
                 <div id='settingsRefresh'>
                     
                     <h3>Refresh Rate</h3><br>
-                    From 5 sec (fastest rate) to 60 sec (slowest rate).<br>
+                    From 10 sec (fastest rate) to 60 sec (slowest rate).<br>
                     <br>
 
                     <div id="sliderdiv_refresh">
                         <input id="slider_refresh" type="range" name="points" min="1" max="5" value="2"
                                onchange="changeRefreshRate(this.value)">
                         <!--oninput,onchange="changeRefreshRate(this.value)"-->
-                        <p id="slidertext_refresh">Current Refresh Rate: every 10 sec</p>
+                        <p id="slidertext_refresh">Current Refresh Rate: every 15 sec</p>
                     </div>                    
                 </div>
                 <!-- <a href='#' id='mute_img' onclick='mute()'></a><br>-->
@@ -136,7 +136,7 @@
             </div>
             <div id="show_app_settings" style="display:none;">
                 <h3>Polling:</h3><br>
-				Show the POlls with the first ending or the newest first.<br>
+				Show the Polls with the first ending or the newest first.<br>
 				<br>
                 <form name="pollOrders">
                     <input type=radio name="pollOrder" value="newest" onClick="pollSelection()"> Newest First<br>
@@ -169,6 +169,7 @@
     </div>
 
 </div>
-<div id="darkener"></div> <!-- end darkener -->
+<div id="darkener"></div>
+<div id="flash_div"></div>
 </body>
 </html>

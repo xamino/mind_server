@@ -6,14 +6,16 @@ html, body {
     height: 100%;
 }
 
-#darkener{
+#darkener, #flash_div{
 	width: 100%;
     height: 100%;
-	background-color:rgba(0,0,0,0.0);
 	position: absolute;
 	top:0;
 	left:0;
 	pointer-events: none;
+}
+#darkener{
+	background-color:rgba(0,0,0,0.0);
 }
 
 #mapscroll {
@@ -87,12 +89,24 @@ html, body {
     padding: 10px;
 }
 
+#content , #show_display_settings, #show_app_settings, #current_polls{
+/*#content *:not(#slider_refresh, #slider_brightness){*/
+	background-color: #dddddd !important;
+	background-size: cover;
+}
+
+input[type="range"]{
+   -webkit-appearance:none !important;  
+   background-color: #32627c !important;
+ }
+
 #app_settings {
     /*float:left;*/
     display: inline-block;
     vertical-align: left;
     width: 50%;
-    height: 200px;
+    height: 125px;		/* change also in var remaining_height in polling.js*/
+    /*height: 200px;*/
     position: absolute;
     top: 10px;
     text-align: center;
@@ -105,7 +119,7 @@ html, body {
     display: inline-block;
     vertical-align: right;
     width: 50%;
-    height: 200px;
+    height: 125px;	/* change also in var remaining_height in polling.js*/
     /*width:50%;
     height:20%;*/
     text-align: center;
@@ -113,14 +127,18 @@ html, body {
     right: 0px;
     top: 10px;
 }
+#display_settings > span, #app_settings > span{
+	font-size: 30px;
+	font-weight:bold;
+}
 
 #app_settings_img {
     background-image: url(../images/pd_icons/settings_default_350px.png);
     background-repeat: no-repeat;
     background-size: contain;
     display: block;
-    width: 150px;
-    height: 150px;
+    width: 75px;
+    height: 75px;
     margin: auto;
 }
 
@@ -135,8 +153,10 @@ background-size: contain;*/
 
 #display_settings_img {
     display: block;
-    width: 150px;
-    height: 150px;
+    width: 75px;
+    height: 75px;
+    /*width: 150px;
+    height: 150px;*/
     background-image: url(../images/pd_icons/settings_default_350px.png);
     background-repeat: no-repeat;
     background-size: contain;
@@ -152,7 +172,7 @@ background-size: contain;*/
 #content_popup {
     /*border: 1px solid orange;	/*height should be 100% - settings - login_location*/
     /*margin-top:20%;*/
-    margin-top: 200px;
+    margin-top: 125px;
 }
 
 #toggleFullscreen, #displayLogoutButton {
@@ -162,11 +182,14 @@ background-size: contain;*/
 #support{
 	color: #32627c;
 	font-weight: bold;
+	font-size:30px;
 }
 
 .poll_user{
-	width: 48px;
-	height: 48px;
+	/*width: 48px;
+	height: 48px;*/
+	width: 96px;
+	height: 96px;
 }
 
 /* table with all polls from one user in the user balloon */
@@ -185,7 +208,7 @@ background-size: contain;*/
 }
 
 .poll_user_icon{
-	width:72px;
+	width: 72px;
 	height: 72px;
 }
 
