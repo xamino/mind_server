@@ -15,11 +15,16 @@ function getRemainingSpace(){
 
 
 var userPollsList = [];
+
+var temporalPollCounter = new Array();
+var previousPollCounter = new Array();
+var newPollIcons = new Array();
 /**
  * load all polls (initiates to start the placement on the display in the callback)
  * @param callback, callbackdata
  */
-function loadPolls(callback, callbackdata){
+//function loadPolls(callback, callbackdata){
+function loadPolls(callback){
 	userPollsList = [];
 	doTask("read_all_polls", null, function (data){
 		//no polls in database
@@ -31,7 +36,15 @@ function loadPolls(callback, callbackdata){
 			var polls = "";
 			//all polls
 			temporalPollCounter = [];
-			for (var i = 0; i < data.object.length; i++) {			
+			for (var i = 0; i < data.object.length; i++) {	
+				
+			//NEW POLL CHECK
+				if(temporalPollCounter[data.object[i].icon] == null){
+					temporalPollCounter[data.object[i].icon] = 1;
+				}else{
+					temporalPollCounter[data.object[i].icon] = (+temporalPollCounter[data.object[i].icon])+(+1);
+				}
+			//NEW POLL CHECK
 				
 				polls += "<div class='sortedPolls_newest' id='poll_"+ i +"' data-datetime_created='"+data.object[i].created+"' data-datetime_end='"+data.object[i].end+"'>";
 				polls += "<table><tr><td><img style='width:144px;' src="+data.object[i].icon+"></td>";	//changed from 72 to 144px
@@ -95,6 +108,28 @@ function loadPolls(callback, callbackdata){
 				polls += "</div>";
 			}
 			
+			
+		//NEW POLL CHECK
+			//for each previous poll
+			for (var icon in previousPollCounter) {
+				if(temporalPollCounter[icon]==null){ //if poll no longer available (poll removed)
+					previousPollCounter[icon] = 0;
+				}else{ //previous poll counter of poll with icon 'icon' is updated
+					//if more icons of one type with icon 'icon' than before
+					if((+temporalPollCounter[icon])-(+previousPollCounter[icon]) > 0){
+						newPollIcons.push(icon);
+					}
+					previousPollCounter[icon] = temporalPollCounter[icon];
+					delete temporalPollCounter[icon];
+				}
+			}
+			//for each remaining new poll
+			for (var icon in temporalPollCounter){
+				newPollIcons.push(icon);
+				previousPollCounter[icon] = temporalPollCounter[icon];
+			}
+		//END NEW POLL CHECK
+			
 //			alert(userPollsList.length);
 			
 			document.getElementById("current_polls").innerHTML = polls;
@@ -130,10 +165,12 @@ function loadPolls(callback, callbackdata){
 		}
 		
 		//to secure that check is always first and after that (!) is the update of the icon placement
-		callback(callbackdata);
+		//callback(callbackdata);
+		callback();
 	});
 	
 }
+
 
 var user_polls = [];
 var userPerPoll = [];
