@@ -589,7 +589,7 @@ function updateUserListOnReceive(data) {
 	//if any error occured (e.g. the server was down)
 	if(instanceOf(data.object,Error)){
 		//reload this page (causes the pd to login, thus receiving a new session)
-		alert(data.object);
+		//alert(data.object);
 		window.location.reload();
 	}
 	
