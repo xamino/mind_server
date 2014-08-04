@@ -2,9 +2,11 @@ package de.uulm.mi.mind.io;
 
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
+import com.db4o.ObjectServer;
 import com.db4o.ObjectSet;
 import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.constraints.UniqueFieldValueConstraint;
+import com.db4o.cs.Db4oClientServer;
 import com.db4o.query.Predicate;
 import com.db4o.query.Query;
 import de.uulm.mi.mind.objects.*;
@@ -245,41 +247,47 @@ class DatabaseController extends DatabaseAccess {
         Configuration config = Configuration.getInstance();
         String dbFilePath = contextPath + "WEB-INF/" + config.getDbName();
 
-        EmbeddedConfiguration dbconfig = Db4oEmbedded.newConfiguration();
-        dbconfig.common().activationDepth(1);
+        ObjectServer server = Db4oClientServer.openServer(dbFilePath,3306);
+        server.grantAccess("root","");
+
+        com.db4o.config.Configuration dbconfig = server.ext().configure();
+
+        dbconfig.activationDepth(1);
 
         //dbconfig.common().diagnostic().addListener(new DiagnosticToConsole());
-        dbconfig.common().objectClass(Area.class).cascadeOnUpdate(true);
-        dbconfig.common().objectClass(Location.class).cascadeOnUpdate(true);
-        dbconfig.common().objectClass(Location.class).cascadeOnDelete(true);
-        dbconfig.common().objectClass(Poll.class).cascadeOnUpdate(true);
-        dbconfig.common().objectClass(Poll.class).cascadeOnDelete(true);
+        dbconfig.objectClass(Area.class).cascadeOnUpdate(true);
+        dbconfig.objectClass(Location.class).cascadeOnUpdate(true);
+        dbconfig.objectClass(Location.class).cascadeOnDelete(true);
+        dbconfig.objectClass(Poll.class).cascadeOnUpdate(true);
+        dbconfig.objectClass(Poll.class).cascadeOnDelete(true);
         //dbconfig.common().optimizeNativeQueries(true);
 
-        dbconfig.common().objectClass(User.class).objectField("email").indexed(true);
+        dbconfig.objectClass(User.class).objectField("email").indexed(true);
         //dbconfig.common().add(new UniqueFieldValueConstraint(User.class, "email"));
 
-        dbconfig.common().objectClass(Area.class).objectField("ID").indexed(true);
+        dbconfig.objectClass(Area.class).objectField("ID").indexed(true);
         //dbconfig.common().add(new UniqueFieldValueConstraint(Area.class, "ID"));
 
-        dbconfig.common().objectClass(PublicDisplay.class).objectField("identification").indexed(true);
+        dbconfig.objectClass(PublicDisplay.class).objectField("identification").indexed(true);
         //dbconfig.common().add(new UniqueFieldValueConstraint(PublicDisplay.class, "identification"));
 
-        dbconfig.common().objectClass(WifiSensor.class).objectField("identification").indexed(true);
+        dbconfig.objectClass(WifiSensor.class).objectField("identification").indexed(true);
         //dbconfig.common().add(new UniqueFieldValueConstraint(WifiSensor.class, "identification"));
 
-        dbconfig.common().objectClass(Location.class).objectField("key").indexed(true);
+        dbconfig.objectClass(Location.class).objectField("key").indexed(true);
         //dbconfig.common().add(new UniqueFieldValueConstraint(Location.class, "key"));
 
-        dbconfig.common().objectClass(Poll.class).objectField("key").indexed(true);
+        dbconfig.objectClass(Poll.class).objectField("key").indexed(true);
         //dbconfig.common().add(new UniqueFieldValueConstraint(Poll.class, "key"));
 
-        dbconfig.common().objectClass(PollOption.class).objectField("key").indexed(true);
+        dbconfig.objectClass(PollOption.class).objectField("key").indexed(true);
         //dbconfig.common().add(new UniqueFieldValueConstraint(PollOption.class, "key"));
 
-        dbconfig.common().objectClass(WifiMorsel.class).objectField("wifiMac").indexed(true);
+        dbconfig.objectClass(WifiMorsel.class).objectField("wifiMac").indexed(true);
         // WifiMorsel is not unique
-        rootContainer = Db4oEmbedded.openFile(dbconfig, dbFilePath);
+
+        // set rootContainer
+        rootContainer = Db4oClientServer.openClient("localhost", 3306, "root", "");
 
         log.log(TAG, "db4o startup on " + dbFilePath);
 
