@@ -63,7 +63,7 @@ function initPublicDisplayStuff() {
         }
         
         generateRotatedAreas();
-        setAreasRotation(false);
+        //setAreasRotation(false);
 
         checkAwayArea();
 
@@ -216,7 +216,7 @@ function generateRotatedAreas(){
 		//if is other area -> rotate by 180�
 		else{
 			areasRotated[ID].topLeftX = +1440-(+((+areasStd[ID].topLeftX)+(+areasStd[ID].width)));
-			areasRotated[ID].topLeftY = +1080-(+((+areasStd[ID].topLeftY)+(+areasStd[ID].height))) - +250;			
+			areasRotated[ID].topLeftY = +1080-(+((+areasStd[ID].topLeftY)+(+areasStd[ID].height))) - +255;			
 		}
 //		alert(ID+"\n"+
 //				areasStd[ID].topLeftX+" to "+areasRotated[ID].topLeftX+"\n"+
@@ -745,7 +745,7 @@ function updatePdData() {
 	checkAwayArea();	// check periodically on reload
 	getRemainingSpace();	//to find out size of remaining content (for polling) on reload
 	
-	checkMapRotation();
+	//checkMapRotation();
 	
     if (balloonIsOpen()) {
         return;

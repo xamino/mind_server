@@ -190,7 +190,8 @@ function setSettings(){
 		localStorage.setItem('mapRotation', '0');
 		setMapRotation();
 	}
-	else if(mapRotateVar == '180' || mapRotateVar == '0'){	//switch auto brightness on	
+	else if(mapRotateVar == '180'){	//switch auto brightness on	
+		localStorage.setItem('mapRotation', '180');
 		setMapRotation();
 	}
 	//app settings
@@ -341,7 +342,7 @@ function setMapRotation(){
 	mapContainer = document.getElementById("mapscroll");
 	mapRotate = localStorage.getItem('mapRotation');
 	imageURL = "/images/map_180";
-	if(mapRotate == '180'){	//map has to be 180°
+	if(mapRotate+'' == '180'){	//map has to be 180°
 		if(imageExists(imageURL) == false){	//error map remains 0°
 //		mapContainer.style.backgroundImage = "url('/images/map_180')", "url('/images/map')";
 //		mapContainer.style.onerror = function () {
