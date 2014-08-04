@@ -1813,7 +1813,7 @@ function flashPolls(){
 		//TODO flash
 		var flasher2 = document.getElementById("flash_div_2");
 		var rgbColor = "";
-		
+		brightUp();
 		var icon_flash_div = document.getElementById('icon_flash_div');
 		/*icon_flash_div.style.display = "block";
 		icon_flash_div.style.margin = "auto";*/
