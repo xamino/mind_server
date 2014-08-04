@@ -18,6 +18,10 @@ html, body {
 	background-color:rgba(0,0,0,0.0);
 }
 
+#flash_div, #flash_div_2, #icon_flash_div{
+	pointer-events: none;
+}
+
 #mapscroll {
     width: 75%;
     height: 100%;

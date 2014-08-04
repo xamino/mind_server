@@ -15,7 +15,7 @@
     <script src="javascript/run.js"></script>
     <script src="javascript/pd/displayMap.js"></script>
     <script src="javascript/pd/pd_general.js"></script>
-    <script src="javascript/pd/streaming.js"></script>
+    <!-- <script src="javascript/pd/streaming.js"></script>-->
     <script src="javascript/pd/polling.js"></script>
     <script src="javascript/jquery.balloon.js"></script>
     <script type="text/javascript">

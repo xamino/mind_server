@@ -328,6 +328,7 @@ function placeUserIcon(user) {
         //colored status div
         var statusDiv = document.createElement("div"); 
         statusDiv.id = "status_"+user.email;
+        statusDiv.style.pointerEvents = "none";
         document.getElementById("mapscroll").appendChild(statusDiv);
         
         //flash div if new user shows up
