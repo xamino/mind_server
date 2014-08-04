@@ -50,10 +50,10 @@ function loadPolls(callback){
 				polls += "<table><tr><td><img style='width:144px;' src="+data.object[i].icon+"></td>";	//changed from 72 to 144px
 				//cut if too long
 				if(data.object[i].question.length <= 50){
-					polls += "<td><p style='font-size:44px; font-weight:bold; margin:0px; margin-bottom:10px; width:250px; overflow-x:hidden;'>"+data.object[i].question+"</p>";
+					polls += "<td><p style='font-size:40px; font-weight:bold; margin:0px; margin-bottom:10px; width:250px; overflow-x:hidden;'>"+data.object[i].question+"</p>";
 				}else{
 					var questionPart = data.object[i].question.substr(0, 40);
-					polls += "<td><p style='font-size:44px; font-weight:bold; marginBottom:10px; width:320px; overflow-x:hidden;'>"+questionPart+" ...</p>";
+					polls += "<td><p style='font-size:40px; font-weight:bold; marginBottom:10px; width:320px; overflow-x:hidden;'>"+questionPart+" ...</p>";
 				}
 				var today = new Date();
 				var currDay = today.getDate();
@@ -63,25 +63,25 @@ function loadPolls(callback){
 				if(pollDay == currDay){
 					//state is closed
 					if(data.object[i].state == 'CLOSED'){
-						polls += "<span style='font-size:30px; font-weight:bold;'>Closed</span><br></td><tr></table>";
+						polls += "<span style='font-size:24px; font-weight:bold;'>Closed</span><br></td><tr></table>";
 					}
 					//state is ongoing
 					else{
-						polls += "<span style='font-size:30px; font-weight:bold;'>End: Today - "+pollTime+"</span><br></td><tr></table>"; // polls += " End: "+data.object[i].end+"<br>";
+						polls += "<span style='font-size:24px; font-weight:bold;'>End: Today - "+pollTime+"</span><br></td><tr></table>"; // polls += " End: "+data.object[i].end+"<br>";
 					}
 				// day is tomorrow
 				}else{
-					polls += "<span style='font-size:30px; font-weight:bold;'>End: Tomorrow - "+pollTime+"</span><br></td><tr></table>";
+					polls += "<span style='font-size:24px; font-weight:bold;'>End: Tomorrow - "+pollTime+"</span><br></td><tr></table>";
 				}
 				if(data.object[i].options.length == 0){
 					//alert("error");
 				}else{
 					//all options (per poll)
 					for(var j = 0; j < data.object[i].options.length; j++){
-						polls += "<span style='font-size:30px; font-weight:bold;'>"+data.object[i].options[j].optionValue+":  </span>";
+						polls += "<span style='font-size:24px; font-weight:bold;'>"+data.object[i].options[j].optionValue+":  </span>";
 						//alert(data.object[i].options[j].users.length);
 						if(data.object[i].options[j].users.length == 0){
-							polls += "<span style='font-size:20px; font-weight:bold;'>No participants right now.</span>";
+							polls += "<span style='font-size:16px; font-weight:bold;'>No participants right now.</span>";
 						}else{
 							polls += "<br>";
 							//all users (per option per poll)
