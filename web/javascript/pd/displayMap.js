@@ -192,7 +192,8 @@ function mapResize() {
         for (var email in users) {
             users[email].x = Math.round(+changeFactor * +users[email].x);
             users[email].y = Math.round(+changeFactor * +users[email].y);
-            loadPolls(placeUserIcon, users[email]);
+            //loadPolls(placeUserIcon, users[email]);
+            placeUserIcon(users[email]);
             
         }
     }
@@ -568,8 +569,13 @@ function setUserIconCoordsByArea() {
  */
 function updateUserIconPlacement() {
     for (var email in users) {
-    	loadPolls(placeUserIcon, users[email]);
+    	//loadPolls(placeUserIcon, users[email]);
+    	placeUserIcon(users[email]);
     }
+}
+
+function updatePolls(){
+	loadPolls(updateUserIconPlacement);
 }
 
 /**
@@ -633,7 +639,8 @@ function updateUserListOnReceive(data) {
     //set individual user icon coordinates considering area
     setUserIconCoordsByArea();
     //display all currently tracked users
-    updateUserIconPlacement();
+//    updateUserIconPlacement();
+    updatePolls();
 
 
 //	var element = document.getElementById("mapscroll");
@@ -1704,40 +1711,103 @@ function changeRefreshRate(value) {
     
 }
 
-var temporalPollCounter = new Array();
-var previousPollCounter = new Array();
-var newPollIcons = new Array();
+//var temporalPollCounter = new Array();
+//var previousPollCounter = new Array();
+//var newPollIcons = new Array();
+
+//function flashPolls(){
+//	doTask("read_all_polls", null, function (data){
+//		
+//		for (var i = 0; i < data.object.length; i++) {
+//			//add all curentpolls
+//			if(temporalPollCounter[data.object[i].icon] == null){
+//				temporalPollCounter[data.object[i].icon] = 1;
+//			}else{
+//				temporalPollCounter[data.object[i].icon] = (+temporalPollCounter[data.object[i].icon])+(+1);
+//			}			
+//		}
+//		
+//		//for each previous poll
+//		for (var icon in previousPollCounter) {
+//			if(temporalPollCounter[icon]==null){ //if poll no longer available (poll removed)
+//				previousPollCounter[icon] = 0;
+//			}else{ //previous poll counter of poll with icon 'icon' is updated
+//				//if more icons of one type with icon 'icon' than before
+//				if((+temporalPollCounter[icon])-(+previousPollCounter[icon]) > 0){
+//					newPollIcons.push(icon);
+//				}
+//				previousPollCounter[icon] = temporalPollCounter[icon];
+//				delete temporalPollCounter[icon];
+//			}
+//		}
+//		//for each remaining new poll
+//		for (var icon in temporalPollCounter){
+//			newPollIcons.push(icon);
+//			previousPollCounter[icon] = temporalPollCounter[icon];
+//		}
+//		
+//		//TODO flash
+//		var flasher2 = document.getElementById("flash_div_2");
+//		var rgbColor = "";
+//		
+//		var icon_flash_div = document.getElementById('icon_flash_div');
+//		/*icon_flash_div.style.display = "block";
+//		icon_flash_div.style.margin = "auto";*/
+//		icon_flash_div.style.position = "absolute";
+//		icon_flash_div.style.top = "365px";
+//		
+//		
+//		var temp_icon_flash_img;
+//		for(var i = 0; i < newPollIcons.length; i++){
+//			temp_icon_flash_img = document.createElement('img');
+//			temp_icon_flash_img.src = newPollIcons[i];
+//			temp_icon_flash_img.style.width = "350px";
+//			temp_icon_flash_img.style.height = "350px";
+//			temp_icon_flash_img.style.margin = "20px";
+//			icon_flash_div.appendChild(temp_icon_flash_img);
+//		}
+//		
+//		var width_div = icon_flash_div.offsetWidth;
+//		icon_flash_div.style.left = ((+1920/+2) - (+width_div/+2))+"px";
+//		
+////		flasher2.appendChild(icon_flash_div);
+//		
+//		if(newPollIcons.length == 0){
+//			return;
+//		}
+//		else if(newPollIcons.length > 1){	//'rgba(247, 207, 18, 0.8)';
+//			rgbColor = "rgba(255, 255, 0, ";
+//		}else if(newPollIcons.length == 1){
+//			if(endsWith(newPollIcons[0], 'default.png')){
+//				rgbColor = "rgba(255, 255, 0, ";
+//			}else if(endsWith(newPollIcons[0], 'kicker.png')){
+//				rgbColor = "rgba(0, 255, 0, ";
+//			}else if(endsWith(newPollIcons[0], 'meeting.png')){
+//				rgbColor = "rgba(30, 35, 255, ";
+//			}else if(endsWith(newPollIcons[0], 'lunch.png')){
+//				rgbColor = "rgba(255, 0, 0, ";
+//			}
+//		}
+//		flasher2.style.backgroundColor = rgbColor+"0.8)";
+//		setTimeout(function () {
+//        	flasher2.style.backgroundColor = rgbColor+"0.5)";
+//        	setTimeout(function () {
+//            	flasher2.style.backgroundColor = rgbColor+"0.3)";
+//            	setTimeout(function () {
+//                	flasher2.style.backgroundColor = rgbColor+"0.0)";
+//                	icon_flash_div.innerHTML ="";
+//                }, 500);
+//            }, 500);
+//        }, 1500);
+//		
+//		
+//		newPollIcons = [];
+//	});
+//}
+
 
 function flashPolls(){
-	doTask("read_all_polls", null, function (data){
-		
-		for (var i = 0; i < data.object.length; i++) {
-			//add all curentpolls
-			if(temporalPollCounter[data.object[i].icon] == null){
-				temporalPollCounter[data.object[i].icon] = 1;
-			}else{
-				temporalPollCounter[data.object[i].icon] = (+temporalPollCounter[data.object[i].icon])+(+1);
-			}			
-		}
-		
-		//for each previous poll
-		for (var icon in previousPollCounter) {
-			if(temporalPollCounter[icon]==null){ //if poll no longer available (poll removed)
-				previousPollCounter[icon] = 0;
-			}else{ //previous poll counter of poll with icon 'icon' is updated
-				//if more icons of one type with icon 'icon' than before
-				if((+temporalPollCounter[icon])-(+previousPollCounter[icon]) > 0){
-					newPollIcons.push(icon);
-				}
-				previousPollCounter[icon] = temporalPollCounter[icon];
-				delete temporalPollCounter[icon];
-			}
-		}
-		//for each remaining new poll
-		for (var icon in temporalPollCounter){
-			newPollIcons.push(icon);
-			previousPollCounter[icon] = temporalPollCounter[icon];
-		}
+
 		
 		//TODO flash
 		var flasher2 = document.getElementById("flash_div_2");
@@ -1771,14 +1841,14 @@ function flashPolls(){
 		else if(newPollIcons.length > 1){	//'rgba(247, 207, 18, 0.8)';
 			rgbColor = "rgba(255, 255, 0, ";
 		}else if(newPollIcons.length == 1){
-			if(endsWith(newPollIcons[0], 'default.png')){
-				rgbColor = "rgba(255, 255, 0, ";
-			}else if(endsWith(newPollIcons[0], 'kicker.png')){
+			if(endsWith(newPollIcons[0], 'kicker.png')){
 				rgbColor = "rgba(0, 255, 0, ";
 			}else if(endsWith(newPollIcons[0], 'meeting.png')){
 				rgbColor = "rgba(30, 35, 255, ";
 			}else if(endsWith(newPollIcons[0], 'lunch.png')){
 				rgbColor = "rgba(255, 0, 0, ";
+			}else{ //default icon or other
+				rgbColor = "rgba(255, 255, 0, ";
 			}
 		}
 		flasher2.style.backgroundColor = rgbColor+"0.8)";
@@ -1795,5 +1865,4 @@ function flashPolls(){
 		
 		
 		newPollIcons = [];
-	});
 }
