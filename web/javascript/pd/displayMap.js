@@ -426,6 +426,7 @@ function placeUserIcon(user) {
     		pollIconElement.parentNode.removeChild(pollIconElement);	//remove poll icon (like user)
     	}
     }
+    icon.style.display = "block";
 }
 
 /**
