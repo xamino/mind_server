@@ -268,8 +268,8 @@ function brightUp(){
 }
 
 var brightnessTimeout;
-//var time = 1000 * 60 * 15;
-var time = 1000 * 5;
+var time = 1000 * 60 * 15;
+//var time = 1000 * 5;
 $(document).on('mouseup', 'body', function(){if(autoBrightVar == 'on'){
 	brightnessTimeout = setTimeout(function(){autoBrightness(lastBrightnessVar);},
 		time);}
