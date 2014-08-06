@@ -741,6 +741,7 @@ var refreshCounter = 0;
 function updatePdData() {
 //	flashPolls();
 
+	if(streamingPopup!=null && !streamingPopup.closed){return;}
 	checkAwayArea();	// check periodically on reload
 	getRemainingSpace();	//to find out size of remaining content (for polling) on reload
 	
@@ -1230,33 +1231,37 @@ function generateStreamData(){
 	areaToIP["331"] = "134.60.156.63";
 	areaToIP["333"] = "134.60.172.39";
 	
-	setMyIP();
+	//setMyIP();
+	send(new Arrival("get_ip"), myIPcallback);
 }
 
-function setMyIP() {
-    if (window.XMLHttpRequest) xmlhttp = new XMLHttpRequest();
-    else xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+//function setMyIP() {
+//    if (window.XMLHttpRequest) xmlhttp = new XMLHttpRequest();
+//    else xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+//
+//    xmlhttp.open("GET","http://api.hostip.info/get_html.php",false);
+//    xmlhttp.send();
+//
+//    hostipInfo = xmlhttp.responseText.split("\n");
+//
+//    for (var i=0; hostipInfo.length >= i; i++) {
+//    	if(hostipInfo[i]!=null){
+//    		ipAddress = hostipInfo[i].split(":");
+//    		if ( ipAddress[0] == "IP" ){
+//    			localIP = $.trim(ipAddress[1]+"");
+//    			myIPcallback();
+//    			return;
+//    		}    		
+//    	}
+//    }
+//    localIP = '';
+//}
 
-    xmlhttp.open("GET","http://api.hostip.info/get_html.php",false);
-    xmlhttp.send();
-
-    hostipInfo = xmlhttp.responseText.split("\n");
-
-    for (var i=0; hostipInfo.length >= i; i++) {
-    	if(hostipInfo[i]!=null){
-    		ipAddress = hostipInfo[i].split(":");
-    		if ( ipAddress[0] == "IP" ){
-    			localIP = $.trim(ipAddress[1]+"");
-    			myIPcallback();
-    			return;
-    		}    		
-    	}
-    }
-    localIP = '';
-}
-
-function myIPcallback(){
-	alert("callback '"+localIP+"' - area is "+getRoomByIP(localIP));
+function myIPcallback(data){
+	
+	localIP = data.object.ipAddress;
+	//alert(JSON.stringify(data.object)+"");
+	alert("callback '"+localIP+"' -> area is "+getRoomByIP(localIP));
 	
 	//if pd participates in streaming -> open socket for server push purposes
 	if(getRoomByIP(localIP)!=null){
@@ -1368,11 +1373,17 @@ function receiveCall(caller_IP){
 	'scrollbars=1,resizable=0,width=840,height=620, top=0,left=0');
 	if(streamingPopup==null){return;}
 	streamingPopup.document.write('<center><h1 id="headLine">Looking into room '+callerRoom+'</h1><center>');
-	streamingPopup.document.write('<iframe id="remoteCamView" height="350" allowTransparency="true" frameborder="0" '+
-		 'scrolling="yes" style="width:100%;" src="'+callerURL+'" type= "text/javascript"></iframe>');
-	streamingPopup.document.write('<iframe id="myCamControl" height="150" allowTransparency="true" frameborder="0" '+
-		 'scrolling="yes" style="width:100%;" src="'+localURL+'" type= "text/javascript"></iframe>');
+	streamingPopup.document.write('<iframe id="remoteCamView" height="720" allowTransparency="true" frameborder="0" '+
+		 'scrolling="no" style="width:100%;" src="'+callerURL+'" type= "text/javascript"></iframe>');
+	streamingPopup.document.write('<iframe id="myCamControl" height="80" allowTransparency="true" frameborder="0" '+
+		 'scrolling="no" style="width:100%;" src="'+localURL+'" type= "text/javascript"></iframe>');
 
+	var buttonDiv = document.createElement('div');
+	buttonDiv.setAttribute('id','buttonDiv');
+	buttonDiv.style.width = "100%";
+	buttonDiv.style.display = "block";
+	buttonDiv.style.textAlign = "center";
+	
 	//cancel button
 	var cancelButton = document.createElement('input');
 	cancelButton.setAttribute('id','cancelButton');
@@ -1382,7 +1393,6 @@ function receiveCall(caller_IP){
 	cancelButton.onclick = function () {
 		invokeCloseStreamingPopup();
 	};
-	streamingPopup.document.body.appendChild(cancelButton);
 	
 	//accept button
 	var acceptButton = document.createElement('input');
@@ -1393,7 +1403,10 @@ function receiveCall(caller_IP){
 	acceptButton.onclick = function () {
 		acceptCall();
 	};
-	streamingPopup.document.body.appendChild(acceptButton);
+	
+	streamingPopup.document.body.appendChild(buttonDiv);
+	buttonDiv.appendChild(cancelButton);
+	buttonDiv.appendChild(acceptButton);
 	
 	//make me "visible" for the callee
 //	sendLocalCommand("streamBlurry");
@@ -1437,12 +1450,18 @@ function callRoom(){
 			'scrollbars=1,resizable=0,width=840,height=620, top=0,left=0');
 	//remote view
 	streamingPopup.document.write('<center><h1 id="headLine">Looking into room '+roomToCall+'</h1><center>');
-	streamingPopup.document.write('<iframe id="remoteCamView" height="600" allowTransparency="true" frameborder="0" '+
-			 'scrolling="yes" style="width:100%;" src="'+calleeURL+'" type= "text/javascript"></iframe>');
+	streamingPopup.document.write('<iframe id="remoteCamView" height="720" allowTransparency="true" frameborder="0" '+
+			 'scrolling="no" style="width:100%;" src="'+calleeURL+'" type= "text/javascript"></iframe>');
 	//local control
-	streamingPopup.document.write('<p>local cam control:</p>');
-	streamingPopup.document.write('<iframe id="myCamControl" height="100" allowTransparency="true" frameborder="0" '+
-			 'scrolling="yes" style="width:100%;" src="'+localURL+'" type= "text/javascript"></iframe>');	
+	//streamingPopup.document.write('<p>local cam control:</p>');
+	streamingPopup.document.write('<iframe id="myCamControl" height="80" allowTransparency="true" frameborder="0" '+
+			 'scrolling="no" style="width:100%;" src="'+localURL+'" type= "text/javascript"></iframe>');	
+	
+	var buttonDiv = document.createElement('div');
+	buttonDiv.setAttribute('id','buttonDiv');
+	buttonDiv.style.width = "100%";
+	buttonDiv.style.display = "block";
+	buttonDiv.style.textAlign = "center";
 	
 	//add close button - closes the popup and stops the camera
 	var cancelButton = document.createElement('input');
@@ -1453,7 +1472,8 @@ function callRoom(){
 	cancelButton.onclick = function () {
 		invokeCloseStreamingPopup();
 	};
-	streamingPopup.document.body.appendChild(cancelButton);
+	streamingPopup.document.body.appendChild(buttonDiv);
+	buttonDiv.appendChild(cancelButton);
 
 	//start streaming once local cam control is loaded
 	streamingPopup.document.getElementById("myCamControl").onload = function() {

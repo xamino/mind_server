@@ -14,7 +14,7 @@ public class GetIp extends Task<Arrival, Sendable> {
 
     @Override
     public boolean validateInput(Arrival object) {
-        return safeString(object.getSessionHash());
+        return true;
     }
 
     @Override
