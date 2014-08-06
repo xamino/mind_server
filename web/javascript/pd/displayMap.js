@@ -1472,9 +1472,11 @@ var callAccepted = false;
  */
 function acceptCall(){
 	if(!callAccepted){
-		callAccepted = true;
-		//make me visible for the callee
-		sendLocalCommand("streamClearly");		
+		if(streamingPopup.document.getElementById("acceptButton")){			
+			callAccepted = true;
+			//make me visible for the callee
+			sendLocalCommand("streamClearly");		
+		}
 	}
 }
 

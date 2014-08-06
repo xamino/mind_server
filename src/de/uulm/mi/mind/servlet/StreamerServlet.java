@@ -51,9 +51,13 @@ public class StreamerServlet {
 		log.log(TAG, "onMessage from IP '"+ip+"' with message '"+msg+"'");
 		
 		try {
-
+			if(msg.equals("accept")){
+				if(sessionMap.get(ip)!=null){
+					sessionMap.get(ip).getBasicRemote().sendText("accept");
+				}
+			}
 			//ip is ip that canceled; msg: "cancel:'ipToNotifyAboutCancel"
-			if(msg.startsWith("cancel:")){
+			else if(msg.startsWith("cancel:")){
 				String ipToNotifyAboutCancel = msg.substring(7);
 				log.log(TAG, "try to send cancel message to '"+ipToNotifyAboutCancel+"' from ip '"+ip+"'");
 				if(sessionMap.get(ipToNotifyAboutCancel)!=null){
