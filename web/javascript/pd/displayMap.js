@@ -9,7 +9,6 @@ var iconByMapWidthFactor = 0.08; //the factor by which the icon size is set -> d
 
 var defaultIconSize = 110; //if something goes wrong when setting the icon size - defaultIconSize will be applied
 var factor = 1; //the size-factor by which the displayed image deviates from the original image
-//TODO read from server
 var refreshRate = 15; //the refresh rate for locating - in seconds
 var interval; //the interval of location refreshing
 var balloonClosingTime = 7;
@@ -86,8 +85,8 @@ function initPublicDisplayStuff() {
             initInterval();
             
             //determines if this room participates in streaming and (if so) generates streaming data (rooms with pi cams # IPs)
-            //TODO JPEG
-            //generateStreamData();
+
+            generateStreamData();
         });
     });
 }
@@ -1147,13 +1146,13 @@ function balloonIsOpen() {
  */
 $(document).on("mousedown", "#mapscroll", function (event) {
 
-	//if this display participates in streaming and not clicked on call button
-//	if(participateInStreaming){ TODO JPEG
-//		if($(event.target).attr('id')!='callButton'){
-//			//check if relevant area (with pi-cam) was clicked
-//			checkForAreaClick(event);
-//		}		
-//	} TODO JPEG
+//	if this display participates in streaming and not clicked on call button
+	if(participateInStreaming){
+		if($(event.target).attr('id')!='callButton'){
+			//check if relevant area (with pi-cam) was clicked
+			checkForAreaClick(event);
+		}		
+	}
 
     
 	if (!$(event.target).hasClass('micon')) { //if !(click on icon)
@@ -1166,123 +1165,118 @@ $(document).on("mousedown", "#mapscroll", function (event) {
 });
 
 
-//TODO JPEG
-//
+
+
 /////////////////////////////////////// JPEG STREAMER /////////////////////////////////////
-//
-//	
-///**
-// * checks if relevant area (with pi-cam) was clicked
-// */
-//function checkForAreaClick(event){
-//
-////	var output = "";
-//	var id;
-//	for ( var i = 0; i < camAreas.length; i++) {
-//		id = camAreas[i];
-//		//check on x axis
-//		if( (+event.clientX) > (+areas[id].topLeftX)*factor && (+event.clientX) < +((+areas[id].topLeftX)+(+areas[id].width))*factor ){
-//			//check on y axis
-//			if( (+event.clientY) > (+areas[id].topLeftY)*factor && (+event.clientY) < +((+areas[id].topLeftY)+(+areas[id].height))*factor ){
-////				alert(+event.clientX +","+ +event.clientY +"::"+ 
-////						+(+areas[id].topLeftX)*factor +","+ ((+areas[id].topLeftX)+(+areas[id].width))*factor +
-////						"||"+ (+areas[id].topLeftY)*factor +","+ ((+areas[id].topLeftY)+(+areas[id].width))*factor +" ->clicked on area "+id);
-//				
-//				setupButton(id);
-//				
-//				return;
-//			}
-//		}
-//	}
-//	
-//	hideButton();
-//}
-//
-//
-//var roomToCall = "none";
-//
-//function setupButton(room){
-//
-//	
-//	roomToCall = room+"";
-//	var btn = document.getElementById("callButton");
-//	btn.value = "Call Room "+room;
-//	btn.style.visibility = "visible";
-//}
-//
-//function hideButton(){
-//	var btn = document.getElementById("callButton");
-//	btn.style.visibility = "hidden";
-//	roomToCall = "none";
-//}
-//
-//
-//var streamingPopup;
-//var localIP = "";
-//var localURL = "";
-//var participateInStreaming = false;
-//
-///**
-// * areas in which a camera is availabe
-// */
+
+	
+/**
+ * checks if relevant area (with pi-cam) was clicked
+ */
+function checkForAreaClick(event){
+
+	for(var id in areaToIP) {
+		//check on x axis
+		if( (+event.clientX) > (+areas[id].topLeftX)*factor && (+event.clientX) < +((+areas[id].topLeftX)+(+areas[id].width))*factor ){
+			//check on y axis
+			if( (+event.clientY) > (+areas[id].topLeftY)*factor && (+event.clientY) < +((+areas[id].topLeftY)+(+areas[id].height))*factor ){
+				//if my room not the room that was clicked on
+				if(localIP+""!=areaToIP[id]+""){
+					setupButton(id);
+					return;
+				}				
+			}
+		}
+	}
+	
+	hideButton();
+}
+
+
+var roomToCall = "none";
+
+function setupButton(room){
+
+	roomToCall = room+"";
+	var btn = document.getElementById("callButton");
+	btn.value = "Call Room "+room;
+	btn.style.visibility = "visible";
+}
+
+function hideButton(){
+	var btn = document.getElementById("callButton");
+	btn.style.visibility = "hidden";
+	roomToCall = "none";
+}
+
+
+var streamingPopup;
+var localIP = "";
+var localURL = "";
+var participateInStreaming = false;
+
+/**
+ * areas in which a camera is availabe
+ */
 //var camAreas;
-//var areaToIP;
-//
-//function generateStreamData(){
-//	camAreas = new Array(332,337,331,333);
-//	areaToIP = new Array();
-//	//TODO
-//	areaToIP["332"] = "134.60.128.44";
-//	areaToIP["337"] = "134.60.128.47";
-//	areaToIP["331"] = "134.60.156.63";
-//	areaToIP["333"] = "134.60.172.39";
-//	
-//	setMyIP();
-//}
-//
-//function setMyIP() {
-//    if (window.XMLHttpRequest) xmlhttp = new XMLHttpRequest();
-//    else xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-//
-//    xmlhttp.open("GET","http://api.hostip.info/get_html.php",false);
-//    xmlhttp.send();
-//
-//    hostipInfo = xmlhttp.responseText.split("\n");
-//
-//    for (var i=0; hostipInfo.length >= i; i++) {
-//    	if(hostipInfo[i]!=null){
-//    		ipAddress = hostipInfo[i].split(":");
-//    		if ( ipAddress[0] == "IP" ){
-//    			localIP = $.trim(ipAddress[1]+"");
-//    			myIPcallback();
-//    			return;
-//    		}    		
-//    	}
-//    }
-//    localIP = '';
-//}
-//
-//function myIPcallback(){
-//	alert("callback '"+localIP+"' - area is "+getRoomByIP(localIP));
-//	
-//	//if pd participates in streaming -> open socket for server push purposes
-//	if(getRoomByIP(localIP)!=null){
-//		participateInStreaming = true;
-//		localURL  = 'http://'+localIP+':80';
-////		alert("participating in stream with localURL: "+localURL);
-////		postToServer("test");
-//		ws = new WebSocket("ws://134.60.156.63:8080/streamerServlet/"+localIP);
-//		ws.onopen = function(){
-//		};
-//		
-//		ws.onmessage = function(message){
-////			alert("message received: '"+message.data+"'");
-//			if(getRoomByIP(message.data+"")!=null){
-//				receiveCall(message.data+"");
-//			}
-//			//if other participant cancelded (format: "canceled:+'ip'"
-//			else if(message.data.substring(0,9)=="canceled:"){
-//				var canceledParticipantIP = message.data.substring(9);
+var areaToIP;
+
+function generateStreamData(){
+	//camAreas = new Array(332,337,331,333);
+	areaToIP = new Array();
+	//TODO
+	areaToIP["332"] = "134.60.128.44";
+	areaToIP["337"] = "134.60.128.47";
+	areaToIP["331"] = "134.60.156.63";
+	areaToIP["333"] = "134.60.172.39";
+	
+	setMyIP();
+}
+
+function setMyIP() {
+    if (window.XMLHttpRequest) xmlhttp = new XMLHttpRequest();
+    else xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+
+    xmlhttp.open("GET","http://api.hostip.info/get_html.php",false);
+    xmlhttp.send();
+
+    hostipInfo = xmlhttp.responseText.split("\n");
+
+    for (var i=0; hostipInfo.length >= i; i++) {
+    	if(hostipInfo[i]!=null){
+    		ipAddress = hostipInfo[i].split(":");
+    		if ( ipAddress[0] == "IP" ){
+    			localIP = $.trim(ipAddress[1]+"");
+    			myIPcallback();
+    			return;
+    		}    		
+    	}
+    }
+    localIP = '';
+}
+
+function myIPcallback(){
+	alert("callback '"+localIP+"' - area is "+getRoomByIP(localIP));
+	
+	//if pd participates in streaming -> open socket for server push purposes
+	if(getRoomByIP(localIP)!=null){
+		participateInStreaming = true;
+		localURL  = 'http://'+localIP+':80';
+//		alert("participating in stream with localURL: "+localURL);
+//		postToServer("test");
+		ws = new WebSocket("ws://134.60.156.63:8080/streamerServlet/"+localIP);
+		ws.onopen = function(){
+		};
+		
+		ws.onmessage = function(message){
+//			alert("message received: '"+message.data+"'");
+			if(getRoomByIP(message.data+"")!=null){
+				receiveCall(message.data+"");
+			}
+			//if other participant cancelded (format: "canceled:+'ip'"
+			else if(message.data.substring(0,9)=="canceled:"){
+				var canceledParticipantIP = message.data.substring(9);
+				//for closing popup only when callee not accepted
 //				//alert("cancel message received: "+message.data);
 //				if(!callAccepted){
 ////					alert("call not yet accepted");
@@ -1296,282 +1290,336 @@ $(document).on("mousedown", "#mapscroll", function (event) {
 //				else if(callerIP == canceledParticipantIP){
 //					displayCanceled();
 //				}
-//			}
-//		}; 
-//	}
-//}
-//
-////WEB SOCKET
-//var ws;
-//
-//function postToServer(txt){
-////	alert("post to server: "+txt);
-//	ws.send(txt);
-////	document.getElementById("msg").value = "";
-//}
-//function closeConnect(){
-//	ws.close();
-//}
-//
-////END WEB SOCKET
-//
-//
-//function getRoomByIP(ip){
-//	for(var area in areaToIP) {
-//		if(areaToIP[area]+""==ip+""){
-//			return area;
-//		}
-//	}
-//	return null;
-//}
-//
-//function displayCanceled(){
-//	if(streamingPopup!=null && streamingPopup.document.getElementById("headLine")!=null){
-//		streamingPopup.document.getElementById("headLine").innerHTML = streamingPopup.document.getElementById("headLine").innerHTML+" - ROOM CANCELED";
-//	}	;
-//}
-//
-//var callerIP = null;
-//
-//function receiveCall(caller_IP){
-//	callerIP = $.trim(caller_IP);
-//	var callerRoom = getRoomByIP(callerIP);
-//	if(callerRoom==null){return;}
-//	if(localIP==null||localIP==""){return;}
-//	
-//	var callerURL = 'http://'+callerIP+':80/watcher.html';
-////	localURL  = 'http://'+localIP+':80';
-////	var localURL  = 'http://134.60.128.44';
-//	
-//	streamingPopup = window.open('','','toolbar=0,location=0,directories=0,menubar=0,'+
-//	'scrollbars=1,resizable=0,width=840,height=620, top=0,left=0');
-//	if(streamingPopup==null){return;}
-//	streamingPopup.document.write('<center><h1 id="headLine">Looking into room '+callerRoom+'</h1><center>');
-//	streamingPopup.document.write('<iframe id="remoteCamView" height="350" allowTransparency="true" frameborder="0" '+
-//		 'scrolling="yes" style="width:100%;" src="'+callerURL+'" type= "text/javascript"></iframe>');
-//	streamingPopup.document.write('<iframe id="myCamControl" height="150" allowTransparency="true" frameborder="0" '+
-//		 'scrolling="yes" style="width:100%;" src="'+localURL+'" type= "text/javascript"></iframe>');
-//
-//	//cancel button
-//	var cancelButton = document.createElement('input');
-//	cancelButton.setAttribute('type','button');
-//	cancelButton.setAttribute('name','CANCEL');
-//	cancelButton.setAttribute('value','CANCEL');
-//	cancelButton.onclick = function () {
-//		closeStreamingPopup();
-//	};
-//	streamingPopup.document.body.appendChild(cancelButton);
-//	
-//	//accept button
-//	var acceptButton = document.createElement('input');
-//	acceptButton.setAttribute('type','button');
-//	acceptButton.setAttribute('name','ACCEPT');
-//	acceptButton.setAttribute('value','ACCEPT');
-//	acceptButton.onclick = function () {
-//		acceptCall();
-//	};
-//	streamingPopup.document.body.appendChild(acceptButton);
-//	
-//	//make me "visible" for the callee
-////	sendLocalCommand("streamBlurry");
-//	streamingPopup.document.getElementById("myCamControl").onload = function() {
-//		streamMeBlurry();
-//	};
-//}
-//
-//var ipToCall = null;
-//
-//function callRoom(){
-//
-//	//TODO check if no call currently receiving
-//	
-//	ipToCall = areaToIP[roomToCall+""];
-//
-//	if(roomToCall=="none" || ipToCall == null || ipToCall == ""){
-//		alert("Choose a valid room");
-//		return;
-//	}
-//	if(localIP==null){return;}
-//
-//	//call accepted always true as caller
-//	callAccepted = true;
-//	
-//	//notify callee about call
-//	postToServer(ipToCall);
-//	
-//	var calleeURL = "http://"+ipToCall+":80/watcher.html";
-//
-//	streamingPopup = window.open('','','toolbar=0,location=0,directories=0,menubar=0,'+
-//			'scrollbars=1,resizable=0,width=840,height=620, top=0,left=0');
-//	//remote view
-//	streamingPopup.document.write('<center><h1 id="headLine">Looking into room '+roomToCall+'</h1><center>');
-//	streamingPopup.document.write('<iframe id="remoteCamView" height="350" allowTransparency="true" frameborder="0" '+
-//			 'scrolling="yes" style="width:100%;" src="'+calleeURL+'" type= "text/javascript"></iframe>');
-//	//local control
-//	streamingPopup.document.write('<p>local cam control:</p>');
-//	streamingPopup.document.write('<iframe id="myCamControl" height="100" allowTransparency="true" frameborder="0" '+
-//			 'scrolling="yes" style="width:100%;" src="'+localURL+'" type= "text/javascript"></iframe>');	
-//	
-//	//add close button - closes the popup and stops the camera
-//	var cancelButton = document.createElement('input');
-//	cancelButton.setAttribute('type','button');
-//	cancelButton.setAttribute('name','CANCEL');
-//	cancelButton.setAttribute('value','CANCEL');
-//	cancelButton.onclick = function () {
-//		closeStreamingPopup();
-//	};
-//	streamingPopup.document.body.appendChild(cancelButton);
-//
-//	//start streaming once local cam control is loaded
-//	streamingPopup.document.getElementById("myCamControl").onload = function() {
-//		streamMeClearly();
-//	};
-//
-//}
-//
-//
-//
-//
-//var callAccepted = false;
-///**
-// * accepting a call turns on my camera (if not yet running - however, it should be running already)
-// * and applies settings for a clear sight to my camera
-// */
-//function acceptCall(){
-//	callAccepted = true;
-//	//make me visible for the callee
-//	sendLocalCommand("streamClearly");
-//}
-//
-///**
-// * sets the camera to blurry, stops the camera
-// * and closes the popup
-// */
-//function closeStreamingPopup(){
-//	sendLocalCommand("cancelCall");
-////	if(callAccepted){
-//		if(callerIP!=null){
-//			postToServer("cancel:"+callerIP);	
-//		}else if(ipToCall!=null){
-//			postToServer("cancel:"+ipToCall);
-//		}			
-////	}
-//	setTimeout("closePopup()", 2500);
-//}
-//
-////closes the streaming popup and resets fields
-//function closePopup(){
-//	//reset fields
-//	callerIP = null;
-//	ipToCall = null;
-//	callAccepted = false;
-//	
-//	streamingPopup.close();
-//}
-//
-//
-//function streamMeClearly(){
-//	sendLocalCommand("streamClearly");
-//}
-//function streamMeBlurry(){
+//				alert("cancel received from "+canceledParticipantIP);
+
+				//close popup when other participant closes
+				if(canceledParticipantIP+""!=localIP){
+					startClosingPopup();
+				}				
+
+			}
+			//callee not available
+			else if(message.data.substring(0,3)=="NA:"){
+				var notReachableIP = message.data.substring(3);
+				if(getRoomByIP(notReachableIP)!=null){
+					alert("Room "+getRoomByIP(notReachableIP)+" not reachable");
+				}else{
+					alert("Callee not reachable");
+				}
+			}
+			//okay to call room (callee currently connected to socket)
+			else if(message.data+""=="okay"){
+				callRoom();
+			}
+			//accept call via smartphone shake
+			else if(message.data+""=="accept"){
+				acceptCall();
+			}
+		}; 
+	}
+}
+
+//WEB SOCKET
+var ws;
+
+function postToServer(txt){
+//	alert("post to server: "+txt);
+	ws.send(txt);
+//	document.getElementById("msg").value = "";
+}
+function closeConnect(){
+	ws.close();
+}
+
+//END WEB SOCKET
+
+
+function getRoomByIP(ip){
+	for(var area in areaToIP) {
+		if(areaToIP[area]+""==ip+""){
+			return area;
+		}
+	}
+	return null;
+}
+
+function displayCanceled(){
+	if(streamingPopup!=null && streamingPopup.document.getElementById("headLine")!=null){
+		streamingPopup.document.getElementById("headLine").innerHTML = streamingPopup.document.getElementById("headLine").innerHTML+" - ROOM CANCELED";
+	}
+}
+
+var callerIP = null;
+
+function receiveCall(caller_IP){
+	
+//	if(streamingPopup!=null || !(typeof variable_here === 'undefined')){return;}
+	
+	callerIP = $.trim(caller_IP);
+	var callerRoom = getRoomByIP(callerIP);
+	if(callerRoom==null){return;}
+	if(localIP==null||localIP==""){return;}
+	
+	var callerURL = 'http://'+callerIP+':80/watcher.html';
+//	localURL  = 'http://'+localIP+':80';
+//	var localURL  = 'http://134.60.128.44';
+	
+	streamingPopup = window.open('','','toolbar=0,location=0,directories=0,menubar=0,'+
+	'scrollbars=1,resizable=0,width=840,height=620, top=0,left=0');
+	if(streamingPopup==null){return;}
+	streamingPopup.document.write('<center><h1 id="headLine">Looking into room '+callerRoom+'</h1><center>');
+	streamingPopup.document.write('<iframe id="remoteCamView" height="350" allowTransparency="true" frameborder="0" '+
+		 'scrolling="yes" style="width:100%;" src="'+callerURL+'" type= "text/javascript"></iframe>');
+	streamingPopup.document.write('<iframe id="myCamControl" height="150" allowTransparency="true" frameborder="0" '+
+		 'scrolling="yes" style="width:100%;" src="'+localURL+'" type= "text/javascript"></iframe>');
+
+	//cancel button
+	var cancelButton = document.createElement('input');
+	cancelButton.setAttribute('id','cancelButton');
+	cancelButton.setAttribute('type','button');
+	cancelButton.setAttribute('name','CANCEL');
+	cancelButton.setAttribute('value','CANCEL');
+	cancelButton.onclick = function () {
+		invokeCloseStreamingPopup();
+	};
+	streamingPopup.document.body.appendChild(cancelButton);
+	
+	//accept button
+	var acceptButton = document.createElement('input');
+	acceptButton.setAttribute('id','acceptButton');
+	acceptButton.setAttribute('type','button');
+	acceptButton.setAttribute('name','ACCEPT');
+	acceptButton.setAttribute('value','ACCEPT');
+	acceptButton.onclick = function () {
+		acceptCall();
+	};
+	streamingPopup.document.body.appendChild(acceptButton);
+	
+	//make me "visible" for the callee
 //	sendLocalCommand("streamBlurry");
-//}
-///**
-// * API function for sending a command to the raspberry's cam web interface
-// * @param cmd
-// */
-//function sendLocalCommand(cmd){
-//	streamingPopup.document.getElementById("myCamControl").contentWindow.postMessage(cmd,localURL);
-//}
-//
-//function blurMe(){
-//	sendLocalCommand("px 0048 0027 25 25 0240 0135");
-//}
-//
-//function clearMe(){
-//	sendLocalCommand("px 1296 0730 25 25 2592 1944");
-//}
-//
-//
-///* XHR STUFF
-////Create the XHR object.
-//function createCORSPostRequest(url, params) {
-//  var xhr = new XMLHttpRequest();
-//  if ("withCredentials" in xhr) {
-//    // XHR for Chrome/Firefox/Opera/Safari.
-//    xhr.open('POST', url, true);
-//    xhr.onreadystatechange = function() {if (xhr.readyState==4) alert("It worked!");};
-////    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-////    xhr.setRequestHeader("Content-length", params.length);
-////    xhr.setRequestHeader("Connection", "close");
-//    xhr.send(params);
-//    
-//  } else if (typeof XDomainRequest != "undefined") {
-//    // XDomainRequest for IE.
-//    xhr = new XDomainRequest();
-//    xhr.open(method, url);
-//  } else {
-//    // CORS not supported.
-//    xhr = null;
-//  }
-//  return xhr;
-//}
-//
-//
-////Create the XHR object.
-//function createCORSGetRequest(url) {
-//  var xhr = new XMLHttpRequest();
-//  if ("withCredentials" in xhr) {
-//    // XHR for Chrome/Firefox/Opera/Safari.
-//    xhr.open(method, url, true);
-//  } else if (typeof XDomainRequest != "undefined") {
-//    // XDomainRequest for IE.
-//    xhr = new XDomainRequest();
-//    xhr.open('GET', url);
-//  } else {
-//    // CORS not supported.
-//    xhr = null;
-//  }
-//  return xhr;
-//}
-//
-//// Helper method to parse the title tag from the response.
-//function getTitle(text) {
-//  return text.match('<title>(.*)?</title>')[1];
-//}
-//
-//// Make the actual CORS request.
-//function makeCorsRequest(method, url) {
-//  // All HTML5 Rocks properties support CORS.
-////  var url = 'http://updates.html5rocks.com';
-//
-//  var xhr = createCORSRequest(method, url);
-//  
-////  xhr.setRequestHeader('Pi_Cam_Control', 'stop');
-////  xhr.withCredentials = true;
-//  if (!xhr) {
-//    alert('CORS not supported');
-//    return;
-//  }
-//
-//  // Response handlers.
-//  xhr.onload = function() {
-//	  var text = xhr.responseText;
-//	  var title = getTitle(text);
-//	  alert('Response from CORS request to ' + url + ': ' + title);
-//  };
-//
-//  xhr.onerror = function() {
-//	  alert('Woops, there was an error making the request.');
-//  };
-//
-//  xhr.send();
-//}
-//*/
-//
+	streamingPopup.document.getElementById("myCamControl").onload = function() {
+		streamMeBlurry();
+	};
+}
+
+var ipToCall = null;
+
+/**
+ * checks if room to call exists and i have an IP
+ * and sends a message to the serversocket to check upon the callee ip
+ * and ultimately open both popups
+ */
+function invokeCallingRoom(){
+
+//	if(streamingPopup!=null){return;}
+	
+	ipToCall = areaToIP[roomToCall+""];
+
+	if(roomToCall=="none" || ipToCall == null || ipToCall == ""){
+		alert("Choose a valid room");
+		return;
+	}
+	if(localIP==null){alert("You don't have a valid IP - try refreshing the page"); return;}
+
+	//notify callee about call and wait for callback
+	postToServer(ipToCall);
+
+}
+
+function callRoom(){
+	
+	//call accepted always true as caller
+	callAccepted = true;
+
+	var calleeURL = "http://"+ipToCall+":80/watcher.html";
+
+	streamingPopup = window.open('','','toolbar=0,location=0,directories=0,menubar=0,'+
+			'scrollbars=1,resizable=0,width=840,height=620, top=0,left=0');
+	//remote view
+	streamingPopup.document.write('<center><h1 id="headLine">Looking into room '+roomToCall+'</h1><center>');
+	streamingPopup.document.write('<iframe id="remoteCamView" height="600" allowTransparency="true" frameborder="0" '+
+			 'scrolling="yes" style="width:100%;" src="'+calleeURL+'" type= "text/javascript"></iframe>');
+	//local control
+	streamingPopup.document.write('<p>local cam control:</p>');
+	streamingPopup.document.write('<iframe id="myCamControl" height="100" allowTransparency="true" frameborder="0" '+
+			 'scrolling="yes" style="width:100%;" src="'+localURL+'" type= "text/javascript"></iframe>');	
+	
+	//add close button - closes the popup and stops the camera
+	var cancelButton = document.createElement('input');
+	cancelButton.setAttribute('id','cancelButton');
+	cancelButton.setAttribute('type','button');
+	cancelButton.setAttribute('name','CANCEL');
+	cancelButton.setAttribute('value','CANCEL');
+	cancelButton.onclick = function () {
+		invokeCloseStreamingPopup();
+	};
+	streamingPopup.document.body.appendChild(cancelButton);
+
+	//start streaming once local cam control is loaded
+	streamingPopup.document.getElementById("myCamControl").onload = function() {
+		streamMeClearly();
+	};
+
+}
+
+
+
+
+var callAccepted = false;
+/**
+ * accepting a call turns on my camera (if not yet running - however, it should be running already)
+ * and applies settings for a clear sight to my camera
+ */
+function acceptCall(){
+	if(!callAccepted){
+		callAccepted = true;
+		//make me visible for the callee
+		sendLocalCommand("streamClearly");		
+	}
+}
+
+/**
+ * sets the camera to blurry, stops the camera
+ * and closes the popup
+ */
+function invokeCloseStreamingPopup(){
+
+	if(callerIP!=null){
+		postToServer("cancel:"+callerIP);	
+	}else if(ipToCall!=null){
+		postToServer("cancel:"+ipToCall);
+	}			
+
+	startClosingPopup();
+}
+
+function startClosingPopup(){
+	var cancelButton = streamingPopup.document.getElementById("cancelButton");
+	if(cancelButton!=null){
+		cancelButton.disabled = "true";
+		cancelButton.value = "Wait...";
+	}
+	var acceptButton = streamingPopup.document.getElementById("acceptButton");
+	if(acceptButton!=null){
+		acceptButton.disabled = "true";
+	}
+	
+	sendLocalCommand("cancelCall");
+	setTimeout("closePopup()", 2500);
+}
+
+//closes the streaming popup and resets fields
+function closePopup(){
+	//reset fields
+	callerIP = null;
+	ipToCall = null;
+	callAccepted = false;
+	
+	streamingPopup.close();
+}
+
+
+function streamMeClearly(){
+	sendLocalCommand("streamClearly");
+}
+function streamMeBlurry(){
+	sendLocalCommand("streamBlurry");
+}
+/**
+ * API function for sending a command to the raspberry's cam web interface
+ * @param cmd
+ */
+function sendLocalCommand(cmd){
+	streamingPopup.document.getElementById("myCamControl").contentWindow.postMessage(cmd,localURL);
+}
+
+function blurMe(){
+	sendLocalCommand("px 0048 0027 25 25 0240 0135");
+}
+
+function clearMe(){
+	sendLocalCommand("px 1296 0730 25 25 2592 1944");
+}
+
+
+/* XHR STUFF
+//Create the XHR object.
+function createCORSPostRequest(url, params) {
+  var xhr = new XMLHttpRequest();
+  if ("withCredentials" in xhr) {
+    // XHR for Chrome/Firefox/Opera/Safari.
+    xhr.open('POST', url, true);
+    xhr.onreadystatechange = function() {if (xhr.readyState==4) alert("It worked!");};
+//    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+//    xhr.setRequestHeader("Content-length", params.length);
+//    xhr.setRequestHeader("Connection", "close");
+    xhr.send(params);
+    
+  } else if (typeof XDomainRequest != "undefined") {
+    // XDomainRequest for IE.
+    xhr = new XDomainRequest();
+    xhr.open(method, url);
+  } else {
+    // CORS not supported.
+    xhr = null;
+  }
+  return xhr;
+}
+
+
+//Create the XHR object.
+function createCORSGetRequest(url) {
+  var xhr = new XMLHttpRequest();
+  if ("withCredentials" in xhr) {
+    // XHR for Chrome/Firefox/Opera/Safari.
+    xhr.open(method, url, true);
+  } else if (typeof XDomainRequest != "undefined") {
+    // XDomainRequest for IE.
+    xhr = new XDomainRequest();
+    xhr.open('GET', url);
+  } else {
+    // CORS not supported.
+    xhr = null;
+  }
+  return xhr;
+}
+
+// Helper method to parse the title tag from the response.
+function getTitle(text) {
+  return text.match('<title>(.*)?</title>')[1];
+}
+
+// Make the actual CORS request.
+function makeCorsRequest(method, url) {
+  // All HTML5 Rocks properties support CORS.
+//  var url = 'http://updates.html5rocks.com';
+
+  var xhr = createCORSRequest(method, url);
+  
+//  xhr.setRequestHeader('Pi_Cam_Control', 'stop');
+//  xhr.withCredentials = true;
+  if (!xhr) {
+    alert('CORS not supported');
+    return;
+  }
+
+  // Response handlers.
+  xhr.onload = function() {
+	  var text = xhr.responseText;
+	  var title = getTitle(text);
+	  alert('Response from CORS request to ' + url + ': ' + title);
+  };
+
+  xhr.onerror = function() {
+	  alert('Woops, there was an error making the request.');
+  };
+
+  xhr.send();
+}
+*/
+
 /////////////////////////////////////// END JPEG STREAMER /////////////////////////////////////
 
-//TODO JPEG
 
 /**
  * This function is called when the Call button is clicked on the user's popup balloon
