@@ -28,10 +28,6 @@ import java.util.Date;
 public class Security {
 
     /**
-     * Instance of this class. Get it via getInstance().
-     */
-    private static Security INSTANCE;
-    /**
      * Tag used for all logging that happens within Security.
      */
     private static final String TAG = "Security";
@@ -39,6 +35,10 @@ public class Security {
      * Session timeout in milliseconds. Cannot be changed during runtime!
      */
     private final static long TIMEOUT = 15 * 60 * 1000;
+    /**
+     * Instance of this class. Get it via getInstance().
+     */
+    private static Security INSTANCE;
     /**
      * Instance of log used for the output.
      */
@@ -297,7 +297,7 @@ public class Security {
         }
         if (data.size() != 1) {
             // this is a DB error!
-            log.error(TAG, "Read from DB failed because read object is ambiguous!");
+            log.error(TAG, "Read from DB failed because read object is ambiguous! Found " + data.size() + " objects.");
             // return null;
         }
         return (Authenticated) data.get(0);

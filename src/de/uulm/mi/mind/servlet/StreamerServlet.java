@@ -1,8 +1,6 @@
 package de.uulm.mi.mind.servlet;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import de.uulm.mi.mind.logger.Messenger;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
@@ -10,41 +8,44 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
-
-import de.uulm.mi.mind.logger.Messenger;
+import java.io.IOException;
+import java.util.HashMap;
 
 @ServerEndpoint(value = "/streamerServlet/{ip}")
 public class StreamerServlet {
-	// notice:not thread-safe
+    // notice:not thread-safe
 //	private static ArrayList<Session> sessionList = new ArrayList<Session>();
 
-	private static HashMap<String,Session> sessionMap = new HashMap<String,Session>();
+    private static HashMap<String, Session> sessionMap = new HashMap<String, Session>();
 
-	Messenger log = Messenger.getInstance();
-	String TAG = "StreamerServlet";
-	
-	@OnOpen
-	public void onOpen(@PathParam("ip") String ip, Session session) {
-		try {
-			sessionMap.put(ip, session);
-			// asynchronous communication
+    Messenger log = Messenger.getInstance();
+    String TAG = "StreamerServlet";
+    public static StreamerServlet streamer;
+
+    @OnOpen
+    public void onOpen(@PathParam("ip") String ip, Session session) {
+        streamer = this;
+
+        try {
+            sessionMap.put(ip, session);
+            // asynchronous communication
 //			System.out.println("PARAMETERMAP size: "+session.getRequestParameterMap().size());
 //			for (String key : session.getRequestParameterMap().keySet()) {
 //				System.out.println(key+":"+session.getRequestParameterMap().get(key));
 //			}
-			session.getBasicRemote().sendText("Hello from MIND StreamerServlet!");
-		} catch (IOException e) {
-		}
-	}
+            session.getBasicRemote().sendText("Hello from MIND StreamerServlet!");
+        } catch (IOException e) {
+        }
+    }
 
-	@OnClose
-	public void onClose(@PathParam("ip") String ip, Session session) {
-		sessionMap.remove(ip);
-	}
+    @OnClose
+    public void onClose(@PathParam("ip") String ip, Session session) {
+        sessionMap.remove(ip);
+    }
 
-	@OnMessage
-	public void onMessage(@PathParam("ip") String ip, String msg) {
-		
+    @OnMessage
+    public void onMessage(@PathParam("ip") String ip, String msg) {
+
 //		System.out.println("STREAMERSERVLET:"+msg+" from ip:"+ip);
 		
 		log.log(TAG, "onMessage from IP '"+ip+"' with message '"+msg+"'");
@@ -75,8 +76,8 @@ public class StreamerServlet {
 					sessionMap.get(ip).getBasicRemote().sendText("NA:"+msg);
 				}
 			}
-
-		} catch (IOException e) {
+		}catch(IOException ioex){
+			
 		}
-	}
+    }
 }
