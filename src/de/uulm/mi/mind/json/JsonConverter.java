@@ -3,6 +3,7 @@ package de.uulm.mi.mind.json;
 import de.uulm.mi.mind.logger.Messenger;
 import de.uulm.mi.mind.objects.DataList;
 import de.uulm.mi.mind.objects.Interfaces.Sendable;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -172,7 +173,7 @@ public class JsonConverter<E> {
             Object value = entry.getValue();
             // null value
             if (value == null) {
-                jsonObject.append(ESCAPE + fieldName + ESCAPE + ":null");
+                jsonObject.append(ESCAPE).append(fieldName).append(ESCAPE).append(":null");
             }
             // collections && arrays
             else if (value instanceof Collection || value instanceof Object[]) {
@@ -202,10 +203,13 @@ public class JsonConverter<E> {
                 }
                 jsonObject.append(']');
             }
+            // strings must be escaped
+            else if (value instanceof String) {
+                jsonObject.append(pack(fieldName, StringEscapeUtils.escapeJson(value.toString())));
+            }
             // string, numbers, enums
-            else if (value instanceof Enum || value instanceof String || value instanceof Byte || value instanceof Short
-                    || value instanceof Integer || value instanceof Long || value instanceof Float
-                    || value instanceof Double) {
+            else if (value instanceof Enum || value instanceof Byte || value instanceof Short || value instanceof Integer
+                    || value instanceof Long || value instanceof Float || value instanceof Double) {
                 jsonObject.append(pack(fieldName, value.toString()));
             }
             // boolean
@@ -353,7 +357,8 @@ public class JsonConverter<E> {
             if (value.equals("null")) {
                 return null;
             }
-            return value;
+            // deescape
+            return StringEscapeUtils.unescapeJson(value);
         }
         // null is caught exactly here for a reason! --> int = null is impossible... :P
         else if (value.equals("null")) {
