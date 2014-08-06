@@ -50,16 +50,29 @@ public class StreamerServlet {
 		log.log(TAG, "onMessage from IP '"+ip+"' with message '"+msg+"'");
 		
 		try {
-			if(sessionMap.get(msg)!=null){
-				sessionMap.get(msg).getBasicRemote().sendText(ip);
-			}
+
 			//ip is ip that canceled; msg: "cancel:'ipToNotifyAboutCancel"
-			else if(msg.startsWith("cancel:")){
+			if(msg.startsWith("cancel:")){
 				String ipToNotifyAboutCancel = msg.substring(7);
 				log.log(TAG, "try to send cancel message to '"+ipToNotifyAboutCancel+"' from ip '"+ip+"'");
 				if(sessionMap.get(ipToNotifyAboutCancel)!=null){
 					log.log(TAG, "send cancel message to '"+ipToNotifyAboutCancel+"' from ip '"+ip+"'");
 					sessionMap.get(ipToNotifyAboutCancel).getBasicRemote().sendText("canceled:"+ip);
+				}
+				//send 'canceled' to all (2) participants
+				for (String ipToSendTo : sessionMap.keySet()) {
+					sessionMap.get(ipToSendTo).getBasicRemote().sendText("canceled");
+				}
+			}
+			//if msg is ip to call
+			else if(sessionMap.get(msg)!=null && sessionMap.get(ip)!=null){
+				sessionMap.get(msg).getBasicRemote().sendText(ip);
+				sessionMap.get(ip).getBasicRemote().sendText("okay");
+			}
+			//else if ip to call does not exist (Not Available)
+			else{
+				if(sessionMap.get(ip)!=null){
+					sessionMap.get(ip).getBasicRemote().sendText("NA:"+msg);
 				}
 			}
 
