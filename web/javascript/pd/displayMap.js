@@ -1261,7 +1261,7 @@ function myIPcallback(data){
 	
 	localIP = data.object.ipAddress;
 	//alert(JSON.stringify(data.object)+"");
-	alert("callback '"+localIP+"' -> area is "+getRoomByIP(localIP));
+	// alert("callback '"+localIP+"' -> area is "+getRoomByIP(localIP));
 	
 	//if pd participates in streaming -> open socket for server push purposes
 	if(getRoomByIP(localIP)!=null){
